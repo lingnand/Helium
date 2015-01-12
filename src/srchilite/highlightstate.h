@@ -170,6 +170,14 @@ public:
         originalState = orig;
     }
 
+    bool operator==(const HighlightState& rhs)
+    {
+        return originalState == rhs.originalState ||
+                (defaultElement == rhs.defaultElement
+                && ruleList == rhs.ruleList
+                && needsReferenceReplacement == rhs.needsReferenceReplacement);
+    }
+
 };
 
 }

@@ -21,10 +21,6 @@
 #include "langdefmanager.h"
 #include "regexrulefactory.h"
 #include "highlightstate.h"
-#include "sourcehighlighter.h"
-#include "bufferedoutput.h"
-#include "sourcefilehighlighter.h"
-#include "linenumgenerator.h"
 #include "ioexception.h"
 #include "srcuntabifier.h"
 #include "langmap.h"
@@ -32,43 +28,19 @@
 #include "highlightstateprinter.h"
 #include "langelemsprinter.hpp"
 #include "langelems.h"
-#include "verbosity.h"
 #include "settings.h"
+#include "instances.h"
 
 using namespace std;
 
 namespace srchilite {
 
-SourceHighlight::SourceHighlight(const std::string &_outputLang) :
-    outputLang(_outputLang), dataDir(Settings::retrieveDataDir()), styleFile(
-            "default.style"), formatterManager(0), preFormatter(0),
-            langDefManager(new LangDefManager(new RegexRuleFactory)),
-            lineNumGenerator(0), highlightEventListener(0), lineRanges(0), regexRanges(0),
-            optimize(true), generateLineNumbers(false), generateLineNumberRefs(false),
-            lineNumberPad('0'), lineNumberDigits(0), binaryOutput(false),
-            tabSpaces(0) {
-}
-
-SourceHighlight::~SourceHighlight() {
-    if (formatterManager)
-        delete formatterManager;
-
-    if (preFormatter)
-        delete preFormatter;
-
-    delete langDefManager->getRuleFactory();
-    delete langDefManager;
-
-    if (lineNumGenerator)
-        delete lineNumGenerator;
-}
-
-void SourceHighlight::initialize() {
-    if (formatterManager)
-        return; // already initialized
-
+SourceHighlight::SourceHighlight(const std::string &_styleFile, const std::string &_outputLang) :
+        dataDir(Settings::retrieveDataDir()), styleFile(_styleFile), output(buffer),
+        formatterManager(0), preFormatter(0), langDefManager(Instances::getLangDefManager()),
+            highlightEventListener(0), highlighter(0), tabSpaces(0) {
     TextStylesPtr textStyles = parse_outlang_def(dataDir.c_str(),
-            outputLang.c_str());
+            _outputLang.c_str());
 
     FormatterPtr defaultFormatter(new TextStyleFormatter("$text"));
     formatterManager = new FormatterManager(defaultFormatter);
@@ -81,43 +53,14 @@ void SourceHighlight::initialize() {
         preFormatter = new PreFormatter(textStyles->charTranslator);
     }
 
-    linePrefix = textStyles->line_prefix;
-
     TextStyleFormatterFactory formatterFactory(textStyles, preFormatter, formatterManager);
 
-    if (styleCssFile.size())
-        parseCssStyles(dataDir, styleCssFile, &formatterFactory,
-                backgroundColor);
-    else
-        parseStyles(dataDir, styleFile, &formatterFactory, backgroundColor);
-
-    // keep the background color empty if none is specified
-    if (backgroundColor != "")
-        backgroundColor = formatterFactory.preprocessColor(backgroundColor);
+    std::string backgroundColor;
+    parseStyles(dataDir, styleFile, &formatterFactory, backgroundColor);
 
     formatterFactory.addDefaultFormatter();
 
-    // use the style default file to build missing formatters
-    if (styleDefaultFile.size()) {
-        LangMap defaultStyles(dataDir, styleDefaultFile);
-        defaultStyles.open();
-        for (LangMap::const_iterator it = defaultStyles.begin(); it
-                != defaultStyles.end(); ++it) {
-            formatterFactory.createMissingFormatter(it->first, it->second);
-        }
-    }
-
     formatterCollection = formatterFactory.getFormatterCollection();
-
-    // initialize the line number generator
-    TextStyleFormatter *lineNumFormatter =
-            dynamic_cast<TextStyleFormatter *> (formatterManager->getFormatter(
-                    "linenum").get());
-    lineNumGenerator = new LineNumGenerator(lineNumFormatter->toString(), 5,
-            lineNumberPad);
-    lineNumGenerator->setAnchorPrefix(lineNumberAnchorPrefix);
-    if (generateLineNumberRefs)
-        lineNumGenerator->setAnchorStyle(textStyles->refstyle.anchor);
 
     // set the preformatter in all the formatters
     for (TextStyleFormatterCollection::const_iterator it =
@@ -125,63 +68,43 @@ void SourceHighlight::initialize() {
         (*it)->setPreFormatter(preFormatter);
     }
 
-    outputFileExtension = textStyles->file_extension;
+    // wire up the output
+    for (TextStyleFormatterCollection::const_iterator it =
+            formatterCollection.begin(); it != formatterCollection.end(); ++it) {
+        (*it)->setBufferedOutput(&output);
+    }
 }
 
-void SourceHighlight::highlight(std::istream &input, std::ostream &output,
-        const std::string &inputLang, const std::string &inputFileName) {
+SourceHighlight::~SourceHighlight() {
+    if (highlighter)
+        delete highlighter;
 
-    initialize();
+    if (formatterManager)
+        delete formatterManager;
 
-    HighlightStatePtr highlightState = langDefManager->getHighlightState(
-            dataDir, inputLang);
+    if (preFormatter)
+        delete preFormatter;
 
-    SourceHighlighter highlighter(highlightState);
-    highlighter.setFormatterManager(formatterManager);
-    highlighter.setOptimize(optimize);
-    if (highlightEventListener)
-        highlighter.addListener(highlightEventListener);
+    delete langDefManager->getRuleFactory();
+    delete langDefManager;
+}
 
-    BufferedOutput bufferedOutput(output);
+void SourceHighlight::setInputLang(const std::string &_inputLang) {
+    if (!highlighter || _inputLang != inputLang) {
+        delete highlighter;
+        inputLang = _inputLang;
 
-    // if no optimization, then always flush the output
-    if (!optimize)
-        bufferedOutput.setAlwaysFlush(true);
+        if (inputLang != "") {
+            HighlightStatePtr highlightState = langDefManager->getHighlightState(
+                    dataDir, inputLang);
 
-    updateBufferedOutput(&bufferedOutput);
-
-    SourceFileHighlighter fileHighlighter(inputFileName, &highlighter,
-            &bufferedOutput);
-
-    fileHighlighter.setLineRanges(lineRanges);
-    fileHighlighter.setRegexRanges(regexRanges);
-
-    if (generateLineNumbers) {
-        fileHighlighter.setLineNumGenerator(lineNumGenerator);
-        if (lineNumberDigits != 0) {
-            lineNumGenerator->setDigitNum(lineNumberDigits);
+            highlighter = new SourceHighlighter(highlightState);
+            highlighter->setFormatterManager(formatterManager);
+            highlighter->setOptimize(false);
+            if (highlightEventListener)
+                highlighter->addListener(highlightEventListener);
         }
     }
-
-    // set the prefix for all lines
-    fileHighlighter.setLinePrefix(linePrefix);
-
-    fileHighlighter.setPreformatter(preFormatter);
-
-    // set the range separator only after the preformatter!
-    // since the separator itself might have to be preformatted
-    if (rangeSeparator.size()) {
-        fileHighlighter.setRangeSeparator(rangeSeparator);
-    }
-
-    // the formatter for possible context lines
-    fileHighlighter.setContextFormatter(formatterManager->getFormatter(
-            "context").get());
-
-    fileHighlighter.highlight(input);
-
-    if (highlightEventListener)
-        highlighter.removeListener(highlightEventListener);
 }
 
 void SourceHighlight::checkLangDef(const std::string &langFile) {
@@ -218,11 +141,9 @@ void SourceHighlight::printLangElems(const std::string &langFile,
     delete elems;
 }
 
-void SourceHighlight::updateBufferedOutput(BufferedOutput *output) {
-    for (TextStyleFormatterCollection::const_iterator it =
-            formatterCollection.begin(); it != formatterCollection.end(); ++it) {
-        (*it)->setBufferedOutput(output);
-    }
+void SourceHighlight::clearBuffer() {
+    buffer.clear();
+    buffer.str("");
 }
 
 }

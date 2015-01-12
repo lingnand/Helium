@@ -15,6 +15,8 @@ namespace bb {
     namespace cascades {
         class TextField;
         class TextArea;
+        class AbstractTextControl;
+        class KeyEvent;
     }
 }
 
@@ -29,14 +31,18 @@ public:
     Q_SLOT void onLanguageChanged();
     Q_SLOT void setBuffer(Buffer* buffer);
 private:
-    bb::cascades::TextField *m_pTitleTextField;
-    bb::cascades::TextArea *m_pTextArea;
-    Buffer *m_pBuffer;
+    bb::cascades::TextField *_titleTextField;
+    bb::cascades::TextArea *_textArea;
+    Buffer *_buffer;
+    unsigned char _modPressed;
+    unsigned char _modUsed;
     Q_SLOT void onTitleTextFieldFocusChanged(bool focus);
+    Q_SLOT void onTitleTextFieldSubmitted(bb::cascades::AbstractTextControl *control);
     Q_SLOT void onTextAreaTextChanged(const QString& text);
-    Q_SLOT void onTextAreaCursorPositionChanged(int position);
+    Q_SLOT void onTextAreaKeyEvent(bb::cascades::KeyEvent *event);
+    Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
+    Q_SLOT void onBufferContentChanged(const QString& content);
     Q_SLOT void setTitle(const QString& title);
-    Q_SLOT void setImageSource(const QUrl& image);
 };
 
 #endif /* VIEW_H_ */

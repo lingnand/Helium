@@ -10,15 +10,17 @@
 #include <string>
 #include <istream>
 #include <ostream>
+#include <sstream>
 
 #include "textstyleformattercollection.h"
+#include "sourcehighlighter.h"
+#include "bufferedoutput.h"
 
 namespace srchilite {
 
 class FormatterManager;
 class PreFormatter;
 class LangDefManager;
-class BufferedOutput;
 class LineNumGenerator;
 class CharTranslator;
 class HighlightEventListener;
@@ -30,9 +32,6 @@ class RegexRanges;
  * an output file.
  */
 class SourceHighlight {
-    /// the output language file name
-    std::string outputLang;
-
     /**
      * Path for several configuration files.
      * By default it contains the absolute data dir corresponding to the installation
@@ -40,44 +39,15 @@ class SourceHighlight {
      */
     std::string dataDir;
 
-    /// the background color
-    std::string backgroundColor;
-
     /// the style file
     std::string styleFile;
-
-    /// the css style file
-    std::string styleCssFile;
-
-    /// the style defaults file
-    std::string styleDefaultFile;
-
-    /// the prefix for all the output lines
-    std::string linePrefix;
-
-    /// the separator for ranges
-    std::string rangeSeparator;
-
-    /// the title for the output document (defaults to the source file name)
-    std::string title;
 
     /// the input lang for the output document
     std::string inputLang;
 
-    /// the value for the css
-    std::string css;
-
-    /// the file name of the header
-    std::string headerFileName;
-
-    /// the file name of the footer
-    std::string footerFileName;
-
-    /// the file extension for output files
-    std::string outputFileExtension;
-
-    /// the directory for output files
-    std::string outputFileDir;
+    /// the output
+    std::ostringstream buffer;
+    BufferedOutput output;
 
     /// the formatter manager
     FormatterManager *formatterManager;
@@ -91,47 +61,15 @@ class SourceHighlight {
     /// for loading language definitions
     LangDefManager *langDefManager;
 
-    /// the generator for line numbers
-    LineNumGenerator *lineNumGenerator;
-
     /**
      * The listener for highlight events
      */
     HighlightEventListener *highlightEventListener;
 
-    /// the possible LineRanges (to check which lines should be printed)
-    LineRanges *lineRanges;
-
-    /// the possible RegexRanges (to check which lines should be printed)
-    RegexRanges *regexRanges;
-
     /**
-     * Whether to optmize output (e.g., adiacent text parts belonging
-     * to the same element will be buffered and generated as a single text part)
+     * The actual source highlight object
      */
-    bool optimize;
-
-    /// whether to generate line numbers
-    bool generateLineNumbers;
-
-    /// whether to generate line numbers with references
-    bool generateLineNumberRefs;
-
-    /// the prefix for the line number anchors
-    std::string lineNumberAnchorPrefix;
-
-    /// the line number padding char (default '0')
-    char lineNumberPad;
-
-    /**
-     * the number of digits for line numbers (if not specified this is
-     * computed automatically according to the lines in the input, if the
-     * input is a file name, otherwise it is set to a default value of 5)
-     */
-    unsigned int lineNumberDigits;
-
-    /// whether to open output files in binary mode (default false)
-    bool binaryOutput;
+    SourceHighlighter *highlighter;
 
     /**
      * If greater than 0 it means that tabs will be replaced by tabSpaces
@@ -139,49 +77,9 @@ class SourceHighlight {
      */
     unsigned int tabSpaces;
 
-    /**
-     * Sets the specified buffered output to all the formatters
-     * @param output
-     */
-    void updateBufferedOutput(BufferedOutput *output);
-
 public:
-    /**
-     * @param outputLang the output lang file (default: html.outlang)
-     */
-    SourceHighlight(const std::string &outputLang = "html.outlang");
+    SourceHighlight(const std::string &_styleFile, const std::string &_outputLang);
     ~SourceHighlight();
-
-    /**
-     * performs initialization of fields, if not already initialized.
-     * There's no need to call it directly, since the highlight functions always
-     * check initialization.
-     */
-    void initialize();
-
-    /**
-     * Highlights the contents of the input file into the output file, using
-     * the specified inputLang definition
-     * @param input the input file name, if empty stdin will be used
-     * @param output the output file name, if empty (or equal to STDOUT) the stdout will be used
-     * @param inputLang the language definition file
-     */
-    void highlight(const std::string &input, const std::string &output,
-            const std::string &inputLang);
-
-    /**
-     * Highlights the contents of the input stream into the output stream, using
-     * the specified inputLang definition
-     * @param input the input stream
-     * @param output the output stream
-     * @param inputLang the language definition file
-     * @param inputFileName the input file name
-     */
-    void
-            highlight(std::istream &input, std::ostream &output,
-                    const std::string &inputLang,
-                    const std::string &inputFileName = "");
-
     /**
      * Only check the validity of the language definition file.
      * If the language definition is valid it simply returns, otherwise,
@@ -220,113 +118,31 @@ public:
      */
     void printLangElems(const std::string &langFile, std::ostream &os);
 
-    void setDataDir(const std::string &_datadir) {
-        dataDir = _datadir;
+    void clearBuffer();
+    const std::ostringstream &getBuffer() {
+        return buffer;
     }
 
     void setStyleFile(const std::string &_styleFile) {
         styleFile = _styleFile;
     }
 
-    void setStyleCssFile(const std::string &_styleFile) {
-        styleCssFile = _styleFile;
-    }
-
-    void setStyleDefaultFile(const std::string &_styleDefaultFile) {
-        styleDefaultFile = _styleDefaultFile;
-    }
-
-    void setTitle(const std::string &_title) {
-        title = _title;
-    }
-
-    void setInputLang(const std::string &_inputLang) {
-        inputLang = _inputLang;
-    }
-
-    void setCss(const std::string &_css) {
-        css = _css;
-    }
-
-    void setHeaderFileName(const std::string &h) {
-        headerFileName = h;
-    }
-
-    void setFooterFileName(const std::string &f) {
-        footerFileName = f;
-    }
-
-    void setOutputDir(const std::string &_outputDir) {
-        outputFileDir = _outputDir;
-    }
-
     const TextStyleFormatterCollection &getFormatterCollection() const {
         return formatterCollection;
-    }
-
-    void setOptimize(bool b = true) {
-        optimize = b;
-    }
-
-    void setGenerateLineNumbers(bool b = true) {
-        generateLineNumbers = b;
-    }
-
-    void setGenerateLineNumberRefs(bool b = true) {
-        generateLineNumberRefs = b;
-    }
-
-    void setLineNumberPad(char c) {
-        lineNumberPad = c;
-    }
-
-    void setLineNumberAnchorPrefix(const std::string &_prefix) {
-        lineNumberAnchorPrefix = _prefix;
-    }
-
-    void setLineNumberDigits(unsigned int d) {
-        lineNumberDigits = d;
-    }
-
-    void setBinaryOutput(bool b = true) {
-        binaryOutput = b;
     }
 
     void setHighlightEventListener(HighlightEventListener *l) {
         highlightEventListener = l;
     }
 
-    void setRangeSeparator(const std::string &sep) {
-        rangeSeparator = sep;
-    }
-
-    LineRanges *getLineRanges() const {
-        return lineRanges;
-    }
-
-    void setLineRanges(LineRanges *lr) {
-        lineRanges = lr;
-    }
-
-    RegexRanges *getRegexRanges() const {
-        return regexRanges;
-    }
-
-    void setRegexRanges(RegexRanges *rr) {
-        regexRanges = rr;
-    }
-
     void setTabSpaces(unsigned int i) {
         tabSpaces = i;
     }
 
-    /**
-     * Returns the file extension for the output file as specified in
-     * the output format definition file (initialize must have been called).
-     * @return the output file extension
-     */
-    const std::string &getOutputFileExtension() const {
-        return outputFileExtension;
+    void setInputLang(const std::string &inputLang);
+
+    SourceHighlighter *getHighlighter() const {
+        return highlighter;
     }
 };
 

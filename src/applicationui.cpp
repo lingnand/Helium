@@ -24,11 +24,8 @@
 #include <bb/system/SystemUiPosition>
 #include <src/View.h>
 #include <src/Buffer.h>
-#include <src/Helper.h>
 
 using namespace bb::cascades;
-
-/* helpers */
 
 /* member functions */
 
@@ -36,24 +33,24 @@ ApplicationUI::ApplicationUI() :
         QObject()
 {
     // prepare the localization
-    m_pTranslator = new QTranslator(this);
-    m_pLocaleHandler = new LocaleHandler(this);
-    conn(m_pLocaleHandler, SIGNAL(systemLanguageChanged()),
+    _translator = new QTranslator(this);
+    _localeHandler = new LocaleHandler(this);
+    conn(_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(onSystemLanguageChanged()));
 
     // Create the root TabbedPane
-    m_pRootPane = new TabbedPane;
-    m_pRootPane->setShowTabsOnActionBar(false);
+    _rootPane = new TabbedPane;
+    _rootPane->setShowTabsOnActionBar(false);
     // set up the openFileTab
-    m_pNewFileTab = new Tab;
-    conn(m_pNewFileTab, SIGNAL(triggered()),
+    _newFileTab = new Tab;
+    conn(_newFileTab, SIGNAL(triggered()),
          this, SLOT(newFile()));
-    m_pRootPane->add(m_pNewFileTab);
+    _rootPane->add(_newFileTab);
     // set up the openFileTab
-    m_pOpenFileTab = new Tab;
-    conn(m_pOpenFileTab, SIGNAL(triggered()),
+    _openFileTab = new Tab;
+    conn(_openFileTab, SIGNAL(triggered()),
          this, SLOT(openFile()));
-    m_pRootPane->add(m_pOpenFileTab);
+    _rootPane->add(_openFileTab);
     // create a single buffer
     newFile();
 
@@ -61,13 +58,13 @@ ApplicationUI::ApplicationUI() :
     onSystemLanguageChanged();
 
     // Set the application scene
-    Application::instance()->setScene(m_pRootPane);
+    Application::instance()->setScene(_rootPane);
 }
 
 void ApplicationUI::newFile() {
     View *view = new View(new Buffer);
     addView(view);
-    m_pRootPane->setActiveTab(view);
+    _rootPane->setActiveTab(view);
 }
 
 void ApplicationUI::openFile() {
@@ -78,27 +75,25 @@ void ApplicationUI::openFile() {
 }
 
 void ApplicationUI::addView(View* view) {
-    m_pRootPane->add(view);
-    m_pViews.append(view);
+    _rootPane->add(view);
+    _views.append(view);
 }
 
 void ApplicationUI::onSystemLanguageChanged()
 {
-    QCoreApplication::instance()->removeTranslator(m_pTranslator);
+    QCoreApplication::instance()->removeTranslator(_translator);
     // Initiate, load and install the application translation files.
     QString locale_string = QLocale().name();
-    fprintf(stdout, "locale_string %s\n", locale_string.toLocal8Bit().data());
     QString file_name = QString("Char_%1").arg(locale_string);
-    if (m_pTranslator->load(file_name, "app/native/qm")) {
-        QCoreApplication::instance()->installTranslator(m_pTranslator);
-        fprintf(stdout, "setting the label for new file tab");
+    if (_translator->load(file_name, "app/native/qm")) {
+        QCoreApplication::instance()->installTranslator(_translator);
         // new file tab
-        m_pNewFileTab->setTitle(tr("New File"));
+        _newFileTab->setTitle(tr("New File"));
         // open file tab
-        m_pOpenFileTab->setTitle(tr("Open File"));
+        _openFileTab->setTitle(tr("Open File"));
         // loop through all the views to reset the texts
-        for (int i=0; i<m_pViews.count(); ++i) {
-            m_pViews[i]->onLanguageChanged();
+        for (int i=0; i<_views.count(); ++i) {
+            _views[i]->onLanguageChanged();
         }
     }
 }

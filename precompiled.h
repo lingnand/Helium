@@ -3,3 +3,4 @@
 #include <QObject>
 #include <QString>
 #include <QVariant>
+#include <src/Helper.h>

@@ -4,12 +4,12 @@
 <context>
     <name>ApplicationUI</name>
     <message>
-        <location filename="../src/applicationui.cpp" line="96"/>
+        <location filename="../src/applicationui.cpp" line="91"/>
         <source>New File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/applicationui.cpp" line="98"/>
+        <location filename="../src/applicationui.cpp" line="93"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -17,12 +17,12 @@
 <context>
     <name>View</name>
     <message>
-        <location filename="../src/View.cpp" line="120"/>
+        <location filename="../src/View.cpp" line="203"/>
         <source>Enter the title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/View.cpp" line="121"/>
+        <location filename="../src/View.cpp" line="204"/>
         <source>Enter the content</source>
         <translation type="unfinished"></translation>
     </message>

@@ -129,6 +129,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/javalog.lang) \
         $$quote($$BASEDIR/assets/srchilite/javascript.lang) \
         $$quote($$BASEDIR/assets/srchilite/key_string.lang) \
+        $$quote($$BASEDIR/assets/srchilite/lang.map) \
         $$quote($$BASEDIR/assets/srchilite/langdef.lang) \
         $$quote($$BASEDIR/assets/srchilite/latex.lang) \
         $$quote($$BASEDIR/assets/srchilite/ldap.lang) \

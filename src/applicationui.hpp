@@ -45,18 +45,18 @@ public:
     ApplicationUI();
     virtual ~ApplicationUI() {}
 private:
-    QTranslator* m_pTranslator;
-    bb::cascades::LocaleHandler* m_pLocaleHandler;
+    QTranslator* _translator;
+    bb::cascades::LocaleHandler* _localeHandler;
     Q_SLOT void onSystemLanguageChanged();
 
-    bb::cascades::TabbedPane* m_pRootPane;
+    bb::cascades::TabbedPane* _rootPane;
 
-    bb::cascades::Tab* m_pOpenFileTab;
-    bb::cascades::Tab* m_pNewFileTab;
+    bb::cascades::Tab* _openFileTab;
+    bb::cascades::Tab* _newFileTab;
     Q_SLOT void newFile();
     Q_SLOT void openFile();
 
-    QList<View*> m_pViews;
+    QList<View*> _views;
     void addView(View* view);
 };
 
