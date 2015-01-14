@@ -16,7 +16,9 @@ namespace bb {
         class TextField;
         class TextArea;
         class AbstractTextControl;
+        class ProgressIndicator;
         class KeyEvent;
+        class ActionItem;
     }
 }
 
@@ -33,15 +35,17 @@ public:
 private:
     bb::cascades::TextField *_titleTextField;
     bb::cascades::TextArea *_textArea;
+    bb::cascades::ProgressIndicator *_progressIndicator;
+    bb::cascades::ActionItem *_saveAction;
     Buffer *_buffer;
     unsigned char _modPressed;
-    unsigned char _modUsed;
     Q_SLOT void onTitleTextFieldFocusChanged(bool focus);
-    Q_SLOT void onTitleTextFieldSubmitted(bb::cascades::AbstractTextControl *control);
+    Q_SLOT void onTitleTextFieldSubmitted();
     Q_SLOT void onTextAreaTextChanged(const QString& text);
     Q_SLOT void onTextAreaKeyEvent(bb::cascades::KeyEvent *event);
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
     Q_SLOT void onBufferContentChanged(const QString& content);
+    Q_SLOT void onBufferProgressChanged(float progress);
     Q_SLOT void setTitle(const QString& title);
 };
 

@@ -197,6 +197,8 @@ config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/Buffer.cpp) \
         $$quote($$BASEDIR/src/Helper.cpp) \
+        $$quote($$BASEDIR/src/HtmlHighlight.cpp) \
+        $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
@@ -270,6 +272,10 @@ config_pri_source_group1 {
     HEADERS += \
         $$quote($$BASEDIR/src/Buffer.h) \
         $$quote($$BASEDIR/src/Helper.h) \
+        $$quote($$BASEDIR/src/HighlightStateData.h) \
+        $$quote($$BASEDIR/src/HtmlHighlight.h) \
+        $$quote($$BASEDIR/src/HtmlParser.h) \
+        $$quote($$BASEDIR/src/HtmlPlainTextExtractor.h) \
         $$quote($$BASEDIR/src/View.h) \
         $$quote($$BASEDIR/src/applicationui.hpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \

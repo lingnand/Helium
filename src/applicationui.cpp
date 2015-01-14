@@ -20,6 +20,7 @@
 #include <bb/cascades/TabbedPane>
 #include <bb/cascades/LocaleHandler>
 #include <bb/cascades/Tab>
+#include <bb/cascades/Shortcut>
 #include <bb/system/SystemToast>
 #include <bb/system/SystemUiPosition>
 #include <src/View.h>
@@ -38,19 +39,22 @@ ApplicationUI::ApplicationUI() :
     conn(_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(onSystemLanguageChanged()));
 
+    _newFileTab = Tab::create()
+        .addShortcut(Shortcut::create().key("c")
+                .onTriggered(this, SLOT(newFile())))
+        .onTriggered(this, SLOT(newFile()));
+    _openFileTab = Tab::create()
+        .addShortcut(Shortcut::create().key("e")
+                .onTriggered(this, SLOT(openFile())))
+        .onTriggered(this, SLOT(openFile()));
     // Create the root TabbedPane
-    _rootPane = new TabbedPane;
-    _rootPane->setShowTabsOnActionBar(false);
-    // set up the openFileTab
-    _newFileTab = new Tab;
-    conn(_newFileTab, SIGNAL(triggered()),
-         this, SLOT(newFile()));
-    _rootPane->add(_newFileTab);
-    // set up the openFileTab
-    _openFileTab = new Tab;
-    conn(_openFileTab, SIGNAL(triggered()),
-         this, SLOT(openFile()));
-    _rootPane->add(_openFileTab);
+    // TODO: handle auto focus properly: focus on the textarea when the tab is switched to
+    // However, think about the case when you press enter+<switching between tabs> and you want to do it again on the next switched to tab
+    _rootPane = TabbedPane::create()
+        .showTabsOnActionBar(false)
+        .add(_newFileTab)
+        .add(_openFileTab);
+
     // create a single buffer
     newFile();
 
@@ -63,8 +67,9 @@ ApplicationUI::ApplicationUI() :
 
 void ApplicationUI::newFile() {
     View *view = new View(new Buffer);
-    addView(view);
+    _rootPane->add(view);
     _rootPane->setActiveTab(view);
+    // TODO: handle auto focus (this should focus on the title textfield)
 }
 
 void ApplicationUI::openFile() {
@@ -72,11 +77,6 @@ void ApplicationUI::openFile() {
     toast->setBody("Open file");
     toast->setPosition(bb::system::SystemUiPosition::MiddleCenter);
     toast->show();
-}
-
-void ApplicationUI::addView(View* view) {
-    _rootPane->add(view);
-    _views.append(view);
 }
 
 void ApplicationUI::onSystemLanguageChanged()
@@ -88,12 +88,14 @@ void ApplicationUI::onSystemLanguageChanged()
     if (_translator->load(file_name, "app/native/qm")) {
         QCoreApplication::instance()->installTranslator(_translator);
         // new file tab
-        _newFileTab->setTitle(tr("New File"));
+        _newFileTab->setTitle(tr("New"));
+        _newFileTab->setDescription(tr("shortcut: C"));
         // open file tab
-        _openFileTab->setTitle(tr("Open File"));
+        _openFileTab->setTitle(tr("Open"));
+        _openFileTab->setDescription(tr("shortcut: E"));
         // loop through all the views to reset the texts
-        for (int i=0; i<_views.count(); ++i) {
-            _views[i]->onLanguageChanged();
+        for (int i=2; i< _rootPane->count(); ++i) {
+            ((View *) _rootPane->at(i))->onLanguageChanged();
         }
     }
 }

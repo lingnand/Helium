@@ -55,9 +55,6 @@ private:
     bb::cascades::Tab* _newFileTab;
     Q_SLOT void newFile();
     Q_SLOT void openFile();
-
-    QList<View*> _views;
-    void addView(View* view);
 };
 
 #endif /* ApplicationUI_HPP_ */
