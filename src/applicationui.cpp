@@ -39,10 +39,10 @@ ApplicationUI::ApplicationUI() :
     conn(_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(onSystemLanguageChanged()));
 
-    _newFileTab = Tab::create()
+    _newViewTab = Tab::create()
         .addShortcut(Shortcut::create().key("c")
-                .onTriggered(this, SLOT(newFile())))
-        .onTriggered(this, SLOT(newFile()));
+                .onTriggered(this, SLOT(newView())))
+        .onTriggered(this, SLOT(newView()));
     _openFileTab = Tab::create()
         .addShortcut(Shortcut::create().key("e")
                 .onTriggered(this, SLOT(openFile())))
@@ -52,11 +52,15 @@ ApplicationUI::ApplicationUI() :
     // However, think about the case when you press enter+<switching between tabs> and you want to do it again on the next switched to tab
     _rootPane = TabbedPane::create()
         .showTabsOnActionBar(false)
-        .add(_newFileTab)
+        .addShortcut(Shortcut::create().key("q")
+                .onTriggered(this, SLOT(prevView())))
+        .addShortcut(Shortcut::create().key("w")
+                .onTriggered(this, SLOT(nextView())))
+        .add(_newViewTab)
         .add(_openFileTab);
 
-    // create a single buffer
-    newFile();
+    // create a single view
+    appendNewView();
 
     // label initial load
     onSystemLanguageChanged();
@@ -65,11 +69,16 @@ ApplicationUI::ApplicationUI() :
     Application::instance()->setScene(_rootPane);
 }
 
-void ApplicationUI::newFile() {
-    View *view = new View(new Buffer);
-    _rootPane->add(view);
-    _rootPane->setActiveTab(view);
-    // TODO: handle auto focus (this should focus on the title textfield)
+void ApplicationUI::newView() {
+    View *c = (View *) _rootPane->activeTab();
+    appendNewView();
+    c->unlockTextArea();
+}
+
+void ApplicationUI::appendNewView() {
+    View *v = new View(new Buffer);
+    _rootPane->add(v);
+    _rootPane->setActiveTab(v);
 }
 
 void ApplicationUI::openFile() {
@@ -77,6 +86,22 @@ void ApplicationUI::openFile() {
     toast->setBody("Open file");
     toast->setPosition(bb::system::SystemUiPosition::MiddleCenter);
     toast->show();
+}
+
+void ApplicationUI::prevView() {
+    activateViewWithOffset(-1);
+}
+
+void ApplicationUI::nextView() {
+    activateViewWithOffset(1);
+}
+
+void ApplicationUI::activateViewWithOffset(int offset) {
+    int nv = _rootPane->count() - 2;
+    View *c = (View *) _rootPane->activeTab();
+    int i = PMOD(_rootPane->indexOf(c) - 2 + offset, nv) + 2;
+    _rootPane->setActiveTab(_rootPane->at(i));
+    c->unlockTextArea();
 }
 
 void ApplicationUI::onSystemLanguageChanged()
@@ -88,11 +113,9 @@ void ApplicationUI::onSystemLanguageChanged()
     if (_translator->load(file_name, "app/native/qm")) {
         QCoreApplication::instance()->installTranslator(_translator);
         // new file tab
-        _newFileTab->setTitle(tr("New"));
-        _newFileTab->setDescription(tr("shortcut: C"));
+        _newViewTab->setTitle(tr("New"));
         // open file tab
         _openFileTab->setTitle(tr("Open"));
-        _openFileTab->setDescription(tr("shortcut: E"));
         // loop through all the views to reset the texts
         for (int i=2; i< _rootPane->count(); ++i) {
             ((View *) _rootPane->at(i))->onLanguageChanged();

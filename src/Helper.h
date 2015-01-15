@@ -21,4 +21,6 @@
     Q_UNUSED(res); \
 }
 
+#define PMOD(x, y) (((x) % (y) + (y)) % (y))
+
 #endif /* HELPER_H_ */

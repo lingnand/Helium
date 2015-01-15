@@ -37,19 +37,6 @@ View::View(Buffer* buffer):
         _buffer(NULL),
         _modPressed(KEYFLAG_NONE)
 {
-    // the main text area within the page
-//    _textArea->input()->setSubmitKey(SubmitKey::Default);
-//    conn(_textArea->input(), SIGNAL(submitted(bb::cascades::AbstractTextControl*)),
-//         this, SLOT(onTextAreaReturnPressed()));
-
-//    _textArea->setInputMode(TextAreaInputMode::Custom);
-//    _textArea->setInputMode(TextAreaInputMode::Text);
-//    _textArea->input()->setFlags(TextInputFlag::PredictionOff |
-//                                 TextInputFlag::AutoCorrectionOff |
-//                                 TextInputFlag::AutoCapitalizationOff |
-//                                 TextInputFlag::AutoPeriodOff |
-//                                 TextInputFlag::SpellCheckOff |
-//                                 TextInputFlag::WordSubstitutionOff);
     // title bar
     TextFieldTitleBarKindProperties *tbp = new TextFieldTitleBarKindProperties();
     _titleTextField = tbp->textField();
@@ -65,9 +52,11 @@ View::View(Buffer* buffer):
         .format(TextFormat::Html)
         .addKeyListener(KeyListener::create()
             .onKeyEvent(this, SLOT(onTextAreaKeyEvent(bb::cascades::KeyEvent*))))
+        .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create()
         .spaceQuota(1))
         .bottomMargin(0);
+
     _progressIndicator = ProgressIndicator::create()
         .vertical(VerticalAlignment::Bottom)
         .topMargin(0);
@@ -76,8 +65,8 @@ View::View(Buffer* buffer):
     _saveAction = ActionItem::create()
         .addShortcut(Shortcut::create().key("s"));
     // TODO: add action items and shortcuts for:
-    // * prev/next tab
     // * undo/redo
+    // * search
 
     // set the final content
     setContent(Page::create()
@@ -89,21 +78,36 @@ View::View(Buffer* buffer):
         .addAction(_saveAction, ActionBarPlacement::Signature)
         // TODO: enable the user to choose between the different
         // action bar visibility
-        // Visible/Hidden/Compact/(Overlay?)
+        // Visible/Hidden
         // - for hidden: we need to implement a gesture recognize that
         //   enables the user to open the drawer by a right-to-left swipe
         //   (or maybe there is an easier way to turn this directly on in sdk?)
-        // - for compact: we need to think about how the signature action
-        //   will block the progress bar
         //   one option might be to shift the progress bar to the top
         //   (and stop the visibility hack), which works well too
-        .actionBarVisibility(ChromeVisibility::Hidden));
+        .actionBarVisibility(ChromeVisibility::Hidden)
+        // shortcuts
+        .addShortcut(Shortcut::create().key("Enter")
+            .onTriggered(this, SLOT(autoFocus()))));
 
     // label initial load
     onLanguageChanged();
 
     // set the buffer
     setBuffer(buffer);
+}
+
+/* miscellaneous actions */
+void View::lockTextArea() { _textArea->setEditable(false); }
+
+void View::unlockTextArea() { _textArea->setEditable(true); }
+
+void View::autoFocus()
+{
+    // focus title text only when the text area is empty
+    if (_textArea->text().isEmpty())
+        _titleTextField->requestFocus();
+    else
+        _textArea->requestFocus();
 }
 
 void View::setTitle(const QString& title)
@@ -165,7 +169,7 @@ void View::onTitleTextFieldFocusChanged(bool focus)
         // the user defocused the text field
         // set the buffer name
         _buffer->setName(_titleTextField->text());
-   }
+    }
 }
 
 void View::onTextAreaTextChanged(const QString& text)
@@ -192,7 +196,7 @@ void View::onTextAreaKeyEvent(bb::cascades::KeyEvent *event)
                 case KEYCODE_RETURN:
                     printf("return pressed!\n");
                     _modPressed |= KEYFLAG_RETURN;
-                    _textArea->setEditable(false);
+                    lockTextArea();
                     break;
             }
         }
@@ -201,7 +205,7 @@ void View::onTextAreaKeyEvent(bb::cascades::KeyEvent *event)
             case KEYCODE_RETURN:
                 if ((_modPressed & KEYFLAG_RETURN) == KEYFLAG_RETURN) {
                     _modPressed ^= KEYFLAG_RETURN;
-                    _textArea->setEditable(true);
+                    unlockTextArea();
                 }
                 break;
         }

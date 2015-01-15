@@ -32,6 +32,8 @@ public:
     virtual ~View() {}
     Q_SLOT void onLanguageChanged();
     Q_SLOT void setBuffer(Buffer* buffer);
+    Q_SLOT void lockTextArea();
+    Q_SLOT void unlockTextArea();
 private:
     bb::cascades::TextField *_titleTextField;
     bb::cascades::TextArea *_textArea;
@@ -46,6 +48,7 @@ private:
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
     Q_SLOT void onBufferContentChanged(const QString& content);
     Q_SLOT void onBufferProgressChanged(float progress);
+    Q_SLOT void autoFocus();
     Q_SLOT void setTitle(const QString& title);
 };
 

@@ -52,9 +52,13 @@ private:
     bb::cascades::TabbedPane* _rootPane;
 
     bb::cascades::Tab* _openFileTab;
-    bb::cascades::Tab* _newFileTab;
-    Q_SLOT void newFile();
+    bb::cascades::Tab* _newViewTab;
     Q_SLOT void openFile();
+    Q_SLOT void newView();
+    Q_SLOT void prevView();
+    Q_SLOT void nextView();
+    Q_SLOT void activateViewWithOffset(int offset);
+    void appendNewView();
 };
 
 #endif /* ApplicationUI_HPP_ */

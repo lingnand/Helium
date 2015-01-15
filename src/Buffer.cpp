@@ -69,6 +69,9 @@ void Buffer::parseContent(const QString content, int cursorPosition, bool forceH
 /* file related operations */
 void Buffer::save()
 {
+    // get the original text of the content
+    QString toSave =_extractor.extractPlainText(_content);
+    printf("toSave: %s\n", qPrintable(toSave));
     int max = 1000;
     int msec = 3000;
     int i = 0;
