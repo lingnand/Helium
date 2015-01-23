@@ -8,6 +8,8 @@
 #ifndef HTMLPARSER_H_
 #define HTMLPARSER_H_
 
+#define BOF '\0'
+
 #include <QObject>
 
 /* A general purpose html parser
@@ -19,10 +21,12 @@ class HtmlParser : public QObject
     Q_OBJECT
 protected:
     // return the last cursor index
-    unsigned int parse(const QString& html);
+    int parse(const QString& html);
     virtual bool stopParsing() = 0;
-    virtual void parseCharacter(const QChar &ch, unsigned int charCount) = 0;
+    // parse character begins from BOF
+    virtual void parseCharacter(const QChar &ch, int charCount) = 0;
     virtual void parseTag(const QString &name, const QString &attributeName, const QString &attributeValue) = 0;
+    // this starts from the first character
     virtual void parseHtmlCharacter(const QChar &ch) = 0;
     virtual void reachedEnd() = 0;
 };

@@ -81,6 +81,21 @@ simulator {
 
 config_pri_assets {
     OTHER_FILES += \
+        $$quote($$BASEDIR/assets/images/ic_backward.png) \
+        $$quote($$BASEDIR/assets/images/ic_cancel.png) \
+        $$quote($$BASEDIR/assets/images/ic_clear.png) \
+        $$quote($$BASEDIR/assets/images/ic_compose.png) \
+        $$quote($$BASEDIR/assets/images/ic_forward.png) \
+        $$quote($$BASEDIR/assets/images/ic_next.png) \
+        $$quote($$BASEDIR/assets/images/ic_open.png) \
+        $$quote($$BASEDIR/assets/images/ic_previous.png) \
+        $$quote($$BASEDIR/assets/images/ic_redo.png) \
+        $$quote($$BASEDIR/assets/images/ic_rename.png) \
+        $$quote($$BASEDIR/assets/images/ic_save.png) \
+        $$quote($$BASEDIR/assets/images/ic_search.png) \
+        $$quote($$BASEDIR/assets/images/ic_sort.png) \
+        $$quote($$BASEDIR/assets/images/ic_sort_black.png) \
+        $$quote($$BASEDIR/assets/images/ic_undo.png) \
         $$quote($$BASEDIR/assets/srchilite/ada.lang) \
         $$quote($$BASEDIR/assets/srchilite/applescript.lang) \
         $$quote($$BASEDIR/assets/srchilite/asm.lang) \
@@ -196,9 +211,12 @@ config_pri_assets {
 config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/Buffer.cpp) \
+        $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/Helper.cpp) \
         $$quote($$BASEDIR/src/HtmlHighlight.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
+        $$quote($$BASEDIR/src/ModKeyListener.cpp) \
+        $$quote($$BASEDIR/src/SaveWork.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
@@ -271,11 +289,16 @@ config_pri_source_group1 {
 
     HEADERS += \
         $$quote($$BASEDIR/src/Buffer.h) \
+        $$quote($$BASEDIR/src/BufferWork.h) \
+        $$quote($$BASEDIR/src/BufferWorker.h) \
         $$quote($$BASEDIR/src/Helper.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HtmlHighlight.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/HtmlPlainTextExtractor.h) \
+        $$quote($$BASEDIR/src/HtmlPlainTextValidator.h) \
+        $$quote($$BASEDIR/src/ModKeyListener.h) \
+        $$quote($$BASEDIR/src/SaveWork.h) \
         $$quote($$BASEDIR/src/View.h) \
         $$quote($$BASEDIR/src/applicationui.hpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \
@@ -383,6 +406,9 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../assets/*.qml) \
         $$quote($$BASEDIR/../assets/*.js) \
         $$quote($$BASEDIR/../assets/*.qs) \
+        $$quote($$BASEDIR/../assets/images/*.qml) \
+        $$quote($$BASEDIR/../assets/images/*.js) \
+        $$quote($$BASEDIR/../assets/images/*.qs) \
         $$quote($$BASEDIR/../assets/srchilite/*.qml) \
         $$quote($$BASEDIR/../assets/srchilite/*.js) \
         $$quote($$BASEDIR/../assets/srchilite/*.qs)

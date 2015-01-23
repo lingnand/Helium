@@ -40,10 +40,12 @@ ApplicationUI::ApplicationUI() :
          this, SLOT(onSystemLanguageChanged()));
 
     _newViewTab = Tab::create()
+        .imageSource(QUrl("asset:///images/ic_compose.png"))
         .addShortcut(Shortcut::create().key("c")
                 .onTriggered(this, SLOT(newView())))
         .onTriggered(this, SLOT(newView()));
     _openFileTab = Tab::create()
+        .imageSource(QUrl("asset:///images/ic_open.png"))
         .addShortcut(Shortcut::create().key("e")
                 .onTriggered(this, SLOT(openFile())))
         .onTriggered(this, SLOT(openFile()));
@@ -72,11 +74,11 @@ ApplicationUI::ApplicationUI() :
 void ApplicationUI::newView() {
     View *c = (View *) _rootPane->activeTab();
     appendNewView();
-    c->unlockTextArea();
+    c->onOutOfView();
 }
 
 void ApplicationUI::appendNewView() {
-    View *v = new View(new Buffer);
+    View *v = new View(new Buffer(100));
     _rootPane->add(v);
     _rootPane->setActiveTab(v);
 }
@@ -101,7 +103,7 @@ void ApplicationUI::activateViewWithOffset(int offset) {
     View *c = (View *) _rootPane->activeTab();
     int i = PMOD(_rootPane->indexOf(c) - 2 + offset, nv) + 2;
     _rootPane->setActiveTab(_rootPane->at(i));
-    c->unlockTextArea();
+    c->onOutOfView();
 }
 
 void ApplicationUI::onSystemLanguageChanged()

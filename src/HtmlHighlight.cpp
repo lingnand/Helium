@@ -78,7 +78,7 @@ bool HtmlHighlight::stopParsing()
     return _stopParsing;
 }
 
-void HtmlHighlight::parseCharacter(const QChar &ch, unsigned int charCount)
+void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
 {
     if (!_reachedCursor && charCount == _cursorPosition) {
         _reachedCursor = true;
@@ -113,7 +113,7 @@ void HtmlHighlight::parseCharacter(const QChar &ch, unsigned int charCount)
         if (highlightLine()) {
             _buffer += '\n';
         }
-    } else {
+    } else if (!ch.isNull()) {
         _toHighlightBuffer += ch;
     }
     _afterTTTag = false;
@@ -194,10 +194,9 @@ void HtmlHighlight::parseTag(const QString &name, const QString &attributeName, 
                 _toHighlight = HighlightDelayed;
             _lastHighlightDelayedLine = _currentLine;
         } else if (_toHighlight && _toHighlightBuffer.isEmpty() && _highlightStateDataHash.contains(*_currentLine)) {
-            // in a force refresh procedure all the state hash is reset do we need to check for 'contains'
+            // in a force refresh procedure all the state hash is reset so we need to check for 'contains'
             // if the highlight buffer is not empty, that means it has not been flushed
             // we have highlighted some stuff in the past
-            Q_ASSERT(_currentHighlightStateData);
             if (*_currentHighlightStateData == *_highlightStateDataHash[*_currentLine].first) {
                 // setting noHighlight to false means we expect somewhere down to still be highlighted
                 if (_lastHighlightDelayedLine)

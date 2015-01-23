@@ -6,59 +6,62 @@
  */
 
 #include <src/HtmlParser.h>
+#include <stdio.h>
 
 enum HtmlState { InChar, InTag };
 enum CharState { Normal, InSpecialChar };
 enum TagState { InPrefix, InAttributeName, InAttributeValue };
 
-unsigned int HtmlParser::parse(const QString& html)
+int HtmlParser::parse(const QString& html)
 {
     // process the content
     // first find the regions to rehighlight
     HtmlState state = InChar;
     CharState charState = Normal;
     TagState tagState = InPrefix;
-    unsigned int charCount = 0;
-    bool _reachedCursor = false;
-    QString specialChar, tagName, tagAttributeName, tagAttributeValue;
+    int charCount = 0;
+    QString specialCharStr, tagName, tagAttributeName, tagAttributeValue;
     // i is the NEEDLE/CURSOR position inside the content
-    unsigned int i = 0;
+    int i = 0;
     // ch is the character just before the cursor
-    QChar ch;
+    QChar ch = BOF;
     while (true) {
         switch (state) {
             case InChar: {
-                QChar parsed;
                 switch (charState) {
                     case Normal:
-                        if (ch == '&') {
+                        if (ch == BOF) {
+                            parseCharacter(ch, charCount);
+                        } else if (ch == '&') {
                             charState = InSpecialChar;
                         } else if (ch == '<') {
                             state = InTag;
                         } else {
-                            parsed = ch;
+                            charCount++;
+                            parseCharacter(ch, charCount);
                         }
                         break;
                     case InSpecialChar:
                         if (ch == ';') {
-                            charCount++;
-                            if (specialChar == "amp") {
-                                parsed = '&';
-                            } else if (specialChar == "lt") {
-                                parsed = '<';
-                            } else if (specialChar == "gt") {
-                                parsed = '>';
+                            if (specialCharStr == "amp") {
+                                ch = '&';
+                            } else if (specialCharStr == "lt") {
+                                ch = '<';
+                            } else if (specialCharStr == "gt") {
+                                ch = '>';
+                            } else {
+                                // set it to null character at the moment
+                                ch = '\0';
+                                printf("unrecognized special char: %s\n", qPrintable(specialCharStr));
                             }
-                            specialChar.clear();
+                            charCount++;
+                            parseCharacter(ch, charCount);
+                            specialCharStr.clear();
                             charState = Normal;
                         } else {
-                            specialChar += ch;
+                            specialCharStr += ch;
                         }
                         break;
-                }
-                if (!parsed.isNull()) {
-                    charCount++;
-                    parseCharacter(parsed, charCount);
                 }
                 break;
             }
@@ -100,15 +103,15 @@ unsigned int HtmlParser::parse(const QString& html)
         }
         if (stopParsing()) {
             break;
-        } if (i == html.length()) {
+        }
+        if (i == html.length()) {
             // reached end of the content
             reachedEnd();
             break;
-        } else {
-            // increment the cursor
-            ch = html[i++];
-            parseHtmlCharacter(ch);
         }
+        // increment the cursor
+        ch = html[i++];
+        parseHtmlCharacter(ch);
     }
     return i;
 }

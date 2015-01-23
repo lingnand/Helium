@@ -27,14 +27,14 @@ public:
 Q_SIGNALS:
     void filetypeChanged(const QString &filetype);
 private:
-    unsigned int _lineCounter;
+    int _lineCounter;
     enum ToHighlightState { NoHighlight = 0, HighlightCurrent = 1, HighlightDelayed = 2};
     bool _highlighted;
     bool _stopParsing;
     bool _enableDelay;
     bool _afterTTTag;
     bool _reachedCursor;
-    unsigned int _cursorPosition;
+    int _cursorPosition;
     ToHighlightState _toHighlight;
     QString _filetype;
     QString _buffer;
@@ -47,7 +47,7 @@ private:
     QHash<QString, HighlightLineStates> _highlightStateDataHash;
     srchilite::SourceHighlight _sourceHighlight;
     bool stopParsing();
-    void parseCharacter(const QChar &ch, unsigned int charCount);
+    void parseCharacter(const QChar &ch, int charCount);
     void parseTag(const QString &name, const QString &attributeName, const QString &attributeValue);
     void parseHtmlCharacter(const QChar &ch);
     void reachedEnd();

@@ -8,6 +8,8 @@
 #ifndef HIGHLIGHTSTATEDATA_H_
 #define HIGHLIGHTSTATEDATA_H_
 
+#include <boost/shared_ptr.hpp>
+
 struct HighlightStateData {
     /// the current state for the SourceHighlighter object
     srchilite::HighlightStatePtr currentState;

@@ -8,9 +8,6 @@
 /*
  * The primary buffer model for text editing
  * It processes signals on a separate thread (its own thread)
- * TODO: think about the race conditions that can be caused
- *  e.g. somebody sent a "save" signal here and the background process begins saving
- *  whereas somebody immediately changed the buffer content
  * TODO: tabs are always a headache.
  *  some problems to think about
  *  1. option to enable the user to view four spaces as a single tab when openning files
@@ -27,9 +24,9 @@
 
 #include <QObject>
 #include <QUrl>
-#include <QThread>
-#include <boost/shared_ptr.hpp>
+#include <QDateTime>
 #include <src/HtmlHighlight.h>
+#include <src/BufferWorker.h>
 #include <src/HtmlPlainTextExtractor.h>
 
 namespace srchilite {
@@ -40,34 +37,54 @@ class Buffer : public QObject
 {
     Q_OBJECT
 public:
-    Buffer();
+    Buffer(int historyLimit);
     virtual ~Buffer();
     // returns the name of the current buffer, "" for no name
-    const QString &name() const { return _name; }
-    const QString &filetype() const { return _highlight.filetype(); }
-    const QString &content() const { return _content; }
+    const QString &name() const;
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name);
-    Q_SLOT void setFiletype(const QString &filetype) { _highlight.setFiletype(filetype); }
+    const QString &filetype() const;
+    Q_SLOT void setFiletype(const QString &filetype);
+    const QString &content() const;
     Q_SLOT void setContent(const QString &content, int cursorPosition);
+    bool hasUndo() const;
+    Q_SLOT void undo();
+    bool hasRedo() const;
+    Q_SLOT void redo();
+    bool hasPlainText() const;
+    QString plainText();
     Q_SLOT void save();
 Q_SIGNALS:
     void nameChanged(const QString &name);
     void filetypeChanged(const QString &filetype);
-    void contentChanged(const QString &parsedContent);
+    // on content changed, negative cursorPosition means the changed content
+    // doesn't change cursor position
+    // otherwise the view should set its cursor position to match the value emitted here
+    void contentChanged(const QString &content, int cursorPosition);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
-    void inProgressChanged(float);
+    void inProgressChanged(float progress);
+    void hasUndosChanged(bool hasUndos);
+    void hasRedosChanged(bool hasRedos);
 private:
-    bool _parsingContent;
+    typedef QPair<QString, int> BufferState;
+    bool _modifyingContent;
+    bool _hasUndo;
+    bool _hasRedo;
     QString _name;
     QString _content;
-    // the thread the buffer lives in
-    QThread _thread;
+    int _historyIndex;
+    int _historyLimit;
+    QList<BufferState> _history;
+    QDateTime _lastEdited;
+    BufferWorker _worker;
     HtmlHighlight _highlight;
     HtmlPlainTextExtractor _extractor;
     srchilite::LangMap *_langMap;
-    void parseContent(const QString content, int cursorPosition, bool noHighlight, bool enableDelay);
+    void parseContent(QString content, int cursorPosition, bool noHighlight, bool enableDelay);
+    void goToHistory(int offset);
+    void setHasUndo(bool hasUndo);
+    void setHasRedo(bool hasRedo);
     Q_SLOT void onHtmlHighlightFiletypeChanged(const QString &filetype);
 };
 

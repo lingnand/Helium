@@ -9,23 +9,36 @@
 #include <stdio.h>
 #include <src/srchilite/instances.h>
 #include <src/srchilite/langmap.h>
+#include <src/HtmlPlainTextExtractor.h>
+#include <src/HtmlPlainTextValidator.h>
+#include <src/SaveWork.h>
 
-Buffer::Buffer() :
+#define SECONDS_TO_REGISTER_HISTORY 1
+#define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
+
+Buffer::Buffer(int historyLimit) :
     _highlight("default.style"),
     _langMap(srchilite::Instances::getLangMap()),
-    _parsingContent(false)
+    _modifyingContent(false), _hasUndo(false), _hasRedo(false),
+    _historyIndex(0),
+    _historyLimit(historyLimit),
+    _lastEdited(DEFAULT_EDIT_TIME),
+    _worker(this)
 {
+    _history.append(BufferState("", 0));
     conn(&_highlight, SIGNAL(filetypeChanged(QString)),
         this, SLOT(onHtmlHighlightFiletypeChanged(QString)));
-    moveToThread(&_thread);
-    _thread.start();
+    conn(&_worker, SIGNAL(inProgressChanged(float)),
+        this, SIGNAL(inProgressChanged(float)));
 }
 
 Buffer::~Buffer()
 {
-    _thread.quit();
-    _thread.wait();
+    _worker.quit();
+    _worker.wait();
 }
+
+const QString &Buffer::name() const { return _name; }
 
 void Buffer::setName(const QString& name)
 {
@@ -39,46 +52,138 @@ void Buffer::setName(const QString& name)
     }
 }
 
+const QString &Buffer::filetype() const { return _highlight.filetype(); }
+
+void Buffer::setFiletype(const QString &filetype) { _highlight.setFiletype(filetype); }
+
 void Buffer::onHtmlHighlightFiletypeChanged(const QString &filetype)
 {
+    // TODO: how do we clear the buffer states?
+    // OR, make sure that the undo works with file type related changes
     parseContent(_content, 0, true, false);
     emit filetypeChanged(filetype);
 }
 
+const QString &Buffer::content() const { return _content; }
+
+// TODO: also tackle the case where the editor is moved, selection selected
+// in other words, in such situations you also need to rehighlight any delayed content
 void Buffer::setContent(const QString &content, int cursorPosition)
 {
     parseContent(content, cursorPosition, false, true);
 }
 
-void Buffer::parseContent(const QString content, int cursorPosition, bool forceHighlight, bool enableDelay)
+void Buffer::parseContent(QString content, int cursorPosition, bool forceHighlight, bool enableDelay)
 {
-    if (_parsingContent)
+    if (_modifyingContent)
         return;
-    _parsingContent = true;
+    _modifyingContent = true;
     if (forceHighlight || !filetype().isEmpty()) {
-        _content = _highlight.highlightHtml(content, cursorPosition, enableDelay);
-        emit contentChanged(_content);
-    } else if (content != _content) {
-        // if highlight is not necessary
-        _content = content;
-        emit contentChanged(_content);
+        content = _highlight.highlightHtml(content, cursorPosition, enableDelay);
     }
-    _parsingContent = false;
+    if (content != _content) {
+        _content = content;
+        // save history state
+        QDateTime current = QDateTime::currentDateTime();
+        if (_historyIndex < _history.count() - 1) {
+            do {
+                _history.removeLast();
+            } while (_historyIndex < _history.count() - 1);
+            ++_historyIndex;
+        } else if (current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
+            ++_historyIndex;
+        }
+        _lastEdited = current;
+        // append/modify the history if necessary
+        if (_historyIndex == _history.count()) {
+            _history.append(BufferState(_content, cursorPosition));
+            if (_history.count() > _historyLimit) {
+                _history.removeFirst();
+                --_historyIndex;
+            }
+        } else {
+            _history[_historyIndex] = BufferState(_content, cursorPosition);
+        }
+        printf("last edit time: %s, historyIndex: %d\n",
+                qPrintable(_lastEdited.toString("hh:mm:ss:zzz")), _historyIndex);
+        // there is always blank text state to undo to
+        setHasUndo(true);
+        setHasRedo(false);
+        emit contentChanged(_content, -1);
+    }
+    _modifyingContent = false;
+}
+
+bool Buffer::hasUndo() const { return _hasUndo; }
+
+void Buffer::setHasUndo(bool hasUndo)
+{
+    if (hasUndo != _hasUndo) {
+        _hasUndo = hasUndo;
+        emit hasUndosChanged(_hasUndo);
+    }
+}
+
+bool Buffer::hasRedo() const { return _hasRedo; }
+
+void Buffer::setHasRedo(bool hasRedo)
+{
+    if (hasRedo != _hasRedo) {
+        _hasRedo = hasRedo;
+        emit hasRedosChanged(_hasRedo);
+    }
+}
+
+void Buffer::undo()
+{
+    goToHistory(-1);
+}
+
+void Buffer::redo()
+{
+    goToHistory(1);
+}
+
+void Buffer::goToHistory(int offset)
+{
+    printf("## go to history with offset %d ##\n", offset);
+    _modifyingContent = true;
+    int i = _historyIndex + offset;
+    if (i >= 0 && i < _history.count()) {
+        setHasUndo(i != 0);
+        setHasRedo(i != _history.count() - 1);
+        _historyIndex = i;
+        printf("new history index: %d\n", i);
+        BufferState s = _history[i];
+        _content = s.first;
+        printf("new content: %s, new cursor position: %d\n", qPrintable(_content), s.second);
+        // invalidate the date time
+        _lastEdited = DEFAULT_EDIT_TIME;
+        emit contentChanged(_content, s.second);
+    }
+    _modifyingContent = false;
+    printf("## go to history with offset %d finished ##\n", offset);
 }
 
 /* file related operations */
 void Buffer::save()
 {
-    // get the original text of the content
-    QString toSave =_extractor.extractPlainText(_content);
-    printf("toSave: %s\n", qPrintable(toSave));
-    int max = 1000;
-    int msec = 3000;
-    int i = 0;
-    while (i < max) {
-        i++;
-        emit inProgressChanged(i/(float)max);
-        usleep(msec);
+    if (!_worker.isRunning()) {
+        BufferWorkPtr w = _worker.work();
+        if (!w || w->type() != Save) {
+            w = BufferWorkPtr(new SaveWork(&_extractor));
+            _worker.setWork(w);
+        }
+        boost::dynamic_pointer_cast<SaveWork>(w)->setHtml(_content);
+        _worker.start();
+    } else if (_worker.work()->type() != Save) {
+        printf("save action activated while some other job %d is running!\n", _worker.work()->type());
     }
-    emit inProgressChanged(0);
+}
+
+bool Buffer::hasPlainText() const { return HtmlPlainTextValidator::HtmlHasPlainText(_content); }
+
+QString Buffer::plainText()
+{
+    return _extractor.extractPlainText(_content);
 }
