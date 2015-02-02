@@ -29,21 +29,44 @@
 #include <bb/cascades/TitleBarExpandableArea>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Shortcut>
-#include <bb/system/SystemToast>
-#include <bb/system/SystemUiPosition>
+#include <bb/system/Clipboard>
 
 using namespace bb::cascades;
 
-#define EMPTY_BUFFER_TITLE "No Name"
+#define BUFFER_TITLE_EMPTY "No Name"
 // keys
 #define KEYFLAG_NONE 0
 #define KEYFLAG_RETURN 1
+// strings
+#define HINT_TEXT_TITLE_FIELD "Enter the title"
+#define HINT_TEXT_TEXT_AREA "Enter the content"
+
+#define ACTION_TITLE_SAVE "Save"
+#define ACTION_TITLE_UNDO "Undo"
+#define ACTION_TITLE_REDO "Redo"
+#define ACTION_TITLE_FIND "Find"
+
+#define ACTION_TITLE_GO_TO_FIND_FIELD "Go to find field"
+#define ACTION_TITLE_FIND_PREV "Find previous"
+#define ACTION_TITLE_FIND_NEXT "Find next"
+#define ACTION_TITLE_REPLACE_NEXT "Replace next"
+#define ACTION_TITLE_REPLACE_ALL "Replace all remaining"
+#define ACTION_TITLE_FIND_CANCEL "Cancel"
+
+#define HINT_TEXT_FIND_FIELD "Find text"
+#define HINT_TEXT_REPLACE_FIELD "Replace with"
+#define CHECKBOX_TEXT_FIND_CASE_SENSITIVE "Case sensitive"
+// messages
+#define TOAST_FIND_INVALID_QUERY_EMPTY "Search query can't be empty!"
+#define TOAST_FIND_NOT_FOUND "Not found"
+#define TOAST_FIND_REACHED_END "Reached end of document, beginning from top!"
+#define TOAST_FIND_REACHED_TOP "Reached top of document, beginning from bottom!"
 
 View::View(Buffer* buffer):
         _titleField(NULL), _textArea(NULL), _progressIndicator(NULL),
         _buffer(NULL),
         _mode(Normal),
-        _modUsed(false)
+        _findBufferDirty(true)
 {
     _textArea = TextArea::create()
         .format(TextFormat::Html)
@@ -51,11 +74,12 @@ View::View(Buffer* buffer):
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))
         .bottomMargin(0);
-    _textArea->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onNormalModeModifiedKeyPressed(bb::cascades::KeyEvent*)))
+    _textAreaModKeyListener = ModKeyListener::create(KEYCODE_RETURN)
+        .onModifiedKeyPressed(this, SLOT(onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent*)))
         .onModKeyPressed(this, SLOT(onTextAreaModKeyPressed(bb::cascades::KeyEvent*)))
         .onTextAreaInputModeChanged(_textArea, SLOT(setInputMode(bb::cascades::TextAreaInputMode::Type)))
-        .handleFocusOn(_textArea, SIGNAL(focusedChanged(bool))));
+        .handleFocusOn(_textArea, SIGNAL(focusedChanged(bool)));
+    _textArea->addKeyListener(_textAreaModKeyListener);
 
     // TODO: monospace font doesn't play well with italic
     // so what we need to do is to reformat the style file for highlight
@@ -70,7 +94,7 @@ View::View(Buffer* buffer):
     conn(_titleField, SIGNAL(focusedChanged(bool)),
         this, SLOT(onTitleFieldFocusChanged(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onNormalModeModifiedKeyPressed(bb::cascades::KeyEvent*)))
+        .onModifiedKeyPressed(this, SLOT(onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
         .onModKeyPressed(_textArea, SLOT(requestFocus()))
         .onTextFieldInputModeChanged(_titleField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .handleFocusOn(_titleField, SIGNAL(focusedChanged(bool))));
@@ -85,11 +109,23 @@ View::View(Buffer* buffer):
     // the candidate titlebars
     // the search and replace titlebar
     _findField = TextField::create().vertical(VerticalAlignment::Center)
+        .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create().spaceQuota(1));
     _replaceField = TextField::create().vertical(VerticalAlignment::Center)
-        .layoutProperties(StackLayoutProperties::create().spaceQuota(1))
-        .submitKey(SubmitKey::Search)
-        .onSubmitted(this, SLOT(findNext()));
+        .focusPolicy(FocusPolicy::Touch)
+        .layoutProperties(StackLayoutProperties::create().spaceQuota(1));
+    // set up the find fields mod keys
+    // TODO: not only focus the replaceField, but also select the existing content of the replace field
+    _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
+        .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
+        .onModKeyPressed(_replaceField, SLOT(requestFocus()))
+        .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
+        .handleFocusOn(_findField, SIGNAL(focusedChanged(bool))));
+    _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
+        .onModifiedKeyPressed(this, SLOT(onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
+        .onModKeyPressed(this, SLOT(findNext()))
+        .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
+        .handleFocusOn(_replaceField, SIGNAL(focusedChanged(bool))));
     _findCaseSensitiveCheckBox = new CheckBox;
     FreeFormTitleBarKindProperties *findTitleBarProperties = FreeFormTitleBarKindProperties::create()
         .expandableIndicator(TitleBarExpandableAreaIndicatorVisibility::Hidden)
@@ -201,10 +237,16 @@ void View::setNormalModeActions()
 void View::setFindModeActions()
 {
     _page->removeAllActions();
+    _goToFindFieldAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_search.png"))
+        .addShortcut(Shortcut::create().key("f"))
+        .onTriggered(_findField, SLOT(requestFocus()));
     _findPrevAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_backward.png"))
         .addShortcut(Shortcut::create().key("p"))
         .onTriggered(this, SLOT(findPrev()));
+    // TODO: we should probably add the "enter" shortcut?
+    // (but for some reason it's not working properly)
     _findNextAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_forward.png"))
         .addShortcut(Shortcut::create().key("n"))
@@ -215,13 +257,14 @@ void View::setFindModeActions()
         .onTriggered(this, SLOT(replaceNext()));
     _replaceAllAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_rename.png"))
-        .addShortcut(Shortcut::create().key("Shift+r"))
+        .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(replaceAll()));
     _findCancelAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("q"))
         .onTriggered(this, SLOT(findModeOff()));
     reloadFindModeActionTitles();
+    _page->addAction(_goToFindFieldAction);
     _page->addAction(_findPrevAction);
     _page->addAction(_findNextAction, ActionBarPlacement::Signature);
     _page->addAction(_replaceNextAction, ActionBarPlacement::OnBar);
@@ -229,91 +272,150 @@ void View::setFindModeActions()
     _page->addAction(_findCancelAction, ActionBarPlacement::OnBar);
 }
 
-// TODO: make it such that when the user touches the textarea, quit the find
-// mode automatically?
-// also, when the user taps away the cursor location, we should make our search
-// start with that as well
-// TODO: further, on each new search due to change in the search field, we should
-// always stick to using the same old starting cursor location
 bool View::findModeOn()
 {
-    _mode = Find;
-    _page->setTitleBar(_findTitleBar);
-    setFindModeActions();
-    _textArea->setEditable(false);
-    _findField->resetText();
-    _replaceField->resetText();
-    // states
-    _findBuffer.clear();
-    _findQuery.clear();
-    _findOffset = _textArea->editor()->cursorPosition();
-    // focus
-    _findField->requestFocus();
-    return true;
+    if (_mode != Find) {
+        _mode = Find;
+        // disable current key handler
+        _textAreaModKeyListener->setEnabled(false);
+        // titlebar
+        _replaceField->resetText();
+        _page->setTitleBar(_findTitleBar);
+        // actionbar
+        setFindModeActions();
+        // focus
+        _findField->requestFocus();
+        QString f = _findField->text();
+        if (!f.isEmpty()) {
+            _findField->editor()->setSelection(0, f.length());
+        }
+        _textArea->setEditable(false);
+        return true;
+    }
+    return false;
+}
+
+bool View::findModeOff()
+{
+    if (_mode == Find) {
+        // clear states
+        _findBuffer.clear();
+        _findQuery.clear();
+        _findBufferDirty = true;
+
+        _page->setTitleBar(_titleBar);
+        setNormalModeActions();
+        _mode = Normal;
+        _textArea->loseFocus();
+        _textArea->setEditable(true);
+        _textAreaModKeyListener->setEnabled(true);
+//        _textArea->editor()->setCursorPosition(_textArea->editor()->cursorPosition());
+        _textArea->requestFocus();
+        return true;
+    }
+    return false;
 }
 
 void View::select(const TextSelection &selection)
 {
+    // use lose focus and then refocus to force scrolling to the right position
+    _textArea->loseFocus();
     _textArea->editor()->setSelection(selection.first, selection.second);
+    _textArea->requestFocus();
+}
+
+// this function is responsible for updating the find query/regex, if any change has taken place
+View::FindQueryUpdateStatus View::updateFindQuery(bool interactive)
+{
+    QString find = _findField->text();
+    if (find.isEmpty()) {
+        if (interactive)
+            toast(tr(TOAST_FIND_INVALID_QUERY_EMPTY));
+        _findComplete = true;
+        return Invalid;
+    }
+    FindQueryUpdateStatus status = Unchanged;
+    if (find != _findQuery) {
+        _findQuery = find;
+        _findRegex = boost::regex(std::string(find.toUtf8().constData()));
+        status = Changed;
+    }
+    if (_findBufferDirty) {
+        _findBufferDirty = false;
+        _findBuffer = _buffer->plainText().toUtf8().constData();
+        status = Changed;
+    }
+    if (status == Changed)
+        _findComplete = false;
+    return status;
 }
 
 void View::findNext()
 {
+    findNextWithOptions(true, updateFindQuery(true));
+}
+
+void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
+{
+    _textArea->requestFocus();
     // check if we need to set up the iterator
-    QString find = _findField->text();
-    if (find.isEmpty()) {
-        printf("please enter text to search!\n");
-        return;
-    }
-    if (find != _findQuery) {
-        _findQuery = find;
-        if (_findBuffer.empty())
-            _findBuffer = _buffer->plainText().toUtf8().constData();
-        if (_findOffset == 0) {
-            _lastFindLoop = true;
-            _bofIndex = 0;
-        } else {
-            _lastFindLoop = false;
-        }
-        _findRegex = boost::regex(std::string(find.toUtf8().constData()));
-        _findIterator = boost::sregex_iterator(
-                _findBuffer.begin() + _findOffset,
-                _findBuffer.end(),
-                _findRegex);
-        _findComplete = false;
-        _findHits.clear();
-        _findIndex = 0;
-    } else {
-        if (_findComplete && _findHits.isEmpty()) {
-            printf("not found!\n");
+    switch (status) {
+        case Invalid:
             return;
-        }
-        // check if there is something on findIndex
-        ++_findIndex;
-        if (_findComplete && _findIndex == _findHits.count()) {
+        case Changed: {
+            int findOffset = _textArea->editor()->cursorPosition();
+            if (findOffset == 0) {
+                _bofIndex = 0;
+            } else {
+                _bofIndex = -1;
+            }
+            _findIterator = boost::sregex_iterator(
+                    _findBuffer.begin() + findOffset,
+                    _findBuffer.end(),
+                    _findRegex);
+            _findHits.clear();
             _findIndex = 0;
+            break;
         }
-        if (_lastFindLoop && _findIndex == _bofIndex) {
-            printf("reached end of document, beginning from top!\n");
+        case Unchanged: {
+            if (_findComplete && _findHits.isEmpty()) {
+                if (interactive)
+                    toast(tr(TOAST_FIND_NOT_FOUND));
+                return;
+            }
+            // check if there is something on findIndex
+            ++_findIndex;
+            if (_findComplete && _findIndex == _findHits.count()) {
+                _findIndex = 0;
+            }
+            if (_findIndex == _bofIndex && interactive) {
+                toast(tr(TOAST_FIND_REACHED_END));
+            }
+            if (_findIndex < _findHits.count()) {
+                if (interactive)
+                    select(_findHits[_findIndex].first);
+                return;
+            }
+            // we've reached end of the hit list
+            _findIterator++;
+            break;
         }
-        if (_findIndex < _findHits.count()) {
-            select(_findHits[_findIndex]);
-            return;
-        }
-        // we've reached end of the hit list
-        _findIterator++;
     }
     boost::sregex_iterator end = boost::sregex_iterator();
     if (_findIterator == end) {
-        if (_lastFindLoop) {
+        if (_bofIndex >= 0) {
             printf("reached end of the last find loop; marking complete\n");
             _findComplete = true;
             _findIndex = 0;
-            Q_ASSERT(!_findHits.isEmpty());
-            select(_findHits[0]);
+            if(_findHits.isEmpty()) {
+                if (interactive)
+                    toast(tr(TOAST_FIND_NOT_FOUND));
+            } else {
+                if (interactive)
+                    select(_findHits[0].first);
+            }
             return;
         } else {
-            _lastFindLoop = true;
             // we've reached end
             // try from beginning again
             _findIterator = boost::sregex_iterator(
@@ -321,13 +423,15 @@ void View::findNext()
                     _findBuffer.end(),
                     _findRegex);
             if (_findIterator == end) {
-                printf("not found!\n");
+                if (interactive)
+                    toast(tr(TOAST_FIND_NOT_FOUND));
                 Q_ASSERT(_findHits.isEmpty());
                 _findComplete = true;
                 return;
             }
             _bofIndex = _findIndex;
-            printf("reached end of document, continue from top!\n");
+            if (interactive)
+                toast(tr(TOAST_FIND_REACHED_END));
         }
     }
     // found something
@@ -336,49 +440,215 @@ void View::findNext()
     Q_ASSERT(_findIndex == _findHits.count());
     TextSelection selection((*_findIterator)[0].first - _findBuffer.begin(),
             (*_findIterator)[0].second - _findBuffer.begin());
-    if (!_findHits.isEmpty() && selection == _findHits[0]) {
+    if (!_findHits.isEmpty() && selection == _findHits[0].first) {
         // we've wrapped around and found the same selection as the first one
         printf("found the same match in the list; marking complete\n");
+        // take care of the bofIndex to match the change in the findIndex
+        if (_bofIndex == _findIndex)
+            _bofIndex = 0;
         _findIndex = 0;
         _findComplete = true;
     } else {
-        _findHits.append(selection);
+        _findHits.append(FindMatch(selection, *_findIterator));
     }
-    select(selection);
+    if (interactive)
+        select(selection);
 }
 
 void View::findPrev()
 {
-
+    _textArea->requestFocus();
+    switch (updateFindQuery(true)) {
+        case Invalid:
+            return;
+        case Changed: {
+            _textArea->requestFocus();
+            int findOffset = _textArea->editor()->cursorPosition();
+            // we always enter the last find loop, because a reverse search will trigger
+            // a whole run-down iterator
+            _bofIndex = 0;
+            _findIterator = boost::sregex_iterator(
+                    _findBuffer.begin(),
+                    _findBuffer.end(),
+                    _findRegex);
+            _findHits.clear();
+            // use -1 to indicate nothing in the hit list
+            _findIndex = -1;
+            // begin to find all the matches until passes the given offset
+            boost::sregex_iterator end = boost::sregex_iterator();
+            while (true) {
+                if (_findIterator == end) {
+                    // no more matches can be found
+                    _findComplete = true;
+                    break;
+                }
+                ++_findIndex;
+                // first append the result
+                _findHits.append(FindMatch(
+                        TextSelection((*_findIterator)[0].first - _findBuffer.begin(),
+                        (*_findIterator)[0].second - _findBuffer.begin())
+                        , *_findIterator));
+                if ((*_findIterator)[0].first - _findBuffer.begin() > findOffset) {
+                    if (_findIndex < 1) {
+                        // if this is the first find index, we don't have anything before
+                        // the current cursor
+                        toast(tr(TOAST_FIND_REACHED_TOP));
+                    } else {
+                        // let's rewind by one
+                        --_findIndex;
+                        break;
+                    }
+                }
+                _findIterator++;
+            }
+            // now hopefully we've settled down on the correct index
+            if (_findIndex < 0) {
+                Q_ASSERT(_findHits.isEmpty());
+                toast(tr(TOAST_FIND_NOT_FOUND));
+            } else {
+                select(_findHits[_findIndex].first);
+            }
+            break;
+        }
+        case Unchanged: {
+            _textArea->requestFocus();
+            if (_findComplete && _findHits.isEmpty()) {
+                toast(tr(TOAST_FIND_NOT_FOUND));
+                return;
+            }
+            if (_findIndex == _bofIndex) {
+                toast(tr(TOAST_FIND_REACHED_TOP));
+            }
+            // check if there is something on findIndex
+            --_findIndex;
+            if (_findComplete && _findIndex < 0) {
+                _findIndex = _findHits.count() - 1;
+            }
+            if (_findIndex >= 0) {
+                select(_findHits[_findIndex].first);
+                return;
+            }
+            // we've reached the left end of the hit list
+            // findIndex is negative here
+            // exhaust the current iterator and switch to the beginning-from-the-top iterator
+            // and exhaust that as well. the point is to complete the whole list of find hits
+            boost::sregex_iterator end = boost::sregex_iterator();
+            while (true) {
+                // increment find iterator
+                _findIterator++;
+                if (_findIterator == end) {
+                    // no more matches can be found
+                    if (_bofIndex < 0) {
+                        _findIterator = boost::sregex_iterator(
+                                _findBuffer.begin(),
+                                _findBuffer.end(),
+                                _findRegex);
+                        if (_findIterator == end) {
+                            toast(tr(TOAST_FIND_NOT_FOUND));
+                            _findComplete = true;
+                            break;
+                        }
+                        _bofIndex = _findHits.count();
+                    } else {
+                        _findComplete = true;
+                        break;
+                    }
+                }
+                // check for wrapping condition
+                TextSelection selection((*_findIterator)[0].first - _findBuffer.begin(),
+                    (*_findIterator)[0].second - _findBuffer.begin());
+                if (!_findHits.isEmpty() && selection == _findHits[0].first) {
+                    _findComplete = true;
+                    if (_bofIndex == _findHits.count()) {
+                        _bofIndex = 0;
+                        toast(tr(TOAST_FIND_REACHED_TOP));
+                    }
+                    break;
+                } else {
+                    _findHits.append(FindMatch(selection, *_findIterator));
+                }
+            }
+            _findIndex = _findHits.count() - 1;
+            select(_findHits[_findIndex].first);
+            break;
+        }
+    }
 }
 
 void View::replaceNext()
 {
-
+    FindQueryUpdateStatus status = updateFindQuery(true);
+    if (status == Invalid)
+        return;
+    if (status == Unchanged) {
+        TextSelection current(_textArea->editor()->selectionStart(),
+                _textArea->editor()->selectionEnd());
+        if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].first) {
+            QString rep = QString::fromUtf8(_findHits[_findIndex].second.format(_replaceField->text().toUtf8().constData()).c_str());
+            // TODO: take care of \r, etc. in the replacement string?
+            // TODO: change the delay of the highlighter to false so that we can do
+            // highlight fully and properly (normally this wouldn't be too much of an issue)
+            _textArea->editor()->insertPlainText(rep);
+            // TODO: modify the findbuffer appropriately instead of doing plainText() again in the next findNext call
+            _findBufferDirty = true;
+            // there shouldn't be any interactivity here
+            status = updateFindQuery(true);
+        }
+    }
+    findNextWithOptions(true, status);
 }
 
+// TODO: this appears to be working, but not enough testing at the moment
 void View::replaceAll()
 {
-
-}
-
-bool View::findModeOff()
-{
-    if (_mode == Find) {
-        _page->setTitleBar(_titleBar);
-        setNormalModeActions();
-        _mode = Normal;
-        _textArea->setEditable(true);
-        _textArea->requestFocus();
-        return true;
+    FindQueryUpdateStatus status = updateFindQuery(true);
+    if (status == Invalid)
+        return;
+    findNextWithOptions(false, status);
+    // get the replace index
+    int replaceIndex = _findIndex;
+    printf("replace index is %d\n", replaceIndex);
+    std::string replacement = _replaceField->text().toUtf8().constData();
+    // refill all the findMatches in the _findHits
+    while (!_findComplete) {
+        // there shouldn't be any change in the status
+        findNextWithOptions(false, Unchanged);
     }
-    return false;
+    QList<QPair<TextSelection, QString> > replaces;
+    int i = 0;
+    int index;
+    // now take from the replaceIndex to bofIndex - 1
+    for (; i < _findHits.count(); i++) {
+        index = (replaceIndex + i) % _findHits.count();
+        printf("adding index %d to the first replaces queue\n", index);
+        if (index == _bofIndex) {
+            break;
+        }
+        replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
+                QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
+    }
+    // do the actual replaces
+    _buffer->parseReplacementContentChange(replaces);
+    printf(qPrintable(QString("Search reached bottom. Replaced %1 instances\n").arg(replaces.count())));
+    // TODO: let the user choose whether we should do replacement from the top
+    // if yes, then
+    replaces.clear();
+    for (; i < _findHits.count(); i++) {
+        index = (replaceIndex + i) % _findHits.count();
+        printf("adding index %d to the second replaces queue\n", index);
+        replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
+                QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
+    }
+    _buffer->parseReplacementContentChange(replaces);
+    printf(qPrintable(QString("Search from top finished. Replaced %1 instances\n").arg(replaces.count())));
+    // mark the buffer as dirty
+    _findBufferDirty = true;
 }
 
 void View::setTitle(const QString& title)
 {
     if (title.isEmpty()) {
-        Tab::setTitle(tr(EMPTY_BUFFER_TITLE));
+        Tab::setTitle(tr(BUFFER_TITLE_EMPTY));
     } else {
         _titleField->setText(title);
         Tab::setTitle(title);
@@ -454,39 +724,102 @@ void View::onTextAreaTextChanged(const QString& text)
 //    fprintf(stdout, "text changed: %s\n", qPrintable(text));
 //    if (_textArea->editor()->selectedText().isEmpty())
     // only when the the cursor is currently before
-    _buffer->setContent(text, _textArea->editor()->cursorPosition());
+    if (!_buffer->isEmittingContentChange())
+        _buffer->parseIncrementalContentChange(text, _textArea->editor()->cursorPosition(), true);
 }
 
-void View::onModPressTimeout() {
+void View::onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
+{
+    onFindFieldsModifiedKeyPressed(_findField->editor(), event);
+}
+
+void View::onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
+{
+    onFindFieldsModifiedKeyPressed(_replaceField->editor(), event);
+}
+
+// TODO: we should probably enable undo and redo
+// TODO: we should probably stop those tab related action (open file, new buffer)
+void View::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
+{
+    switch (event->keycap()) {
+        case KEYCODE_T:
+            editor->insertPlainText("\t");
+            break;
+        case KEYCODE_F:
+            _findField->requestFocus();
+            break;
+        case KEYCODE_P:
+            findPrev();
+            break;
+        case KEYCODE_N:
+            findNext();
+            break;
+        case KEYCODE_R:
+            replaceNext();
+            break;
+        case KEYCODE_A:
+            replaceAll();
+            break;
+        case KEYCODE_Q:
+            findModeOff();
+            break;
+        default:
+            onTextControlModifiedKeyPressed(editor, event);
+    }
 }
 
 void View::onTextAreaModKeyPressed(bb::cascades::KeyEvent *event)
 {
-    if (_mode == Normal)
-        _textArea->editor()->insertPlainText(event->unicode());
+    _textArea->editor()->insertPlainText(event->unicode());
 }
 
-void View::onNormalModeModifiedKeyPressed(bb::cascades::KeyEvent *event)
+void View::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
 {
-    if (_mode == Normal) {
-        switch (event->keycap()) {
-            case KEYCODE_T:
-                _textArea->editor()->insertPlainText("\t");
-                break;
-            case KEYCODE_S:
-                onSaveTriggered();
-                break;
-            case KEYCODE_Z:
-                onUndoTriggered();
-                break;
-            case KEYCODE_X:
-                onRedoTriggered();
-                break;
-            case KEYCODE_F:
-                findModeOn();
-                break;
-            // TODO: add shortcut for open and new file
+    switch (event->keycap()) {
+        case KEYCODE_S:
+            onSaveTriggered();
+            break;
+        // TODO: add shortcut for open and new file, next/prev tab
+        default:
+            onTextControlModifiedKeyPressed(_titleField->editor(), event);
+    }
+}
+
+// this method should only be invoked in normal mode
+void View::onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
+{
+    switch (event->keycap()) {
+        case KEYCODE_V: {
+            bb::system::Clipboard clipboard;
+            QString paste = clipboard.value("text/plain");
+            editor->insertPlainText(paste);
+            break;
         }
+    }
+}
+
+void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
+{
+    switch (event->keycap()) {
+        case KEYCODE_T:
+            _textArea->editor()->insertPlainText("\t");
+            break;
+        case KEYCODE_Z:
+            onUndoTriggered();
+            break;
+        case KEYCODE_X:
+            onRedoTriggered();
+            break;
+        case KEYCODE_F:
+            findModeOn();
+            break;
+        case KEYCODE_S:
+            onSaveTriggered();
+            break;
+        // TODO: add shortcut for open and new file, next/prev tab
+        default:
+            onTextControlModifiedKeyPressed(_textArea->editor(), event);
     }
 }
 
@@ -548,29 +881,30 @@ void View::onRedoTriggered()
 
 void View::reloadNormalModeActionTitles()
 {
-    _saveAction->setTitle(tr("Save"));
-    _undoAction->setTitle(tr("Undo"));
-    _redoAction->setTitle(tr("Redo"));
-    _findAction->setTitle(tr("Find"));
+    _saveAction->setTitle(tr(ACTION_TITLE_SAVE));
+    _undoAction->setTitle(tr(ACTION_TITLE_UNDO));
+    _redoAction->setTitle(tr(ACTION_TITLE_REDO));
+    _findAction->setTitle(tr(ACTION_TITLE_FIND));
 }
 
 void View::reloadFindModeActionTitles()
 {
-    _findPrevAction->setTitle(tr("Find Previous"));
-    _findNextAction->setTitle(tr("Find next"));
-    _replaceNextAction->setTitle(tr("Replace next"));
-    _replaceAllAction->setTitle(tr("Replace all remaining"));
-    _findCancelAction->setTitle(tr("Cancel"));
+    _goToFindFieldAction->setTitle(tr(ACTION_TITLE_GO_TO_FIND_FIELD));
+    _findPrevAction->setTitle(tr(ACTION_TITLE_FIND_PREV));
+    _findNextAction->setTitle(tr(ACTION_TITLE_FIND_NEXT));
+    _replaceNextAction->setTitle(tr(ACTION_TITLE_REPLACE_NEXT));
+    _replaceAllAction->setTitle(tr(ACTION_TITLE_REPLACE_ALL));
+    _findCancelAction->setTitle(tr(ACTION_TITLE_FIND_CANCEL));
 }
 
 void View::onLanguageChanged()
 {
-    _titleField->setHintText(tr("Enter the title"));
-    _textArea->setHintText(tr("Enter the content"));
+    _titleField->setHintText(tr(HINT_TEXT_TITLE_FIELD));
+    _textArea->setHintText(tr(HINT_TEXT_TEXT_AREA));
 
-    _findCaseSensitiveCheckBox->setText("Case sensitive");
-    _findField->setHintText(tr("Find text"));
-    _replaceField->setHintText(tr("Replace with"));
+    _findCaseSensitiveCheckBox->setText(tr(CHECKBOX_TEXT_FIND_CASE_SENSITIVE));
+    _findField->setHintText(tr(HINT_TEXT_FIND_FIELD));
+    _replaceField->setHintText(tr(HINT_TEXT_REPLACE_FIELD));
 
     // actions
     switch (_mode) {

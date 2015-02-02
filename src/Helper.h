@@ -23,4 +23,6 @@
 
 #define PMOD(x, y) (((x) % (y) + (y)) % (y))
 
+void toast(const QString &msg);
+
 #endif /* HELPER_H_ */

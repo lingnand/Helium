@@ -27,6 +27,8 @@ public:
     ModKeyListener(int modKeycap);
     virtual ~ModKeyListener() {}
     Q_SLOT void handleFocus(bool focus);
+    bool enabled() const;
+    Q_SLOT void setEnabled(bool enabled);
 
     template <typename BuilderType, typename BuiltType>
     class TBuilder : public BaseObject::TBuilder<BuilderType, BuiltType>
@@ -77,6 +79,7 @@ Q_SIGNALS:
     void textAreaInputModeChanged(bb::cascades::TextAreaInputMode::Type newInputMode);
 private:
     int _modKeycap;
+    bool _enabled;
     bool _modPressed;
     bool _modUsed;
     bool modOn();

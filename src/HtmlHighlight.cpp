@@ -23,53 +23,74 @@ void HtmlHighlight::setFiletype(const QString &filetype)
         printf("Setting filetype to: %s\n", qPrintable(_filetype));
         // clear the state cache
         _highlightStateDataHash.clear();
-        if (_filetype.isEmpty()) {
-            _sourceHighlight.setInputLang("default.lang");
-        } else {
+        if (!_filetype.isEmpty()) {
             _sourceHighlight.setInputLang(std::string(_filetype.toUtf8().constData()) + ".lang");
+            // initialize the main state data
+            _mainStateData = HighlightStateDataPtr(new HighlightStateData(
+                    _sourceHighlight.getHighlighter()->getMainState(),
+                    srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
+            ));
         }
-        // initialize the main state data
-        _mainStateData = HighlightStateDataPtr(new HighlightStateData(
-                _sourceHighlight.getHighlighter()->getMainState(),
-                srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
-        ));
         emit filetypeChanged(_filetype);
     }
 }
 
-
-QString HtmlHighlight::highlightHtml(const QString &html, int cursorPosition, bool enableDelay)
+// note other variables should have been set before calling this function
+bool HtmlHighlight::highlightHtmlBasic(const QString &html)
 {
-    QString toParse = html;
-    // strips the pre tags
-    if (toParse.startsWith("<pre>"))
-        toParse.remove(0, 5);
-    if (toParse.endsWith("</pre>"))
-        toParse.chop(6);
-//    printf("parsing %s\n", qPrintable(toParse));
     // reset the variables
     _highlighted = false;
     _toHighlight = NoHighlight;
     _stopParsing = false;
     _afterTTTag = false;
-    _reachedCursor = false;
     _currentHighlightStateData = _mainStateData;
     _toHighlightBuffer.clear();
     _htmlBuffer.clear();
     _currentLine = QStringPtr(new QString);
-    _enableDelay = enableDelay;
-    _cursorPosition = cursorPosition;
-    if (!enableDelay)
-        _lastHighlightDelayedLine.reset();
     _buffer.clear();
+
+    QString toParse = html;
+//    printf("parsing %s\n", qPrintable(toParse));
+    // strips the pre tags
+    if (toParse.startsWith("<pre>"))
+        toParse.remove(0, 5);
+    if (toParse.endsWith("</pre>"))
+        toParse.chop(6);
     int i = parse(toParse);
     if (_highlighted) {
         _buffer += _htmlBuffer;
         _buffer += toParse.right(toParse.length() - i);
         _buffer.prepend("<pre>");
         _buffer.append("</pre>");
-        return _buffer;
+        return true;
     }
+    return false;
+}
+
+QString HtmlHighlight::highlightHtml(const QString &html, int cursorPosition, bool enableDelay)
+{
+    _mode = Incremental;
+    _enableDelay = enableDelay;
+    _cursorPosition = cursorPosition;
+    _reachedCursor = false;
+    if (!enableDelay)
+        _lastHighlightDelayedLine.reset();
+
+    if (highlightHtmlBasic(html))
+        return _buffer;
+    return html;
+}
+
+QString HtmlHighlight::replaceHtml(const QString &html, const QList<QPair<TextSelection, QString> > &replaces)
+{
+    if (replaces.count() == 0)
+        return html;
+
+    _mode = Replace;
+    _replaces = replaces;
+
+    if (highlightHtmlBasic(html))
+        return _buffer;
     return html;
 }
 
@@ -80,41 +101,61 @@ bool HtmlHighlight::stopParsing()
 
 void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
 {
-    if (!_reachedCursor && charCount == _cursorPosition) {
-        _reachedCursor = true;
-        printf("reached cursor, current ch: %s, current toHighlight: %s, current charCount, %d\n",
-                qPrintable(QString(ch)), qPrintable(_toHighlightBuffer), charCount);
-        if (!_toHighlight || _toHighlight == HighlightDelayed) {
-            // if there is no highlight, or if it is to highlight the delay line and the current line IS the delay line AGAIN
-            if (_enableDelay &&
-                    // not highlight if the character is a letter or number
-                    (ch.isLetterOrNumber()
-                    // or the last delayed line has been cleared
-                    // that means there is no prediction
-                    // we need to stop highlighting if we know the given character
-                    // IS going to bring up predictions
-                    // in this case, we assume all white space characters can
-                    // TODO: devise a strategy to reliably tell if there is prediction prompt
-                    // instead of just crudely assume ANYTHING will prompt for prediction
-                    ||  ((ch.isSpace() || ch == '\n') && !_lastHighlightDelayedLine))) {
-                printf("entered delayed line for ch %s, _lastHighlightDelayedLine: %s\n",
-                        qPrintable(QString(ch)), _lastHighlightDelayedLine ? qPrintable(*_lastHighlightDelayedLine) : "NULL");
-                _lastHighlightDelayedLine = _currentLine;
-                _stopParsing = true;
-                return;
-            } else {
-                _toHighlight = HighlightCurrent;
+    QString replacement = ch;
+    switch (_mode) {
+        case Incremental:
+            if (!_reachedCursor && charCount == _cursorPosition) {
+                _reachedCursor = true;
+                printf("reached cursor, current ch: %s, current toHighlight: %s, current charCount, %d\n",
+                        qPrintable(QString(ch)), qPrintable(_toHighlightBuffer), charCount);
+                if (!_toHighlight || _toHighlight == HighlightDelayed) {
+                    // if there is no highlight, or if it is to highlight the delay line and the current line IS the delay line AGAIN
+                    if (_enableDelay &&
+                            // not highlight if the character is a letter or number
+                            (ch.isLetterOrNumber()
+                            // or the last delayed line has been cleared
+                            // that means there is no prediction
+                            // we need to stop highlighting if we know the given character
+                            // IS going to bring up predictions
+                            // in this case, we assume all white space characters can
+                            // TODO: devise a strategy to reliably tell if there is prediction prompt
+                            // instead of just crudely assume ANYTHING will prompt for prediction
+                            ||  ((ch.isSpace() || ch == '\n') && !_lastHighlightDelayedLine))) {
+                        printf("entered delayed line for ch %s, _lastHighlightDelayedLine: %s\n",
+                                qPrintable(QString(ch)), _lastHighlightDelayedLine ? qPrintable(*_lastHighlightDelayedLine) : "NULL");
+                        _lastHighlightDelayedLine = _currentLine;
+                        _stopParsing = true;
+                        return;
+                    } else {
+                        _toHighlight = HighlightCurrent;
+                    }
+                }
             }
-        }
+            break;
+        case Replace:
+            if (!_replaces.isEmpty() && charCount > _replaces[0].first.first) {
+                if (charCount < _replaces[0].first.second) {
+                    replacement.clear();
+                } else if (charCount == _replaces[0].first.second) {
+                    _toHighlight = HighlightCurrent;
+                    replacement = _replaces[0].second;
+                    _replaces.removeFirst();
+                }
+            }
+            break;
     }
-    if (ch == '\n') {
-        if (!_afterTTTag  && !_toHighlightBuffer.isEmpty())
-            _toHighlight = HighlightCurrent;
-        if (highlightLine()) {
-            _buffer += '\n';
+    QChar rch;
+    for (int i = 0; i < replacement.length(); i++) {
+        rch = replacement[i];
+        if (rch == '\n') {
+            if (!_afterTTTag  && !_toHighlightBuffer.isEmpty())
+                _toHighlight = HighlightCurrent;
+            if (highlightLine()) {
+                _buffer += '\n';
+            }
+        } else if (!rch.isNull()) {
+            _toHighlightBuffer += rch;
         }
-    } else if (!ch.isNull()) {
-        _toHighlightBuffer += ch;
     }
     _afterTTTag = false;
 }
@@ -160,7 +201,7 @@ bool HtmlHighlight::highlightLine()
             _currentHighlightStateData->currentState = _sourceHighlight.getHighlighter()->getCurrentState();
             states.second = _currentHighlightStateData;
             // reset the lastHighlightDelayedLine if necessary
-            if (_currentLine == _lastHighlightDelayedLine) {
+            if (_mode == Incremental && _currentLine == _lastHighlightDelayedLine) {
                 printf("resetting lastHighlightDelayedLine\n");
                 _lastHighlightDelayedLine.reset();
             }
@@ -182,13 +223,26 @@ bool HtmlHighlight::highlightLine()
     return highlightedLine;
 }
 
+bool HtmlHighlight::moreHighlightNeeded()
+{
+    switch (_mode) {
+        case Incremental:
+            if (_lastHighlightDelayedLine)
+                return true;
+            return !_reachedCursor;
+        case Replace:
+            return !_replaces.isEmpty();
+    }
+    return true;
+}
+
 void HtmlHighlight::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
 {
     if (name == "tt" && attributeName == "name") {
         printf("parsed tt tag with name %s\n", qPrintable(attributeValue));
         Q_ASSERT(!attributeValue.isEmpty());
         *_currentLine = attributeValue;
-        if (_lastHighlightDelayedLine && *_currentLine == *_lastHighlightDelayedLine) {
+        if (_mode == Incremental && _lastHighlightDelayedLine && *_currentLine == *_lastHighlightDelayedLine) {
             printf("Line %s detected to be last unhighlighted line!\n", qPrintable(*_currentLine));
             if (!_toHighlight)
                 _toHighlight = HighlightDelayed;
@@ -198,12 +252,9 @@ void HtmlHighlight::parseTag(const QString &name, const QString &attributeName, 
             // if the highlight buffer is not empty, that means it has not been flushed
             // we have highlighted some stuff in the past
             if (*_currentHighlightStateData == *_highlightStateDataHash[*_currentLine].first) {
-                // setting noHighlight to false means we expect somewhere down to still be highlighted
-                if (_lastHighlightDelayedLine)
+                if (moreHighlightNeeded())
                     _toHighlight = NoHighlight;
-                else if (_reachedCursor)
-                    // else we know that there is no need to continue
-                    // note: we must guarantee that we've visited the cursor
+                else
                     _stopParsing = true;
             }
             printf("Line %s requested for highlight - stop parsing: %d\n",

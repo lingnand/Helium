@@ -9,6 +9,7 @@
 #define SAVEWORK_H_
 
 #include <src/BufferWork.h>
+#include <src/HtmlPlainTextExtractor.h>
 
 class HtmlPlainTextExtractor;
 
@@ -16,12 +17,12 @@ class SaveWork : public BufferWork
 {
     Q_OBJECT
 public:
-    SaveWork(HtmlPlainTextExtractor *extractor);
+    SaveWork();
     void setHtml(const QString &html);
     void run();
 protected:
     QString _html;
-    HtmlPlainTextExtractor *_extractor;
+    HtmlPlainTextExtractor _extractor;
 };
 
 typedef boost::shared_ptr<BufferWork> SaveWorkPtr;

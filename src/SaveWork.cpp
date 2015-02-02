@@ -7,17 +7,15 @@
 
 #include <src/SaveWork.h>
 #include <stdio.h>
-#include <src/HtmlPlainTextExtractor.h>
 
-SaveWork::SaveWork(HtmlPlainTextExtractor *extractor):
-    BufferWork(Save), _extractor(extractor)
+SaveWork::SaveWork(): BufferWork(Save)
 {
 }
 
 void SaveWork::run()
 {
     // get the original text of the content
-    QString toSave =_extractor->extractPlainText(_html);
+    QString toSave =_extractor.extractPlainText(_html);
     printf("toSave: %s\n", qPrintable(toSave));
     int max = 1000;
     int msec = 3000;

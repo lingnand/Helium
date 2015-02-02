@@ -8,9 +8,11 @@
 #ifndef HTMLHIGHLIGHT_H_
 #define HTMLHIGHLIGHT_H_
 
+#include <boost/regex.hpp>
 #include <src/HtmlParser.h>
 #include <src/srchilite/sourcehighlight.h>
 #include <src/HighlightStateData.h>
+#include <src/Type.h>
 
 typedef boost::shared_ptr<QString> QStringPtr;
 typedef QPair<HighlightStateDataPtr, HighlightStateDataPtr> HighlightLineStates;
@@ -23,18 +25,24 @@ public:
     virtual ~HtmlHighlight() {}
     const QString &filetype() const { return _filetype; }
     QString highlightHtml(const QString &html, int cursorPosition, bool enableDelay);
+    QString replaceHtml(const QString &html, const QList<QPair<TextSelection, QString> > &replaces);
     Q_SLOT void setFiletype(const QString &filetype);
 Q_SIGNALS:
     void filetypeChanged(const QString &filetype);
 private:
     int _lineCounter;
     enum ToHighlightState { NoHighlight = 0, HighlightCurrent = 1, HighlightDelayed = 2};
-    bool _highlighted;
-    bool _stopParsing;
+    enum HighlightMode { Incremental, Replace };
+    // Incremental mode variables
     bool _enableDelay;
-    bool _afterTTTag;
     bool _reachedCursor;
     int _cursorPosition;
+    // Replace mode variables
+    QList<QPair<TextSelection, QString> > _replaces;
+    HighlightMode _mode;
+    bool _highlighted;
+    bool _stopParsing;
+    bool _afterTTTag;
     ToHighlightState _toHighlight;
     QString _filetype;
     QString _buffer;
@@ -54,6 +62,8 @@ private:
     // return true if the toHighlightBuffer is highlighted and result
     // appended to buffer, otherwise false
     bool highlightLine();
+    bool highlightHtmlBasic(const QString &html);
+    bool moreHighlightNeeded();
 };
 
 #endif /* HTMLHIGHLIGHT_H_ */

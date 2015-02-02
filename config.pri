@@ -215,6 +215,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Helper.cpp) \
         $$quote($$BASEDIR/src/HtmlHighlight.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
+        $$quote($$BASEDIR/src/HtmlPlainTextExtractor.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/SaveWork.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
@@ -296,9 +297,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/HtmlHighlight.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/HtmlPlainTextExtractor.h) \
-        $$quote($$BASEDIR/src/HtmlPlainTextValidator.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/SaveWork.h) \
+        $$quote($$BASEDIR/src/Type.h) \
         $$quote($$BASEDIR/src/View.h) \
         $$quote($$BASEDIR/src/applicationui.hpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \

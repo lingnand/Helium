@@ -11,10 +11,12 @@
 #include <QObject>
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
+#include <src/Type.h>
 
 namespace bb {
     namespace cascades {
         class TextField;
+        class TextEditor;
         class TextArea;
         class Page;
         class ProgressIndicator;
@@ -27,6 +29,7 @@ namespace bb {
     }
 }
 
+class ModKeyListener;
 class Buffer;
 
 class View : public bb::cascades::Tab
@@ -48,6 +51,7 @@ private:
 
     bb::cascades::TextField *_titleField;
     bb::cascades::TextArea *_textArea;
+    ModKeyListener *_textAreaModKeyListener;
     bb::cascades::ProgressIndicator *_progressIndicator;
 
     // find and replace
@@ -61,6 +65,7 @@ private:
     bb::cascades::ActionItem *_redoAction;
     bb::cascades::ActionItem *_findAction;
 
+    bb::cascades::ActionItem *_goToFindFieldAction;
     bb::cascades::ActionItem *_findPrevAction;
     bb::cascades::ActionItem *_findNextAction;
     bb::cascades::ActionItem *_replaceNextAction;
@@ -68,20 +73,20 @@ private:
     bb::cascades::ActionItem *_findCancelAction;
 
     // the find state to keep track of the current find
-    typedef QPair<int, int> TextSelection;
+    enum FindQueryUpdateStatus { Changed, Unchanged, Invalid };
     QString _findQuery;
+    bool _findBufferDirty;
     std::string _findBuffer;
-    bool _lastFindLoop;
     boost::sregex_iterator _findIterator;
     boost::regex _findRegex;
     bool _findComplete;
-    QList<TextSelection> _findHits;
-    int _findOffset;
+    typedef QPair<TextSelection, boost::smatch> FindMatch;
+    QList<FindMatch> _findHits;
     int _findIndex;
+    // negative means the top/first match is still indeterminate
     int _bofIndex;
     QString _replaceQuery;
 
-    bool _modUsed;
     Buffer *_buffer;
 
     Q_SLOT void select(const TextSelection &selection);
@@ -92,14 +97,20 @@ private:
     Q_SLOT bool findModeOn();
     Q_SLOT bool findModeOff();
     Q_SLOT void findNext();
+    Q_SLOT void findNextWithOptions(bool interactive, FindQueryUpdateStatus status);
     Q_SLOT void findPrev();
+    Q_SLOT FindQueryUpdateStatus updateFindQuery(bool interactive);
     Q_SLOT void replaceNext();
     Q_SLOT void replaceAll();
-    Q_SLOT void onModPressTimeout();
+    Q_SLOT void onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onTitleFieldFocusChanged(bool focus);
+    Q_SLOT void onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString& text);
     Q_SLOT void onTextAreaModKeyPressed(bb::cascades::KeyEvent *event);
-    Q_SLOT void onNormalModeModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
+    Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
     Q_SLOT void onBufferContentChanged(const QString& content, int cursorPosition);

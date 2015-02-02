@@ -21,14 +21,13 @@
 #include <bb/cascades/LocaleHandler>
 #include <bb/cascades/Tab>
 #include <bb/cascades/Shortcut>
-#include <bb/system/SystemToast>
-#include <bb/system/SystemUiPosition>
 #include <src/View.h>
 #include <src/Buffer.h>
 
 using namespace bb::cascades;
 
-/* member functions */
+#define TAB_TITLE_NEW "New"
+#define TAB_TITLE_OPEN "Open"
 
 ApplicationUI::ApplicationUI() :
         QObject()
@@ -84,10 +83,7 @@ void ApplicationUI::appendNewView() {
 }
 
 void ApplicationUI::openFile() {
-    bb::system::SystemToast *toast = new bb::system::SystemToast(this);
-    toast->setBody("Open file");
-    toast->setPosition(bb::system::SystemUiPosition::MiddleCenter);
-    toast->show();
+    toast("Open file");
 }
 
 void ApplicationUI::prevView() {
@@ -115,9 +111,9 @@ void ApplicationUI::onSystemLanguageChanged()
     if (_translator->load(file_name, "app/native/qm")) {
         QCoreApplication::instance()->installTranslator(_translator);
         // new file tab
-        _newViewTab->setTitle(tr("New"));
+        _newViewTab->setTitle(tr(TAB_TITLE_NEW));
         // open file tab
-        _openFileTab->setTitle(tr("Open"));
+        _openFileTab->setTitle(tr(TAB_TITLE_OPEN));
         // loop through all the views to reset the texts
         for (int i=2; i< _rootPane->count(); ++i) {
             ((View *) _rootPane->at(i))->onLanguageChanged();

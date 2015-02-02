@@ -45,13 +45,15 @@ public:
     Q_SLOT void setName(const QString &name);
     const QString &filetype() const;
     Q_SLOT void setFiletype(const QString &filetype);
+    bool isEmittingContentChange() const;
     const QString &content() const;
-    Q_SLOT void setContent(const QString &content, int cursorPosition);
+    Q_SLOT void parseIncrementalContentChange(QString content, int cursorPosition, bool enableDelay);
+    Q_SLOT void parseReplacementContentChange(QList<QPair<TextSelection, QString> > replaces);
     bool hasUndo() const;
     Q_SLOT void undo();
     bool hasRedo() const;
     Q_SLOT void redo();
-    bool hasPlainText() const;
+    bool hasPlainText();
     QString plainText();
     Q_SLOT void save();
 Q_SIGNALS:
@@ -68,7 +70,7 @@ Q_SIGNALS:
     void hasRedosChanged(bool hasRedos);
 private:
     typedef QPair<QString, int> BufferState;
-    bool _modifyingContent;
+    bool _emittingContentChange;
     bool _hasUndo;
     bool _hasRedo;
     QString _name;
@@ -81,11 +83,12 @@ private:
     HtmlHighlight _highlight;
     HtmlPlainTextExtractor _extractor;
     srchilite::LangMap *_langMap;
-    void parseContent(QString content, int cursorPosition, bool noHighlight, bool enableDelay);
     void goToHistory(int offset);
     void setHasUndo(bool hasUndo);
     void setHasRedo(bool hasRedo);
     Q_SLOT void onHtmlHighlightFiletypeChanged(const QString &filetype);
+    Q_SLOT void setContent(const QString &content, int cursorPosition);
+    Q_SLOT void registerContentChange(const QString &cont, int cursorPosition);
 };
 
 #endif /* BUFFER_H_ */

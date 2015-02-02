@@ -11,10 +11,20 @@
 #define MOD_TIMEOUT 500
 
 ModKeyListener::ModKeyListener(int modKeycap):
-    _modKeycap(modKeycap), _modPressed(false), _modUsed(false)
+    _modKeycap(modKeycap), _modPressed(false), _modUsed(false), _enabled(true)
 {
     conn(this, SIGNAL(keyEvent(bb::cascades::KeyEvent*)),
         this, SLOT(onKeyEvent(bb::cascades::KeyEvent*)));
+}
+
+bool ModKeyListener::enabled() const
+{
+    return _enabled;
+}
+
+void ModKeyListener::setEnabled(bool enabled)
+{
+    _enabled = enabled;
 }
 
 bool ModKeyListener::modOn()
@@ -47,6 +57,8 @@ void ModKeyListener::handleFocus(bool focus)
 
 void ModKeyListener::onKeyEvent(bb::cascades::KeyEvent *event)
 {
+    if (!_enabled)
+        return;
     if (event->isPressed()) {
         if (_modPressed) {
             if (event->keycap() == _modKeycap) {
