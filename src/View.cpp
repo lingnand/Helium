@@ -61,7 +61,18 @@ using namespace bb::cascades;
 #define TOAST_FIND_NOT_FOUND "Not found"
 #define TOAST_FIND_REACHED_END "Reached end of document, beginning from top!"
 #define TOAST_FIND_REACHED_TOP "Reached top of document, beginning from bottom!"
+// dialog
+#define DIALOG_REPLACE_FROM_TOP_CONFIRM "Yes"
+#define DIALOG_REPLACE_FROM_TOP_CANCEL "No"
+#define DIALOG_REPLACE_FROM_TOP_TITLE "End of file reached"
+#define DIALOG_REPLACE_FROM_TOP_BODY "%1 replacement(s) were made. Do you want to continue from the beginning?"
+#define DIALOG_REPLACE_FINISHED_CONFIRM "OK"
+#define DIALOG_REPLACE_FINISHED_TITLE "Replace finished"
+#define DIALOG_REPLACE_FINISHED_BODY "%1 replacement(s) have been made."
 
+// TODO: it would be good if you can modulize the undo/redo functionality
+// and then attach it to each textfield/area like what you did with the modkeylistener!
+// that would be awesome...
 View::View(Buffer* buffer):
         _titleField(NULL), _textArea(NULL), _progressIndicator(NULL),
         _buffer(NULL),
@@ -70,6 +81,7 @@ View::View(Buffer* buffer):
 {
     _textArea = TextArea::create()
         .format(TextFormat::Html)
+        .inputFlags(TextInputFlag::SpellCheckOff)
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))
@@ -118,7 +130,7 @@ View::View(Buffer* buffer):
     // TODO: not only focus the replaceField, but also select the existing content of the replace field
     _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
-        .onModKeyPressed(_replaceField, SLOT(requestFocus()))
+        .onModKeyPressed(this, SLOT(onFindFieldModKeyPressed()))
         .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .handleFocusOn(_findField, SIGNAL(focusedChanged(bool))));
     _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
@@ -263,6 +275,14 @@ void View::setFindModeActions()
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("q"))
         .onTriggered(this, SLOT(findModeOff()));
+    _undoAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_undo.png"))
+        .addShortcut(Shortcut::create().key("z"))
+        .onTriggered(this, SLOT(onUndoTriggered()));
+    _redoAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_redo.png"))
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SLOT(onRedoTriggered()));
     reloadFindModeActionTitles();
     _page->addAction(_goToFindFieldAction);
     _page->addAction(_findPrevAction);
@@ -270,6 +290,22 @@ void View::setFindModeActions()
     _page->addAction(_replaceNextAction, ActionBarPlacement::OnBar);
     _page->addAction(_replaceAllAction);
     _page->addAction(_findCancelAction, ActionBarPlacement::OnBar);
+    _page->addAction(_undoAction);
+    _page->addAction(_redoAction);
+}
+
+void View::focusTextFieldAndSelectAll(bb::cascades::TextField *field)
+{
+    field->requestFocus();
+    QString f = field->text();
+    if (!f.isEmpty()) {
+        field->editor()->setSelection(0, f.length());
+    }
+}
+
+void View::onFindFieldModKeyPressed()
+{
+    focusTextFieldAndSelectAll(_replaceField);
 }
 
 bool View::findModeOn()
@@ -279,16 +315,11 @@ bool View::findModeOn()
         // disable current key handler
         _textAreaModKeyListener->setEnabled(false);
         // titlebar
-        _replaceField->resetText();
         _page->setTitleBar(_findTitleBar);
         // actionbar
         setFindModeActions();
         // focus
-        _findField->requestFocus();
-        QString f = _findField->text();
-        if (!f.isEmpty()) {
-            _findField->editor()->setSelection(0, f.length());
-        }
+        focusTextFieldAndSelectAll(_findField);
         _textArea->setEditable(false);
         return true;
     }
@@ -614,35 +645,47 @@ void View::replaceAll()
         // there shouldn't be any change in the status
         findNextWithOptions(false, Unchanged);
     }
-    QList<QPair<TextSelection, QString> > replaces;
+    _replaces.clear();
     int i = 0;
     int index;
     // now take from the replaceIndex to bofIndex - 1
     for (; i < _findHits.count(); i++) {
         index = (replaceIndex + i) % _findHits.count();
-        printf("adding index %d to the first replaces queue\n", index);
+//        printf("adding index %d to the first replaces queue\n", index);
         if (index == _bofIndex) {
             break;
         }
-        replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
+        _replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
                 QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
     }
     // do the actual replaces
-    _buffer->parseReplacementContentChange(replaces);
-    printf(qPrintable(QString("Search reached bottom. Replaced %1 instances\n").arg(replaces.count())));
-    // TODO: let the user choose whether we should do replacement from the top
-    // if yes, then
-    replaces.clear();
+    _buffer->parseReplacementContentChange(_replaces);
+    _numberOfReplacesTillBottom = _replaces.count();
+    _replaces.clear();
     for (; i < _findHits.count(); i++) {
         index = (replaceIndex + i) % _findHits.count();
-        printf("adding index %d to the second replaces queue\n", index);
-        replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
+//        printf("adding index %d to the second replaces queue\n", index);
+        _replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
                 QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
     }
-    _buffer->parseReplacementContentChange(replaces);
-    printf(qPrintable(QString("Search from top finished. Replaced %1 instances\n").arg(replaces.count())));
     // mark the buffer as dirty
     _findBufferDirty = true;
+    dialog(tr(DIALOG_REPLACE_FROM_TOP_CONFIRM), tr(DIALOG_REPLACE_FROM_TOP_CANCEL),
+            tr(DIALOG_REPLACE_FROM_TOP_TITLE),
+            QString(tr(DIALOG_REPLACE_FROM_TOP_BODY)).arg(_numberOfReplacesTillBottom),
+            this, SLOT(onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type)));
+}
+
+void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        _buffer->parseReplacementContentChange(_replaces);
+        dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
+                tr(DIALOG_REPLACE_FINISHED_TITLE),
+                QString(tr(DIALOG_REPLACE_FINISHED_BODY))
+                    .arg(_numberOfReplacesTillBottom+_replaces.count()));
+    }
+    _replaces.clear();
 }
 
 void View::setTitle(const QString& title)
@@ -658,6 +701,7 @@ void View::setTitle(const QString& title)
 void View::setBuffer(Buffer* buffer)
 {
     if (buffer != _buffer) {
+        findModeOff();
         // we only deal with real buffers, can't set to NULL
         Q_ASSERT(buffer);
         if (_buffer) {
@@ -672,9 +716,9 @@ void View::setBuffer(Buffer* buffer)
             disconn(_buffer, SIGNAL(inProgressChanged(float)),
                 this, SLOT(onBufferProgressChanged(float)));
             disconn(_buffer, SIGNAL(hasUndosChanged(bool)),
-                _undoAction, SLOT(setEnabled(bool)));
+                this, SLOT(onBufferHasUndosChanged(bool)));
             disconn(_buffer, SIGNAL(hasRedosChanged(bool)),
-                _redoAction, SLOT(setEnabled(bool)));
+                this, SLOT(onBufferHasRedosChanged(bool)));
         }
         _buffer = buffer;
         onBufferContentChanged(_buffer->content(), -1);
@@ -808,6 +852,10 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
         case KEYCODE_Z:
             onUndoTriggered();
             break;
+        // TODO: subject to change in keycode
+        case KEYCODE_G:
+            _titleField->requestFocus();
+            break;
         case KEYCODE_X:
             onRedoTriggered();
             break;
@@ -895,6 +943,8 @@ void View::reloadFindModeActionTitles()
     _replaceNextAction->setTitle(tr(ACTION_TITLE_REPLACE_NEXT));
     _replaceAllAction->setTitle(tr(ACTION_TITLE_REPLACE_ALL));
     _findCancelAction->setTitle(tr(ACTION_TITLE_FIND_CANCEL));
+    _undoAction->setTitle(tr(ACTION_TITLE_UNDO));
+    _redoAction->setTitle(tr(ACTION_TITLE_REDO));
 }
 
 void View::onLanguageChanged()

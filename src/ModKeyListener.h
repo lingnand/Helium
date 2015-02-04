@@ -38,12 +38,12 @@ public:
           {
           }
     public:
-          BuilderType& onModifiedKeyPressed(const QObject* receiver, const char *method) {
+          BuilderType& onModifiedKeyPressed(const QObject *receiver, const char *method) {
               this->connect(SIGNAL(modifiedKeyPressed(bb::cascades::KeyEvent*)), receiver, method);
               return this->builder();
           }
 
-          BuilderType& onTextFieldInputModeChanged(const QObject* receiver, const char *method) {
+          BuilderType& onTextFieldInputModeChanged(const QObject *receiver, const char *method) {
               this->connect(SIGNAL(textFieldInputModeChanged(bb::cascades::TextFieldInputMode::Type)), receiver, method);
               return this->builder();
           }

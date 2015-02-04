@@ -12,6 +12,7 @@
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
 #include <src/Type.h>
+#include <bb/system/SystemUiResult>
 
 namespace bb {
     namespace cascades {
@@ -86,6 +87,8 @@ private:
     // negative means the top/first match is still indeterminate
     int _bofIndex;
     QString _replaceQuery;
+    QList<QPair<TextSelection, QString> > _replaces;
+    int _numberOfReplacesTillBottom;
 
     Buffer *_buffer;
 
@@ -94,6 +97,7 @@ private:
     Q_SLOT void setFindModeActions();
     Q_SLOT void reloadNormalModeActionTitles();
     Q_SLOT void reloadFindModeActionTitles();
+    Q_SLOT void focusTextFieldAndSelectAll(bb::cascades::TextField *field);
     Q_SLOT bool findModeOn();
     Q_SLOT bool findModeOff();
     Q_SLOT void findNext();
@@ -102,7 +106,9 @@ private:
     Q_SLOT FindQueryUpdateStatus updateFindQuery(bool interactive);
     Q_SLOT void replaceNext();
     Q_SLOT void replaceAll();
+    Q_SLOT void onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type);
     Q_SLOT void onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onFindFieldModKeyPressed();
     Q_SLOT void onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onTitleFieldFocusChanged(bool focus);

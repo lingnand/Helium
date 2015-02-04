@@ -25,4 +25,11 @@
 
 void toast(const QString &msg);
 
+void dialog(const QString &confirm,
+        const QString &title, const QString &body,
+        const QObject *receiver=NULL, const char *method=NULL);
+
+void dialog(const QString &confirm, const QString &cancel,
+        const QString &title, const QString &body,
+        const QObject *receiver, const char *method);
 #endif /* HELPER_H_ */

@@ -171,7 +171,6 @@ void Buffer::redo()
 
 void Buffer::goToHistory(int offset)
 {
-    printf("## go to history with offset %d ##\n", offset);
     int i = _historyIndex + offset;
     if (i >= 0 && i < _history.count()) {
         setHasUndo(i != 0);
@@ -180,11 +179,10 @@ void Buffer::goToHistory(int offset)
         printf("new history index: %d\n", i);
         BufferState s = _history[i];
         setContent(s.first, s.second);
-        printf("new content: %s, new cursor position: %d\n", qPrintable(content()), s.second);
+//        printf("new content: %s, new cursor position: %d\n", qPrintable(content()), s.second);
         // invalidate the date time
         _lastEdited = DEFAULT_EDIT_TIME;
     }
-    printf("## go to history with offset %d finished ##\n", offset);
 }
 
 /* file related operations */
