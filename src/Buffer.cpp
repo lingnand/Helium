@@ -24,7 +24,7 @@ Buffer::Buffer(int historyLimit) :
     _lastEdited(DEFAULT_EDIT_TIME),
     _worker(this)
 {
-    _history.append(BufferState("", 0));
+    _history.append(BufferState("", 0, ""));
     conn(&_highlight, SIGNAL(filetypeChanged(QString)),
         this, SLOT(onHtmlHighlightFiletypeChanged(QString)));
     conn(&_worker, SIGNAL(inProgressChanged(float)),
@@ -67,17 +67,21 @@ void Buffer::setContent(const QString &content, int cursorPosition)
     _emittingContentChange = false;
 }
 
+QString Buffer::updateContentForCurrentFiletype(const QString &content)
+{
+    if (filetype().isEmpty()) {
+        return _extractor.extractPlainText(content);
+    }
+    return _highlight.highlightHtml(content, 0, false);
+}
+
 void Buffer::onHtmlHighlightFiletypeChanged(const QString &filetype)
 {
     // TODO: how do we clear the buffer states?
     // OR, make sure that the undo works with file type related changes
     // TODO: we can change the saved history state for the current one, so that
     // it matches the current file type (save re-parsing on the next whoop)
-    if (filetype.isEmpty()) {
-        setContent(plainText(), -1);
-    } else {
-        parseIncrementalContentChange(content(), 0, false);
-    }
+    setContent(updateContentForCurrentFiletype(content()), -1);
     emit filetypeChanged(filetype);
 }
 
@@ -97,13 +101,13 @@ void Buffer::registerContentChange(const QString &cont, int cursorPosition)
         _lastEdited = current;
         // append/modify the history if necessary
         if (_historyIndex == _history.count()) {
-            _history.append(BufferState(cont, cursorPosition));
+            _history.append(BufferState(cont, cursorPosition, filetype()));
             if (_history.count() > _historyLimit) {
                 _history.removeFirst();
                 --_historyIndex;
             }
         } else {
-            _history[_historyIndex] = BufferState(cont, cursorPosition);
+            _history[_historyIndex] = BufferState(cont, cursorPosition, filetype());
         }
         printf("last edit time: %s, historyIndex: %d\n",
                 qPrintable(_lastEdited.toString("hh:mm:ss:zzz")), _historyIndex);
@@ -176,9 +180,18 @@ void Buffer::goToHistory(int offset)
         setHasUndo(i != 0);
         setHasRedo(i != _history.count() - 1);
         _historyIndex = i;
-        printf("new history index: %d\n", i);
-        BufferState s = _history[i];
-        setContent(s.first, s.second);
+//        printf("new history index: %d\n", i);
+        BufferState &s = _history[i];
+        // parse the content if necessary
+        if (s.filetype != filetype()) {
+//            printf("history state with different filetype! current: %s; history: %s\n",
+//                    qPrintable(filetype()), qPrintable(s.filetype));
+            s.filetype = filetype();
+            s.content = updateContentForCurrentFiletype(s.content);
+//            printf("history slot after content reparse: content: %s; filetype: %s\n",
+//                    qPrintable(_history[i].content), qPrintable(_history[i].filetype));
+        }
+        setContent(s.content, s.cursorPosition);
 //        printf("new content: %s, new cursor position: %d\n", qPrintable(content()), s.second);
         // invalidate the date time
         _lastEdited = DEFAULT_EDIT_TIME;

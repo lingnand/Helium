@@ -69,7 +69,13 @@ Q_SIGNALS:
     void hasUndosChanged(bool hasUndos);
     void hasRedosChanged(bool hasRedos);
 private:
-    typedef QPair<QString, int> BufferState;
+    struct BufferState {
+        QString content;
+        int cursorPosition;
+        QString filetype;
+        BufferState(QString _content, int _cursorPosition, QString _filetype):
+            content(_content), cursorPosition(_cursorPosition), filetype(_filetype) {}
+    };
     bool _emittingContentChange;
     bool _hasUndo;
     bool _hasRedo;
@@ -86,6 +92,7 @@ private:
     void goToHistory(int offset);
     void setHasUndo(bool hasUndo);
     void setHasRedo(bool hasRedo);
+    Q_SLOT QString updateContentForCurrentFiletype(const QString &content);
     Q_SLOT void onHtmlHighlightFiletypeChanged(const QString &filetype);
     Q_SLOT void setContent(const QString &content, int cursorPosition);
     Q_SLOT void registerContentChange(const QString &cont, int cursorPosition);
