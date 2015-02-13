@@ -277,3 +277,8 @@ void HtmlHighlight::reachedEnd()
 {
     highlightLine();
 }
+
+void HtmlHighlight::clearHighlightStateDataHash()
+{
+    _highlightStateDataHash.clear();
+}

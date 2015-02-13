@@ -77,10 +77,6 @@ QString Buffer::updateContentForCurrentFiletype(const QString &content)
 
 void Buffer::onHtmlHighlightFiletypeChanged(const QString &filetype)
 {
-    // TODO: how do we clear the buffer states?
-    // OR, make sure that the undo works with file type related changes
-    // TODO: we can change the saved history state for the current one, so that
-    // it matches the current file type (save re-parsing on the next whoop)
     setContent(updateContentForCurrentFiletype(content()), -1);
     emit filetypeChanged(filetype);
 }
@@ -120,10 +116,6 @@ void Buffer::registerContentChange(const QString &cont, int cursorPosition)
 
 // TODO: also tackle the case where the editor is moved, selection selected
 // in other words, in such situations you also need to rehighlight any delayed content
-// TODO: the undo/redo might mess up our HighlightStateHash, so should we save a snapshot of the hash
-// together with the undo/redo as well?
-// an easier way is to flush the hash on redo/undo
-// or we can re-index the lines so that the highlighter knows not to use the hash
 void Buffer::parseIncrementalContentChange(QString cont, int cursorPosition, bool enableDelay)
 {
     if (!filetype().isEmpty()) {
@@ -182,6 +174,8 @@ void Buffer::goToHistory(int offset)
         _historyIndex = i;
 //        printf("new history index: %d\n", i);
         BufferState &s = _history[i];
+        // flush the state hash
+        _highlight.clearHighlightStateDataHash();
         // parse the content if necessary
         if (s.filetype != filetype()) {
 //            printf("history state with different filetype! current: %s; history: %s\n",

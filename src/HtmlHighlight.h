@@ -27,6 +27,7 @@ public:
     QString highlightHtml(const QString &html, int cursorPosition, bool enableDelay);
     QString replaceHtml(const QString &html, const QList<QPair<TextSelection, QString> > &replaces);
     Q_SLOT void setFiletype(const QString &filetype);
+    Q_SLOT void clearHighlightStateDataHash();
 Q_SIGNALS:
     void filetypeChanged(const QString &filetype);
 private:
