@@ -11,6 +11,7 @@
 #define BOF '\0'
 
 #include <QObject>
+#include <QTextStream>
 
 /* A general purpose html parser
  * only works for the simple syntax inside a textarea
@@ -21,7 +22,7 @@ class HtmlParser : public QObject
     Q_OBJECT
 protected:
     // return the last cursor index
-    int parse(const QString& html);
+    void parse(QTextStream& input);
     virtual bool stopParsing() = 0;
     // parse character begins from BOF
     virtual void parseCharacter(const QChar &ch, int charCount) = 0;

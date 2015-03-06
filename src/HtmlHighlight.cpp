@@ -36,7 +36,7 @@ void HtmlHighlight::setFiletype(const QString &filetype)
 }
 
 // note other variables should have been set before calling this function
-bool HtmlHighlight::highlightHtmlBasic(const QString &html)
+bool HtmlHighlight::highlightHtmlBasic(QTextStream &input, QTextStream &output)
 {
     // reset the variables
     _highlighted = false;
@@ -47,27 +47,16 @@ bool HtmlHighlight::highlightHtmlBasic(const QString &html)
     _toHighlightBuffer.clear();
     _htmlBuffer.clear();
     _currentLine = QStringPtr(new QString);
-    _buffer.clear();
+    _output = &output;
 
-    QString toParse = html;
 //    printf("parsing %s\n", qPrintable(toParse));
-    // strips the pre tags
-    if (toParse.startsWith("<pre>"))
-        toParse.remove(0, 5);
-    if (toParse.endsWith("</pre>"))
-        toParse.chop(6);
-    int i = parse(toParse);
-    if (_highlighted) {
-        _buffer += _htmlBuffer;
-        _buffer += toParse.right(toParse.length() - i);
-        _buffer.prepend("<pre>");
-        _buffer.append("</pre>");
-        return true;
-    }
-    return false;
+    parse(input);
+    (*_output) << _htmlBuffer;
+    (*_output) << input.readAll();
+    return _highlighted;
 }
 
-QString HtmlHighlight::highlightHtml(const QString &html, int cursorPosition, bool enableDelay)
+bool HtmlHighlight::highlightHtml(QTextStream &input, QTextStream &output, int cursorPosition, bool enableDelay)
 {
     _mode = Incremental;
     _enableDelay = enableDelay;
@@ -76,22 +65,18 @@ QString HtmlHighlight::highlightHtml(const QString &html, int cursorPosition, bo
     if (!enableDelay)
         _lastHighlightDelayedLine.reset();
 
-    if (highlightHtmlBasic(html))
-        return _buffer;
-    return html;
+    return highlightHtmlBasic(input, output);
 }
 
-QString HtmlHighlight::replaceHtml(const QString &html, const QList<QPair<TextSelection, QString> > &replaces)
+bool HtmlHighlight::replaceHtml(QTextStream &input, QTextStream &output, const QList<QPair<TextSelection, QString> > &replaces)
 {
     if (replaces.count() == 0)
-        return html;
+        return false;
 
     _mode = Replace;
     _replaces = replaces;
 
-    if (highlightHtmlBasic(html))
-        return _buffer;
-    return html;
+    return highlightHtmlBasic(input, output);
 }
 
 bool HtmlHighlight::stopParsing()
@@ -151,7 +136,7 @@ void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
             if (!_afterTTTag  && !_toHighlightBuffer.isEmpty())
                 _toHighlight = HighlightCurrent;
             if (highlightLine()) {
-                _buffer += '\n';
+                (*_output) << '\n';
             }
         } else if (!rch.isNull()) {
             _toHighlightBuffer += rch;
@@ -195,9 +180,9 @@ bool HtmlHighlight::highlightLine()
                 // only in this case the highlight is set to true
                 _highlighted = true;
             }
-            _buffer += prefix;
-            _buffer += highlightResult;
-            _buffer += postfix;
+            (*_output) << prefix;
+            (*_output) << highlightResult;
+            (*_output) << postfix;
             _currentHighlightStateData->currentState = _sourceHighlight.getHighlighter()->getCurrentState();
             states.second = _currentHighlightStateData;
             // reset the lastHighlightDelayedLine if necessary
@@ -207,7 +192,7 @@ bool HtmlHighlight::highlightLine()
             }
             highlightedLine = true;
         } else {
-            _buffer += _htmlBuffer;
+            (*_output) << _htmlBuffer;
             // if no need to highlight
             // then we should pass through to the end state of the current line if possible
             Q_ASSERT(_highlightStateDataHash.contains(*_currentLine));

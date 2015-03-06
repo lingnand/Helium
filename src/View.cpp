@@ -659,7 +659,7 @@ void View::replaceAll()
                 QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
     }
     // do the actual replaces
-    _buffer->parseReplacementContentChange(_replaces);
+    _buffer->parseReplacementContentChange(this, _replaces);
     _numberOfReplacesTillBottom = _replaces.count();
     _replaces.clear();
     for (; i < _findHits.count(); i++) {
@@ -679,7 +679,7 @@ void View::replaceAll()
 void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        _buffer->parseReplacementContentChange(_replaces);
+        _buffer->parseReplacementContentChange(this, _replaces);
         dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
                 tr(DIALOG_REPLACE_FINISHED_TITLE),
                 QString(tr(DIALOG_REPLACE_FINISHED_BODY))
@@ -707,8 +707,8 @@ void View::setBuffer(Buffer* buffer)
         if (_buffer) {
             disconn(_textArea, SIGNAL(textChanging(QString)),
                 this, SLOT(onTextAreaTextChanged(QString)));
-            disconn(_buffer, SIGNAL(contentChanged(QString, int)),
-                this, SLOT(onBufferContentChanged(QString, int)));
+            disconn(_buffer, SIGNAL(contentChanged(View *, bool, QString, int)),
+                this, SLOT(onBufferContentChanged(View *, bool, QString, int)));
             disconn(_buffer, SIGNAL(nameChanged(QString)),
                 this, SLOT(setTitle(QString)));
             disconn(_buffer, SIGNAL(filetypeChanged(QString)),
@@ -721,11 +721,11 @@ void View::setBuffer(Buffer* buffer)
                 this, SLOT(onBufferHasRedosChanged(bool)));
         }
         _buffer = buffer;
-        onBufferContentChanged(_buffer->content(), -1);
+        onBufferContentChanged(NULL, true, _buffer->content(), -1);
         conn(_textArea, SIGNAL(textChanging(QString)),
             this, SLOT(onTextAreaTextChanged(QString)));
-        conn(_buffer, SIGNAL(contentChanged(QString, int)),
-            this, SLOT(onBufferContentChanged(QString, int)));
+        conn(_buffer, SIGNAL(contentChanged(View *, bool, QString, int)),
+            this, SLOT(onBufferContentChanged(View *, bool, QString, int)));
 
         setTitle(_buffer->name());
         conn(_buffer, SIGNAL(nameChanged(QString)),
@@ -769,7 +769,7 @@ void View::onTextAreaTextChanged(const QString& text)
 //    if (_textArea->editor()->selectedText().isEmpty())
     // only when the the cursor is currently before
     if (!_buffer->isEmittingContentChange())
-        _buffer->parseIncrementalContentChange(text, _textArea->editor()->cursorPosition(), true);
+        _buffer->parseIncrementalContentChange(this, text, _textArea->editor()->cursorPosition(), true);
 }
 
 void View::onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
@@ -881,9 +881,9 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
     }
 }
 
-void View::onBufferContentChanged(const QString& content, int cursorPosition) {
-    if (_textArea->text() != content) {
-//        printf("## text area out of sync with buffer content\n### text area: %s\n### buffer: %s\n", qPrintable(_textArea->text()), qPrintable(content));
+void View::onBufferContentChanged(View *source, bool sourceChanged, const QString& content, int cursorPosition) {
+    if (this != source || sourceChanged) {
+    //        printf("## text area out of sync with buffer content\n### text area: %s\n### buffer: %s\n", qPrintable(_textArea->text()), qPrintable(content));
         int pos = cursorPosition < 0 ? _textArea->editor()->cursorPosition() : cursorPosition;
         _textArea->setText(content);
         _textArea->editor()->setCursorPosition(pos);

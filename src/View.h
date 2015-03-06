@@ -119,7 +119,7 @@ private:
     Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
-    Q_SLOT void onBufferContentChanged(const QString& content, int cursorPosition);
+    Q_SLOT void onBufferContentChanged(View *source, bool sourceChanged, const QString& content, int cursorPosition);
     Q_SLOT void onBufferProgressChanged(float progress);
     Q_SLOT void onBufferHasUndosChanged(bool hasUndos);
     Q_SLOT void onBufferHasRedosChanged(bool hasRedos);

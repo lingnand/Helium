@@ -1,32 +1,34 @@
 #include <src/HtmlPlainTextExtractor.h>
 #include <stdio.h>
 
-QString HtmlPlainTextExtractor::extractPlainText(const QString &html)
+bool HtmlPlainTextExtractor::extractPlainText(QTextStream &input, QTextStream &output)
 {
     _mode = Extract;
-    _buffer.clear();
-    parse(html);
-    return _buffer;
+    _output = &output;
+    _changed = false;
+    parse(input);
+    return _changed;
 }
 
-bool HtmlPlainTextExtractor::hasPlainText(const QString &html)
+bool HtmlPlainTextExtractor::hasPlainText(QTextStream &input)
 {
     _mode = Validate;
     _hasPlainText = false;
-    parse(html);
+    parse(input);
     return _hasPlainText;
 }
 
-QString HtmlPlainTextExtractor::replacePlainText(const QString &plainText, const QList<QPair<TextSelection, QString> > &replaces)
+bool HtmlPlainTextExtractor::replacePlainText(QTextStream &input, QTextStream &output, const QList<QPair<TextSelection, QString> > &replaces)
 {
     if (replaces.count() == 0)
-        return plainText;
+        return false;
 
     _mode = Replace;
     _replaces = replaces;
-    _buffer.clear();
-    parse(plainText);
-    return _buffer;
+    _output = &output;
+    _changed = false;
+    parse(input);
+    return _changed;
 }
 
 bool HtmlPlainTextExtractor::stopParsing()
@@ -45,7 +47,7 @@ void HtmlPlainTextExtractor::parseCharacter(const QChar &ch, int charCount)
     if (!ch.isNull()) {
         switch (_mode) {
             case Extract:
-                _buffer += ch;
+                (*_output) << ch;
                 break;
             case Validate:
                 _hasPlainText = true;
@@ -64,7 +66,7 @@ void HtmlPlainTextExtractor::parseCharacter(const QChar &ch, int charCount)
                         _replaces.removeFirst();
                     }
                 }
-                _buffer += replacement;
+                (*_output) << replacement;
                 break;
             }
         }
@@ -73,6 +75,10 @@ void HtmlPlainTextExtractor::parseCharacter(const QChar &ch, int charCount)
 
 void HtmlPlainTextExtractor::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
 {
+    _changed |= name == "b"
+             || name == "i"
+             || name == "u"
+             || name == "span" && attributeName == "style";
 }
 
 void HtmlPlainTextExtractor::parseHtmlCharacter(const QChar &ch)

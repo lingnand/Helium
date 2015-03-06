@@ -5,6 +5,7 @@
  *      Author: lingnan
  */
 
+#include <QTextStream>
 #include <src/Buffer.h>
 #include <stdio.h>
 #include <src/srchilite/instances.h>
@@ -55,84 +56,119 @@ const QString &Buffer::filetype() const { return _highlight.filetype(); }
 
 void Buffer::setFiletype(const QString &filetype) { _highlight.setFiletype(filetype); }
 
-bool Buffer::isEmittingContentChange() const { return _emittingContentChange; }
-
 const QString &Buffer::content() const { return _content; }
 
-void Buffer::setContent(const QString &content, int cursorPosition)
+bool Buffer::isEmittingContentChange() const { return _emittingContentChange; }
+
+void Buffer::emitContentChanged(View *source, bool sourceChanged, int cursorPosition)
 {
     _emittingContentChange = true;
-    _content = content;
-    emit contentChanged(_content, cursorPosition);
+    emit contentChanged(source, sourceChanged, _content, cursorPosition);
     _emittingContentChange = false;
 }
 
-QString Buffer::updateContentForCurrentFiletype(const QString &content)
+// TODO: remember to change highlightHtml to use separate strings as input/output
+// whenever necessary
+// TODO: remember to strip the <pre> and </pre> before passing the string to the highlighter
+// TODO: remember to add the <pre> and </pre> on the result string
+void Buffer::updateContentForCurrentFiletype(QTextStream &input, QTextStream &output)
 {
     if (filetype().isEmpty()) {
-        return _extractor.extractPlainText(content);
+        _extractor.extractPlainText(input, output);
+    } else {
+        _highlight.highlightHtml(input, output, 0, false);
     }
-    return _highlight.highlightHtml(content, 0, false);
 }
 
 void Buffer::onHtmlHighlightFiletypeChanged(const QString &filetype)
 {
-    setContent(updateContentForCurrentFiletype(content()), -1);
+    QString cont(_content);
+    QTextStream input(&cont);
+    _content.clear();
+    QTextStream output(&_content);
+    updateContentForCurrentFiletype(input, output);
+    output << flush;
+    emitContentChanged(NULL, true, -1);
     emit filetypeChanged(filetype);
 }
 
-void Buffer::registerContentChange(const QString &cont, int cursorPosition)
+void Buffer::registerContentChange(int cursorPosition)
 {
-    if (cont != content()) {
-        // save history state
-        QDateTime current = QDateTime::currentDateTime();
-        if (_historyIndex < _history.count() - 1) {
-            do {
-                _history.removeLast();
-            } while (_historyIndex < _history.count() - 1);
-            ++_historyIndex;
-        } else if (current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
-            ++_historyIndex;
-        }
-        _lastEdited = current;
-        // append/modify the history if necessary
-        if (_historyIndex == _history.count()) {
-            _history.append(BufferState(cont, cursorPosition, filetype()));
-            if (_history.count() > _historyLimit) {
-                _history.removeFirst();
-                --_historyIndex;
-            }
-        } else {
-            _history[_historyIndex] = BufferState(cont, cursorPosition, filetype());
-        }
-        printf("last edit time: %s, historyIndex: %d\n",
-                qPrintable(_lastEdited.toString("hh:mm:ss:zzz")), _historyIndex);
-        // there is always blank text state to undo to
-        setHasUndo(true);
-        setHasRedo(false);
-        setContent(cont, -1);
+    // save history state
+    QDateTime current = QDateTime::currentDateTime();
+    if (_historyIndex < _history.count() - 1) {
+        do {
+            _history.removeLast();
+        } while (_historyIndex < _history.count() - 1);
+        ++_historyIndex;
+    } else if (current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
+        ++_historyIndex;
     }
+    _lastEdited = current;
+    // append/modify the history if necessary
+    if (_historyIndex == _history.count()) {
+        _history.append(BufferState(_content, cursorPosition, filetype()));
+        if (_history.count() > _historyLimit) {
+            _history.removeFirst();
+            --_historyIndex;
+        }
+    } else {
+        _history[_historyIndex] = BufferState(_content, cursorPosition, filetype());
+    }
+    printf("last edit time: %s, historyIndex: %d\n",
+            qPrintable(_lastEdited.toString("hh:mm:ss:zzz")), _historyIndex);
+    // there is always blank text state to undo to
+    setHasUndo(true);
+    setHasRedo(false);
 }
 
 // TODO: also tackle the case where the editor is moved, selection selected
 // in other words, in such situations you also need to rehighlight any delayed content
-void Buffer::parseIncrementalContentChange(QString cont, int cursorPosition, bool enableDelay)
+void Buffer::parseIncrementalContentChange(View *source, const QString &content, int cursorPosition, bool enableDelay)
 {
+    bool sourceChanged = false;
     if (!filetype().isEmpty()) {
-        cont = _highlight.highlightHtml(cont, cursorPosition, enableDelay);
+        // set up input
+        QString cont(content);
+        QTextStream input(&cont);
+        if (cont.startsWith("<pre>"))
+            input.seek(5);
+//        if (content.endsWith("</pre>"))
+//            content.chop(6);
+//        QTextStream input(&content);
+
+        _content.clear();
+        QTextStream output(&_content);
+        output << "<pre>";
+        sourceChanged = _highlight.highlightHtml(input, output, cursorPosition, enableDelay);
+        output << flush;
+        if (!_content.endsWith("</pre>"))
+            _content += "</pre>";
+    } else {
+        // we assume that when this function is called there is always some change
+        _content = content;
     }
-    registerContentChange(cont, cursorPosition);
+//        registerContentChange(cursorPosition);
+    emitContentChanged(source, sourceChanged, -1);
 }
 
-void Buffer::parseReplacementContentChange(QList<QPair<TextSelection, QString> > replaces)
+void Buffer::parseReplacementContentChange(View *source, QList<QPair<TextSelection, QString> > &replaces)
 {
-    QString cont;
+    if (replaces.count() == 0)
+        return;
+    bool sourceChanged = false;
+    QString cont(_content);
+    QTextStream input(&cont);
+    _content.clear();
+    QTextStream output(&_content);
     if (filetype().isEmpty()) {
-        cont = _extractor.replacePlainText(content(), replaces);
+        sourceChanged = _extractor.replacePlainText(input, output, replaces);
     } else {
-        cont = _highlight.replaceHtml(content(), replaces);
+        sourceChanged = _highlight.replaceHtml(input, output, replaces);
     }
-    registerContentChange(cont, -1);
+    output << flush;
+//        registerContentChange(-1);
+    emitContentChanged(source, sourceChanged, -1);
 }
 
 bool Buffer::hasUndo() const { return _hasUndo; }
@@ -181,11 +217,16 @@ void Buffer::goToHistory(int offset)
 //            printf("history state with different filetype! current: %s; history: %s\n",
 //                    qPrintable(filetype()), qPrintable(s.filetype));
             s.filetype = filetype();
-            s.content = updateContentForCurrentFiletype(s.content);
+            QString cont(s.content);
+            QTextStream input(&cont);
+            QTextStream output(&s.content);
+            updateContentForCurrentFiletype(input, output);
+            output << flush;
 //            printf("history slot after content reparse: content: %s; filetype: %s\n",
 //                    qPrintable(_history[i].content), qPrintable(_history[i].filetype));
         }
-        setContent(s.content, s.cursorPosition);
+        _content = s.content;
+        emitContentChanged(NULL, true, s.cursorPosition);
 //        printf("new content: %s, new cursor position: %d\n", qPrintable(content()), s.second);
         // invalidate the date time
         _lastEdited = DEFAULT_EDIT_TIME;
@@ -210,10 +251,16 @@ void Buffer::save()
 
 bool Buffer::hasPlainText()
 {
-    return _extractor.hasPlainText(content());
+    QTextStream input(&_content);
+    return _extractor.hasPlainText(input);
 }
 
 QString Buffer::plainText()
 {
-    return _extractor.extractPlainText(content());
+    QTextStream input(&_content);
+    QString cont;
+    QTextStream output(&cont);
+    _extractor.extractPlainText(input, output);
+    output << flush;
+    return cont;
 }

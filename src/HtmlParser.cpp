@@ -12,7 +12,7 @@ enum HtmlState { InChar, InTag };
 enum CharState { Normal, InSpecialChar };
 enum TagState { InPrefix, InAttributeName, InAttributeValue };
 
-int HtmlParser::parse(const QString& html)
+void HtmlParser::parse(QTextStream& input)
 {
     // process the content
     // first find the regions to rehighlight
@@ -21,8 +21,6 @@ int HtmlParser::parse(const QString& html)
     TagState tagState = InPrefix;
     int charCount = 0;
     QString specialCharStr, tagName, tagAttributeName, tagAttributeValue;
-    // i is the NEEDLE/CURSOR position inside the content
-    int i = 0;
     // ch is the character just before the cursor
     QChar ch = BOF;
     while (true) {
@@ -104,15 +102,13 @@ int HtmlParser::parse(const QString& html)
         if (stopParsing()) {
             break;
         }
-        if (i == html.length()) {
+        input >> ch;
+        if (ch.isNull()) {
             // reached end of the content
             reachedEnd();
             break;
         }
-        // increment the cursor
-        ch = html[i++];
         parseHtmlCharacter(ch);
     }
-    return i;
 }
 

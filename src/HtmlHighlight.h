@@ -8,6 +8,7 @@
 #ifndef HTMLHIGHLIGHT_H_
 #define HTMLHIGHLIGHT_H_
 
+#include <QTextStream>
 #include <boost/regex.hpp>
 #include <src/HtmlParser.h>
 #include <src/srchilite/sourcehighlight.h>
@@ -24,8 +25,8 @@ public:
     HtmlHighlight(const QString &style);
     virtual ~HtmlHighlight() {}
     const QString &filetype() const { return _filetype; }
-    QString highlightHtml(const QString &html, int cursorPosition, bool enableDelay);
-    QString replaceHtml(const QString &html, const QList<QPair<TextSelection, QString> > &replaces);
+    bool highlightHtml(QTextStream &input, QTextStream &output, int cursorPosition, bool enableDelay);
+    bool replaceHtml(QTextStream &input, QTextStream &output, const QList<QPair<TextSelection, QString> > &replaces);
     Q_SLOT void setFiletype(const QString &filetype);
     Q_SLOT void clearHighlightStateDataHash();
 Q_SIGNALS:
@@ -46,7 +47,7 @@ private:
     bool _afterTTTag;
     ToHighlightState _toHighlight;
     QString _filetype;
-    QString _buffer;
+    QTextStream *_output;
     QString _toHighlightBuffer;
     QString _htmlBuffer;
     QStringPtr _lastHighlightDelayedLine;
@@ -63,7 +64,7 @@ private:
     // return true if the toHighlightBuffer is highlighted and result
     // appended to buffer, otherwise false
     bool highlightLine();
-    bool highlightHtmlBasic(const QString &html);
+    bool highlightHtmlBasic(QTextStream &input, QTextStream &output);
     bool moreHighlightNeeded();
 };
 

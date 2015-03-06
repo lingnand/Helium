@@ -33,6 +33,8 @@ namespace srchilite {
     class LangMap;
 }
 
+class View;
+
 class Buffer : public QObject
 {
     Q_OBJECT
@@ -47,8 +49,8 @@ public:
     Q_SLOT void setFiletype(const QString &filetype);
     bool isEmittingContentChange() const;
     const QString &content() const;
-    Q_SLOT void parseIncrementalContentChange(QString content, int cursorPosition, bool enableDelay);
-    Q_SLOT void parseReplacementContentChange(QList<QPair<TextSelection, QString> > replaces);
+    Q_SLOT void parseIncrementalContentChange(View *source, const QString &content, int cursorPosition, bool enableDelay);
+    Q_SLOT void parseReplacementContentChange(View *source, QList<QPair<TextSelection, QString> > &replaces);
     bool hasUndo() const;
     Q_SLOT void undo();
     bool hasRedo() const;
@@ -62,7 +64,7 @@ Q_SIGNALS:
     // on content changed, negative cursorPosition means the changed content
     // doesn't change cursor position
     // otherwise the view should set its cursor position to match the value emitted here
-    void contentChanged(const QString &content, int cursorPosition);
+    void contentChanged(View *source, bool sourceChanged, const QString &content, int cursorPosition);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
     void inProgressChanged(float progress);
@@ -92,10 +94,10 @@ private:
     void goToHistory(int offset);
     void setHasUndo(bool hasUndo);
     void setHasRedo(bool hasRedo);
-    Q_SLOT QString updateContentForCurrentFiletype(const QString &content);
+    Q_SLOT void updateContentForCurrentFiletype(QTextStream &input, QTextStream &output);
     Q_SLOT void onHtmlHighlightFiletypeChanged(const QString &filetype);
-    Q_SLOT void setContent(const QString &content, int cursorPosition);
-    Q_SLOT void registerContentChange(const QString &cont, int cursorPosition);
+    Q_SLOT void emitContentChanged(View *source, bool sourceChanged, int cursorPosition);
+    Q_SLOT void registerContentChange(int cursorPosition);
 };
 
 #endif /* BUFFER_H_ */

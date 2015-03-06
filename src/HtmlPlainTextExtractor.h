@@ -8,6 +8,7 @@
 #ifndef HTMLPLAINTEXTEXTRACTOR_H_
 #define HTMLPLAINTEXTEXTRACTOR_H_
 
+#include <QTextStream>
 #include <src/HtmlParser.h>
 #include <src/Type.h>
 
@@ -15,15 +16,16 @@ class HtmlPlainTextExtractor : public HtmlParser
 {
     Q_OBJECT
 public:
-    Q_SLOT QString extractPlainText(const QString &html);
+    Q_SLOT bool extractPlainText(QTextStream &input, QTextStream &output);
     // the replacePlainText function assumes that the passed text is already plainText - this can speed things up
-    Q_SLOT QString replacePlainText(const QString &plainText, const QList<QPair<TextSelection, QString> > &replaces);
-    Q_SLOT bool hasPlainText(const QString &html);
+    Q_SLOT bool replacePlainText(QTextStream &input, QTextStream &output, const QList<QPair<TextSelection, QString> > &replaces);
+    Q_SLOT bool hasPlainText(QTextStream &input);
 private:
+    bool _changed;
     enum PlainTextMode { Extract, Validate, Replace };
     QList<QPair<TextSelection, QString> > _replaces;
     PlainTextMode _mode;
-    QString _buffer;
+    QTextStream *_output;
     bool _hasPlainText;
     bool stopParsing();
     void parseCharacter(const QChar &ch, int charCount);
