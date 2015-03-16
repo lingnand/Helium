@@ -135,7 +135,6 @@ void BufferState::writePartialHighlightedHtml(QTextStream &output, int beginInde
         at(i).writePreText(output);
         output << '\n';
     }
-    output << QString("<s id='%1'>").arg(i);
     while (true) {
         output << QString("<q id='%1'>").arg(i);
         at(i).writeHighlightText(output);
@@ -146,7 +145,6 @@ void BufferState::writePartialHighlightedHtml(QTextStream &output, int beginInde
         }
         output << '\n';
     }
-    output << "</s>";
     for (; i < size(); i++) {
         output << '\n';
         at(i).writePreText(output);

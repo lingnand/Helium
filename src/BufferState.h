@@ -39,7 +39,7 @@ private:
     HighlightStateDataPtr _endHighlightState;
 };
 // a buffer state is a snapshot of the current buffer content
-// it consists of a list of BufferLinePtr's
+// it consists of a list of BufferLine's
 // each line is identified by its index inside the BufferState
 
 // on each new highlight iteration, the BufferState is modified

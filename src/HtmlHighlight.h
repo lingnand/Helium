@@ -35,15 +35,14 @@ Q_SIGNALS:
 private:
     int _lineCounter;
     enum ToHighlightState { NoHighlight = 0, HighlightCurrent = 1, HighlightDelayed = 2};
-    enum HighlightMode { Incremental, Replace };
     // Incremental mode variables
     bool _enableDelay;
     bool _reachedCursor;
     int _cursorPosition;
     // Replace mode variables
     QList<QPair<TextSelection, QString> > _replaces;
-    HighlightMode _mode;
     bool _highlighted;
+    bool _startedParsing;
     bool _stopParsing;
     bool _afterTTTag;
     ToHighlightState _toHighlight;
@@ -52,20 +51,10 @@ private:
     QString _toHighlightBuffer;
     int _lastHighlightDelayedLineIndex;
     int _currentIndex;
-    struct TempLine {
-        // the presumed index for this line
-        int index;
-        BufferLine line;
-        TempLine(): index(-1), line(BufferLine()) {}
-    } _tempLine;
+
     HighlightStateDataPtr _currentHighlightStateData;
     HighlightStateDataPtr _mainStateData;
     srchilite::SourceHighlight _sourceHighlight;
-    bool stopParsing();
-    void parseCharacter(const QChar &ch, int charCount);
-    void parseTag(const QString &name, const QString &attributeName, const QString &attributeValue);
-    void parseHtmlCharacter(const QChar &ch);
-    void reachedEnd();
     // return true if the toHighlightBuffer is highlighted and result
     // appended to buffer, otherwise false
     bool highlightLine();
