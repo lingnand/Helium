@@ -211,6 +211,7 @@ config_pri_assets {
 config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/Buffer.cpp) \
+        $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/Helper.cpp) \
         $$quote($$BASEDIR/src/HtmlHighlight.cpp) \
@@ -290,6 +291,7 @@ config_pri_source_group1 {
 
     HEADERS += \
         $$quote($$BASEDIR/src/Buffer.h) \
+        $$quote($$BASEDIR/src/BufferState.h) \
         $$quote($$BASEDIR/src/BufferWork.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
         $$quote($$BASEDIR/src/Helper.h) \

@@ -14,6 +14,7 @@
 #include <src/srchilite/sourcehighlight.h>
 #include <src/HighlightStateData.h>
 #include <src/Type.h>
+#include <src/BufferState.h>
 
 typedef boost::shared_ptr<QString> QStringPtr;
 typedef QPair<HighlightStateDataPtr, HighlightStateDataPtr> HighlightLineStates;
@@ -47,14 +48,18 @@ private:
     bool _afterTTTag;
     ToHighlightState _toHighlight;
     QString _filetype;
-    QTextStream *_output;
+    BufferState *_state;
     QString _toHighlightBuffer;
-    QString _htmlBuffer;
-    QStringPtr _lastHighlightDelayedLine;
-    QStringPtr _currentLine;
+    int _lastHighlightDelayedLineIndex;
+    int _currentIndex;
+    struct TempLine {
+        // the presumed index for this line
+        int index;
+        BufferLine line;
+        TempLine(): index(-1), line(BufferLine()) {}
+    } _tempLine;
     HighlightStateDataPtr _currentHighlightStateData;
     HighlightStateDataPtr _mainStateData;
-    QHash<QString, HighlightLineStates> _highlightStateDataHash;
     srchilite::SourceHighlight _sourceHighlight;
     bool stopParsing();
     void parseCharacter(const QChar &ch, int charCount);

@@ -5,8 +5,9 @@
  *      Author: lingnan
  */
 
-#include <src/HtmlHighlight.h>
 #include <stdio.h>
+#include <src/HtmlHighlight.h>
+#include <src/BufferState.h>
 
 HtmlHighlight::HtmlHighlight(const QString &style):
     _sourceHighlight(std::string(style.toUtf8().constData()), "xhtml.outlang"),
@@ -35,8 +36,9 @@ void HtmlHighlight::setFiletype(const QString &filetype)
     }
 }
 
+//
 // note other variables should have been set before calling this function
-bool HtmlHighlight::highlightHtmlBasic(QTextStream &input, QTextStream &output)
+bool HtmlHighlight::highlightHtmlBasic(BufferState &state, QTextStream &input)
 {
     // reset the variables
     _highlighted = false;
@@ -44,16 +46,26 @@ bool HtmlHighlight::highlightHtmlBasic(QTextStream &input, QTextStream &output)
     _stopParsing = false;
     _afterTTTag = false;
     _currentHighlightStateData = _mainStateData;
-    _toHighlightBuffer.clear();
-    _htmlBuffer.clear();
-    _currentLine = QStringPtr(new QString);
-    _output = &output;
+    // start from index 0
+    _tempLine = TempLine();
+    _offset = 0;
+    _state = &state;
 
 //    printf("parsing %s\n", qPrintable(toParse));
     parse(input);
-    (*_output) << _htmlBuffer;
-    (*_output) << input.readAll();
     return _highlighted;
+}
+
+// modify the bufferState to pull in the changes in the input
+// if enableDelay is set to true, we do some magic to not modify the state in some cases
+bool HtmlHighlight::highlightChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
+{
+    _mode = Incremental;
+    _enableDelay = enableDelay;
+    _cursorPosition = cursorPosition;
+    _reachedCursor = false;
+    return highlightHtmlBasic(input, output);
+
 }
 
 bool HtmlHighlight::highlightHtml(QTextStream &input, QTextStream &output, int cursorPosition, bool enableDelay)
@@ -91,8 +103,7 @@ void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
         case Incremental:
             if (!_reachedCursor && charCount == _cursorPosition) {
                 _reachedCursor = true;
-                printf("reached cursor, current ch: %s, current toHighlight: %s, current charCount, %d\n",
-                        qPrintable(QString(ch)), qPrintable(_toHighlightBuffer), charCount);
+                printf("reached cursor, current ch: %s\n, charCount: %d\n", qPrintable(QString(ch)), charCount);
                 if (!_toHighlight || _toHighlight == HighlightDelayed) {
                     // if there is no highlight, or if it is to highlight the delay line and the current line IS the delay line AGAIN
                     if (_enableDelay &&
@@ -105,9 +116,8 @@ void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
                             // in this case, we assume all white space characters can
                             // TODO: devise a strategy to reliably tell if there is prediction prompt
                             // instead of just crudely assume ANYTHING will prompt for prediction
-                            ||  ((ch.isSpace() || ch == '\n') && !_lastHighlightDelayedLine))) {
-                        printf("entered delayed line for ch %s, _lastHighlightDelayedLine: %s\n",
-                                qPrintable(QString(ch)), _lastHighlightDelayedLine ? qPrintable(*_lastHighlightDelayedLine) : "NULL");
+                            ||  ((ch.isSpace() || ch == '\n') && _lastHighlightDelayedLine < 0))) {
+                        printf("entered delayed line for ch %s, _lastHighlightDelayedLine: %d\n", qPrintable(QString(ch)), _lastHighlightDelayedLine);
                         _lastHighlightDelayedLine = _currentLine;
                         _stopParsing = true;
                         return;
@@ -129,6 +139,7 @@ void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
             }
             break;
     }
+    // TODO: reached refactoring here!
     QChar rch;
     for (int i = 0; i < replacement.length(); i++) {
         rch = replacement[i];
@@ -139,13 +150,19 @@ void HtmlHighlight::parseCharacter(const QChar &ch, int charCount)
                 (*_output) << '\n';
             }
         } else if (!rch.isNull()) {
-            _toHighlightBuffer += rch;
+            _currentLine.plainText += rch;
         }
     }
     _afterTTTag = false;
 }
 
-bool HtmlHighlight::highlightLine()
+bool HtmlHighlight::addLine(BufferState& state, BufferLine *line)
+{
+
+}
+
+// put the highlighted content into the line
+bool HtmlHighlight::highlightLine(BufferLine &line)
 {
     // if it's empty we are immediately done
     bool highlightedLine = _toHighlightBuffer.isEmpty();
@@ -261,9 +278,4 @@ void HtmlHighlight::parseHtmlCharacter(const QChar &ch)
 void HtmlHighlight::reachedEnd()
 {
     highlightLine();
-}
-
-void HtmlHighlight::clearHighlightStateDataHash()
-{
-    _highlightStateDataHash.clear();
 }
