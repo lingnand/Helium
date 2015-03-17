@@ -6,7 +6,7 @@ HtmlBufferChangeParser::HtmlBufferChangeParser(): _lastDelayedLine(-1)
 
 BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, int cursorPosition)
 {
-    _metLineId = false;
+    _startParsing = true;
     _stopParsing = false;
     _afterTTTag = false;
     _reachedCursor = false;
@@ -19,6 +19,8 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
 
 void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
 {
+    if (!_startParsing)
+        return;
     BufferLine &currentLine = _change.last();
     if (!_reachedCursor && charCount == _cursorPosition) {
         _reachedCursor = true;
@@ -47,7 +49,7 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
             _stopParsing = true;
         else if ( _change.size() > 1 || // already recored some change in the past
                 // start recording change
-                (!_afterTTTag && !metLineId || currentLine.charCount() > 0)) {
+                (!_afterTTTag && currentLine.charCount() > 0)) {
             // this line IS a change that should be recorded
             _change.append(ChangedBufferLine());
         }
@@ -59,9 +61,13 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
 
 void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
 {
-    if (name == "q") {
+    if (name == "pre") {
+        // after seeing pre we can throw away all the old stuff
+        _startParsing = false;
+        _change = BufferStateChange();
+    } else if (name == "q") {
         Q_ASSERT(attributeName == "id" && !attributeValue.isEmpty());
-        _metLineId = true;
+        _startParsing = true;
         _change.last().index = attributeValue.toInt();
     } else if (name == "/q") {
         _afterTTTag = true;

@@ -25,7 +25,7 @@ class HtmlHighlight
 public:
     HtmlHighlight(const QString &style);
     virtual ~HtmlHighlight() {}
-    const QString &filetype() const { return _filetype; }
+    const QString &filetype();
     bool highlightHtml(QTextStream &input, QTextStream &output, int cursorPosition, bool enableDelay);
     bool replaceHtml(QTextStream &input, QTextStream &output, const QList<QPair<TextSelection, QString> > &replaces);
     Q_SLOT void setFiletype(const QString &filetype);

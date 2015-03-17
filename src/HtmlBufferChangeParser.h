@@ -37,7 +37,7 @@ public:
     HtmlBufferChangeParser();
     BufferStateChange parseBufferChange(QTextStream &input, int cursorPosition);
 private:
-    bool _metLineId;
+    bool _startParsing;
     bool _stopParsing;
     bool _afterTTTag;
     bool _reachedCursor;
