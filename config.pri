@@ -214,6 +214,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/Helper.cpp) \
+        $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlHighlight.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/HtmlPlainTextExtractor.cpp) \
@@ -296,6 +297,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferWorker.h) \
         $$quote($$BASEDIR/src/Helper.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
+        $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlHighlight.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/HtmlPlainTextExtractor.h) \

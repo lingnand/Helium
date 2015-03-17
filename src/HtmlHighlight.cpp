@@ -36,36 +36,61 @@ void HtmlHighlight::setFiletype(const QString &filetype)
     }
 }
 
-//
-// note other variables should have been set before calling this function
-bool HtmlHighlight::highlightHtmlBasic(BufferState &state, QTextStream &input)
-{
-    // reset the variables
-    _highlighted = false;
-    _toHighlight = NoHighlight;
-    _startParsing = false;
-    _stopParsing = false;
-    _afterTTTag = false;
-    _currentHighlightStateData = _mainStateData;
-    // start from index 0
-    _tempLine = TempLine();
-    _offset = 0;
-    _state = &state;
-
-//    printf("parsing %s\n", qPrintable(toParse));
-    parse(input);
-    return _highlighted;
-}
-
 // modify the bufferState to pull in the changes in the input
 // if enableDelay is set to true, we do some magic to not modify the state in some cases
 bool HtmlHighlight::highlightChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
 {
-    _enableDelay = enableDelay;
-    _cursorPosition = cursorPosition;
-    _reachedCursor = false;
-    return highlightHtmlBasic(input, output);
-
+    BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
+    // pull in the changes
+    int bufferIndex = qMax(change.startIndex(), 0);
+    int changeIndex = 0;
+    int offset = 0;
+    HighlightStateDataPtr currentHighlightData;
+    int beforeStartIndex = bufferIndex - 1;
+    if (beforeStartIndex >= 0 && beforeStartIndex < state.size()) {
+        currentHighlightData = state[beforeStartIndex].endHighlightState();
+    } else {
+        currentHighlightData = _mainStateData;
+    }
+    while (changeIndex < change.size()) {
+        ChangedBufferLine &change = change[changeIndex];
+        BufferLine &changedLine = change.line;
+        currentHighlightData = HighlightStateDataPtr(new HighlightStateData(*currentHighlightData));
+        _sourceHighlight.getHighlighter()->setCurrentState(currentHighlightData->currentState);
+        _sourceHighlight.getHighlighter()->setStateStack(currentHighlightData->stateStack);
+        _sourceHighlight.clearBuffer();
+        QByteArray plainText;
+        QTextStream stream(&plainText);
+        changedLine.writePlainText(stream);
+        stream << flush;
+        _sourceHighlight.getHighlighter()->highlightParagraph(std::string(plainText.constData()));
+        changedLine.setHighlightText(QString::fromUtf8(_sourceHighlight.getBuffer().str().c_str()));
+//        if (_filetype.isEmpty() || highlightResult != _toHighlightBuffer) {
+            // if there is no change on the content to highlight
+            // then we think there hasn't been any highlighting
+            // NOTE: when the filetype is empty, what we are devote to doing is stripping format, thus
+            // only in this case the highlight is set to true
+//            _highlighted = true;
+//        }
+        currentHighlightData->currentState = _sourceHighlight.getHighlighter()->getCurrentState();
+        changedLine.setEndHighlightState(currentHighlightData);
+        if (change.index < 0) {
+            // we need to insert this new line
+            state.insert(bufferIndex, changedLine);
+            offset++;
+        } else {
+            // we need to delete the lines until the index match up
+            while (bufferIndex != change.index+offset) {
+                state.removeAt(bufferIndex);
+                offset--;
+            }
+            state[bufferIndex] = changedLine;
+        }
+        changeIndex++;
+        bufferIndex++;
+    }
+    // TODO: we still need to keep on highlighting until we meet something with the same start state
+    return !enableDelay || !change.delayable();
 }
 
 bool HtmlHighlight::highlightHtml(QTextStream &input, QTextStream &output, int cursorPosition, bool enableDelay)

@@ -30,10 +30,6 @@ HighlightStateDataPtr BufferLine::endHighlightState()
 {
     return _endHighlightState;
 }
-void BufferLine::setBeginHighlightState(HighlightStateDataPtr beginState)
-{
-    _beginHighlightState  = beginState;
-}
 
 void BufferLine::setEndHighlightState(HighlightStateDataPtr endState)
 {

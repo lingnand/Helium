@@ -20,9 +20,7 @@ public:
     virtual ~BufferLine() {}
     int charCount();
     void setHighlightText(const QString &highlightText);
-    HighlightStateDataPtr beginHighlightState();
     HighlightStateDataPtr endHighlightState();
-    void setBeginHighlightState(HighlightStateDataPtr beginState);
     void setEndHighlightState(HighlightStateDataPtr endState);
 
     BufferLine &BufferLine::operator<<(QChar c);
