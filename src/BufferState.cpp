@@ -7,6 +7,8 @@
 
 #include <src/BufferState.h>
 
+// BufferLine
+
 void BufferLine::BufferLine():_charCount(0)
 {
 }
@@ -91,6 +93,12 @@ void BufferLine::writeHighlightText(QTextStream &output)
     output << _highlightText;
 }
 
+// BufferState
+
+BufferState::BufferState(): _cursorPosition(-1)
+{
+}
+
 QString &BufferState::filetype()
 {
     return _filetype;
@@ -101,7 +109,17 @@ void BufferState::setFiletype(QString &filetype)
     _filetype = filetype;
 }
 
-int BufferState::focusedLine(int cursorPosition)
+int BufferState::cursorPosition()
+{
+    return _cursorPosition;
+}
+
+void BufferState::setCursorPosition(int cursorPosition)
+{
+    _cursorPosition = cursorPosition;
+}
+
+int BufferState::focus(int cursorPosition)
 {
     if (empty())
         return -1;
@@ -126,30 +144,109 @@ void BufferState::writePlainText(QTextStream &output)
     }
 }
 
-// this uses the same syntax as common substring function - the end line
-void BufferState::writePartialHighlightedHtml(QTextStream &output, int beginIndex, int endIndex)
+void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex)
 {
     if (empty())
         return;
-    int i = 0;
-    for (; i < beginIndex; i++) {
-        at(i).writePreText(output);
-        output << '\n';
-    }
-    while (true) {
-        if (!at(i).isEmpty()) {
-            output << QString("<q id='%1'>").arg(i);
-            at(i).writeHighlightText(output);
-            output << "</q>";
+    if (filetype().isEmpty()) {
+        at(0).writePreText(output);
+        for (int i = 1; i < size(); i++) {
+            output << '\n';
+            at(i).writePreText(output);
         }
-        i++;
-        if (i == endIndex) {
-            break;
+    } else {
+        beginIndex = qMax(0, beginIndex);
+        endIndex = qMin(endIndex, size());
+        int i = 0;
+        for (; i < beginIndex; i++) {
+            at(i).writePreText(output);
+            output << '\n';
         }
-        output << '\n';
+        while (true) {
+            if (!at(i).isEmpty()) {
+                output << QString("<q id='%1'>").arg(i);
+                at(i).writeHighlightText(output);
+                output << "</q>";
+            }
+            i++;
+            if (i == endIndex) {
+                break;
+            }
+            output << '\n';
+        }
+        for (; i < size(); i++) {
+            output << '\n';
+            at(i).writePreText(output);
+        }
     }
-    for (; i < size(); i++) {
-        output << '\n';
-        at(i).writePreText(output);
+}
+
+// BufferHistory
+
+BufferHistory::BufferHistory(int upperLimit): _upperLimit(upperLimit), _currentIndex(0)
+{
+    append(BufferState());
+}
+
+void BufferHistory::copyCurrentAndAdvance()
+{
+    bool oa = advanceable();
+    bool or = retractable();
+    while (size() > _currentIndex+1) {
+        removeLast();
     }
+    append(BufferState(last()));
+    // take out of previous items (if necessary)
+    if (_upperLimit > 0) {
+        while (size() > _upperLimit) {
+            removeFirst();
+        }
+    }
+    _currentIndex = size() - 1;
+    if (oa)
+        emit advanceableChanged(false);
+    if (!or)
+        emit retractableChanged(true);
+}
+
+BufferState &BufferHistory::current()
+{
+    return at(_currentIndex);
+}
+
+BufferState &BufferHistory::advance()
+{
+    if (_currentIndex != size() - 1) {
+        _currentIndex++;
+        if (_currentIndex == 1)
+            emit retractableChanged(true);
+        if (_currentIndex == size() - 1) {
+            emit advanceableChanged(false);
+        }
+    }
+    return current();
+}
+
+BufferState &BufferHistory::retract()
+{
+    if (_currentIndex != 0) {
+        _currentIndex--;
+        if (_currentIndex == size() - 2) {
+            emit advanceableChanged(true);
+        }
+        if (_currentIndex == 0) {
+            emit retractableChanged(false);
+        } 
+    }
+    return current();
+}
+
+bool BufferHistory::advanceable()
+{
+    return _currentIndex < size()-1; 
+}
+
+bool BufferHistory::retractable()
+{
+    return _currentIndex > 0;
 }

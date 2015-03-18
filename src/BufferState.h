@@ -48,15 +48,43 @@ private:
 class BufferState : QList<BufferLine>
 {
 public:
+    BufferState();
+    virtual ~BufferState() {}
     // return the index of the line where the cursor is currently in
     // NOTE: the cursorPosition is assumed to be based on plainText
-    int focusedLine(int cursorPosition);
+    int focus(int cursorPosition);
     void writePlainText(QTextStream &output);
-    void writePartialHighlightedHtml(QTextStream &output, int highlightStartLine, int highlightEndLine);
+    void writePreText(QTextStream &output);
+    // beginIndex should always be smaller than endIndex
+    void writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex);
     QString &filetype();
+    int cursorPosition();
+    void setCursorPosition(int cursorPosition);
     void setFiletype(QString &filetype);
 private:
     QString _filetype;
+    int _cursorPosition;
 };
+
+class BufferHistory : QList<BufferState>
+{
+public:
+    // anything equal or below 0 means no limitation on the size
+    BufferHistory(int upperLimit = 0);
+    virtual ~BufferHistory() {}
+    // this will remove all items after current
+    void copyCurrentAndAdvance();
+    BufferState &current();
+    BufferState &advance();
+    BufferState &retract();
+    bool advanceable();
+    bool retractable();
+Q_SIGNALS:
+    void advanceableChanged(bool advanceable);
+    void retractableChanged(bool retractable);
+private:
+    int _upperLimit;
+    int _currentIndex;
+}
 
 #endif /* BUFFERSTATE_H_ */

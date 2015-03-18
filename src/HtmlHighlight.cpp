@@ -38,11 +38,6 @@ void HtmlHighlight::setFiletype(const QString &filetype)
 HighlightStateDataPtr HtmlHighlight::highlightLine(BufferLine &line, HighlightStateDataPtr startState)
 {
     if (filetype().isEmpty()) {
-        QString output;
-        QTextStream stream(&output);
-        line.writePreText(stream);
-        stream << flush;
-        line.setHighlightText(output);
         line.endHighlightState().reset();
     } else {
         HighlightStateDataPtr state = HighlightStateDataPtr(new HighlightStateData(*startState));
@@ -61,10 +56,11 @@ HighlightStateDataPtr HtmlHighlight::highlightLine(BufferLine &line, HighlightSt
     return line.endHighlightState();
 }
 
-// modify the bufferState to pull in the changes in the input
-// if enableDelay is set to true, we do some magic to not modify the state in some cases
+// returning: have we highlighted any change?
 bool HtmlHighlight::highlightChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
 {
+    state.setCursorPosition(cursorPosition);
+    state.setFiletype(filetype());
     BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
@@ -102,7 +98,7 @@ bool HtmlHighlight::highlightChange(BufferState &state, QTextStream &input, int 
         currentHighlightData = highlightLine(state[bufferIndex], currentHighlightData);
         bufferIndex++;
     }
-    return !enableDelay || !change.delayable();
+    return !filetype().isEmpty() && !enableDelay || !change.delayable();
 }
 
 // put the highlighted content into the line

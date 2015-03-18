@@ -54,7 +54,19 @@ void Buffer::setName(const QString& name)
 
 const QString &Buffer::filetype() const { return _highlight.filetype(); }
 
-void Buffer::setFiletype(const QString &filetype) { _highlight.setFiletype(filetype); }
+void Buffer::setFiletype(const QString &filetype) 
+{ 
+    _highlight.setFiletype(filetype); 
+    // TODO: rehighlight the current bufferstate
+    QString cont(_content);
+    QTextStream input(&cont);
+    _content.clear();
+    QTextStream output(&_content);
+    updateContentForCurrentFiletype(input, output);
+    output << flush;
+    emitContentChanged(NULL, true, -1);
+    emit filetypeChanged(filetype);
+}
 
 const QString &Buffer::content() const { return _content; }
 
@@ -67,29 +79,8 @@ void Buffer::emitContentChanged(View *source, bool sourceChanged, int cursorPosi
     _emittingContentChange = false;
 }
 
-// TODO: remember to change highlightHtml to use separate strings as input/output
-// whenever necessary
-// TODO: remember to strip the <pre> and </pre> before passing the string to the highlighter
-// TODO: remember to add the <pre> and </pre> on the result string
-void Buffer::updateContentForCurrentFiletype(QTextStream &input, QTextStream &output)
-{
-    if (filetype().isEmpty()) {
-        _extractor.extractPlainText(input, output);
-    } else {
-        _highlight.highlightHtml(input, output, 0, false);
-    }
-}
-
 void Buffer::onHtmlHighlightFiletypeChanged(const QString &filetype)
 {
-    QString cont(_content);
-    QTextStream input(&cont);
-    _content.clear();
-    QTextStream output(&_content);
-    updateContentForCurrentFiletype(input, output);
-    output << flush;
-    emitContentChanged(NULL, true, -1);
-    emit filetypeChanged(filetype);
 }
 
 void Buffer::registerContentChange(int cursorPosition)

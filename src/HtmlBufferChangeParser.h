@@ -21,7 +21,7 @@ public:
     // NOTE: this should always be a valid index
     int startIndex() { return at(0).index; }
     bool delayable() { return _delayable; }
-    BufferStateChange(): QList<ChangedBufferLine>(), _delayable(false) {
+    BufferStateChange(): _delayable(false) {
         // a BufferStateChange always contain at least one changedBufferLine
         append(ChangedBufferLine());
     }
