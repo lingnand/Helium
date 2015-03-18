@@ -36,6 +36,10 @@ struct HighlightStateData {
     bool operator==(const HighlightStateData &rhs) {
         return *currentState == *rhs.currentState && *stateStack == *rhs.stateStack;
     }
+
+    bool operator!=(const HighlightStateData &rhs) {
+        return !operator==(rhs);
+    }
 };
 
 typedef boost::shared_ptr<HighlightStateData> HighlightStateDataPtr;

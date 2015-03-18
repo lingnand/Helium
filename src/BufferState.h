@@ -19,6 +19,7 @@ public:
     BufferLine();
     virtual ~BufferLine() {}
     int charCount();
+    bool isEmpty();
     void setHighlightText(const QString &highlightText);
     HighlightStateDataPtr endHighlightState();
     void setEndHighlightState(HighlightStateDataPtr endState);

@@ -21,7 +21,22 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
 {
     if (!_startParsing)
         return;
-    BufferLine &currentLine = _change.last();
+    if (ch == '\n') {
+        if (_change.size() > 1 || // already recored some change in the past
+            // start recording change
+            (!_afterTTTag && _change.last().charCount() > 0)) {
+            // this line IS a change that should be recorded
+            _change.append(ChangedBufferLine());
+        }
+        if (_reachedCursor)
+            // stop parsing after the line which contains the cursor
+            // we don't reset the cursor line
+            _stopParsing = true;
+        else
+            _change.last() = ChangedBufferLine();
+    } else if (!ch.isNull()) {
+        _change.last() << ch;
+    }
     if (!_reachedCursor && charCount == _cursorPosition) {
         _reachedCursor = true;
         printf("reached cursor, current ch: %s\n, charCount: %d\n", qPrintable(QString(ch)), charCount);
@@ -38,23 +53,10 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
                 // instead of just crudely assume ANYTHING will prompt for prediction
                 ||  (ch.isSpace() || ch == '\n') && _lastHighlightDelayedLine < 0)) {
             printf("entered delayed line for ch %s, _lastHighlightDelayedLine: %d\n", qPrintable(QString(ch)), _lastDelayedLine);
-            _lastDelayedLine = currentLine.index;
+            _lastDelayedLine = _change.last().index;
         } else {
             _lastDelayedLine = -1;
         }
-    }
-    if (ch == '\n') {
-        if (_reachedCursor)
-            // stop parsing after the line which contains the cursor
-            _stopParsing = true;
-        else if ( _change.size() > 1 || // already recored some change in the past
-                // start recording change
-                (!_afterTTTag && currentLine.charCount() > 0)) {
-            // this line IS a change that should be recorded
-            _change.append(ChangedBufferLine());
-        }
-    } else if (!ch.isNull()) {
-        currentLine << ch;
     }
     _afterTTTag = false;
 }

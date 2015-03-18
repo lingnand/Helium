@@ -16,6 +16,11 @@ int BufferLine::charCount()
     return _charCount;
 }
 
+bool BufferLine::isEmpty()
+{
+    return _preTextSegments.empty() && _specialChars.empty();
+}
+
 void BufferLine::setHighlightText(const QString &highlightText)
 {
     _highlightText = highlightText;
@@ -132,9 +137,11 @@ void BufferState::writePartialHighlightedHtml(QTextStream &output, int beginInde
         output << '\n';
     }
     while (true) {
-        output << QString("<q id='%1'>").arg(i);
-        at(i).writeHighlightText(output);
-        output << "</q>";
+        if (!at(i).isEmpty()) {
+            output << QString("<q id='%1'>").arg(i);
+            at(i).writeHighlightText(output);
+            output << "</q>";
+        }
         i++;
         if (i == endIndex) {
             break;

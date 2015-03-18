@@ -39,7 +39,7 @@ private:
     HtmlBufferChangeParser _bufferChangeParser;
     // return true if the toHighlightBuffer is highlighted and result
     // appended to buffer, otherwise false
-    bool highlightLine();
+    HighlightStateDataPtr highlightLine(BufferLine &line, HighlightStateDataPtr startState);
     bool highlightHtmlBasic(QTextStream &input, QTextStream &output);
     bool moreHighlightNeeded();
 };
