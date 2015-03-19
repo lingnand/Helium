@@ -33,6 +33,7 @@ void HtmlHighlight::setFiletype(const QString &filetype)
                     srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
             ));
         }
+        emit filetypeChanged(_filetype);
     }
 }
 
@@ -67,11 +68,12 @@ void HtmlHighlight::highlight(BufferState &state)
     }
 }
 
+// assumption: input does contain some change
+// the state was in sync before the change in the input (with the correct filetype and all)
 // returning: have we highlighted any change?
 bool HtmlHighlight::highlightChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
 {
     state.setCursorPosition(cursorPosition);
-    state.setFiletype(filetype());
     BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);

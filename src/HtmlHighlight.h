@@ -30,6 +30,8 @@ public:
     bool highlightChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
     void highlight(BufferState &state);
     void replace(BufferState &state, const QList<QPair<TextSelection, QString> > &replaces);
+Q_SIGNALS:
+    void filetypeChanged(QString &filetype);
 private:
     QString _filetype;
     HighlightStateDataPtr _mainStateData;
