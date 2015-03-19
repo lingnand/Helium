@@ -26,22 +26,16 @@ public:
     HtmlHighlight(const QString &style);
     virtual ~HtmlHighlight() {}
     const QString &filetype();
-    bool highlightHtml(QTextStream &input, QTextStream &output, int cursorPosition, bool enableDelay);
-    bool replaceHtml(QTextStream &input, QTextStream &output, const QList<QPair<TextSelection, QString> > &replaces);
     Q_SLOT void setFiletype(const QString &filetype);
-    Q_SLOT void clearHighlightStateDataHash();
-Q_SIGNALS:
-    void filetypeChanged(const QString &filetype);
+    bool highlightChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
+    void highlight(BufferState &state);
+    void replace(BufferState &state, const QList<QPair<TextSelection, QString> > &replaces);
 private:
     QString _filetype;
     HighlightStateDataPtr _mainStateData;
     srchilite::SourceHighlight _sourceHighlight;
     HtmlBufferChangeParser _bufferChangeParser;
-    // return true if the toHighlightBuffer is highlighted and result
-    // appended to buffer, otherwise false
     HighlightStateDataPtr highlightLine(BufferLine &line, HighlightStateDataPtr startState);
-    bool highlightHtmlBasic(QTextStream &input, QTextStream &output);
-    bool moreHighlightNeeded();
 };
 
 #endif /* HTMLHIGHLIGHT_H_ */

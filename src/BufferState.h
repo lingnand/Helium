@@ -73,7 +73,7 @@ public:
     BufferHistory(int upperLimit = 0);
     virtual ~BufferHistory() {}
     // this will remove all items after current
-    void copyCurrentAndAdvance();
+    BufferState &copyCurrent();
     BufferState &current();
     BufferState &advance();
     BufferState &retract();

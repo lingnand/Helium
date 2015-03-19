@@ -123,12 +123,12 @@ int BufferState::focus(int cursorPosition)
 {
     if (empty())
         return -1;
-    int i = 0;
-    while (i < size())  {
+    for (int i = 0; i < size(); i++)  {
         cursorPosition -= at(i).charCount();
         if (cursorPosition <= 0)
             return i;
-        i++;
+        // minus the newline character
+        cursorPosition--;
     }
     return -1;
 }
@@ -188,10 +188,10 @@ BufferHistory::BufferHistory(int upperLimit): _upperLimit(upperLimit), _currentI
     append(BufferState());
 }
 
-void BufferHistory::copyCurrentAndAdvance()
+BufferState &BufferHistory::copyCurrent()
 {
-    bool oa = advanceable();
-    bool or = retractable();
+    bool a = advanceable();
+    bool r = retractable();
     while (size() > _currentIndex+1) {
         removeLast();
     }
@@ -203,10 +203,11 @@ void BufferHistory::copyCurrentAndAdvance()
         }
     }
     _currentIndex = size() - 1;
-    if (oa)
+    if (a)
         emit advanceableChanged(false);
-    if (!or)
+    if (!r)
         emit retractableChanged(true);
+    return current();
 }
 
 BufferState &BufferHistory::current()
@@ -236,14 +237,14 @@ BufferState &BufferHistory::retract()
         }
         if (_currentIndex == 0) {
             emit retractableChanged(false);
-        } 
+        }
     }
     return current();
 }
 
 bool BufferHistory::advanceable()
 {
-    return _currentIndex < size()-1; 
+    return _currentIndex < size()-1;
 }
 
 bool BufferHistory::retractable()
