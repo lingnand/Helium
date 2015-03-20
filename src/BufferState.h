@@ -75,8 +75,8 @@ public:
     // this will remove all items after current
     BufferState &copyCurrent();
     BufferState &current();
-    BufferState &advance();
-    BufferState &retract();
+    bool advance();
+    bool retract();
     bool advanceable();
     bool retractable();
 Q_SIGNALS:
@@ -85,6 +85,6 @@ Q_SIGNALS:
 private:
     int _upperLimit;
     int _currentIndex;
-}
+};
 
 #endif /* BUFFERSTATE_H_ */

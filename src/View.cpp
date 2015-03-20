@@ -206,7 +206,7 @@ void View::autoFocus()
     switch (_mode) {
         case Normal:
             // focus title text only when the text area is empty
-            if (!_buffer->hasPlainText())
+            if (_buffer->state().empty())
                 _titleField->requestFocus();
             else
                 _textArea->requestFocus();

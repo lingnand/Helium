@@ -17,19 +17,19 @@
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
 
 Buffer::Buffer(int historyLimit) :
-    _highlight("default.style"),
     _langMap(srchilite::Instances::getLangMap()),
-    _emittingContentChange(false), _hasUndo(false), _hasRedo(false),
-    _historyIndex(0),
-    _historyLimit(historyLimit),
+    _emittingContentChange(false),
+    _sourceHighlight(std::string(style.toUtf8().constData()), "xhtml.outlang"),
+    _states(BufferHistory(historyLimit)),
     _lastEdited(DEFAULT_EDIT_TIME),
     _worker(this)
 {
-    _history.append(BufferState("", 0, ""));
-    conn(&_highlight, SIGNAL(filetypeChanged(QString)),
-        this, SLOT(onHtmlHighlightFiletypeChanged(QString)));
     conn(&_worker, SIGNAL(inProgressChanged(float)),
         this, SIGNAL(inProgressChanged(float)));
+    conn(&_states, SIGNAL(retractableChanged(bool)),
+        this, SIGNAL(hasUndosChanged(bool)));
+    conn(&_states, SIGNAL(advanceableChanged(bool)),
+        this, SIGNAL(hasRedosChanged(bool)));
 }
 
 Buffer::~Buffer()
@@ -52,98 +52,148 @@ void Buffer::setName(const QString& name)
     }
 }
 
-const QString &Buffer::filetype() const { return _highlight.filetype(); }
+const QString &Buffer::filetype() const { return _filetype; }
 
-void Buffer::setFiletype(const QString &filetype) 
-{ 
-    _highlight.setFiletype(filetype); 
-    // TODO: rehighlight the current bufferstate
-    QString cont(_content);
-    QTextStream input(&cont);
-    _content.clear();
-    QTextStream output(&_content);
-    updateContentForCurrentFiletype(input, output);
-    output << flush;
-    emitContentChanged(NULL, true, -1);
-    emit filetypeChanged(filetype);
-}
-
-const QString &Buffer::content() const { return _content; }
-
-bool Buffer::isEmittingContentChange() const { return _emittingContentChange; }
-
-void Buffer::emitContentChanged(View *source, bool sourceChanged, int cursorPosition)
+void Buffer::setFiletype(const QString &filetype)
 {
-    _emittingContentChange = true;
-    emit contentChanged(source, sourceChanged, _content, cursorPosition);
-    _emittingContentChange = false;
+    if (filetype != _filetype) {
+        _filetype = filetype;
+        printf("Setting filetype to: %s\n", qPrintable(_filetype));
+        if (_filetype.isEmpty()) {
+            _mainStateData.reset();
+        } else {
+            _sourceHighlight.setInputLang(std::string(_filetype.toUtf8().constData()) + ".lang");
+            // initialize the main state data
+            _mainStateData = HighlightStateDataPtr(new HighlightStateData(
+                    _sourceHighlight.getHighlighter()->getMainState(),
+                    srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
+            ));
+        }
+        highlight(_states.current());
+        emit filetypeChanged(_filetype);
+    }
 }
 
-void Buffer::onHtmlHighlightFiletypeChanged(const QString &filetype)
+const BufferState &Buffer::state() const { return _states.current(); }
+
+bool Buffer::emittingStateChange() const { return _emittingStateChange; }
+
+void Buffer::emitStateChange(View *source, bool sourceChanged, bool shouldMatchCursorPosition)
 {
+    _emittingStateChange = true;
+    emit stateChanged(state(), source, sourceChanged, shouldMatchCursorPosition);
+    _emittingStateChange = false;
 }
 
-void Buffer::registerContentChange(int cursorPosition)
+void Buffer::highlight(BufferState &state)
+{
+    state.setFiletype(filetype());
+    HighlightStateDataPtr currentHighlightData = _mainStateData;
+    for (int i = 0; i < state.size(); i++) {
+        currentHighlightData = highlightLine(state[i], currentHighlightData);
+    }
+}
+
+HighlightStateDataPtr Buffer::highlightLine(BufferLine &line, HighlightStateDataPtr startState)
+{
+    if (filetype().isEmpty()) {
+        line.setHighlightText(QString());
+        line.endHighlightState().reset();
+    } else {
+        HighlightStateDataPtr state = HighlightStateDataPtr(new HighlightStateData(*startState));
+        _sourceHighlight.getHighlighter()->setCurrentState(state->currentState);
+        _sourceHighlight.getHighlighter()->setStateStack(state->stateStack);
+        _sourceHighlight.clearBuffer();
+        QByteArray plainText;
+        QTextStream stream(&plainText);
+        line.writePlainText(stream);
+        stream << flush;
+        _sourceHighlight.getHighlighter()->highlightParagraph(std::string(plainText.constData()));
+        line.setHighlightText(QString::fromUtf8(_sourceHighlight.getBuffer().str().c_str()));
+        state->currentState = _sourceHighlight.getHighlighter()->getCurrentState();
+        line.setEndHighlightState(state);
+    }
+    return line.endHighlightState();
+}
+
+// assumption: input does contain some change
+// the state was in sync before the change in the input (with the correct filetype and all)
+// returning: have we highlighted any change?
+bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
+{
+    state.setCursorPosition(cursorPosition);
+    BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
+    // pull in the changes
+    int bufferIndex = qMax(change.startIndex(), 0);
+    int changeIndex = 0;
+    int offset = 0;
+    HighlightStateDataPtr currentHighlightData;
+    int beforeStartIndex = bufferIndex - 1;
+    if (beforeStartIndex >= 0 && beforeStartIndex < state.size()) {
+        currentHighlightData = state[beforeStartIndex].endHighlightState();
+    } else {
+        currentHighlightData = _mainStateData;
+    }
+    HighlightStateDataPtr lastEndHighlightData = currentHighlightData;
+    while (changeIndex < change.size()) {
+        ChangedBufferLine &ch = change[changeIndex];
+        currentHighlightData = highlightLine(ch.line, currentHighlightData);
+        if (ch.index < 0) {
+            // we need to insert this new line
+            state.insert(bufferIndex, ch.line);
+            offset++;
+        } else {
+            // we need to delete the lines until the index match up
+            while (bufferIndex != ch.index+offset) {
+                state.removeAt(bufferIndex);
+                offset--;
+            }
+            lastEndHighlightData = state[bufferIndex].endHighlightState();
+            state[bufferIndex] = ch.line;
+        }
+        changeIndex++;
+        bufferIndex++;
+    }
+    while (bufferIndex < state.size() && *lastEndHighlightData != *currentHighlightData){
+        lastEndHighlightData = state[bufferIndex].endHighlightState();
+        currentHighlightData = highlightLine(state[bufferIndex], currentHighlightData);
+        bufferIndex++;
+    }
+    return !filetype().isEmpty() && !enableDelay || !change.delayable();
+}
+
+void Buffer::replace(BufferState &state, const QList<QPair<TextSelection, QString> > &replaces)
+{
+    // a replace buffer recording currently the stuff to be inserted
+    // a counter recording how many more (consecutive) characters to be replaced
+    // this allows us to break replace position and strings into pieces
+    // an offset that tells us how many more characters to eat away before the
+    // next replace starts (this is to account for the fact that these text selections
+    // are all relative to the old buffer
+}
+
+BufferState &Buffer::modifyState()
 {
     // save history state
     QDateTime current = QDateTime::currentDateTime();
-    if (_historyIndex < _history.count() - 1) {
-        do {
-            _history.removeLast();
-        } while (_historyIndex < _history.count() - 1);
-        ++_historyIndex;
-    } else if (current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
-        ++_historyIndex;
+    if (current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
+        _states.copyCurrent();
     }
     _lastEdited = current;
-    // append/modify the history if necessary
-    if (_historyIndex == _history.count()) {
-        _history.append(BufferState(_content, cursorPosition, filetype()));
-        if (_history.count() > _historyLimit) {
-            _history.removeFirst();
-            --_historyIndex;
-        }
-    } else {
-        _history[_historyIndex] = BufferState(_content, cursorPosition, filetype());
-    }
-    printf("last edit time: %s, historyIndex: %d\n",
-            qPrintable(_lastEdited.toString("hh:mm:ss:zzz")), _historyIndex);
-    // there is always blank text state to undo to
-    setHasUndo(true);
-    setHasRedo(false);
+    return _states.current();
 }
 
 // TODO: also tackle the case where the editor is moved, selection selected
 // in other words, in such situations you also need to rehighlight any delayed content
-void Buffer::parseIncrementalContentChange(View *source, const QString &content, int cursorPosition, bool enableDelay)
+void Buffer::parseChange(View *source, const QString &content, int cursorPosition, bool enableDelay)
 {
-    bool sourceChanged = false;
-    if (!filetype().isEmpty()) {
-        // set up input
-        QString cont(content);
-        QTextStream input(&cont);
-        if (cont.startsWith("<pre>"))
-            input.seek(5);
-//        if (content.endsWith("</pre>"))
-//            content.chop(6);
-//        QTextStream input(&content);
 
-        _content.clear();
-        QTextStream output(&_content);
-        output << "<pre>";
-        sourceChanged = _highlight.highlightHtml(input, output, cursorPosition, enableDelay);
-        output << flush;
-        if (!_content.endsWith("</pre>"))
-            _content += "</pre>";
-    } else {
-        // we assume that when this function is called there is always some change
-        _content = content;
-    }
-//        registerContentChange(cursorPosition);
-    emitContentChanged(source, sourceChanged, -1);
+    QString cont(content);
+    QTextStream input(&cont);
+    emitStateChange(source, mergeChange(modifyState(), input, cursorPosition, enableDelay), false);
 }
 
-void Buffer::parseReplacementContentChange(View *source, QList<QPair<TextSelection, QString> > &replaces)
+void Buffer::parseReplacement(View *source, QList<QPair<TextSelection, QString> > &replaces)
 {
     if (replaces.count() == 0)
         return;
@@ -162,65 +212,29 @@ void Buffer::parseReplacementContentChange(View *source, QList<QPair<TextSelecti
     emitContentChanged(source, sourceChanged, -1);
 }
 
-bool Buffer::hasUndo() const { return _hasUndo; }
+bool Buffer::hasUndo() const { return _states.retractable(); }
 
-void Buffer::setHasUndo(bool hasUndo)
-{
-    if (hasUndo != _hasUndo) {
-        _hasUndo = hasUndo;
-        emit hasUndosChanged(_hasUndo);
-    }
-}
-
-bool Buffer::hasRedo() const { return _hasRedo; }
-
-void Buffer::setHasRedo(bool hasRedo)
-{
-    if (hasRedo != _hasRedo) {
-        _hasRedo = hasRedo;
-        emit hasRedosChanged(_hasRedo);
-    }
-}
+bool Buffer::hasRedo() const { return _states.advanceable(); }
 
 void Buffer::undo()
 {
-    goToHistory(-1);
+    if (_states.retract()) {
+        if (state().filetype() != filetype()) {
+            highlight(state());
+        }
+        _lastEdited = DEFAULT_EDIT_TIME;
+        emitStateChange(NULL, true, true);
+    }
 }
 
 void Buffer::redo()
 {
-    goToHistory(1);
-}
-
-void Buffer::goToHistory(int offset)
-{
-    int i = _historyIndex + offset;
-    if (i >= 0 && i < _history.count()) {
-        setHasUndo(i != 0);
-        setHasRedo(i != _history.count() - 1);
-        _historyIndex = i;
-//        printf("new history index: %d\n", i);
-        BufferState &s = _history[i];
-        // flush the state hash
-        _highlight.clearHighlightStateDataHash();
-        // parse the content if necessary
-        if (s.filetype != filetype()) {
-//            printf("history state with different filetype! current: %s; history: %s\n",
-//                    qPrintable(filetype()), qPrintable(s.filetype));
-            s.filetype = filetype();
-            QString cont(s.content);
-            QTextStream input(&cont);
-            QTextStream output(&s.content);
-            updateContentForCurrentFiletype(input, output);
-            output << flush;
-//            printf("history slot after content reparse: content: %s; filetype: %s\n",
-//                    qPrintable(_history[i].content), qPrintable(_history[i].filetype));
+    if (_states.advance()) {
+        if (state().filetype() != filetype()) {
+            highlight(state());
         }
-        _content = s.content;
-        emitContentChanged(NULL, true, s.cursorPosition);
-//        printf("new content: %s, new cursor position: %d\n", qPrintable(content()), s.second);
-        // invalidate the date time
         _lastEdited = DEFAULT_EDIT_TIME;
+        emitStateChange(NULL, true, true);
     }
 }
 

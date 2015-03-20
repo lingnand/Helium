@@ -215,31 +215,31 @@ BufferState &BufferHistory::current()
     return at(_currentIndex);
 }
 
-BufferState &BufferHistory::advance()
+bool BufferHistory::advance()
 {
-    if (_currentIndex != size() - 1) {
-        _currentIndex++;
-        if (_currentIndex == 1)
-            emit retractableChanged(true);
-        if (_currentIndex == size() - 1) {
-            emit advanceableChanged(false);
-        }
+    if (_currentIndex == size() - 1)
+        return false;
+    _currentIndex++;
+    if (_currentIndex == 1)
+        emit retractableChanged(true);
+    if (_currentIndex == size() - 1) {
+        emit advanceableChanged(false);
     }
-    return current();
+    return true;
 }
 
-BufferState &BufferHistory::retract()
+bool BufferHistory::retract()
 {
-    if (_currentIndex != 0) {
-        _currentIndex--;
-        if (_currentIndex == size() - 2) {
-            emit advanceableChanged(true);
-        }
-        if (_currentIndex == 0) {
-            emit retractableChanged(false);
-        }
+    if (currentIndex == 0)
+        return false;
+    _currentIndex--;
+    if (_currentIndex == size() - 2) {
+        emit advanceableChanged(true);
     }
-    return current();
+    if (_currentIndex == 0) {
+        emit retractableChanged(false);
+    }
+    return true;
 }
 
 bool BufferHistory::advanceable()
