@@ -96,9 +96,9 @@ void Buffer::highlight(BufferState &state)
 
 HighlightStateDataPtr Buffer::highlightLine(BufferLine &line, HighlightStateDataPtr startState)
 {
-    if (filetype().isEmpty()) {
+    if (filetype().isEmpty() || line.isEmpty()) {
         line.setHighlightText(QString());
-        line.endHighlightState().reset();
+        line.setEndHighlightState(startState);
     } else {
         HighlightStateDataPtr state = HighlightStateDataPtr(new HighlightStateData(*startState));
         _sourceHighlight.getHighlighter()->setCurrentState(state->currentState);
@@ -162,14 +162,82 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
     return !filetype().isEmpty() && !enableDelay || !change.delayable();
 }
 
-void Buffer::replace(BufferState &state, const QList<QPair<TextSelection, QString> > &replaces)
+void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
 {
+    if (state.empty())
+        return;
     // a replace buffer recording currently the stuff to be inserted
     // a counter recording how many more (consecutive) characters to be replaced
     // this allows us to break replace position and strings into pieces
     // an offset that tells us how many more characters to eat away before the
     // next replace starts (this is to account for the fact that these text selections
     // are all relative to the old buffer
+    int charCount = 0;
+    int stateIndex = 0;
+    bool shouldHighlight = false;
+    BufferLine *current = &state[stateIndex], *before = NULL, *after = NULL;
+    HighlightStateDataPtr highlightState = _mainStateData;
+    for (int i = 0; i < replaces.size(); i++) {
+        Replacement &rep = replaces[i];
+        // fast forward until reaching the replace start
+        while (true) {
+            if (charCount + current->size() < rep.selection.start) {
+                charCount += current->size() + 1;
+            } else {
+                after = &current->split(rep.selection.start - charCount);
+            }
+            if (before) {
+                before->append(*current);
+                current = before;
+                before = NULL;
+            }
+            if (shouldHighlight) {
+                HighlightStateDataPtr oldEnd = current->endHighlightState();
+                highlightState = highlightLine(*current, highlightState);
+                if (oldEnd && *oldEnd == *highlightState)
+                    shouldHighlight = false;
+            } else
+                highlightState = current->endHighlightState();
+            if (after) {
+                shouldHighlight = true;
+                break;
+            }
+            current = &state[++stateIndex];
+        }
+        // start inserting the replaced content
+        for (int i = 0; i < rep.replacement.size(); i++) {
+            QChar ch = rep.replacement[i];
+            if (ch == '\n') {
+                highlightState = highlightLine(*current, highlightState);
+                state.insert(++stateIndex, BufferLine());
+                current = &state[stateIndex];
+            } else {
+                current.append(ch);
+            }
+        }
+        before = current;
+        current = after;
+        after = NULL;
+        // eat away the length of the replacement
+        while (charCount + current->size() < rep.selection.end) {
+            charCount += current->size() + 1;
+            current = &BufferLine(state[stateIndex+1]);
+            state.removeAt(stateIndex+1);
+        }
+        // split again to remove the replaced part
+        current = &current->split(rep.selection.end - charCount);
+    }
+    before->append(*current);
+    current = before;
+    while (true) {
+        HighlightStateDataPtr oldEnd = current->endHighlightState();
+        highlightState = highlightLine(*current, highlightState);
+        if (oldEnd && *oldEnd == *highlightState)
+            break;
+        if (++stateIndex >= state.size())
+            break;
+        current = &state[stateIndex];
+    }
 }
 
 BufferState &Buffer::modifyState()

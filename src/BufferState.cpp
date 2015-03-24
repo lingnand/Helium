@@ -9,18 +9,16 @@
 
 // BufferLine
 
-void BufferLine::BufferLine():_charCount(0)
-{
-}
+BufferLine::BufferLine():_size(0) {}
 
-int BufferLine::charCount()
+int BufferLine::size()
 {
-    return _charCount;
+    return _size;
 }
 
 bool BufferLine::isEmpty()
 {
-    return _preTextSegments.empty() && _specialChars.empty();
+    return _size == 0;
 }
 
 void BufferLine::setHighlightText(const QString &highlightText)
@@ -43,48 +41,99 @@ void BufferLine::setEndHighlightState(HighlightStateDataPtr endState)
     _endHighlightState = endState;
 }
 
-BufferLine &BufferLine::operator<<(QChar c)
+// TODO need to think about the edge cases!
+BufferLine BufferLine::split(int position)
 {
+    BufferLine split;
+    if (_size <= position) {
+        split._endHighlightState = _endHighlightState;
+        return split;
+    }
+    _size -= position;
+    split._size = position;
+    while (position > 0) {
+        QString elem = _preTextSegments.takeFirst();
+        split._preTextSegments.append(elem.left(position));
+        position -= elem.size();
+        if (position <= 0) {
+            _preTextSegments.prepend(elem.right(-position));
+            break;
+        }
+        split._specialChars.append(_specialChars.takeFirst());
+        position--;
+    }
+    swap(split);
+    return split;
+}
+
+void BufferLine::append(const QChar &c)
+{
+    if (_preTextSegments.size() == _specialChars.size())
+        _preTextSegments.append("");
     switch (c) {
         case '&': case '<': case '>':
             _specialChars.append(c);
-            _preTextSegments.append("");
             break;
         default:
-            if (_preTextSegments.empty()) {
-                _preTextSegments.append("");
-            }
-            // append to the last segment
             _preTextSegments.last().append(c);
     }
-    _charCount++;
-    return *this;
+    _size++;
+}
+
+void BufferLine::append(const QString &str)
+{
+    for (int i = 0; i < str.size(); i++) {
+        append(str[i]);
+    }
+}
+
+void BufferLine::append(const BufferLine &other)
+{
+    if (other._size == 0)
+        return;
+    if (_preTextSegments.size() == _specialChars.size())
+        _preTextSegments.append(other._preTextSegments);
+    else {
+        QList<QString> seg = other._preTextSegments;
+        _preTextSegments.last().append(seg.takeFirst());
+        _preTextSegments.append(seg);
+    }
+    _size += other._size;
+    _specialChars.append(other._specialChars);
+}
+
+BufferLine &BufferLine::operator<<(const QChar &c) { append(c); return *this; }
+BufferLine &BufferLine::operator<<(const QString &str) { append(str); return *this; }
+BufferLine &BufferLine::operator<<(const BufferLine &line) { append(line); return *this; }
+
+void BufferLine::swap(BufferLine &other)
+{
+    BufferLine temp(*this);
+    operator=(other);
+    other = temp;
 }
 
 void BufferLine::writePlainText(QTextStream &output)
 {
-    if (_preTextSegments.empty())
-        return;
-    output << _preTextSegments[0];
-    for (int i = 1; i < _preTextSegments.size(); i++) {
-        output << _specialChars[i-1];
+    for (int i = 0; i < _preTextSegments.size(); i++) {
         output << _preTextSegments[i];
+        if (i >= _specialChars.size())
+            break;
+        output << _specialChars[i];
     }
 }
 
 void BufferLine::writePreText(QTextStream &output)
 {
-    if (_preTextSegments.empty())
-        return;
-    output << _preTextSegments[0];
-    // replace all the special characters
-    for (int i = 1; i < _preTextSegments.size(); i++) {
+    for (int i = 0; i < _preTextSegments.size(); i++) {
+        output << _preTextSegments[i];
+        if (i >= _specialChars.size())
+            break;
         switch (_specialChars[i-1]) {
             case '&': output << "&amp;"; break;
             case '<': output << "&lt;"; break;
             case '>': output << "&gt;"; break;
         }
-        output << _preTextSegments[i];
     }
 }
 
@@ -95,9 +144,7 @@ void BufferLine::writeHighlightText(QTextStream &output)
 
 // BufferState
 
-BufferState::BufferState(): _cursorPosition(-1)
-{
-}
+BufferState::BufferState(): _cursorPosition(-1) {}
 
 QString &BufferState::filetype()
 {
@@ -121,10 +168,8 @@ void BufferState::setCursorPosition(int cursorPosition)
 
 int BufferState::focus(int cursorPosition)
 {
-    if (empty())
-        return -1;
     for (int i = 0; i < size(); i++)  {
-        cursorPosition -= at(i).charCount();
+        cursorPosition -= at(i).size();
         if (cursorPosition <= 0)
             return i;
         // minus the newline character

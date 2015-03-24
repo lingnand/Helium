@@ -18,23 +18,31 @@ class BufferLine
 public:
     BufferLine();
     virtual ~BufferLine() {}
-    int charCount();
+    int size();
     bool isEmpty();
     void setHighlightText(const QString &highlightText);
     HighlightStateDataPtr endHighlightState();
     void setEndHighlightState(HighlightStateDataPtr endState);
 
-    BufferLine &BufferLine::operator<<(QChar c);
+    // line modification
+    // split whatever is after the position into a new BufferLine
+    BufferLine split(int position);
+    void append(const BufferLine &other);
+    void append(const QChar &);
+    void append(const QString &);
+    BufferLine &operator<<(const QChar &);
+    BufferLine &operator<<(const QString &);
+    BufferLine &operator<<(const BufferLine &);
+    void swap(BufferLine &other);
 
     void writePlainText(QTextStream &output);
     void writePreText(QTextStream &output);
     void writeHighlightText(QTextStream &output);
 private:
-    int _charCount;
+    int _size;
     QStringList _preTextSegments;
     QList<QChar> _specialChars;
     QString _highlightText;
-    HighlightStateDataPtr _beginHighlightState;
     HighlightStateDataPtr _endHighlightState;
 };
 // a buffer state is a snapshot of the current buffer content

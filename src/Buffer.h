@@ -57,7 +57,7 @@ public:
     const BufferState &state() const;
     bool emittingStateChange() const;
     Q_SLOT void parseChange(View *source, const QString &content, int cursorPosition, bool enableDelay);
-    Q_SLOT void parseReplacement(View *source, QList<QPair<TextSelection, QString> > &replaces);
+    Q_SLOT void parseReplacement(View *source, QList<Replacement> &replaces);
     bool hasUndo() const;
     Q_SLOT void undo();
     bool hasRedo() const;
