@@ -91,8 +91,8 @@ private:
     HighlightStateDataPtr highlightLine(BufferLine &line, HighlightStateDataPtr startState);
     BufferState &modifyState();
     bool mergeChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
+    void replace(BufferState &state, const QList<Replacement> &replaces);
     void highlight(BufferState &state);
-    void replace(BufferState &state, const QList<QPair<TextSelection, QString> > &replaces);
     Q_SLOT void emitStateChange(View *source, bool sourceChanged, bool shouldMatchCursorPosition);
 };
 

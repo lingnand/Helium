@@ -69,7 +69,7 @@ void Buffer::setFiletype(const QString &filetype)
                     srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
             ));
         }
-        highlight(_states.current());
+        highlight(state());
         emit filetypeChanged(_filetype);
     }
 }
@@ -96,7 +96,7 @@ void Buffer::highlight(BufferState &state)
 
 HighlightStateDataPtr Buffer::highlightLine(BufferLine &line, HighlightStateDataPtr startState)
 {
-    if (filetype().isEmpty() || line.isEmpty()) {
+    if (filetype().isEmpty() || line.isEmpty() || !stateState) {
         line.setHighlightText(QString());
         line.setEndHighlightState(startState);
     } else {
@@ -164,7 +164,7 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
 
 void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
 {
-    if (state.empty())
+    if (state.empty() || replaces.empty())
         return;
     // a replace buffer recording currently the stuff to be inserted
     // a counter recording how many more (consecutive) characters to be replaced
@@ -191,17 +191,17 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
                 current = before;
                 before = NULL;
             }
+            if (after) {
+                shouldHighlight = !filetype().isEmpty();
+                break;
+            }
             if (shouldHighlight) {
                 HighlightStateDataPtr oldEnd = current->endHighlightState();
                 highlightState = highlightLine(*current, highlightState);
-                if (oldEnd && *oldEnd == *highlightState)
+                if (oldEnd == highlightState || oldEnd && highlightState && *oldEnd == *highlightState)
                     shouldHighlight = false;
             } else
                 highlightState = current->endHighlightState();
-            if (after) {
-                shouldHighlight = true;
-                break;
-            }
             current = &state[++stateIndex];
         }
         // start inserting the replaced content
@@ -228,16 +228,19 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
         current = &current->split(rep.selection.end - charCount);
     }
     before->append(*current);
-    current = before;
-    while (true) {
-        HighlightStateDataPtr oldEnd = current->endHighlightState();
-        highlightState = highlightLine(*current, highlightState);
-        if (oldEnd && *oldEnd == *highlightState)
-            break;
-        if (++stateIndex >= state.size())
-            break;
-        current = &state[stateIndex];
+    if (shouldHighlight) {
+        current = before;
+        while (true) {
+            HighlightStateDataPtr oldEnd = current->endHighlightState();
+            highlightState = highlightLine(*current, highlightState);
+            if (oldEnd == highlightState || oldEnd && highlightState && *oldEnd == *highlightState)
+                break;
+            if (++stateIndex >= state.size())
+                break;
+            current = &state[stateIndex];
+        }
     }
+    return;
 }
 
 BufferState &Buffer::modifyState()
@@ -248,7 +251,7 @@ BufferState &Buffer::modifyState()
         _states.copyCurrent();
     }
     _lastEdited = current;
-    return _states.current();
+    return state();
 }
 
 // TODO: also tackle the case where the editor is moved, selection selected
@@ -261,23 +264,12 @@ void Buffer::parseChange(View *source, const QString &content, int cursorPositio
     emitStateChange(source, mergeChange(modifyState(), input, cursorPosition, enableDelay), false);
 }
 
-void Buffer::parseReplacement(View *source, QList<QPair<TextSelection, QString> > &replaces)
+void Buffer::parseReplacement(View *source, QList<Replacement> &replaces)
 {
-    if (replaces.count() == 0)
-        return;
-    bool sourceChanged = false;
-    QString cont(_content);
-    QTextStream input(&cont);
-    _content.clear();
-    QTextStream output(&_content);
-    if (filetype().isEmpty()) {
-        sourceChanged = _extractor.replacePlainText(input, output, replaces);
-    } else {
-        sourceChanged = _highlight.replaceHtml(input, output, replaces);
+    if (!replaces.empty()) {
+        replace(modifyState(), replaces);
+        emitStateChange(source, true, false);
     }
-    output << flush;
-//        registerContentChange(-1);
-    emitContentChanged(source, sourceChanged, -1);
 }
 
 bool Buffer::hasUndo() const { return _states.retractable(); }
