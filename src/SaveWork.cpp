@@ -18,8 +18,7 @@ void SaveWork::run()
     // get the original text of the content
     QString toSave;
     QTextStream output(&toSave);
-    QTextStream input(&_html);
-    _extractor.extractPlainText(input, output);
+    _state.writePlainText(output);
     output << flush;
     printf("toSave: %s\n", qPrintable(toSave));
     int max = 1000;
@@ -33,7 +32,7 @@ void SaveWork::run()
     emit inProgressChanged(0);
 }
 
-void SaveWork::setHtml(const QString &html)
+void SaveWork::setState(const BufferState &state)
 {
-    _html = html;
+    _state = state;
 }

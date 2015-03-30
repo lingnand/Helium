@@ -9,6 +9,7 @@
 #define BUFFERSTATE_H_
 
 #include <QObject>
+#include <QStringList>
 #include <QTextStream>
 #include <src/HighlightStateData.h>
 
@@ -38,6 +39,10 @@ public:
     void writePlainText(QTextStream &output);
     void writePreText(QTextStream &output);
     void writeHighlightText(QTextStream &output);
+    // convenience functions
+    QString plainText();
+    QString preText();
+    QString highlightText();
 private:
     int _size;
     QStringList _preTextSegments;
@@ -53,7 +58,7 @@ private:
 // by comparing the user-changed actual textArea content with the current BufferState,
 // referencing the current one as much as possible and add/delete BufferLine's
 // when necessary
-class BufferState : QList<BufferLine>
+class BufferState : public QList<BufferLine>
 {
 public:
     BufferState();
@@ -65,34 +70,17 @@ public:
     void writePreText(QTextStream &output);
     // beginIndex should always be smaller than endIndex
     void writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex);
-    QString &filetype();
+    void writeHighlightedHtml(QTextStream &output, int beginIndex = 0);
+    // convenience function that returns a QString
+    QString highlightedHtml(int beginIndex, int endIndex);
+    QString highlightedHtml(int beginIndex = 0);
+    const QString &filetype() const;
     int cursorPosition();
     void setCursorPosition(int cursorPosition);
-    void setFiletype(QString &filetype);
+    void setFiletype(const QString &filetype);
 private:
     QString _filetype;
     int _cursorPosition;
-};
-
-class BufferHistory : QList<BufferState>
-{
-public:
-    // anything equal or below 0 means no limitation on the size
-    BufferHistory(int upperLimit = 0);
-    virtual ~BufferHistory() {}
-    // this will remove all items after current
-    BufferState &copyCurrent();
-    BufferState &current();
-    bool advance();
-    bool retract();
-    bool advanceable();
-    bool retractable();
-Q_SIGNALS:
-    void advanceableChanged(bool advanceable);
-    void retractableChanged(bool retractable);
-private:
-    int _upperLimit;
-    int _currentIndex;
 };
 
 #endif /* BUFFERSTATE_H_ */

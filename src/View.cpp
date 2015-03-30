@@ -351,7 +351,7 @@ void View::select(const TextSelection &selection)
 {
     // use lose focus and then refocus to force scrolling to the right position
     _textArea->loseFocus();
-    _textArea->editor()->setSelection(selection.first, selection.second);
+    _textArea->editor()->setSelection(selection.start, selection.end);
     _textArea->requestFocus();
 }
 
@@ -373,7 +373,10 @@ View::FindQueryUpdateStatus View::updateFindQuery(bool interactive)
     }
     if (_findBufferDirty) {
         _findBufferDirty = false;
-        _findBuffer = _buffer->plainText().toUtf8().constData();
+        _findBuffer.clear();
+        QTextStream stream(&_findBuffer);
+        _buffer->state().writePlainText(stream);
+        stream.flush();
         status = Changed;
     }
     if (status == Changed)
@@ -400,7 +403,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             } else {
                 _bofIndex = -1;
             }
-            _findIterator = boost::sregex_iterator(
+            _findIterator = boost::cregex_iterator(
                     _findBuffer.begin() + findOffset,
                     _findBuffer.end(),
                     _findRegex);
@@ -424,7 +427,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             }
             if (_findIndex < _findHits.count()) {
                 if (interactive)
-                    select(_findHits[_findIndex].first);
+                    select(_findHits[_findIndex].selection);
                 return;
             }
             // we've reached end of the hit list
@@ -432,7 +435,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             break;
         }
     }
-    boost::sregex_iterator end = boost::sregex_iterator();
+    boost::cregex_iterator end = boost::cregex_iterator();
     if (_findIterator == end) {
         if (_bofIndex >= 0) {
             printf("reached end of the last find loop; marking complete\n");
@@ -443,13 +446,13 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
                     toast(tr(TOAST_FIND_NOT_FOUND));
             } else {
                 if (interactive)
-                    select(_findHits[0].first);
+                    select(_findHits[0].selection);
             }
             return;
         } else {
             // we've reached end
             // try from beginning again
-            _findIterator = boost::sregex_iterator(
+            _findIterator = boost::cregex_iterator(
                     _findBuffer.begin(),
                     _findBuffer.end(),
                     _findRegex);
@@ -471,7 +474,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
     Q_ASSERT(_findIndex == _findHits.count());
     TextSelection selection((*_findIterator)[0].first - _findBuffer.begin(),
             (*_findIterator)[0].second - _findBuffer.begin());
-    if (!_findHits.isEmpty() && selection == _findHits[0].first) {
+    if (!_findHits.isEmpty() && selection == _findHits[0].selection) {
         // we've wrapped around and found the same selection as the first one
         printf("found the same match in the list; marking complete\n");
         // take care of the bofIndex to match the change in the findIndex
@@ -498,7 +501,7 @@ void View::findPrev()
             // we always enter the last find loop, because a reverse search will trigger
             // a whole run-down iterator
             _bofIndex = 0;
-            _findIterator = boost::sregex_iterator(
+            _findIterator = boost::cregex_iterator(
                     _findBuffer.begin(),
                     _findBuffer.end(),
                     _findRegex);
@@ -506,7 +509,7 @@ void View::findPrev()
             // use -1 to indicate nothing in the hit list
             _findIndex = -1;
             // begin to find all the matches until passes the given offset
-            boost::sregex_iterator end = boost::sregex_iterator();
+            boost::cregex_iterator end = boost::cregex_iterator();
             while (true) {
                 if (_findIterator == end) {
                     // no more matches can be found
@@ -537,7 +540,7 @@ void View::findPrev()
                 Q_ASSERT(_findHits.isEmpty());
                 toast(tr(TOAST_FIND_NOT_FOUND));
             } else {
-                select(_findHits[_findIndex].first);
+                select(_findHits[_findIndex].selection);
             }
             break;
         }
@@ -556,21 +559,21 @@ void View::findPrev()
                 _findIndex = _findHits.count() - 1;
             }
             if (_findIndex >= 0) {
-                select(_findHits[_findIndex].first);
+                select(_findHits[_findIndex].selection);
                 return;
             }
             // we've reached the left end of the hit list
             // findIndex is negative here
             // exhaust the current iterator and switch to the beginning-from-the-top iterator
             // and exhaust that as well. the point is to complete the whole list of find hits
-            boost::sregex_iterator end = boost::sregex_iterator();
+            boost::cregex_iterator end = boost::cregex_iterator();
             while (true) {
                 // increment find iterator
                 _findIterator++;
                 if (_findIterator == end) {
                     // no more matches can be found
                     if (_bofIndex < 0) {
-                        _findIterator = boost::sregex_iterator(
+                        _findIterator = boost::cregex_iterator(
                                 _findBuffer.begin(),
                                 _findBuffer.end(),
                                 _findRegex);
@@ -588,7 +591,7 @@ void View::findPrev()
                 // check for wrapping condition
                 TextSelection selection((*_findIterator)[0].first - _findBuffer.begin(),
                     (*_findIterator)[0].second - _findBuffer.begin());
-                if (!_findHits.isEmpty() && selection == _findHits[0].first) {
+                if (!_findHits.isEmpty() && selection == _findHits[0].selection) {
                     _findComplete = true;
                     if (_bofIndex == _findHits.count()) {
                         _bofIndex = 0;
@@ -600,7 +603,7 @@ void View::findPrev()
                 }
             }
             _findIndex = _findHits.count() - 1;
-            select(_findHits[_findIndex].first);
+            select(_findHits[_findIndex].selection);
             break;
         }
     }
@@ -614,8 +617,8 @@ void View::replaceNext()
     if (status == Unchanged) {
         TextSelection current(_textArea->editor()->selectionStart(),
                 _textArea->editor()->selectionEnd());
-        if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].first) {
-            QString rep = QString::fromUtf8(_findHits[_findIndex].second.format(_replaceField->text().toUtf8().constData()).c_str());
+        if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].selection) {
+            QString rep = QString::fromUtf8(_findHits[_findIndex].match.format(_replaceField->text().toUtf8().constData()).c_str());
             // TODO: take care of \r, etc. in the replacement string?
             // TODO: change the delay of the highlighter to false so that we can do
             // highlight fully and properly (normally this wouldn't be too much of an issue)
@@ -639,7 +642,7 @@ void View::replaceAll()
     // get the replace index
     int replaceIndex = _findIndex;
     printf("replace index is %d\n", replaceIndex);
-    std::string replacement = _replaceField->text().toUtf8().constData();
+    const char *replacement = _replaceField->text().toUtf8().constData();
     // refill all the findMatches in the _findHits
     while (!_findComplete) {
         // there shouldn't be any change in the status
@@ -655,18 +658,18 @@ void View::replaceAll()
         if (index == _bofIndex) {
             break;
         }
-        _replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
-                QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
+        _replaces.append(Replacement(_findHits[index].selection,
+                QString::fromUtf8(_findHits[index].match.format(replacement).c_str())));
     }
     // do the actual replaces
-    _buffer->parseReplacementContentChange(this, _replaces);
+    _buffer->parseReplacement(this, _replaces);
     _numberOfReplacesTillBottom = _replaces.count();
     _replaces.clear();
     for (; i < _findHits.count(); i++) {
         index = (replaceIndex + i) % _findHits.count();
 //        printf("adding index %d to the second replaces queue\n", index);
-        _replaces.append(QPair<TextSelection, QString>(_findHits[index].first,
-                QString::fromUtf8(_findHits[index].second.format(replacement).c_str())));
+        _replaces.append(Replacement(_findHits[index].selection,
+                QString::fromUtf8(_findHits[index].match.format(replacement).c_str())));
     }
     // mark the buffer as dirty
     _findBufferDirty = true;
@@ -679,7 +682,7 @@ void View::replaceAll()
 void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        _buffer->parseReplacementContentChange(this, _replaces);
+        _buffer->parseReplacement(this, _replaces);
         dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
                 tr(DIALOG_REPLACE_FINISHED_TITLE),
                 QString(tr(DIALOG_REPLACE_FINISHED_BODY))
@@ -707,8 +710,8 @@ void View::setBuffer(Buffer* buffer)
         if (_buffer) {
             disconn(_textArea, SIGNAL(textChanging(QString)),
                 this, SLOT(onTextAreaTextChanged(QString)));
-            disconn(_buffer, SIGNAL(contentChanged(View *, bool, QString, int)),
-                this, SLOT(onBufferContentChanged(View *, bool, QString, int)));
+            disconn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
+                this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
             disconn(_buffer, SIGNAL(nameChanged(QString)),
                 this, SLOT(setTitle(QString)));
             disconn(_buffer, SIGNAL(filetypeChanged(QString)),
@@ -721,11 +724,11 @@ void View::setBuffer(Buffer* buffer)
                 this, SLOT(onBufferHasRedosChanged(bool)));
         }
         _buffer = buffer;
-        onBufferContentChanged(NULL, true, _buffer->content(), -1);
+        onBufferStateChanged(buffer->state(), NULL, false, false);
         conn(_textArea, SIGNAL(textChanging(QString)),
             this, SLOT(onTextAreaTextChanged(QString)));
-        conn(_buffer, SIGNAL(contentChanged(View *, bool, QString, int)),
-            this, SLOT(onBufferContentChanged(View *, bool, QString, int)));
+        conn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
+            this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
 
         setTitle(_buffer->name());
         conn(_buffer, SIGNAL(nameChanged(QString)),
@@ -768,8 +771,8 @@ void View::onTextAreaTextChanged(const QString& text)
 //    fprintf(stdout, "text changed: %s\n", qPrintable(text));
 //    if (_textArea->editor()->selectedText().isEmpty())
     // only when the the cursor is currently before
-    if (!_buffer->isEmittingContentChange())
-        _buffer->parseIncrementalContentChange(this, text, _textArea->editor()->cursorPosition(), true);
+    if (!_buffer->emittingStateChange())
+        _buffer->parseChange(this, text, _textArea->editor()->cursorPosition(), true);
 }
 
 void View::onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
@@ -881,11 +884,14 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
     }
 }
 
-void View::onBufferContentChanged(View *source, bool sourceChanged, const QString& content, int cursorPosition) {
+// Is textChanging or cursorPositionChanged emitted first?
+void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
     if (this != source || sourceChanged) {
-    //        printf("## text area out of sync with buffer content\n### text area: %s\n### buffer: %s\n", qPrintable(_textArea->text()), qPrintable(content));
-        int pos = cursorPosition < 0 ? _textArea->editor()->cursorPosition() : cursorPosition;
-        _textArea->setText(content);
+        QString highlightedHtml = state.highlightedHtml();
+        printf("## text area out of sync with buffer content\n### text area:\n%s\n### buffer:\n%s\n",
+                qPrintable(_textArea->text()), qPrintable(highlightedHtml));
+        int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
+        _textArea->setText(highlightedHtml);
         _textArea->editor()->setCursorPosition(pos);
     }
 }

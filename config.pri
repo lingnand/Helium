@@ -211,12 +211,12 @@ config_pri_assets {
 config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/Buffer.cpp) \
+        $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/Helper.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
-        $$quote($$BASEDIR/src/HtmlPlainTextExtractor.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/SaveWork.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
@@ -291,6 +291,7 @@ config_pri_source_group1 {
 
     HEADERS += \
         $$quote($$BASEDIR/src/Buffer.h) \
+        $$quote($$BASEDIR/src/BufferHistory.h) \
         $$quote($$BASEDIR/src/BufferState.h) \
         $$quote($$BASEDIR/src/BufferWork.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
@@ -298,7 +299,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
-        $$quote($$BASEDIR/src/HtmlPlainTextExtractor.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/SaveWork.h) \
         $$quote($$BASEDIR/src/Type.h) \

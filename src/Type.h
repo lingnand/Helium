@@ -8,12 +8,16 @@
 #ifndef TYPE_H_
 #define TYPE_H_
 
-typedef QPair<int, int> TextSelection;
-
 struct TextSelection {
     int start;
     int end;
     TextSelection(int _start, int _end): start(_start), end(_end) {}
+    bool operator==(const TextSelection &other) const {
+        return start == other.start && end == other.end;
+    }
+    bool operator!=(const TextSelection &other) const {
+        return !operator==(other);
+    }
 };
 
 struct Replacement {

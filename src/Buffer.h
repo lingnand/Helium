@@ -27,14 +27,12 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <boost/regex.hpp>
-#include <src/HtmlHighlight.h>
 #include <src/BufferWorker.h>
-#include <src/HtmlPlainTextExtractor.h>
 #include <src/HtmlBufferChangeParser.h>
 #include <src/srchilite/sourcehighlight.h>
 #include <src/HighlightStateData.h>
 #include <src/Type.h>
-#include <src/BufferState.h>
+#include <src/BufferHistory.h>
 
 namespace srchilite {
     class LangMap;
@@ -46,21 +44,21 @@ class Buffer : public QObject
 {
     Q_OBJECT
 public:
-    Buffer(int historyLimit);
+    Buffer(int historyLimit = 0);
     virtual ~Buffer();
     // returns the name of the current buffer, "" for no name
     const QString &name() const;
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name);
-    const QString &filetype() const;
+    const QString &filetype();
     Q_SLOT void setFiletype(const QString &filetype);
-    const BufferState &state() const;
+    BufferState &state();
     bool emittingStateChange() const;
     Q_SLOT void parseChange(View *source, const QString &content, int cursorPosition, bool enableDelay);
     Q_SLOT void parseReplacement(View *source, QList<Replacement> &replaces);
-    bool hasUndo() const;
+    bool hasUndo();
     Q_SLOT void undo();
-    bool hasRedo() const;
+    bool hasRedo();
     Q_SLOT void redo();
     bool hasPlainText();
     QString plainText();
@@ -68,7 +66,7 @@ public:
 Q_SIGNALS:
     void nameChanged(const QString &name);
     void filetypeChanged(const QString &filetype);
-    void stateChanged(const BufferState &state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
+    void stateChanged(BufferState &state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
     void inProgressChanged(float progress);
@@ -90,7 +88,7 @@ private:
 
     HighlightStateDataPtr highlightLine(BufferLine &line, HighlightStateDataPtr startState);
     BufferState &modifyState();
-    bool mergeChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay)
+    bool mergeChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay);
     void replace(BufferState &state, const QList<Replacement> &replaces);
     void highlight(BufferState &state);
     Q_SLOT void emitStateChange(View *source, bool sourceChanged, bool shouldMatchCursorPosition);

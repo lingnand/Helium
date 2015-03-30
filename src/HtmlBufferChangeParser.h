@@ -13,7 +13,7 @@ struct ChangedBufferLine
     ChangedBufferLine(): index(-1), line(BufferLine()) {}
 };
 
-class BufferStateChange : QList<ChangedBufferLine>
+class BufferStateChange : public QList<ChangedBufferLine>
 {
     friend class HtmlBufferChangeParser;
 public:
@@ -27,7 +27,7 @@ public:
     }
 private:
     // whether this buffer change is delayable
-    _delayable;
+    bool _delayable;
     void setDelayable(bool delayable) { _delayable = delayable; }
 };
 

@@ -22,9 +22,9 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
     if (!_startParsing)
         return;
     if (ch == '\n') {
-        if (_change.size() > 1 || // already recored some change in the past
+        if (_change.size() > 1 || // already recorded some change in the past
             // start recording change
-            (!_afterTTTag && _change.last().charCount() > 0)) {
+            (!_afterTTTag && _change.last().line.size() > 0)) {
             // this line IS a change that should be recorded
             _change.append(ChangedBufferLine());
         }
@@ -35,11 +35,11 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         else
             _change.last() = ChangedBufferLine();
     } else if (!ch.isNull()) {
-        _change.last() << ch;
+        _change.last().line << ch;
     }
     if (!_reachedCursor && charCount == _cursorPosition) {
         _reachedCursor = true;
-        printf("reached cursor, current ch: %s\n, charCount: %d\n", qPrintable(QString(ch)), charCount);
+        printf("reached cursor, current ch: %s, charCount: %d\n", qPrintable(QString(ch)), charCount);
         // if there is only one line of change
         if (_change.size() == 1 &&
                 // not highlight if the character is a letter or number
@@ -51,7 +51,7 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
                 // in this case, we assume all white space characters can
                 // TODO: devise a strategy to reliably tell if there is prediction prompt
                 // instead of just crudely assume ANYTHING will prompt for prediction
-                ||  (ch.isSpace() || ch == '\n') && _lastHighlightDelayedLine < 0)) {
+                ||  ((ch.isSpace() || ch == '\n') && _lastDelayedLine < 0))) {
             printf("entered delayed line for ch %s, _lastHighlightDelayedLine: %d\n", qPrintable(QString(ch)), _lastDelayedLine);
             _lastDelayedLine = _change.last().index;
         } else {

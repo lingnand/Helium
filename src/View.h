@@ -12,6 +12,7 @@
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
 #include <src/Type.h>
+#include <src/BufferState.h>
 #include <bb/system/SystemUiResult>
 
 namespace bb {
@@ -77,17 +78,21 @@ private:
     enum FindQueryUpdateStatus { Changed, Unchanged, Invalid };
     QString _findQuery;
     bool _findBufferDirty;
-    std::string _findBuffer;
-    boost::sregex_iterator _findIterator;
+    QByteArray _findBuffer;
+    boost::cregex_iterator _findIterator;
     boost::regex _findRegex;
     bool _findComplete;
-    typedef QPair<TextSelection, boost::smatch> FindMatch;
+    struct FindMatch {
+        TextSelection selection;
+        boost::cmatch match;
+        FindMatch(TextSelection _sel, boost::cmatch _match): selection(_sel), match(_match) {}
+    };
     QList<FindMatch> _findHits;
     int _findIndex;
     // negative means the top/first match is still indeterminate
     int _bofIndex;
     QString _replaceQuery;
-    QList<QPair<TextSelection, QString> > _replaces;
+    QList<Replacement> _replaces;
     int _numberOfReplacesTillBottom;
 
     Buffer *_buffer;
@@ -119,7 +124,7 @@ private:
     Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
-    Q_SLOT void onBufferContentChanged(View *source, bool sourceChanged, const QString& content, int cursorPosition);
+    Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
     Q_SLOT void onBufferProgressChanged(float progress);
     Q_SLOT void onBufferHasUndosChanged(bool hasUndos);
     Q_SLOT void onBufferHasRedosChanged(bool hasRedos);

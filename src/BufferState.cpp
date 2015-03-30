@@ -26,11 +26,6 @@ void BufferLine::setHighlightText(const QString &highlightText)
     _highlightText = highlightText;
 }
 
-HighlightStateDataPtr BufferLine::beginHighlightState()
-{
-    return _beginHighlightState;
-}
-
 HighlightStateDataPtr BufferLine::endHighlightState()
 {
     return _endHighlightState;
@@ -70,12 +65,10 @@ void BufferLine::append(const QChar &c)
 {
     if (_preTextSegments.size() == _specialChars.size())
         _preTextSegments.append("");
-    switch (c) {
-        case '&': case '<': case '>':
-            _specialChars.append(c);
-            break;
-        default:
-            _preTextSegments.last().append(c);
+    if (c == '&' || c == '<' || c == '>') {
+        _specialChars.append(c);
+    } else {
+        _preTextSegments.last().append(c);
     }
     _size++;
 }
@@ -129,11 +122,12 @@ void BufferLine::writePreText(QTextStream &output)
         output << _preTextSegments[i];
         if (i >= _specialChars.size())
             break;
-        switch (_specialChars[i-1]) {
-            case '&': output << "&amp;"; break;
-            case '<': output << "&lt;"; break;
-            case '>': output << "&gt;"; break;
-        }
+        if (_specialChars[i-1] == '&')
+            output << "&amp";
+        else if (_specialChars[i-1] == '<')
+            output << "&lt;";
+        else if (_specialChars[i-1] == '>')
+            output << "&gt;";
     }
 }
 
@@ -142,16 +136,39 @@ void BufferLine::writeHighlightText(QTextStream &output)
     output << _highlightText;
 }
 
+QString BufferLine::plainText()
+{
+    QString output;
+    QTextStream stream(&output);
+    writePlainText(stream);
+    stream.flush();
+    return output;
+}
+
+QString BufferLine::preText()
+{
+    QString output;
+    QTextStream stream(&output);
+    writePreText(stream);
+    stream.flush();
+    return output;
+}
+
+QString BufferLine::highlightText()
+{
+    return _highlightText;
+}
+
 // BufferState
 
 BufferState::BufferState(): _cursorPosition(-1) {}
 
-QString &BufferState::filetype()
+const QString &BufferState::filetype() const
 {
     return _filetype;
 }
 
-void BufferState::setFiletype(QString &filetype)
+void BufferState::setFiletype(const QString &filetype)
 {
     _filetype = filetype;
 }
@@ -169,7 +186,7 @@ void BufferState::setCursorPosition(int cursorPosition)
 int BufferState::focus(int cursorPosition)
 {
     for (int i = 0; i < size(); i++)  {
-        cursorPosition -= at(i).size();
+        cursorPosition -= operator[](i).size();
         if (cursorPosition <= 0)
             return i;
         // minus the newline character
@@ -182,10 +199,10 @@ void BufferState::writePlainText(QTextStream &output)
 {
     if (empty())
        return;
-    at(0).writePlainText(output);
+    operator[](0).writePlainText(output);
     for (int i = 1; i < size(); i++) {
         output << '\n';
-        at(i).writePlainText(output);
+        operator[](i).writePlainText(output);
     }
 }
 
@@ -194,23 +211,23 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
     if (empty())
         return;
     if (filetype().isEmpty()) {
-        at(0).writePreText(output);
+        operator[](0).writePreText(output);
         for (int i = 1; i < size(); i++) {
             output << '\n';
-            at(i).writePreText(output);
+            operator[](i).writePreText(output);
         }
     } else {
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;
         for (; i < beginIndex; i++) {
-            at(i).writePreText(output);
+            operator[](i).writePreText(output);
             output << '\n';
         }
         while (true) {
-            if (!at(i).isEmpty()) {
+            if (!operator[](i).isEmpty()) {
                 output << QString("<q id='%1'>").arg(i);
-                at(i).writeHighlightText(output);
+                operator[](i).writeHighlightText(output);
                 output << "</q>";
             }
             i++;
@@ -221,78 +238,26 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         }
         for (; i < size(); i++) {
             output << '\n';
-            at(i).writePreText(output);
+            operator[](i).writePreText(output);
         }
     }
 }
 
-// BufferHistory
-
-BufferHistory::BufferHistory(int upperLimit): _upperLimit(upperLimit), _currentIndex(0)
+void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex)
 {
-    append(BufferState());
+    writeHighlightedHtml(output, beginIndex, size());
 }
 
-BufferState &BufferHistory::copyCurrent()
+QString BufferState::highlightedHtml(int beginIndex, int endIndex)
 {
-    bool a = advanceable();
-    bool r = retractable();
-    while (size() > _currentIndex+1) {
-        removeLast();
-    }
-    append(BufferState(last()));
-    // take out of previous items (if necessary)
-    if (_upperLimit > 0) {
-        while (size() > _upperLimit) {
-            removeFirst();
-        }
-    }
-    _currentIndex = size() - 1;
-    if (a)
-        emit advanceableChanged(false);
-    if (!r)
-        emit retractableChanged(true);
-    return current();
+    QString content;
+    QTextStream stream(&content);
+    writeHighlightedHtml(stream, beginIndex, endIndex);
+    stream.flush();
+    return content;
 }
 
-BufferState &BufferHistory::current()
+QString BufferState::highlightedHtml(int beginIndex)
 {
-    return at(_currentIndex);
-}
-
-bool BufferHistory::advance()
-{
-    if (_currentIndex == size() - 1)
-        return false;
-    _currentIndex++;
-    if (_currentIndex == 1)
-        emit retractableChanged(true);
-    if (_currentIndex == size() - 1) {
-        emit advanceableChanged(false);
-    }
-    return true;
-}
-
-bool BufferHistory::retract()
-{
-    if (currentIndex == 0)
-        return false;
-    _currentIndex--;
-    if (_currentIndex == size() - 2) {
-        emit advanceableChanged(true);
-    }
-    if (_currentIndex == 0) {
-        emit retractableChanged(false);
-    }
-    return true;
-}
-
-bool BufferHistory::advanceable()
-{
-    return _currentIndex < size()-1;
-}
-
-bool BufferHistory::retractable()
-{
-    return _currentIndex > 0;
+    return highlightedHtml(0, size());
 }
