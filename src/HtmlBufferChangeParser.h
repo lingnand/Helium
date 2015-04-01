@@ -39,7 +39,6 @@ public:
 private:
     bool _startParsing;
     bool _stopParsing;
-    bool _afterQTag;
     bool _reachedCursor;
     int _lastDelayedLine;
     int _cursorPosition;

@@ -8,7 +8,6 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
 {
     _startParsing = true;
     _stopParsing = false;
-    _afterQTag = false;
     _reachedCursor = false;
     _cursorPosition = cursorPosition;
     _change = BufferStateChange();
@@ -24,49 +23,13 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         return;
     if (ch == '\n' || ch == '\r') {
         printf("encountered newline, charCount: %d\n", charCount);
-        switch (_change.size()) {
-            case 1:
-                _change.append(ChangedBufferLine());
-                break;
-            case 2:
-                // now we have 2 lines of last change
-                if (_change[1].line.isEmpty() && _change[0].index >= 0) {
-                    _change[1].line.index = _change[0].index+1;
-                    _change.removeFirst();
-                } else if (_change[0].index >= 0 && _change[1].index >= 0) {
-                    _change.removeFirst();
-                }
-        }
-        if (_change.size() < 2) {
-        } else if (_change.size() == 2) {
-
-        }
-//        // identify if this is an empty line
-        if (_change.last().line.isEmpty()) {
-            if (_change.size() == 1) {
-                // let's append
-                _change.append(ChangedBufferLine());
-            } else if (_change.size() == 2) {
-
-            } else {
-                _change.append(ChangedBufferLine());
-            }
-        }
-        if (_change.size() > 1 || // already recorded some change in the past
-            // not after a </q> tag
-            !_afterQTag) {
-            printf("appending new ChangedBufferLine\n");
-            // this line IS a change that should be recorded
-            _change.append(ChangedBufferLine());
-        }
-        if (_reachedCursor)
-            // stop parsing after the line which contains the cursor
-            // we don't reset the cursor line
+        // we always append new lines (let the <q> tag clear unuseful lines out!)
+        if (_reachedCursor && _change.last().index >= 0) {
+            // we are done (last line IS a context line)
             _stopParsing = true;
-        else {
-            printf("reseting last ChangedBufferLine\n");
-            _change.last() = ChangedBufferLine();
+            return;
         }
+        _change.append(ChangedBufferLine());
     } else if (!ch.isNull()) {
         _change.last().line << ch;
     }
@@ -91,7 +54,6 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
             _lastDelayedLine = -1;
         }
     }
-    _afterQTag = false;
 }
 
 void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
@@ -103,11 +65,14 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
     } else if (name == "q") {
         Q_ASSERT(attributeName == "id" && !attributeValue.isEmpty());
         _startParsing = true;
+        // after seeing q we can throw away all the previous lines
+        // (when we haven't reached cursor yet)
+        if (!_reachedCursor) {
+            while (_change.size() > 1)
+                _change.removeFirst();
+        }
         _change.last().index = attributeValue.toInt();
-    } else if (name == "/q") {
-        _afterQTag = true;
     }
-
 }
 void HtmlBufferChangeParser::parseHtmlCharacter(const QChar &ch) {}
 bool HtmlBufferChangeParser::stopParsing() { return _stopParsing; }
