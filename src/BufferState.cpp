@@ -210,6 +210,7 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
 {
     if (empty())
         return;
+    output << "<pre>";
     if (filetype().isEmpty()) {
         operator[](0).writePreText(output);
         for (int i = 1; i < size(); i++) {
@@ -241,6 +242,7 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
             operator[](i).writePreText(output);
         }
     }
+    output << "</pre>";
 }
 
 void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex)

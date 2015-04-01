@@ -81,7 +81,10 @@ View::View(Buffer* buffer):
 {
     _textArea = TextArea::create()
         .format(TextFormat::Html)
-        .inputFlags(TextInputFlag::SpellCheckOff)
+        .inputFlags(TextInputFlag::SpellCheckOff
+                    | TextInputFlag::AutoCorrectionOff
+                    | TextInputFlag::AutoCapitalizationOff
+                    | TextInputFlag::AutoPeriodOff)
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))
@@ -888,7 +891,7 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
 void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
     if (this != source || sourceChanged) {
         QString highlightedHtml = state.highlightedHtml();
-        printf("## text area out of sync with buffer content\n### text area:\n%s\n### buffer:\n%s\n",
+        printf("## text area out of sync\n### text area:\n%s\n### buffer:\n%s\n",
                 qPrintable(_textArea->text()), qPrintable(highlightedHtml));
         int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
         _textArea->setText(highlightedHtml);

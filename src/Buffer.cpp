@@ -123,9 +123,9 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
     state.setCursorPosition(cursorPosition);
     BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
     // print out the change parsed
-//    for (int i = 0; i < change.size(); i++) {
-//        printf("change %d: index - %d, plainText - %s\n", i, change[i].index, qPrintable(change[i].line.plainText()));
-//    }
+    for (int i = 0; i < change.size(); i++) {
+        printf("change %d: index - %d, plainText - %s\n", i, change[i].index, qPrintable(change[i].line.plainText()));
+    }
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
     int changeIndex = -1;
@@ -162,8 +162,10 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
             state.removeLast();
         }
     } else {
+        printf("continuing to highlight additional lines\n");
         while (bufferIndex < state.size() &&
                 lastEndHighlightData != currentHighlightData && *lastEndHighlightData != *currentHighlightData){
+            printf("highlighting line %d", bufferIndex);
             lastEndHighlightData = state[bufferIndex].endHighlightState();
             currentHighlightData = highlightLine(state[bufferIndex], currentHighlightData);
             bufferIndex++;
