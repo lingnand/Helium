@@ -59,9 +59,11 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
 void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
 {
     if (name == "pre") {
-        // after seeing pre we can throw away all the old stuff
-        _startParsing = false;
-        _change = BufferStateChange();
+        if (!_reachedCursor) {
+            // after seeing pre we can throw away all the old stuff
+            _startParsing = false;
+            _change = BufferStateChange();
+        }
     } else if (name == "q") {
         Q_ASSERT(attributeName == "id" && !attributeValue.isEmpty());
         _startParsing = true;
