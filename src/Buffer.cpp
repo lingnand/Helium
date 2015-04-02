@@ -124,7 +124,7 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
     BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
     // print out the change parsed
     for (int i = 0; i < change.size(); i++) {
-        printf("change %d: index - %d, plainText - %s\n", i, change[i].index, qPrintable(change[i].line.plainText()));
+        printf("change %d - startIndex:%d endIndex:%d plainText:%s\n", i, change[i].startIndex, change[i].endIndex, qPrintable(change[i].line.plainText()));
     }
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
@@ -140,12 +140,13 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
     HighlightStateDataPtr lastEndHighlightData = currentHighlightData;
     for (int i = 0; i < change.size(); i++) {
         currentHighlightData = highlightLine(change[i].line, currentHighlightData);
-        changeIndex = change[i].index;
+        changeIndex = change[i].startIndex;
         if (changeIndex < 0) {
             // we need to insert this new line
             state.insert(bufferIndex, change[i].line);
             offset++;
         } else {
+            changeIndex = change[i].endIndex;
             // we need to delete the lines until the index match up
             while (bufferIndex != changeIndex+offset) {
                 state.removeAt(bufferIndex);
@@ -156,7 +157,7 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
         }
         bufferIndex++;
     }
-    // if there is no merge edge then can probably remove all the rest
+    // if there is no merge edge then we can remove all the rest
     if (changeIndex < 0) {
         while (bufferIndex < state.size()) {
             state.removeLast();
