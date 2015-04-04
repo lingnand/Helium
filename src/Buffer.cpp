@@ -195,6 +195,7 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
     int charCount = 0;
     int stateIndex = 0;
     bool shouldHighlight = false;
+    BufferLine temp; // used as a temp storage for pointers
     BufferLine *current = &state[stateIndex], *before = NULL, *after = NULL;
     HighlightStateDataPtr highlightState = _mainStateData;
     for (int i = 0; i < replaces.size(); i++) {
@@ -205,14 +206,18 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
             qDebug() << "charCount:" << charCount << "stateIndex:" << stateIndex;
             qDebug() << "current:" << current;
             qDebug() << "before:" << before;
-            qDebug() << "after:" << before;
+            qDebug() << "after:" << after;
             if (charCount + current->size() < rep.selection.start) {
                 qDebug() << "skippinng the current line";
                 charCount += current->size() + 1;
             } else {
                 qDebug() << "splitting the current line";
-                BufferLine split = current->split(rep.selection.start - charCount);
-                after = &split;
+                temp = current->split(rep.selection.start - charCount);
+                qDebug() << "updating the charCount to match the start of selection";
+                charCount = rep.selection.start;
+                after = &temp;
+                qDebug() << "current:" << current;
+                qDebug() << "after:" << after;
             }
             if (before) {
                 qDebug() << "appending current to before";
@@ -224,7 +229,7 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
             }
             if (after) {
                 shouldHighlight = !filetype().isEmpty();
-                qDebug() << "setting to shouldHighlight to" << shouldHighlight;
+                qDebug() << "setting shouldHighlight to" << shouldHighlight;
                 break;
             }
             if (shouldHighlight) {
@@ -254,10 +259,14 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
                 current->append(ch);
             }
         }
+        qDebug() << "finished insertion";
+        qDebug() << "current:" << current;
+        qDebug() << "before:" << before;
+        qDebug() << "after:" << after;
+        qDebug() << "shifting forward, pointing before to current, current to after";
         before = current;
         current = after;
         after = NULL;
-        qDebug() << "shifting forward, pointing before to current, current to after";
         qDebug() << "current:" << current;
         qDebug() << "before:" << before;
         qDebug() << "eating away the length of the original selection...";
@@ -267,18 +276,19 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
             qDebug() << "charCount:" << charCount;
             qDebug() << "skippinng the current line";
             charCount += current->size() + 1;
-            BufferLine detach = state[stateIndex+1];
-            qDebug() << "detaching from index:" << stateIndex+1 << "line:" << detach;
+            temp = state[stateIndex+1];
+            qDebug() << "detaching from index:" << stateIndex+1 << "line:" << temp;
+            qDebug() << "removing line at index:" << stateIndex+1;
             state.removeAt(stateIndex+1);
-            qDebug() << "removing line at index:", stateIndex+1;
-            current = &detach;
             qDebug() << "pointing current to the detached line";
+            current = &temp;
         }
+        qDebug() << "charCount:" << charCount;
         // split again to remove the replaced part
-        BufferLine split = current->split(rep.selection.end - charCount);
-        qDebug() << "splitting again to remove the final part of the selection, split:" << split;
+        temp = current->split(rep.selection.end - charCount);
+        qDebug() << "splitting again to remove the final part of the selection, split:" << temp;
         qDebug() << "pointing current to split";
-        current = &split;
+        current = &temp;
     }
     qDebug() << "finished all the replacements";
     qDebug() << "current:" << current;
