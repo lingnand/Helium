@@ -645,7 +645,7 @@ void View::replaceAll()
     // get the replace index
     int replaceIndex = _findIndex;
     qDebug() << "replace index is" << replaceIndex;
-    const char *replacement = _replaceField->text().toUtf8().constData();
+    std::string replacement = _replaceField->text().toUtf8().constData();
     // refill all the findMatches in the _findHits
     while (!_findComplete) {
         // there shouldn't be any change in the status

@@ -25,10 +25,10 @@ Buffer::Buffer(int historyLimit) :
 {
     conn(&_worker, SIGNAL(inProgressChanged(float)),
         this, SIGNAL(inProgressChanged(float)));
-//    conn(&_states, SIGNAL(retractableChanged(bool)),
-//        this, SIGNAL(hasUndosChanged(bool)));
-//    conn(&_states, SIGNAL(advanceableChanged(bool)),
-//        this, SIGNAL(hasRedosChanged(bool)));
+    conn(&_states, SIGNAL(retractableChanged(bool)),
+        this, SIGNAL(hasUndosChanged(bool)));
+    conn(&_states, SIGNAL(advanceableChanged(bool)),
+        this, SIGNAL(hasRedosChanged(bool)));
 }
 
 Buffer::~Buffer()
@@ -69,6 +69,7 @@ void Buffer::setFiletype(const QString &filetype)
             ));
         }
         highlight(state());
+        emitStateChange(NULL, true, false);
         emit filetypeChanged(_filetype);
     }
 }
