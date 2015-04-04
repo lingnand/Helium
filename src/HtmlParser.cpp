@@ -6,7 +6,7 @@
  */
 
 #include <src/HtmlParser.h>
-#include <stdio.h>
+#include <QDebug>
 
 enum HtmlState { InChar, InTag };
 enum CharState { Normal, InSpecialChar };
@@ -50,7 +50,7 @@ void HtmlParser::parse(QTextStream& input)
                             } else {
                                 // set it to null character at the moment
                                 ch = '\0';
-                                printf("unrecognized special char: %s\n", qPrintable(specialCharStr));
+                                qCritical() << "unrecognized special char:" << specialCharStr;
                             }
                             charCount++;
                             parseCharacter(ch, charCount);

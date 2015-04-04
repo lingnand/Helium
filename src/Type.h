@@ -8,6 +8,8 @@
 #ifndef TYPE_H_
 #define TYPE_H_
 
+#include <QDebug>
+
 struct TextSelection {
     int start;
     int end;
@@ -26,5 +28,8 @@ struct Replacement {
     Replacement(TextSelection _selection, QString _replacement):
         selection(_selection), replacement(_replacement) {}
 };
+
+QDebug operator<<(QDebug dbg, const TextSelection &selection);
+QDebug operator<<(QDebug dbg, const Replacement &replacement);
 
 #endif /* TYPE_H_ */

@@ -11,7 +11,7 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
     _cursorLine = -1;
     _cursorPosition = cursorPosition;
     _change = BufferStateChange();
-    printf(">>>>>> start parsing >>>>>>\n");
+    qDebug() << ">>>>>> start parsing >>>>>>";
     parse(input);
     // remove everything after the cursorLine, if the line after cursorLine follows cursorLine immediately
     // NOTE: we assume that only the cursor line can assume an endIndex that's different from the startIndex
@@ -22,7 +22,7 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
     }
     // delay only if the change size is one line and it doesn't span multiple lines
     _delayable = _delayable && _change.size() == 1 && _change[0].startIndex == _change[0].endIndex;
-    printf("set delayable to %d\n", _delayable);
+    qDebug() << "set delayable to" << _delayable;
     _change.setDelayable(_delayable);
     return _change;
 }
@@ -32,7 +32,7 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
     if (!_startParsing)
         return;
     if (ch == '\n' || ch == '\r') {
-        printf("encountered newline, charCount: %d\n", charCount);
+        qDebug() << "encountered newline, charCount:" << charCount;
         // try to clean up lines after the cursorLine (including the current line)
         if (_cursorLine >= 0 && _change.last().startIndex >= 0) { // make sure we have at least one context line after the cursor line
             _stopParsing = true;
@@ -49,7 +49,7 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         _change.last().line << ch;
     }
     if (charCount == _cursorPosition) {
-        printf("reached cursor, current ch: %s, charCount: %d\n", qPrintable(QString(ch)), charCount);
+        qDebug() << "reached cursor, current ch:" << ch << "charCount:" << charCount;
         // delay highlight if
         // 1. the character is a letter or number
         // 2. last time we didn't 'delay' highlighting - meaning there is no prediction currently
@@ -86,3 +86,8 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
 void HtmlBufferChangeParser::parseHtmlCharacter(const QChar &ch) {}
 bool HtmlBufferChangeParser::stopParsing() { return _stopParsing; }
 void HtmlBufferChangeParser::reachedEnd() {}
+
+QDebug operator<<(QDebug dbg, const ChangedBufferLine &line) {
+    return dbg.nospace() << "ChangedBufferLine(startIndex:" << line.startIndex << ", "
+            << "endIndex:" << line.endIndex << ", " << line.line << ")";
+}

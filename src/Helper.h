@@ -8,7 +8,6 @@
 #ifndef HELPER_H_
 #define HELPER_H_
 
-
 #define conn(sender, signal, receiver, slot) { \
     bool res = ::QObject::connect(sender, signal, receiver, slot); \
     Q_ASSERT(res); \
@@ -23,6 +22,7 @@
 
 #define PMOD(x, y) (((x) % (y) + (y)) % (y))
 
+// dialog
 void toast(const QString &msg);
 
 void dialog(const QString &confirm,
@@ -32,4 +32,5 @@ void dialog(const QString &confirm,
 void dialog(const QString &confirm, const QString &cancel,
         const QString &title, const QString &body,
         const QObject *receiver, const char *method);
+
 #endif /* HELPER_H_ */

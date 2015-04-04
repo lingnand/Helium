@@ -12,6 +12,7 @@
 #include <QStringList>
 #include <QTextStream>
 #include <src/HighlightStateData.h>
+#include <QDebug>
 
 class BufferLine
 {
@@ -36,13 +37,13 @@ public:
     BufferLine &operator<<(const BufferLine &);
     void swap(BufferLine &other);
 
-    void writePlainText(QTextStream &output);
-    void writePreText(QTextStream &output);
-    void writeHighlightText(QTextStream &output);
+    void writePlainText(QTextStream &output) const;
+    void writePreText(QTextStream &output) const;
+    void writeHighlightText(QTextStream &output) const;
     // convenience functions
-    QString plainText();
-    QString preText();
-    QString highlightText();
+    QString plainText() const;
+    QString preText() const;
+    QString highlightText() const;
 private:
     int _size;
     QStringList _preTextSegments;
@@ -50,6 +51,7 @@ private:
     QString _highlightText;
     HighlightStateDataPtr _endHighlightState;
 };
+
 // a buffer state is a snapshot of the current buffer content
 // it consists of a list of BufferLine's
 // each line is identified by its index inside the BufferState
@@ -82,5 +84,7 @@ private:
     QString _filetype;
     int _cursorPosition;
 };
+
+QDebug operator<<(QDebug dbg, const BufferLine &line);
 
 #endif /* BUFFERSTATE_H_ */

@@ -441,7 +441,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
     boost::cregex_iterator end = boost::cregex_iterator();
     if (_findIterator == end) {
         if (_bofIndex >= 0) {
-            printf("reached end of the last find loop; marking complete\n");
+            qDebug() << "reached end of the last find loop; marking complete";
             _findComplete = true;
             _findIndex = 0;
             if(_findHits.isEmpty()) {
@@ -473,13 +473,13 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
     }
     // found something
     // decide whether we need to insert the location into the list
-    printf("current findIndex: %d, findhits count: %d\n", _findIndex, _findHits.count());
+    qDebug() << "current findIndex:" << _findIndex << "findhits count:" << _findHits.count();
     Q_ASSERT(_findIndex == _findHits.count());
     TextSelection selection((*_findIterator)[0].first - _findBuffer.begin(),
             (*_findIterator)[0].second - _findBuffer.begin());
     if (!_findHits.isEmpty() && selection == _findHits[0].selection) {
         // we've wrapped around and found the same selection as the first one
-        printf("found the same match in the list; marking complete\n");
+        qDebug() << "found the same match in the list; marking complete";
         // take care of the bofIndex to match the change in the findIndex
         if (_bofIndex == _findIndex)
             _bofIndex = 0;
@@ -644,7 +644,7 @@ void View::replaceAll()
     findNextWithOptions(false, status);
     // get the replace index
     int replaceIndex = _findIndex;
-    printf("replace index is %d\n", replaceIndex);
+    qDebug() << "replace index is" << replaceIndex;
     const char *replacement = _replaceField->text().toUtf8().constData();
     // refill all the findMatches in the _findHits
     while (!_findComplete) {
@@ -657,7 +657,7 @@ void View::replaceAll()
     // now take from the replaceIndex to bofIndex - 1
     for (; i < _findHits.count(); i++) {
         index = (replaceIndex + i) % _findHits.count();
-//        printf("adding index %d to the first replaces queue\n", index);
+//        qDebug() << "adding index" << index << "to the first replaces queue";
         if (index == _bofIndex) {
             break;
         }
@@ -670,7 +670,7 @@ void View::replaceAll()
     _replaces.clear();
     for (; i < _findHits.count(); i++) {
         index = (replaceIndex + i) % _findHits.count();
-//        printf("adding index %d to the second replaces queue\n", index);
+//        qDebug() << "adding index" << index << "to the second replaces queue";
         _replaces.append(Replacement(_findHits[index].selection,
                 QString::fromUtf8(_findHits[index].match.format(replacement).c_str())));
     }
@@ -771,7 +771,6 @@ void View::onTitleFieldFocusChanged(bool focus)
 
 void View::onTextAreaTextChanged(const QString& text)
 {
-//    fprintf(stdout, "text changed: %s\n", qPrintable(text));
 //    if (_textArea->editor()->selectedText().isEmpty())
     // only when the the cursor is currently before
     if (!_buffer->emittingStateChange())
@@ -891,8 +890,11 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
 void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
     if (this != source || sourceChanged) {
         QString highlightedHtml = state.highlightedHtml();
-        printf("## text area out of sync\n### text area:\n%s\n### buffer:\n%s\n",
-                qPrintable(_textArea->text()), qPrintable(highlightedHtml));
+        qDebug() << "## text area out of sync";
+        qDebug() << "### text area:";
+        qDebug() << _textArea->text();
+        qDebug() << "### buffer:";
+        qDebug() << highlightedHtml;
         int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
         _textArea->setText(highlightedHtml);
         _textArea->editor()->setCursorPosition(pos);

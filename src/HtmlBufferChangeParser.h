@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <src/HtmlParser.h>
 #include <src/BufferState.h>
+#include <QDebug>
 
 struct ChangedBufferLine
 {
@@ -48,5 +49,7 @@ private:
     bool stopParsing();
     void reachedEnd();
 };
+
+QDebug operator<<(QDebug dbg, const ChangedBufferLine &line);
 
 #endif /* HTMLBUFFERCHANGEPARSER_H_ */

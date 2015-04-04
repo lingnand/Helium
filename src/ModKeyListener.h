@@ -9,7 +9,6 @@
 #define MODKEYLISTENER_H_
 
 #include <QObject>
-#include <stdio.h>
 #include <bb/cascades/KeyListener>
 #include <bb/cascades/TextFieldInputMode>
 #include <bb/cascades/TextAreaInputMode>

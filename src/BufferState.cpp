@@ -106,7 +106,7 @@ void BufferLine::swap(BufferLine &other)
     other = temp;
 }
 
-void BufferLine::writePlainText(QTextStream &output)
+void BufferLine::writePlainText(QTextStream &output) const
 {
     for (int i = 0; i < _preTextSegments.size(); i++) {
         output << _preTextSegments[i];
@@ -116,7 +116,7 @@ void BufferLine::writePlainText(QTextStream &output)
     }
 }
 
-void BufferLine::writePreText(QTextStream &output)
+void BufferLine::writePreText(QTextStream &output) const
 {
     for (int i = 0; i < _preTextSegments.size(); i++) {
         output << _preTextSegments[i];
@@ -131,12 +131,12 @@ void BufferLine::writePreText(QTextStream &output)
     }
 }
 
-void BufferLine::writeHighlightText(QTextStream &output)
+void BufferLine::writeHighlightText(QTextStream &output) const
 {
     output << _highlightText;
 }
 
-QString BufferLine::plainText()
+QString BufferLine::plainText() const
 {
     QString output;
     QTextStream stream(&output);
@@ -145,7 +145,7 @@ QString BufferLine::plainText()
     return output;
 }
 
-QString BufferLine::preText()
+QString BufferLine::preText() const
 {
     QString output;
     QTextStream stream(&output);
@@ -154,7 +154,7 @@ QString BufferLine::preText()
     return output;
 }
 
-QString BufferLine::highlightText()
+QString BufferLine::highlightText() const
 {
     return _highlightText;
 }
@@ -262,4 +262,8 @@ QString BufferState::highlightedHtml(int beginIndex, int endIndex)
 QString BufferState::highlightedHtml(int beginIndex)
 {
     return highlightedHtml(0, size());
+}
+
+QDebug operator<<(QDebug dbg, const BufferLine &line) {
+    return dbg.nospace() << "BufferLine(" << line.plainText() << ", " << line.highlightText() << ")";
 }

@@ -7,10 +7,10 @@
 
 #include <QTextStream>
 #include <src/Buffer.h>
-#include <stdio.h>
 #include <src/srchilite/instances.h>
 #include <src/srchilite/langmap.h>
 #include <src/SaveWork.h>
+#include <QDebug>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
@@ -57,7 +57,7 @@ void Buffer::setFiletype(const QString &filetype)
 {
     if (filetype != _filetype) {
         _filetype = filetype;
-        printf("Setting filetype to: %s\n", qPrintable(_filetype));
+        qDebug() << "Setting filetype to:" << _filetype;
         if (_filetype.isEmpty()) {
             _mainStateData.reset();
         } else {
@@ -122,10 +122,7 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
 {
     state.setCursorPosition(cursorPosition);
     BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
-    // print out the change parsed
-    for (int i = 0; i < change.size(); i++) {
-        printf("change %d - startIndex:%d endIndex:%d plainText:%s\n", i, change[i].startIndex, change[i].endIndex, qPrintable(change[i].line.plainText()));
-    }
+    qDebug() << "change:" << change;
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
     int changeIndex = -1;
@@ -163,10 +160,10 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
             state.removeLast();
         }
     } else {
-        printf("continuing to highlight additional lines\n");
+        qDebug() << "continuing to highlight additional lines";
         while (bufferIndex < state.size() &&
                 lastEndHighlightData != currentHighlightData && *lastEndHighlightData != *currentHighlightData){
-            printf("highlighting line %d", bufferIndex);
+            qDebug() << "highlighting line" << bufferIndex;
             lastEndHighlightData = state[bufferIndex].endHighlightState();
             currentHighlightData = highlightLine(state[bufferIndex], currentHighlightData);
             bufferIndex++;
@@ -181,16 +178,20 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
     return !filetype().isEmpty() && (!enableDelay || !change.delayable());
 }
 
+QDebug operator<<(QDebug dbg, const BufferLine *line)
+{
+    if (!line) {
+        dbg << "<nil>";
+    } else {
+        dbg << *line;
+    }
+    return dbg;
+}
+
 void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
 {
     if (state.empty() || replaces.empty())
         return;
-    // a replace buffer recording currently the stuff to be inserted
-    // a counter recording how many more (consecutive) characters to be replaced
-    // this allows us to break replace position and strings into pieces
-    // an offset that tells us how many more characters to eat away before the
-    // next replace starts (this is to account for the fact that these text selections
-    // are all relative to the old buffer
     int charCount = 0;
     int stateIndex = 0;
     bool shouldHighlight = false;
@@ -198,38 +199,56 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
     HighlightStateDataPtr highlightState = _mainStateData;
     for (int i = 0; i < replaces.size(); i++) {
         const Replacement &rep = replaces[i];
+        qDebug() << "replacing" << rep;
         // fast forward until reaching the replace start
         while (true) {
+            qDebug() << "charCount:" << charCount << "stateIndex:" << stateIndex;
+            qDebug() << "current:" << current;
+            qDebug() << "before:" << before;
+            qDebug() << "after:" << before;
             if (charCount + current->size() < rep.selection.start) {
+                qDebug() << "skippinng the current line";
                 charCount += current->size() + 1;
             } else {
+                qDebug() << "splitting the current line";
                 BufferLine split = current->split(rep.selection.start - charCount);
                 after = &split;
             }
             if (before) {
+                qDebug() << "appending current to before";
                 before->append(*current);
                 current = before;
                 before = NULL;
+                qDebug() << "current:" << current;
+                qDebug() << "before:" << before;
             }
             if (after) {
                 shouldHighlight = !filetype().isEmpty();
+                qDebug() << "setting to shouldHighlight to" << shouldHighlight;
                 break;
             }
             if (shouldHighlight) {
                 HighlightStateDataPtr oldEnd = current->endHighlightState();
+                qDebug() << "highlighting current";
                 highlightState = highlightLine(*current, highlightState);
                 if (oldEnd == highlightState || (oldEnd && highlightState && *oldEnd == *highlightState))
                     shouldHighlight = false;
-            } else
+            } else {
+                qDebug() << "setting highlight state to the end state of current";
                 highlightState = current->endHighlightState();
+            }
+            qDebug() << "advancing the stateIndex and pointing current to the next line in state";
             current = &state[++stateIndex];
         }
         // start inserting the replaced content
-        for (int i = 0; i < rep.replacement.size(); i++) {
-            QChar ch = rep.replacement[i];
+        qDebug() << "inserting replacement into state...";
+        for (int j = 0; j < rep.replacement.size(); j++) {
+            QChar ch = rep.replacement[j];
             if (ch == '\n') {
                 highlightState = highlightLine(*current, highlightState);
                 state.insert(++stateIndex, BufferLine());
+                qDebug() << "newline met: advancing stateIndex to" << stateIndex;
+                qDebug() << "inserting a new BufferLine at the new stateIndex and pointing current to it";
                 current = &state[stateIndex];
             } else {
                 current->append(ch);
@@ -238,22 +257,41 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
         before = current;
         current = after;
         after = NULL;
+        qDebug() << "shifting forward, pointing before to current, current to after";
+        qDebug() << "current:" << current;
+        qDebug() << "before:" << before;
+        qDebug() << "eating away the length of the original selection...";
+        qDebug() << "stateIndex:" << stateIndex;
         // eat away the length of the replacement
         while (charCount + current->size() < rep.selection.end) {
+            qDebug() << "charCount:" << charCount;
+            qDebug() << "skippinng the current line";
             charCount += current->size() + 1;
             BufferLine detach = state[stateIndex+1];
+            qDebug() << "detaching from index:" << stateIndex+1 << "line:" << detach;
             state.removeAt(stateIndex+1);
+            qDebug() << "removing line at index:", stateIndex+1;
             current = &detach;
+            qDebug() << "pointing current to the detached line";
         }
         // split again to remove the replaced part
         BufferLine split = current->split(rep.selection.end - charCount);
+        qDebug() << "splitting again to remove the final part of the selection, split:" << split;
+        qDebug() << "pointing current to split";
         current = &split;
     }
+    qDebug() << "finished all the replacements";
+    qDebug() << "current:" << current;
+    qDebug() << "before:" << before;
+    qDebug() << "appending current to the end of before";
     before->append(*current);
     if (shouldHighlight) {
+        qDebug() << "continuing to highlight";
+        qDebug() << "pointing current to before";
         current = before;
         while (true) {
             HighlightStateDataPtr oldEnd = current->endHighlightState();
+            qDebug() << "highlighting line" << stateIndex;
             highlightState = highlightLine(*current, highlightState);
             if (oldEnd == highlightState || oldEnd && highlightState && *oldEnd == *highlightState)
                 break;
@@ -332,6 +370,6 @@ void Buffer::save()
         boost::dynamic_pointer_cast<SaveWork>(w)->setState(state());
         _worker.start();
     } else if (_worker.work()->type() != Save) {
-        printf("save action activated while some other job %d is running!\n", _worker.work()->type());
+        qDebug() << "save action activated while some other job" << _worker.work()->type() << "is running!";
     }
 }

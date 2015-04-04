@@ -7,7 +7,6 @@
 
 #include <QTextStream>
 #include <src/SaveWork.h>
-#include <stdio.h>
 
 SaveWork::SaveWork(): BufferWork(Save)
 {
@@ -20,7 +19,7 @@ void SaveWork::run()
     QTextStream output(&toSave);
     _state.writePlainText(output);
     output << flush;
-    printf("toSave: %s\n", qPrintable(toSave));
+    qDebug() << "toSave:" << toSave;
     int max = 1000;
     int msec = 3000;
     int i = 0;
