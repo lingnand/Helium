@@ -57,12 +57,11 @@ public:
     Q_SLOT void parseChange(View *source, const QString &content, int cursorPosition, bool enableDelay);
     Q_SLOT void parseReplacement(View *source, const Replacement &replace);
     Q_SLOT void parseReplacement(View *source, const QList<Replacement> &replaces);
+    void killLine(int index);
     bool hasUndo();
     Q_SLOT void undo();
     bool hasRedo();
     Q_SLOT void redo();
-    bool hasPlainText();
-    QString plainText();
     Q_SLOT void save();
 Q_SIGNALS:
     void nameChanged(const QString &name);
@@ -84,15 +83,15 @@ private:
 
     // for highlighting
     srchilite::SourceHighlight _sourceHighlight;
-    HighlightStateDataPtr _mainStateData;
+    HighlightStateData::ptr _mainStateData;
     HtmlBufferChangeParser _bufferChangeParser;
 
-    HighlightStateDataPtr highlightLine(BufferLine &line, HighlightStateDataPtr startState);
+    HighlightStateData::ptr highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState);
     BufferState &modifyState();
     bool mergeChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay);
     void replace(BufferState &state, const QList<Replacement> &replaces);
     void highlight(BufferState &state, int index=0);
-    void highlight(BufferState &state, int index, HighlightStateDataPtr highlightState, HighlightStateDataPtr oldHighlightState=HighlightStateDataPtr());
+    void highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState=HighlightStateData::ptr());
     Q_SLOT void emitStateChange(View *source, bool sourceChanged, bool shouldMatchCursorPosition);
 };
 

@@ -42,8 +42,21 @@ struct HighlightStateData {
     bool operator!=(const HighlightStateData &rhs) {
         return !operator==(rhs);
     }
+
+    typedef boost::shared_ptr<HighlightStateData> ptr;
+
+    static bool equal(ptr lhs, ptr rhs)
+    {
+        return lhs == rhs || (lhs && rhs && *lhs == *rhs);
+    }
+
+    static bool unequal(ptr lhs, ptr rhs)
+    {
+        return !equal(lhs, rhs);
+    }
 };
 
-typedef boost::shared_ptr<HighlightStateData> HighlightStateDataPtr;
+
+
 
 #endif /* HIGHLIGHTSTATEDATA_H_ */

@@ -23,32 +23,13 @@ bool BufferLine::isEmpty() const
 
 void BufferLine::clear()
 {
-    _size = 0;
-    _preTextSegments.clear();
-    _specialChars.clear();
-    _highlightText.clear();
-}
-
-void BufferLine::setHighlightText(const QString &highlightText)
-{
-    _highlightText = highlightText;
-}
-
-HighlightStateDataPtr BufferLine::endHighlightState()
-{
-    return _endHighlightState;
-}
-
-void BufferLine::setEndHighlightState(HighlightStateDataPtr endState)
-{
-    _endHighlightState = endState;
+    *this = BufferLine();
 }
 
 BufferLine BufferLine::split(int position)
 {
     BufferLine split;
     if (_size <= position) {
-        split._endHighlightState = _endHighlightState;
         return split;
     }
     _size -= position;
@@ -138,11 +119,6 @@ void BufferLine::writePreText(QTextStream &output) const
     }
 }
 
-void BufferLine::writeHighlightText(QTextStream &output) const
-{
-    output << _highlightText;
-}
-
 QString BufferLine::plainText() const
 {
     QString output;
@@ -159,11 +135,6 @@ QString BufferLine::preText() const
     writePreText(stream);
     stream.flush();
     return output;
-}
-
-QString BufferLine::highlightText() const
-{
-    return _highlightText;
 }
 
 // BufferState
@@ -194,13 +165,13 @@ BufferState::Position BufferState::focus(int cursorPosition)
 {
     Position pos;
     for (int i = 0; i < size(); i++)  {
-        if (cursorPosition <= at(i).size()) {
+        if (cursorPosition <= at(i).line.size()) {
             pos.lineIndex = i;
             pos.linePosition = cursorPosition;
             break;
         }
         // minus the newline character
-        cursorPosition -= at(i).size() + 1;
+        cursorPosition -= at(i).line.size() + 1;
     }
     return pos;
 }
@@ -209,10 +180,10 @@ void BufferState::writePlainText(QTextStream &output)
 {
     if (empty())
        return;
-    at(0).writePlainText(output);
+    at(0).line.writePlainText(output);
     for (int i = 1; i < size(); i++) {
         output << '\n';
-        at(i).writePlainText(output);
+        at(i).line.writePlainText(output);
     }
 }
 
@@ -222,23 +193,23 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         return;
     output << "<pre>";
     if (filetype().isEmpty()) {
-        at(0).writePreText(output);
+        at(0).line.writePreText(output);
         for (int i = 1; i < size(); i++) {
             output << '\n';
-            at(i).writePreText(output);
+            at(i).line.writePreText(output);
         }
     } else {
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;
         for (; i < beginIndex; i++) {
-            at(i).writePreText(output);
+            at(i).line.writePreText(output);
             output << '\n';
         }
         while (true) {
-            if (!at(i).isEmpty()) {
+            if (!at(i).line.isEmpty()) {
                 output << QString("<q id='%1'>").arg(i);
-                at(i).writeHighlightText(output);
+                output << at(i).highlightText;
                 output << "</q>";
             }
             i++;
@@ -249,7 +220,7 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         }
         for (; i < size(); i++) {
             output << '\n';
-            at(i).writePreText(output);
+            at(i).line.writePreText(output);
         }
     }
     output << "</pre>";
@@ -271,9 +242,13 @@ QString BufferState::highlightedHtml(int beginIndex, int endIndex)
 
 QString BufferState::highlightedHtml(int beginIndex)
 {
-    return highlightedHtml(0, size());
+    return highlightedHtml(beginIndex, size());
 }
 
 QDebug operator<<(QDebug dbg, const BufferLine &line) {
-    return dbg.nospace() << "BufferLine(" << line.plainText() << ", " << line.highlightText() << ")";
+    return dbg.nospace() << "{" << line.plainText() << "}";
+}
+
+QDebug operator<<(QDebug dbg, const BufferLineState &lineState) {
+    return dbg.nospace() << "BufferLineState(" << lineState.line << ", " << lineState.highlightText << ")";
 }

@@ -22,11 +22,7 @@ public:
     virtual ~BufferLine() {}
     int size() const;
     bool isEmpty() const;
-    // clear the text but leave the endState untouched
     void clear();
-    void setHighlightText(const QString &highlightText);
-    HighlightStateDataPtr endHighlightState();
-    void setEndHighlightState(HighlightStateDataPtr endState);
 
     // line modification
     // split whatever is after the position into a new BufferLine
@@ -41,17 +37,21 @@ public:
 
     void writePlainText(QTextStream &output) const;
     void writePreText(QTextStream &output) const;
-    void writeHighlightText(QTextStream &output) const;
     // convenience functions
     QString plainText() const;
     QString preText() const;
-    QString highlightText() const;
 private:
     int _size;
     QStringList _preTextSegments;
     QList<QChar> _specialChars;
-    QString _highlightText;
-    HighlightStateDataPtr _endHighlightState;
+};
+
+struct BufferLineState {
+    BufferLine line;
+    QString highlightText;
+    HighlightStateData::ptr endHighlightState;
+    BufferLineState(BufferLine _line = BufferLine(), HighlightStateData::ptr _endHighlightState = HighlightStateData::ptr()):
+        line(_line), endHighlightState(_endHighlightState) {}
 };
 
 // a buffer state is a snapshot of the current buffer content
@@ -62,7 +62,7 @@ private:
 // by comparing the user-changed actual textArea content with the current BufferState,
 // referencing the current one as much as possible and add/delete BufferLine's
 // when necessary
-class BufferState : public QList<BufferLine>
+class BufferState : public QList<BufferLineState>
 {
 public:
     BufferState();
@@ -93,5 +93,6 @@ private:
 };
 
 QDebug operator<<(QDebug dbg, const BufferLine &line);
+QDebug operator<<(QDebug dbg, const BufferLineState &lineState);
 
 #endif /* BUFFERSTATE_H_ */
