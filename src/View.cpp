@@ -133,7 +133,7 @@ View::View(Buffer* buffer):
     // TODO: not only focus the replaceField, but also select the existing content of the replace field
     _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
-        .onModKeyPressed(this, SLOT(onFindFieldModKeyPressed()))
+        .onModKeyPressed(_replaceField, SLOT(requestFocus()))
         .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .handleFocusOn(_findField, SIGNAL(focusedChanged(bool))));
     _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
@@ -297,20 +297,6 @@ void View::setFindModeActions()
     _page->addAction(_redoAction);
 }
 
-void View::focusTextFieldAndSelectAll(bb::cascades::TextField *field)
-{
-    field->requestFocus();
-    QString f = field->text();
-    if (!f.isEmpty()) {
-        field->editor()->setSelection(0, f.length());
-    }
-}
-
-void View::onFindFieldModKeyPressed()
-{
-    focusTextFieldAndSelectAll(_replaceField);
-}
-
 bool View::findModeOn()
 {
     if (_mode != Find) {
@@ -322,7 +308,7 @@ bool View::findModeOn()
         // actionbar
         setFindModeActions();
         // focus
-        focusTextFieldAndSelectAll(_findField);
+        _findField->requestFocus();
         _textArea->setEditable(false);
         return true;
     }
