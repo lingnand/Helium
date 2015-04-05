@@ -622,10 +622,8 @@ void View::replaceNext()
                 _textArea->editor()->selectionEnd());
         if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].selection) {
             QString rep = QString::fromUtf8(_findHits[_findIndex].match.format(_replaceField->text().toUtf8().constData()).c_str());
-            // TODO: take care of \r, etc. in the replacement string?
-            // TODO: change the delay of the highlighter to false so that we can do
-            // highlight fully and properly (normally this wouldn't be too much of an issue)
-            _textArea->editor()->insertPlainText(rep);
+            // TODO: should we set the cursor to be just after the replacement?
+            _buffer->parseReplacement(this, Replacement(current, rep));
             // TODO: modify the findbuffer appropriately instead of doing plainText() again in the next findNext call
             _findBufferDirty = true;
             // there shouldn't be any interactivity here

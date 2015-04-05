@@ -189,6 +189,8 @@ QDebug operator<<(QDebug dbg, const BufferLine *line)
     return dbg;
 }
 
+// TODO: set cursorPosition of the state to the end of last Replacement
+// potentially needing to record a second counter
 void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
 {
     if (state.empty() || replaces.empty())
@@ -335,7 +337,12 @@ void Buffer::parseChange(View *source, const QString &content, int cursorPositio
     emitStateChange(source, mergeChange(modifyState(), input, cursorPosition, enableDelay), false);
 }
 
-void Buffer::parseReplacement(View *source, QList<Replacement> &replaces)
+void Buffer::parseReplacement(View *source, const Replacement &replace)
+{
+    parseReplacement(source, QList<Replacement>() << replace);
+}
+
+void Buffer::parseReplacement(View *source, const QList<Replacement> &replaces)
 {
     if (!replaces.empty()) {
         replace(modifyState(), replaces);
