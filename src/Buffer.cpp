@@ -85,12 +85,28 @@ void Buffer::emitStateChange(View *source, bool sourceChanged, bool shouldMatchC
     _emittingStateChange = false;
 }
 
-void Buffer::highlight(BufferState &state)
+// when we don't have initial state, we deduce one
+void Buffer::highlight(BufferState &state, int index)
 {
-    state.setFiletype(filetype());
-    HighlightStateDataPtr currentHighlightData = _mainStateData;
-    for (int i = 0; i < state.size(); i++) {
-        currentHighlightData = highlightLine(state[i], currentHighlightData);
+    highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState());
+}
+
+// the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
+void Buffer::highlight(BufferState &state, int index, HighlightStateDataPtr highlightState, HighlightStateDataPtr oldHighlightState)
+{
+    if (state.filetype() != filetype()) {
+        state.setFiletype(filetype());
+        // highlight without checking
+        for (; index < state.size(); index++) {
+            qDebug() << "highlighting line" << index;
+            highlightState = highlightLine(state[index], highlightState);
+        }
+    } else {
+        for (; index < state.size() && !(highlightState == oldHighlightState || (highlightState && oldHighlightState && *highlightState == *oldHighlightState)); index++) {
+            oldHighlightState = state[index].endHighlightState();
+            qDebug() << "highlighting line" << index;
+            highlightState = highlightLine(state[index], highlightState);
+        }
     }
 }
 
@@ -162,13 +178,7 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
         }
     } else {
         qDebug() << "continuing to highlight additional lines";
-        while (bufferIndex < state.size() &&
-                lastEndHighlightData != currentHighlightData && *lastEndHighlightData != *currentHighlightData){
-            qDebug() << "highlighting line" << bufferIndex;
-            lastEndHighlightData = state[bufferIndex].endHighlightState();
-            currentHighlightData = highlightLine(state[bufferIndex], currentHighlightData);
-            bufferIndex++;
-        }
+        highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData);
     }
     // if there is nothing left.
     // there can be no highlight change when the buffer is empty
@@ -301,17 +311,7 @@ void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
     if (shouldHighlight) {
         qDebug() << "continuing to highlight";
         qDebug() << "pointing current to before";
-        current = before;
-        while (true) {
-            HighlightStateDataPtr oldEnd = current->endHighlightState();
-            qDebug() << "highlighting line" << stateIndex;
-            highlightState = highlightLine(*current, highlightState);
-            if (oldEnd == highlightState || oldEnd && highlightState && *oldEnd == *highlightState)
-                break;
-            if (++stateIndex >= state.size())
-                break;
-            current = &state[stateIndex];
-        }
+        highlight(state, stateIndex, highlightState);
     }
     return;
 }
@@ -348,6 +348,12 @@ void Buffer::parseReplacement(View *source, const QList<Replacement> &replaces)
         replace(modifyState(), replaces);
         emitStateChange(source, true, false);
     }
+}
+
+// deleting until the start of the specified line and
+void Buffer::killLine(int index)
+{
+    modifyState()[index].clear();
 }
 
 bool Buffer::hasUndo() { return _states.retractable(); }

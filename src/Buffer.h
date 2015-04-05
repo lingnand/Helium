@@ -91,7 +91,8 @@ private:
     BufferState &modifyState();
     bool mergeChange(BufferState &state, QTextStream &input, int cursorPosition, bool enableDelay);
     void replace(BufferState &state, const QList<Replacement> &replaces);
-    void highlight(BufferState &state);
+    void highlight(BufferState &state, int index=0);
+    void highlight(BufferState &state, int index, HighlightStateDataPtr highlightState, HighlightStateDataPtr oldHighlightState=HighlightStateDataPtr());
     Q_SLOT void emitStateChange(View *source, bool sourceChanged, bool shouldMatchCursorPosition);
 };
 

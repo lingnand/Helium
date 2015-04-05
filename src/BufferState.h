@@ -20,8 +20,10 @@ class BufferLine
 public:
     BufferLine();
     virtual ~BufferLine() {}
-    int size();
-    bool isEmpty();
+    int size() const;
+    bool isEmpty() const;
+    // clear the text but leave the endState untouched
+    void clear();
     void setHighlightText(const QString &highlightText);
     HighlightStateDataPtr endHighlightState();
     void setEndHighlightState(HighlightStateDataPtr endState);
@@ -65,9 +67,14 @@ class BufferState : public QList<BufferLine>
 public:
     BufferState();
     virtual ~BufferState() {}
+    struct Position {
+        int lineIndex;
+        int linePosition;
+        Position(): lineIndex(-1), linePosition(-1) {}
+    };
     // return the index of the line where the cursor is currently in
     // NOTE: the cursorPosition is assumed to be based on plainText
-    int focus(int cursorPosition);
+    Position focus(int cursorPosition);
     void writePlainText(QTextStream &output);
     void writePreText(QTextStream &output);
     // beginIndex should always be smaller than endIndex

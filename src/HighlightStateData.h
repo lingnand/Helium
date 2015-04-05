@@ -35,7 +35,8 @@ struct HighlightStateData {
     }
 
     bool operator==(const HighlightStateData &rhs) {
-        return *currentState == *rhs.currentState && *stateStack == *rhs.stateStack;
+        return (currentState == rhs.currentState || *currentState == *rhs.currentState) &&
+                (stateStack == rhs.stateStack || *stateStack == *rhs.stateStack);
     }
 
     bool operator!=(const HighlightStateData &rhs) {

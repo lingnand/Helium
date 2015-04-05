@@ -11,14 +11,22 @@
 
 BufferLine::BufferLine():_size(0) {}
 
-int BufferLine::size()
+int BufferLine::size() const
 {
     return _size;
 }
 
-bool BufferLine::isEmpty()
+bool BufferLine::isEmpty() const
 {
     return _size == 0;
+}
+
+void BufferLine::clear()
+{
+    _size = 0;
+    _preTextSegments.clear();
+    _specialChars.clear();
+    _highlightText.clear();
 }
 
 void BufferLine::setHighlightText(const QString &highlightText)
@@ -36,7 +44,6 @@ void BufferLine::setEndHighlightState(HighlightStateDataPtr endState)
     _endHighlightState = endState;
 }
 
-// TODO need to think about the edge cases!
 BufferLine BufferLine::split(int position)
 {
     BufferLine split;
@@ -183,26 +190,29 @@ void BufferState::setCursorPosition(int cursorPosition)
     _cursorPosition = cursorPosition;
 }
 
-int BufferState::focus(int cursorPosition)
+BufferState::Position BufferState::focus(int cursorPosition)
 {
+    Position pos;
     for (int i = 0; i < size(); i++)  {
-        cursorPosition -= operator[](i).size();
-        if (cursorPosition <= 0)
-            return i;
+        if (cursorPosition <= at(i).size()) {
+            pos.lineIndex = i;
+            pos.linePosition = cursorPosition;
+            break;
+        }
         // minus the newline character
-        cursorPosition--;
+        cursorPosition -= at(i).size() + 1;
     }
-    return -1;
+    return pos;
 }
 
 void BufferState::writePlainText(QTextStream &output)
 {
     if (empty())
        return;
-    operator[](0).writePlainText(output);
+    at(0).writePlainText(output);
     for (int i = 1; i < size(); i++) {
         output << '\n';
-        operator[](i).writePlainText(output);
+        at(i).writePlainText(output);
     }
 }
 
@@ -212,23 +222,23 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         return;
     output << "<pre>";
     if (filetype().isEmpty()) {
-        operator[](0).writePreText(output);
+        at(0).writePreText(output);
         for (int i = 1; i < size(); i++) {
             output << '\n';
-            operator[](i).writePreText(output);
+            at(i).writePreText(output);
         }
     } else {
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;
         for (; i < beginIndex; i++) {
-            operator[](i).writePreText(output);
+            at(i).writePreText(output);
             output << '\n';
         }
         while (true) {
-            if (!operator[](i).isEmpty()) {
+            if (!at(i).isEmpty()) {
                 output << QString("<q id='%1'>").arg(i);
-                operator[](i).writeHighlightText(output);
+                at(i).writeHighlightText(output);
                 output << "</q>";
             }
             i++;
@@ -239,7 +249,7 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         }
         for (; i < size(); i++) {
             output << '\n';
-            operator[](i).writePreText(output);
+            at(i).writePreText(output);
         }
     }
     output << "</pre>";
