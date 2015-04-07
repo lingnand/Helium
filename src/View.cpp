@@ -70,6 +70,10 @@ using namespace bb::cascades;
 #define DIALOG_REPLACE_FINISHED_TITLE "Replace finished"
 #define DIALOG_REPLACE_FINISHED_BODY "%1 replacement(s) have been made."
 
+// the one side range for partial highlight (will be put into settings)
+#define PARTIAL_HIGHLIGHT_RANGE 20
+
+// #### View
 // TODO: it would be good if you can modulize the undo/redo functionality
 // and then attach it to each textfield/area like what you did with the modkeylistener!
 // that would be awesome...
@@ -77,7 +81,7 @@ View::View(Buffer* buffer):
         _titleField(NULL), _textArea(NULL), _progressIndicator(NULL),
         _buffer(NULL),
         _mode(Normal),
-        _findBufferDirty(true)
+        _findBufferDirty(true), _modifyingTextArea(false)
 {
     _textArea = TextArea::create()
         .format(TextFormat::Html)
@@ -95,6 +99,12 @@ View::View(Buffer* buffer):
         .onTextAreaInputModeChanged(_textArea, SLOT(setInputMode(bb::cascades::TextAreaInputMode::Type)))
         .handleFocusOn(_textArea, SIGNAL(focusedChanged(bool)));
     _textArea->addKeyListener(_textAreaModKeyListener);
+    conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
+            this, SLOT(onTextAreaCursorPositionChanged(int)));
+    // setup the timer for partial highlight update
+    _partialHighlightUpdateTimer.setSingleShot(true);
+    conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
+            this, SLOT(updateTextAreaPartialHighlight()));
 
     // TODO: monospace font doesn't play well with italic
     // so what we need to do is to reformat the style file for highlight
@@ -753,14 +763,6 @@ void View::onTitleFieldFocusChanged(bool focus)
     }
 }
 
-void View::onTextAreaTextChanged(const QString& text)
-{
-//    if (_textArea->editor()->selectedText().isEmpty())
-    // only when the the cursor is currently before
-    if (!_buffer->emittingStateChange())
-        _buffer->parseChange(this, text, _textArea->editor()->cursorPosition(), true);
-}
-
 void View::onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
 {
     onFindFieldsModifiedKeyPressed(_findField->editor(), event);
@@ -802,11 +804,6 @@ void View::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::
     }
 }
 
-void View::onTextAreaModKeyPressed(bb::cascades::KeyEvent *event)
-{
-    _textArea->editor()->insertPlainText(event->unicode());
-}
-
 void View::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
 {
     switch (event->keycap()) {
@@ -832,6 +829,11 @@ void View::onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb:
     }
 }
 
+void View::onTextAreaModKeyPressed(bb::cascades::KeyEvent *event)
+{
+    _textArea->editor()->insertPlainText(event->unicode());
+}
+
 void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
 {
     switch (event->keycap()) {
@@ -854,10 +856,73 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
         case KEYCODE_S:
             onSaveTriggered();
             break;
+        case KEYCODE_D:
+            killCurrentLine();
+            break;
         // TODO: add shortcut for open and new file, next/prev tab
         default:
             onTextControlModifiedKeyPressed(_textArea->editor(), event);
     }
+}
+
+void View::killCurrentLine() {
+    _modifyingTextArea = true;
+    int current = _textArea->editor()->cursorPosition();
+    BufferState::Position pos = _buffer->state().focus(current);
+    _textArea->editor()->setCursorPosition(current - pos.linePosition);
+    _buffer->killLine(pos.lineIndex);
+    _modifyingTextArea = false;
+}
+
+void View::onTextAreaTextChanged(const QString& text)
+{
+    QString header = QString("[TextAreaTextChanged %1]").arg(qrand());
+    qDebug() << header << "entered";
+    if (_modifyingTextArea) {
+        qDebug() << header << "aborted due to lock";
+        return;
+    }
+    if (!_buffer->emittingStateChange()) {
+        qDebug() << header << "parsing text change";
+        _buffer->parseChange(this, text, _textArea->editor()->cursorPosition(), true);
+    }
+    qDebug() << header << "exited";
+}
+
+void View::updateTextAreaPartialHighlight()
+{
+    _modifyingTextArea = true;
+    QString header = QString("[CheckCursorPosition %1]").arg(qrand());
+    qDebug() << header << "entered";
+    int start = _textArea->editor()->selectionStart();
+    int end = _textArea->editor()->selectionEnd();
+    int startLine = _buffer->state().focus(start).lineIndex;
+    int endLine = start == end ? startLine : _buffer->state().focus(end).lineIndex;
+    // this is the case where we've just moved cursor to another place
+    Range newRange = Range(startLine, endLine).grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, _buffer->state().size());
+    if (newRange != _highlightRange) {
+        _highlightRange = newRange;
+        qDebug() << header << "setting new highlight text";
+        _textArea->setText(_buffer->state().highlightedHtml(_highlightRange));
+        qDebug() << header << "resetting selection back to (" << start << "," << end << ")";
+        _textArea->editor()->setSelection(start, end);
+    }
+    _modifyingTextArea = false;
+    qDebug() << header << "exited";
+}
+
+void View::onTextAreaCursorPositionChanged(int cursorPosition)
+{
+    QString header = QString("[CursorPosition %1]").arg(qrand());
+    qDebug() << header << "entered";
+    qDebug() << header << "changed to" << cursorPosition;
+    if (_modifyingTextArea) {
+        qDebug() << header << "aborted due to lock";
+        return;
+    }
+    if (!_partialHighlightUpdateTimer.isActive())
+        _partialHighlightUpdateTimer.start();
+    qDebug() << header << "exited";
 }
 
 void View::onBufferFiletypeChanged(const QString& filetype) {
@@ -872,17 +937,27 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
 
 // Is textChanging or cursorPositionChanged emitted first?
 void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
+    QString header = QString("[BufferStateChange %1]").arg(qrand());
+    qDebug() << header << "entered";
     if (this != source || sourceChanged) {
-        QString highlightedHtml = state.highlightedHtml();
-        qDebug() << "## text area out of sync";
-        qDebug() << "### text area:";
-        qDebug() << _textArea->text();
-        qDebug() << "### buffer:";
-        qDebug() << highlightedHtml;
         int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
-        _textArea->setText(highlightedHtml);
+        // we assume that selectionStart == selectionEnd == pos in this case
+        _modifyingTextArea = true;
+        _highlightRange = Range(state.focus(pos).lineIndex)
+                .grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, state.size());
+        qDebug() << header << "range" << _highlightRange;
+//        qDebug() << "## text area out of sync";
+//        qDebug() << "### text area:";
+//        qDebug() << _textArea->text();
+//        qDebug() << "### buffer:";
+//        qDebug() << highlightedHtml;
+        qDebug() << header << "setting new highlight text";
+        _textArea->setText(state.highlightedHtml(_highlightRange));
+        qDebug() << header << "setting cursor position to" << pos;
         _textArea->editor()->setCursorPosition(pos);
+        _modifyingTextArea = false;
     }
+    qDebug() << header << "exited";
 }
 
 void View::onBufferProgressChanged(float progress)

@@ -32,7 +32,7 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
     if (!_startParsing)
         return;
     if (ch == '\n' || ch == '\r') {
-        qDebug() << "encountered newline, charCount:" << charCount;
+//        qDebug() << "encountered newline, charCount:" << charCount;
         // try to clean up lines after the cursorLine (including the current line)
         if (_cursorLine >= 0 && _change.last().startIndex >= 0) { // make sure we have at least one context line after the cursor line
             _stopParsing = true;

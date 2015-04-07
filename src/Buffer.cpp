@@ -15,6 +15,17 @@
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
 
+// debug functions
+QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
+{
+    if (!lineState) {
+        dbg << "<nil>";
+    } else {
+        dbg << *lineState;
+    }
+    return dbg;
+}
+
 // Buffer
 Buffer::Buffer(int historyLimit) :
     _langMap(srchilite::Instances::getLangMap()),
@@ -191,16 +202,6 @@ bool Buffer::mergeChange(BufferState &state, QTextStream &input, int cursorPosit
     return !filetype().isEmpty() && (!enableDelay || !change.delayable());
 }
 
-QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
-{
-    if (!lineState) {
-        dbg << "<nil>";
-    } else {
-        dbg << *lineState;
-    }
-    return dbg;
-}
-
 // TODO: set cursorPosition of the state to the end of last Replacement
 // potentially needing to record a second counter
 void Buffer::replace(BufferState &state, const QList<Replacement> &replaces)
@@ -358,9 +359,12 @@ void Buffer::parseReplacement(View *source, const QList<Replacement> &replaces)
 // deleting until the start of the specified line and
 void Buffer::killLine(int index)
 {
-    BufferState &state = modifyState();
-    state[index].line.clear();
-    highlight(state, index);
+    if (!state()[index].line.isEmpty()) {
+        BufferState &state = modifyState();
+        state[index].line.clear();
+        highlight(state, index);
+        emitStateChange(NULL, true, false);
+    }
 }
 
 bool Buffer::hasUndo() { return _states.retractable(); }

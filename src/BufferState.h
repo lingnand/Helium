@@ -14,6 +14,36 @@
 #include <src/HighlightStateData.h>
 #include <QDebug>
 
+struct Range {
+    int from;
+    int to;
+    bool operator==(const Range &other) {
+        return from == other.from && to == other.to;
+    }
+    bool operator!=(const Range &other) {
+        return !operator==(other);
+    }
+    // if the current range is a subset of the other range
+    bool operator<=(const Range &other) {
+        return from >= other.from && to <= other.to;
+    }
+    bool operator>=(const Range &other) {
+        return from <= other.from && to >= other.to;
+    }
+    Range &grow(int diff) {
+        from -= diff;
+        to += diff;
+        return *this;
+    }
+    Range &clamp(int fromLimit, int toLimit) {
+        from = qMax(from, fromLimit);
+        to = qMin(to, toLimit);
+        return *this;
+    }
+    Range(int _from=-1): from(_from), to(_from) {}
+    Range(int _from, int _to): from(_from), to(_to) {}
+};
+
 class BufferLine
 {
     // text ready to be used inside <pre></pre>
@@ -74,17 +104,19 @@ public:
     };
     // return the index of the line where the cursor is currently in
     // NOTE: the cursorPosition is assumed to be based on plainText
-    Position focus(int cursorPosition);
-    void writePlainText(QTextStream &output);
-    void writePreText(QTextStream &output);
+    Position focus(int cursorPosition) const;
+    void writePlainText(QTextStream &output) const;
+    void writePreText(QTextStream &output) const;
     // beginIndex should always be smaller than endIndex
-    void writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex);
-    void writeHighlightedHtml(QTextStream &output, int beginIndex = 0);
+    void writeHighlightedHtml(QTextStream &output, const Range &) const;
+    void writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
+    void writeHighlightedHtml(QTextStream &output, int beginIndex = 0) const;
     // convenience function that returns a QString
-    QString highlightedHtml(int beginIndex, int endIndex);
-    QString highlightedHtml(int beginIndex = 0);
+    QString highlightedHtml(const Range &) const;
+    QString highlightedHtml(int beginIndex, int endIndex) const;
+    QString highlightedHtml(int beginIndex = 0) const;
     const QString &filetype() const;
-    int cursorPosition();
+    int cursorPosition() const;
     void setCursorPosition(int cursorPosition);
     void setFiletype(const QString &filetype);
 private:
@@ -94,5 +126,6 @@ private:
 
 QDebug operator<<(QDebug dbg, const BufferLine &line);
 QDebug operator<<(QDebug dbg, const BufferLineState &lineState);
+QDebug operator<<(QDebug dbg, const Range &range);
 
 #endif /* BUFFERSTATE_H_ */

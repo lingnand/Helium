@@ -9,6 +9,7 @@
 #define VIEW_H_
 
 #include <QObject>
+#include <QTimer>
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
 #include <src/Type.h>
@@ -56,7 +57,7 @@ private:
     ModKeyListener *_textAreaModKeyListener;
     bb::cascades::ProgressIndicator *_progressIndicator;
 
-    // find and replace
+    // #### find and replace
     bb::cascades::TitleBarExpandableArea *_findExpandableArea;
     bb::cascades::TextField *_findField;
     bb::cascades::TextField *_replaceField;
@@ -95,7 +96,12 @@ private:
     QList<Replacement> _replaces;
     int _numberOfReplacesTillBottom;
 
+    // #### buffer and highlight
+    bool _modifyingTextArea;
     Buffer *_buffer;
+    Range _highlightRange;
+    QTimer _partialHighlightUpdateTimer;
+    Q_SLOT void updateTextAreaPartialHighlight();
 
     Q_SLOT void select(const TextSelection &selection);
     Q_SLOT void setNormalModeActions();
@@ -110,6 +116,8 @@ private:
     Q_SLOT FindQueryUpdateStatus updateFindQuery(bool interactive);
     Q_SLOT void replaceNext();
     Q_SLOT void replaceAll();
+    // text operations
+    Q_SLOT void killCurrentLine();
     Q_SLOT void onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type);
     Q_SLOT void onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
@@ -118,8 +126,9 @@ private:
     Q_SLOT void onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString& text);
     Q_SLOT void onTextAreaModKeyPressed(bb::cascades::KeyEvent *event);
-    Q_SLOT void onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onTextAreaCursorPositionChanged(int);
+    Q_SLOT void onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
     Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
