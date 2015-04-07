@@ -28,7 +28,6 @@ public:
 private:
     // whether this buffer change is delayable
     bool _delayable;
-    void setDelayable(bool delayable) { _delayable = delayable; }
 };
 
 class HtmlBufferChangeParser : public HtmlParser
@@ -39,7 +38,8 @@ public:
 private:
     bool _startParsing;
     bool _stopParsing;
-    int _delayable;
+    bool _afterQTag;
+    bool _lastDelayable;
     int _cursorPosition;
     int _cursorLine; // index of cursorLine inside _change; or -1 when not found yet
     BufferStateChange _change;
@@ -51,5 +51,6 @@ private:
 };
 
 QDebug operator<<(QDebug dbg, const ChangedBufferLine &line);
+QDebug operator<<(QDebug dbg, const BufferStateChange &change);
 
 #endif /* HTMLBUFFERCHANGEPARSER_H_ */

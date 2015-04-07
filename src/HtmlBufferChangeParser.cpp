@@ -1,6 +1,6 @@
 #include <src/HtmlBufferChangeParser.h>
 
-HtmlBufferChangeParser::HtmlBufferChangeParser(): _delayable(false)
+HtmlBufferChangeParser::HtmlBufferChangeParser(): _lastDelayable(false)
 {
 }
 
@@ -8,9 +8,11 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
 {
     _startParsing = true;
     _stopParsing = false;
+    _afterQTag = false;
     _cursorLine = -1;
     _cursorPosition = cursorPosition;
     _change = BufferStateChange();
+    _change._delayable = true;
     qDebug() << ">>>>>> start parsing >>>>>>";
     parse(input);
     // remove everything after the cursorLine, if the line after cursorLine follows cursorLine immediately
@@ -20,10 +22,8 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
             _change.removeLast();
         }
     }
-    // delay only if the change size is one line and it doesn't span multiple lines
-    _delayable = _delayable && _change.size() == 1 && _change[0].startIndex == _change[0].endIndex;
-    qDebug() << "set delayable to" << _delayable;
-    _change.setDelayable(_delayable);
+    qDebug() << ">>>>>> end parsing >>>>>>";
+    _lastDelayable = _change._delayable;
     return _change;
 }
 
@@ -42,6 +42,9 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         // one more indexed line after the cursorline
         if (_cursorLine < 0 && charCount > _cursorPosition) {
             _cursorLine = _change.size() - 1;
+            _change._delayable = _change._delayable && _change.last().startIndex == _change.last().endIndex;
+        } else {
+            _change._delayable = _change._delayable && (_afterQTag || _change.last().line.isEmpty());
         }
         // we always append new lines (let the <q> tag clear unuseful lines out!)
         _change.append(ChangedBufferLine());
@@ -56,8 +59,9 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         //    we need to delay highlighting if we know a given character IS going to bring up prediction
         //    - in this case, we assume all white space characters can
         //    TODO: devise a strategy to reliably tell if there is prediction prompt
-        _delayable =  ch.isLetterOrNumber() || (ch.isSpace() && !_delayable);
+        _change._delayable =  _change.delayable && (ch.isLetterOrNumber() || (ch.isSpace() && !_lastDelayable));
     }
+    _afterQTag = false;
 }
 
 void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
@@ -81,13 +85,21 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
         if (_change.last().startIndex < 0)
             _change.last().startIndex = parsedIndex;
         _change.last().endIndex = parsedIndex;
+    } else if (name == "/q") {
+        _afterQTag = true;
     }
 }
 void HtmlBufferChangeParser::parseHtmlCharacter(const QChar &ch) {}
 bool HtmlBufferChangeParser::stopParsing() { return _stopParsing; }
 void HtmlBufferChangeParser::reachedEnd() {}
 
-QDebug operator<<(QDebug dbg, const ChangedBufferLine &line) {
+QDebug operator<<(QDebug dbg, const ChangedBufferLine &line)
+{
     return dbg.nospace() << "ChangedBufferLine(startIndex:" << line.startIndex << ", "
             << "endIndex:" << line.endIndex << ", " << line.line << ")";
+}
+
+QDebug operator<<(QDebug dbg, const BufferStateChange &change)
+{
+    return dbg.nospace() << "Change(delayable:" << change.delayable() << ", " << QList<ChangedBufferLine>(change) << ")";
 }
