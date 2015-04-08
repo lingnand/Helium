@@ -876,24 +876,17 @@ void View::killCurrentLine() {
 
 void View::onTextAreaTextChanged(const QString& text)
 {
-    QString header = QString("[TextAreaTextChanged %1]").arg(qrand());
-    qDebug() << header << "entered";
     if (_modifyingTextArea) {
-        qDebug() << header << "aborted due to lock";
         return;
     }
     if (!_buffer->emittingStateChange()) {
-        qDebug() << header << "parsing text change";
         _buffer->parseChange(this, text, _textArea->editor()->cursorPosition(), true);
     }
-    qDebug() << header << "exited";
 }
 
 void View::updateTextAreaPartialHighlight()
 {
     _modifyingTextArea = true;
-    QString header = QString("[CheckCursorPosition %1]").arg(qrand());
-    qDebug() << header << "entered";
     int start = _textArea->editor()->selectionStart();
     int end = _textArea->editor()->selectionEnd();
     int startLine = _buffer->state().focus(start).lineIndex;
@@ -902,27 +895,19 @@ void View::updateTextAreaPartialHighlight()
     Range newRange = Range(startLine, endLine).grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, _buffer->state().size());
     if (newRange != _highlightRange) {
         _highlightRange = newRange;
-        qDebug() << header << "setting new highlight text";
         _textArea->setText(_buffer->state().highlightedHtml(_highlightRange));
-        qDebug() << header << "resetting selection back to (" << start << "," << end << ")";
         _textArea->editor()->setSelection(start, end);
     }
     _modifyingTextArea = false;
-    qDebug() << header << "exited";
 }
 
 void View::onTextAreaCursorPositionChanged(int cursorPosition)
 {
-    QString header = QString("[CursorPosition %1]").arg(qrand());
-    qDebug() << header << "entered";
-    qDebug() << header << "changed to" << cursorPosition;
-    if (_modifyingTextArea) {
-        qDebug() << header << "aborted due to lock";
+    if (_modifyingTextArea || _buffer->filetype().isEmpty()) {
         return;
     }
     if (!_partialHighlightUpdateTimer.isActive())
         _partialHighlightUpdateTimer.start();
-    qDebug() << header << "exited";
 }
 
 void View::onBufferFiletypeChanged(const QString& filetype) {
@@ -937,27 +922,21 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
 
 // Is textChanging or cursorPositionChanged emitted first?
 void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
-    QString header = QString("[BufferStateChange %1]").arg(qrand());
-    qDebug() << header << "entered";
     if (this != source || sourceChanged) {
         int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
         // we assume that selectionStart == selectionEnd == pos in this case
         _modifyingTextArea = true;
         _highlightRange = Range(state.focus(pos).lineIndex)
                 .grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, state.size());
-        qDebug() << header << "range" << _highlightRange;
 //        qDebug() << "## text area out of sync";
 //        qDebug() << "### text area:";
 //        qDebug() << _textArea->text();
 //        qDebug() << "### buffer:";
 //        qDebug() << highlightedHtml;
-        qDebug() << header << "setting new highlight text";
         _textArea->setText(state.highlightedHtml(_highlightRange));
-        qDebug() << header << "setting cursor position to" << pos;
         _textArea->editor()->setCursorPosition(pos);
         _modifyingTextArea = false;
     }
-    qDebug() << header << "exited";
 }
 
 void View::onBufferProgressChanged(float progress)

@@ -111,7 +111,7 @@ void BufferLine::writePreText(QTextStream &output) const
         if (i >= _specialChars.size())
             break;
         if (_specialChars[i] == '&')
-            output << "&amp";
+            output << "&amp;";
         else if (_specialChars[i] == '<')
             output << "&lt;";
         else if (_specialChars[i] == '>')
