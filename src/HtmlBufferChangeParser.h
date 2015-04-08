@@ -19,9 +19,9 @@ class BufferStateChange : public QList<ChangedBufferLine>
     friend class HtmlBufferChangeParser;
 public:
     // the index of the first change
-    int startIndex() { return at(0).startIndex; }
-    bool delayable() { return _delayable; }
-    BufferStateChange(): _delayable(false) {
+    int startIndex() const { return at(0).startIndex; }
+    bool delayable() const { return _delayable; }
+    BufferStateChange(): _delayable(true) { // assume delayable by default
         // a BufferStateChange always contain at least one changedBufferLine
         append(ChangedBufferLine());
     }

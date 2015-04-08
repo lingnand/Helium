@@ -12,7 +12,6 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
     _cursorLine = -1;
     _cursorPosition = cursorPosition;
     _change = BufferStateChange();
-    _change._delayable = true;
     qDebug() << ">>>>>> start parsing >>>>>>";
     parse(input);
     // remove everything after the cursorLine, if the line after cursorLine follows cursorLine immediately
@@ -59,7 +58,7 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         //    we need to delay highlighting if we know a given character IS going to bring up prediction
         //    - in this case, we assume all white space characters can
         //    TODO: devise a strategy to reliably tell if there is prediction prompt
-        _change._delayable =  _change.delayable && (ch.isLetterOrNumber() || (ch.isSpace() && !_lastDelayable));
+        _change._delayable =  _change._delayable && (ch.isLetterOrNumber() || (ch.isSpace() && !_lastDelayable));
     }
     _afterQTag = false;
 }
