@@ -879,9 +879,7 @@ void View::onTextAreaTextChanged(const QString& text)
     if (_modifyingTextArea) {
         return;
     }
-    if (!_buffer->emittingStateChange()) {
-        _buffer->parseChange(this, text, _textArea->editor()->cursorPosition(), true);
-    }
+    _buffer->parseChange(this, text, _textArea->editor()->cursorPosition());
 }
 
 void View::updateTextAreaPartialHighlight()
