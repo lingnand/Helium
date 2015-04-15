@@ -187,6 +187,15 @@ void BufferState::writePlainText(QTextStream &output) const
     }
 }
 
+QString BufferState::plainText() const
+{
+    QString text;
+    QTextStream output(&text);
+    writePlainText(output);
+    output.flush();
+    return text;
+}
+
 void BufferState::writeHighlightedHtml(QTextStream &output, const Range &range) const
 {
     writeHighlightedHtml(output, range.from, range.to);

@@ -106,7 +106,7 @@ public:
     // NOTE: the cursorPosition is assumed to be based on plainText
     Position focus(int cursorPosition) const;
     void writePlainText(QTextStream &output) const;
-    void writePreText(QTextStream &output) const;
+    QString plainText() const;
     // beginIndex should always be smaller than endIndex
     void writeHighlightedHtml(QTextStream &output, const Range &) const;
     void writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
