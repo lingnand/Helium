@@ -79,14 +79,14 @@ private:
     enum FindQueryUpdateStatus { Changed, Unchanged, Invalid };
     QString _findQuery;
     bool _findBufferDirty;
-    QByteArray _findBuffer;
-    boost::cregex_iterator _findIterator;
-    boost::regex _findRegex;
+    std::wstring _findBuffer;
+    boost::wsregex_iterator _findIterator;
+    boost::wregex _findRegex;
     bool _findComplete;
     struct FindMatch {
         TextSelection selection;
-        boost::cmatch match;
-        FindMatch(TextSelection _sel, boost::cmatch _match): selection(_sel), match(_match) {}
+        boost::wsmatch match;
+        FindMatch(TextSelection _sel, boost::wsmatch _match): selection(_sel), match(_match) {}
     };
     QList<FindMatch> _findHits;
     int _findIndex;

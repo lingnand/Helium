@@ -367,15 +367,16 @@ View::FindQueryUpdateStatus View::updateFindQuery(bool interactive)
     FindQueryUpdateStatus status = Unchanged;
     if (find != _findQuery) {
         _findQuery = find;
-        _findRegex = boost::regex(std::string(find.toUtf8().constData()));
+        _findRegex = boost::wregex(find.toStdWString());
         status = Changed;
     }
     if (_findBufferDirty) {
         _findBufferDirty = false;
-        _findBuffer.clear();
-        QTextStream stream(&_findBuffer);
+        QString output;
+        QTextStream stream(&output);
         _buffer->state().writePlainText(stream);
         stream.flush();
+        _findBuffer = output.toStdWString();
         status = Changed;
     }
     if (status == Changed)
@@ -402,7 +403,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             } else {
                 _bofIndex = -1;
             }
-            _findIterator = boost::cregex_iterator(
+            _findIterator = boost::wsregex_iterator(
                     _findBuffer.begin() + findOffset,
                     _findBuffer.end(),
                     _findRegex);
@@ -434,7 +435,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             break;
         }
     }
-    boost::cregex_iterator end = boost::cregex_iterator();
+    boost::wsregex_iterator end = boost::wsregex_iterator();
     if (_findIterator == end) {
         if (_bofIndex >= 0) {
             qDebug() << "reached end of the last find loop; marking complete";
@@ -451,7 +452,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
         } else {
             // we've reached end
             // try from beginning again
-            _findIterator = boost::cregex_iterator(
+            _findIterator = boost::wsregex_iterator(
                     _findBuffer.begin(),
                     _findBuffer.end(),
                     _findRegex);
@@ -500,7 +501,7 @@ void View::findPrev()
             // we always enter the last find loop, because a reverse search will trigger
             // a whole run-down iterator
             _bofIndex = 0;
-            _findIterator = boost::cregex_iterator(
+            _findIterator = boost::wsregex_iterator(
                     _findBuffer.begin(),
                     _findBuffer.end(),
                     _findRegex);
@@ -508,7 +509,7 @@ void View::findPrev()
             // use -1 to indicate nothing in the hit list
             _findIndex = -1;
             // begin to find all the matches until passes the given offset
-            boost::cregex_iterator end = boost::cregex_iterator();
+            boost::wsregex_iterator end = boost::wsregex_iterator();
             while (true) {
                 if (_findIterator == end) {
                     // no more matches can be found
@@ -565,14 +566,14 @@ void View::findPrev()
             // findIndex is negative here
             // exhaust the current iterator and switch to the beginning-from-the-top iterator
             // and exhaust that as well. the point is to complete the whole list of find hits
-            boost::cregex_iterator end = boost::cregex_iterator();
+            boost::wsregex_iterator end = boost::wsregex_iterator();
             while (true) {
                 // increment find iterator
                 _findIterator++;
                 if (_findIterator == end) {
                     // no more matches can be found
                     if (_bofIndex < 0) {
-                        _findIterator = boost::cregex_iterator(
+                        _findIterator = boost::wsregex_iterator(
                                 _findBuffer.begin(),
                                 _findBuffer.end(),
                                 _findRegex);
@@ -617,9 +618,9 @@ void View::replaceNext()
         TextSelection current(_textArea->editor()->selectionStart(),
                 _textArea->editor()->selectionEnd());
         if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].selection) {
-            QString rep = QString::fromUtf8(_findHits[_findIndex].match.format(_replaceField->text().toUtf8().constData()).c_str());
             // TODO: should we set the cursor to be just after the replacement?
-            _buffer->parseReplacement(this, Replacement(current, rep));
+            _buffer->parseReplacement(this, Replacement(current,
+                    QString::fromStdWString(_findHits[_findIndex].match.format(_replaceField->text().toStdWString()))));
             // TODO: modify the findbuffer appropriately instead of doing plainText() again in the next findNext call
             _findBufferDirty = true;
             // there shouldn't be any interactivity here
@@ -639,7 +640,7 @@ void View::replaceAll()
     // get the replace index
     int replaceIndex = _findIndex;
     qDebug() << "replace index is" << replaceIndex;
-    std::string replacement = _replaceField->text().toUtf8().constData();
+    QStdWString replacement = _replaceField->text().toStdWString();
     // refill all the findMatches in the _findHits
     while (!_findComplete) {
         // there shouldn't be any change in the status
@@ -656,7 +657,7 @@ void View::replaceAll()
             break;
         }
         _replaces.append(Replacement(_findHits[index].selection,
-                QString::fromUtf8(_findHits[index].match.format(replacement).c_str())));
+                QString::fromStdWString(_findHits[index].match.format(replacement))));
     }
     // do the actual replaces
     _buffer->parseReplacement(this, _replaces);
@@ -666,7 +667,7 @@ void View::replaceAll()
         index = (replaceIndex + i) % _findHits.count();
 //        qDebug() << "adding index" << index << "to the second replaces queue";
         _replaces.append(Replacement(_findHits[index].selection,
-                QString::fromUtf8(_findHits[index].match.format(replacement).c_str())));
+                QString::fromStdWString(_findHits[index].match.format(replacement))));
     }
     // mark the buffer as dirty
     _findBufferDirty = true;
