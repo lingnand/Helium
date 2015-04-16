@@ -34,14 +34,19 @@ Buffer::Buffer(int historyLimit):
     _locked(false)
 {
     _worker.moveToThread(&_workerThread);
-    conn(&_worker, SIGNAL(inProgressChanged(float)),
-            this, SIGNAL(inProgressChanged(float)));
     conn(this, SIGNAL(workerSaveStateToFile(const BufferState &, const QString &)),
             &_worker, SLOT(saveStateToFile(const BufferState &, const QString &)));
     conn(this, SIGNAL(workerLoadStateFromFile(const QString &)),
             &_worker, SLOT(loadStateFromFile(const QString &)));
+    conn(this, SIGNAL(workerMergeChange(BufferState &, View *, const BufferStateChange &)),
+            &_worker, SLOT(mergeChange(BufferState &, View *, const BufferStateChange &)));
+
+    conn(&_worker, SIGNAL(inProgressChanged(float)),
+            this, SIGNAL(inProgressChanged(float)));
     conn(&_worker, SIGNAL(stateLoadedFromFile(const BufferState &, const QString &)),
             this, SLOT(onWorkerStateLoadedFromFile(const BufferState &, const QString &)));
+    conn(&_worker, SIGNAL(changeMerged(const BufferState &, View *, bool)),
+            this, SLOT(onWorkerChangeMerged(const BufferState &, View *, bool)));
     _workerThread.start();
 
     conn(&_states, SIGNAL(retractableChanged(bool)),

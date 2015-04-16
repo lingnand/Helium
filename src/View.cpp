@@ -927,12 +927,14 @@ void View::onBufferStateChanged(BufferState& state, View *source, bool sourceCha
         _modifyingTextArea = true;
         _highlightRange = Range(state.focus(pos).lineIndex)
                 .grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, state.size());
-//        qDebug() << "## text area out of sync";
-//        qDebug() << "### text area:";
-//        qDebug() << _textArea->text();
-//        qDebug() << "### buffer:";
-//        qDebug() << highlightedHtml;
-        _textArea->setText(state.highlightedHtml(_highlightRange));
+        qDebug() << "## text area out of sync";
+        qDebug() << "### text area:";
+        qDebug() << _textArea->text();
+        qDebug() << "### buffer:";
+        QString highlightedHtml = state.highlightedHtml(_highlightRange);
+        qDebug() << highlightedHtml;
+        _textArea->setText(highlightedHtml);
+//        _textArea->setText(state.highlightedHtml(_highlightRange));
         _textArea->editor()->setCursorPosition(pos);
         _modifyingTextArea = false;
     }

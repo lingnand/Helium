@@ -101,13 +101,12 @@ void BufferWorker::mergeChange(BufferState &state, View *source, const BufferSta
     for (int i = 0; i < change.size(); i++) {
         BufferLineState lineState(change[i].line);
         currentHighlightData = highlightLine(lineState, currentHighlightData);
-        changeIndex = change[i].startIndex;
+        changeIndex = change[i].index;
         if (changeIndex < 0) {
             // we need to insert this new line
             state.insert(bufferIndex, lineState);
             offset++;
         } else {
-            changeIndex = change[i].endIndex;
             // we need to delete the lines until the index match up
             while (bufferIndex != changeIndex+offset) {
                 state.removeAt(bufferIndex);

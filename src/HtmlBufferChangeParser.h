@@ -8,10 +8,9 @@
 
 struct ChangedBufferLine
 {
-    int startIndex; // the presumed start index for this line
-    int endIndex; // the presumed end index for this line
+    int index;
     BufferLine line;
-    ChangedBufferLine(): startIndex(-1), endIndex(-1), line(BufferLine()) {}
+    ChangedBufferLine(int i=-1): index(i), line(BufferLine()) {}
 };
 
 class BufferStateChange : public QList<ChangedBufferLine>
@@ -19,13 +18,13 @@ class BufferStateChange : public QList<ChangedBufferLine>
     friend class HtmlBufferChangeParser;
 public:
     // the index of the first change
-    int startIndex() const { return at(0).startIndex; }
+    int startIndex() const { return _startIndex; }
     bool delayable() const { return _delayable; }
-    BufferStateChange(): _delayable(true) { // assume delayable by default
-        // a BufferStateChange always contain at least one changedBufferLine
+    BufferStateChange(): _startIndex(0), _delayable(true) { // assume delayable by default
         append(ChangedBufferLine());
     }
 private:
+    int _startIndex;
     // whether this buffer change is delayable
     bool _delayable;
 };
@@ -36,7 +35,6 @@ public:
     HtmlBufferChangeParser();
     BufferStateChange parseBufferChange(QTextStream &input, int cursorPosition);
 private:
-    bool _startParsing;
     bool _stopParsing;
     bool _afterQTag;
     bool _lastDelayable;
