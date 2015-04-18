@@ -135,14 +135,12 @@ BufferState &Buffer::modifyState()
 
 // TODO: also tackle the case where the editor is moved, selection selected
 // in other words, in such situations you also need to rehighlight any delayed content
-void Buffer::parseChange(View *source, const QString &content, int cursorPosition)
+void Buffer::parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition)
 {
 
-    QString cont(content);
-    QTextStream input(&cont);
     BufferState &state = modifyState();
     state.setCursorPosition(cursorPosition);
-    BufferStateChange change = _bufferChangeParser.parseBufferChange(input, cursorPosition);
+    BufferStateChange change = _bufferChangeParser.parseBufferChange(content, start, cursorPosition);
     qDebug() << "change:" << change;
     if (change.size() > 100) {
         // put this into background

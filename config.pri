@@ -391,6 +391,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/srchilite/wordtokenizer.h)
 }
 
+INCLUDEPATH += $$quote($$BASEDIR/src/srchilite) \
+    $$quote($$BASEDIR/src)
+
 CONFIG += precompile_header
 
 PRECOMPILED_HEADER = $$quote($$BASEDIR/precompiled.h)

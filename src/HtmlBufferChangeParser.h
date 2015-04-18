@@ -28,12 +28,13 @@ private:
     // whether this buffer change is delayable
     bool _delayable;
 };
+Q_DECLARE_METATYPE(BufferStateChange)
 
 class HtmlBufferChangeParser : public HtmlParser
 {
 public:
     HtmlBufferChangeParser();
-    BufferStateChange parseBufferChange(QTextStream &input, int cursorPosition);
+    BufferStateChange parseBufferChange(const QString &input, ParserPosition position, int cursorPosition);
 private:
     bool _stopParsing;
     bool _afterQTag;

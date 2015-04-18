@@ -9,16 +9,21 @@
 
 // BufferLine
 
-BufferLine::BufferLine():_size(0) {}
+BufferLine::BufferLine():_1size(0), _4size(0), _5size(0) {}
 
 int BufferLine::size() const
 {
-    return _size;
+    return _1size + _4size + _5size;
+}
+
+int BufferLine::preTextSize() const
+{
+    return _1size + 4*_4size + 5*_5size;
 }
 
 bool BufferLine::isEmpty() const
 {
-    return _size == 0;
+    return _preTextSegments.empty() && _specialChars.empty();
 }
 
 void BufferLine::clear()
@@ -29,20 +34,29 @@ void BufferLine::clear()
 BufferLine BufferLine::split(int position)
 {
     BufferLine split;
-    if (_size <= position) {
+    if (size() <= position) {
         return split;
     }
-    _size -= position;
-    split._size = position;
     while (position > 0) {
         QString elem = _preTextSegments.takeFirst();
-        split._preTextSegments.append(elem.left(position));
+        QString transfer = elem.left(position);
+        split._preTextSegments.append(transfer);
+        _1size -= transfer.size();
+        split._1size += transfer.size();
         position -= elem.size();
         if (position <= 0) {
             _preTextSegments.prepend(elem.right(-position));
             break;
         }
-        split._specialChars.append(_specialChars.takeFirst());
+        QChar spTransfer = _specialChars.takeFirst();
+        split._specialChars.append(spTransfer);
+        if (spTransfer == '&') {
+            _5size--;
+            split._5size++;
+        } else { // '<'
+            _4size--;
+            split._4size++;
+        }
         position--;
     }
     swap(split);
@@ -53,12 +67,16 @@ void BufferLine::append(const QChar &c)
 {
     if (_preTextSegments.size() == _specialChars.size())
         _preTextSegments.append("");
-    if (c == '&' || c == '<' || c == '>') {
+    if (c == '&') {
         _specialChars.append(c);
+        _5size++;
+    } else if (c == '<') {
+        _specialChars.append(c);
+        _4size++;
     } else {
         _preTextSegments.last().append(c);
+        _1size++;
     }
-    _size++;
 }
 
 void BufferLine::append(const QString &str)
@@ -70,7 +88,7 @@ void BufferLine::append(const QString &str)
 
 void BufferLine::append(const BufferLine &other)
 {
-    if (other._size == 0)
+    if (other.isEmpty())
         return;
     if (_preTextSegments.size() == _specialChars.size())
         _preTextSegments.append(other._preTextSegments);
@@ -79,8 +97,10 @@ void BufferLine::append(const BufferLine &other)
         _preTextSegments.last().append(seg.takeFirst());
         _preTextSegments.append(seg);
     }
-    _size += other._size;
     _specialChars.append(other._specialChars);
+    _1size += other._1size;
+    _4size += other._4size;
+    _5size += other._5size;
 }
 
 BufferLine &BufferLine::operator<<(const QChar &c) { append(c); return *this; }
@@ -112,10 +132,8 @@ void BufferLine::writePreText(QTextStream &output) const
             break;
         if (_specialChars[i] == '&')
             output << "&amp;";
-        else if (_specialChars[i] == '<')
+        else // (_specialChars[i] == '<')
             output << "&lt;";
-        else if (_specialChars[i] == '>')
-            output << "&gt;";
     }
 }
 
@@ -187,24 +205,21 @@ void BufferState::writePlainText(QTextStream &output) const
     }
 }
 
-QString BufferState::plainText() const
+ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, const Range &range) const
 {
-    QString text;
-    QTextStream output(&text);
-    writePlainText(output);
-    output.flush();
-    return text;
+    return writeHighlightedHtml(output, range.from, range.to);
 }
 
-void BufferState::writeHighlightedHtml(QTextStream &output, const Range &range) const
+ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex) const
 {
-    writeHighlightedHtml(output, range.from, range.to);
+    return writeHighlightedHtml(output, beginIndex, size());
 }
 
-void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const
+ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const
 {
+    ParserPosition pos;
     if (empty())
-        return;
+        return pos;
     output << "<pre>";
     if (filetype().isEmpty()) {
         at(0).line.writePreText(output);
@@ -216,9 +231,31 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;
+        bool writtenPlainText = false;
         for (; i < beginIndex; i++) {
-            at(i).line.writePreText(output);
+//            qDebug() << "writing line" << i << "...";
+            const BufferLine &line = at(i).line;
+            line.writePreText(output);
+            pos.charCount += line.size();
+            pos.htmlCount += line.preTextSize();
+//            qDebug() << "updated position to" << pos;
             output << '\n';
+            pos.charCount++;
+            pos.htmlCount++;
+            writtenPlainText = true;
+        }
+        if (writtenPlainText) {
+            // nudge the htmlCount by 6
+            // - one is for reading from the start of the next line
+            //   this is for the reason that we'd like
+            //   the parse to start parsing from the html line
+            //   NOTE: we assume that as long as we've written plainText
+            //   then cursorPosition != charCount
+            //   i.e. the range should be at least 1 line away from the cursorLine
+            // - remaining 5 is for <pre> at the start
+//            qDebug() << "nudging htmlCount by 6...";
+            pos.htmlCount += 6;
+//            qDebug() << "updated position to" << pos;
         }
         while (true) {
             if (!at(i).line.isEmpty()) {
@@ -238,30 +275,7 @@ void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex, int 
         }
     }
     output << "</pre>";
-}
-
-void BufferState::writeHighlightedHtml(QTextStream &output, int beginIndex) const
-{
-    writeHighlightedHtml(output, beginIndex, size());
-}
-
-QString BufferState::highlightedHtml(const Range &range) const
-{
-    return highlightedHtml(range.from, range.to);
-}
-
-QString BufferState::highlightedHtml(int beginIndex, int endIndex) const
-{
-    QString content;
-    QTextStream stream(&content);
-    writeHighlightedHtml(stream, beginIndex, endIndex);
-    stream.flush();
-    return content;
-}
-
-QString BufferState::highlightedHtml(int beginIndex) const
-{
-    return highlightedHtml(beginIndex, size());
+    return pos;
 }
 
 QDebug operator<<(QDebug dbg, const BufferLine &line) {

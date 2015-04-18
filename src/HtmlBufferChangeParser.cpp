@@ -4,7 +4,7 @@ HtmlBufferChangeParser::HtmlBufferChangeParser(): _lastDelayable(false)
 {
 }
 
-BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, int cursorPosition)
+BufferStateChange HtmlBufferChangeParser::parseBufferChange(const QString &input, ParserPosition position, int cursorPosition)
 {
     _stopParsing = false;
     _afterQTag = false;
@@ -12,7 +12,7 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(QTextStream &input, 
     _cursorLine = -1;
     _change = BufferStateChange();
     qDebug() << ">>>>>> start parsing >>>>>>";
-    parse(input);
+    parse(input, position);
     if (_cursorLine >= 0) { // this should generally be the case
         // remove everything after the cursorLine, if the line after cursorLine follows cursorLine immediately
         if (_cursorLine+1 < _change.size() && _change[_cursorLine].index >= 0 &&

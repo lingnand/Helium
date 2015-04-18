@@ -53,7 +53,7 @@ public:
     const QString &filetype() const;
     Q_SLOT void setFiletype(const QString &filetype, bool rehighlightBuffer=true);
     BufferState &state();
-    Q_SLOT void parseChange(View *source, const QString &content, int cursorPosition);
+    Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
     Q_SLOT void parseReplacement(View *source, const Replacement &replace);
     Q_SLOT void parseReplacement(View *source, const QList<Replacement> &replaces);
     void killLine(int index);

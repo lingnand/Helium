@@ -15,19 +15,20 @@
  */
 
 #include "applicationui.hpp"
-
 #include <bb/cascades/Application>
-
 #include <QLocale>
 #include <QTranslator>
-
 #include <Qt/qdeclarativedebug.h>
+#include <src/BufferState.h>
+#include <src/HtmlBufferChangeParser.h>
 
 using namespace bb::cascades;
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
     Application app(argc, argv);
+    qRegisterMetaType<BufferState>("BufferState&");
+    qRegisterMetaType<BufferStateChange>();
 
     ApplicationUI appui;
 

@@ -13,6 +13,13 @@
 #include <QObject>
 #include <QTextStream>
 
+struct ParserPosition {
+    int charCount; // the character count at the given location in the plaintext
+    int htmlCount; // the character count at the given location in the html
+    ParserPosition(int _charCount=0, int _htmlCount=0):
+        charCount(_charCount), htmlCount(_htmlCount) {}
+};
+
 /* A general purpose html parser
  * only works for the simple syntax inside a textarea
  * subclass should override the necessary functions
@@ -21,8 +28,7 @@ class HtmlParser : public QObject
 {
     Q_OBJECT
 protected:
-    // return the last cursor index
-    void parse(QTextStream& input);
+    void parse(const QString &input, ParserPosition position);
     virtual bool stopParsing() = 0;
     // parse character begins from BOF
     virtual void parseCharacter(const QChar &ch, int charCount) = 0;
@@ -31,5 +37,7 @@ protected:
     virtual void parseHtmlCharacter(const QChar &ch) = 0;
     virtual void reachedEnd() = 0;
 };
+
+QDebug operator<<(QDebug dbg, const ParserPosition &line);
 
 #endif /* HTMLPARSER_H_ */

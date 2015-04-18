@@ -12,31 +12,30 @@ enum HtmlState { InChar, InTag };
 enum CharState { Normal, InSpecialChar };
 enum TagState { InPrefix, InAttributeName, InAttributeValue };
 
-void HtmlParser::parse(QTextStream& input)
+void HtmlParser::parse(const QString &input, ParserPosition position)
 {
     // process the content
     // first find the regions to rehighlight
     HtmlState state = InChar;
     CharState charState = Normal;
     TagState tagState = InPrefix;
-    int charCount = 0;
     QString specialCharStr, tagName, tagAttributeName, tagAttributeValue;
     // ch is the character just before the cursor
-    QChar ch = BOF;
+    QChar ch = position.htmlCount ? input[position.htmlCount-1] : BOF;
     while (true) {
         switch (state) {
             case InChar: {
                 switch (charState) {
                     case Normal:
                         if (ch == BOF) {
-                            parseCharacter(ch, charCount);
+                            parseCharacter(ch, position.charCount);
                         } else if (ch == '&') {
                             charState = InSpecialChar;
                         } else if (ch == '<') {
                             state = InTag;
                         } else {
-                            charCount++;
-                            parseCharacter(ch, charCount);
+                            position.charCount++;
+                            parseCharacter(ch, position.charCount);
                         }
                         break;
                     case InSpecialChar:
@@ -52,8 +51,8 @@ void HtmlParser::parse(QTextStream& input)
                                 ch = '\0';
                                 qCritical() << "unrecognized special char:" << specialCharStr;
                             }
-                            charCount++;
-                            parseCharacter(ch, charCount);
+                            position.charCount++;
+                            parseCharacter(ch, position.charCount);
                             specialCharStr.clear();
                             charState = Normal;
                         } else {
@@ -102,13 +101,18 @@ void HtmlParser::parse(QTextStream& input)
         if (stopParsing()) {
             break;
         }
-        input >> ch;
-        if (ch.isNull()) {
+        if (position.htmlCount >= input.size()) {
             // reached end of the content
             reachedEnd();
             break;
         }
+        ch = input[position.htmlCount++];
         parseHtmlCharacter(ch);
     }
 }
 
+QDebug operator<<(QDebug dbg, const ParserPosition &pos)
+{
+    return dbg.nospace() << "ParserPosition(charCount:" << pos.charCount <<
+            ", htmlCount:" << pos.htmlCount << ")";
+}

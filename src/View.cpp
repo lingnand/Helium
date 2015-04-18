@@ -880,7 +880,10 @@ void View::onTextAreaTextChanged(const QString& text)
     if (_modifyingTextArea) {
         return;
     }
-    _buffer->parseChange(this, text, _textArea->editor()->cursorPosition());
+    qDebug() << "## parsing change from text area";
+//    qDebug() << "lines from the highlightStart:" <<
+//            text.right(text.size() - _highlightStart.htmlCount + 1).left(100);
+    _buffer->parseChange(this, text, _highlightStart, _textArea->editor()->cursorPosition());
 }
 
 void View::updateTextAreaPartialHighlight()
@@ -893,8 +896,17 @@ void View::updateTextAreaPartialHighlight()
     // this is the case where we've just moved cursor to another place
     Range newRange = Range(startLine, endLine).grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, _buffer->state().size());
     if (newRange != _highlightRange) {
+        qDebug() << "## updating new partial highlight view";
         _highlightRange = newRange;
-        _textArea->setText(_buffer->state().highlightedHtml(_highlightRange));
+        QString highlightedHtml;
+        QTextStream output(&highlightedHtml);
+        _highlightStart = _buffer->state().writeHighlightedHtml(output, _highlightRange);
+        output.flush();
+        qDebug() << "updated highlightStart to" << _highlightStart;
+//        qDebug() << "lines from the highlightStart:" <<
+//                highlightedHtml.right(highlightedHtml.size() - _highlightStart.htmlCount + 1).left(100);
+//        qDebug() << "entire doc:" << highlightedHtml;
+        _textArea->setText(highlightedHtml);
         _textArea->editor()->setSelection(start, end);
     }
     _modifyingTextArea = false;
@@ -927,14 +939,18 @@ void View::onBufferStateChanged(BufferState& state, View *source, bool sourceCha
         _modifyingTextArea = true;
         _highlightRange = Range(state.focus(pos).lineIndex)
                 .grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, state.size());
+        QString highlightedHtml;
+        QTextStream output(&highlightedHtml);
+        _highlightStart = state.writeHighlightedHtml(output, _highlightRange);
+        output.flush();
+
         qDebug() << "## text area out of sync";
         qDebug() << "### text area:";
         qDebug() << _textArea->text();
         qDebug() << "### buffer:";
-        QString highlightedHtml = state.highlightedHtml(_highlightRange);
         qDebug() << highlightedHtml;
+
         _textArea->setText(highlightedHtml);
-//        _textArea->setText(state.highlightedHtml(_highlightRange));
         _textArea->editor()->setCursorPosition(pos);
         _modifyingTextArea = false;
     }

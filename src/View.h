@@ -100,6 +100,7 @@ private:
     bool _modifyingTextArea;
     Buffer *_buffer;
     Range _highlightRange;
+    ParserPosition _highlightStart;
     QTimer _partialHighlightUpdateTimer;
     Q_SLOT void updateTextAreaPartialHighlight();
 

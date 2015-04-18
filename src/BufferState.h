@@ -12,6 +12,7 @@
 #include <QStringList>
 #include <QTextStream>
 #include <src/HighlightStateData.h>
+#include <src/HtmlParser.h>
 #include <QDebug>
 
 struct Range {
@@ -51,6 +52,7 @@ public:
     BufferLine();
     virtual ~BufferLine() {}
     int size() const;
+    int preTextSize() const;
     bool isEmpty() const;
     void clear();
 
@@ -71,7 +73,9 @@ public:
     QString plainText() const;
     QString preText() const;
 private:
-    int _size;
+    int _1size; // number of characters that will translate into 1 char in pretext
+    int _4size; // ... translate into 4 chars e.g. &lt;
+    int _5size; // .. translate into 5 chars e.g. &amp;
     QStringList _preTextSegments;
     QList<QChar> _specialChars;
 };
@@ -106,15 +110,11 @@ public:
     // NOTE: the cursorPosition is assumed to be based on plainText
     Position focus(int cursorPosition) const;
     void writePlainText(QTextStream &output) const;
-    QString plainText() const;
     // beginIndex should always be smaller than endIndex
-    void writeHighlightedHtml(QTextStream &output, const Range &) const;
-    void writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
-    void writeHighlightedHtml(QTextStream &output, int beginIndex = 0) const;
-    // convenience function that returns a QString
-    QString highlightedHtml(const Range &) const;
-    QString highlightedHtml(int beginIndex, int endIndex) const;
-    QString highlightedHtml(int beginIndex = 0) const;
+    // return: the parser position at the beginning of the highlight section
+    ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;
+    ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
+    ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex = 0) const;
     const QString &filetype() const;
     int cursorPosition() const;
     void setCursorPosition(int cursorPosition);
@@ -123,6 +123,7 @@ private:
     QString _filetype;
     int _cursorPosition;
 };
+Q_DECLARE_METATYPE(BufferState)
 
 QDebug operator<<(QDebug dbg, const BufferLine &line);
 QDebug operator<<(QDebug dbg, const BufferLineState &lineState);
