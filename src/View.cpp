@@ -886,6 +886,19 @@ void View::onTextAreaTextChanged(const QString& text)
     _buffer->parseChange(this, text, _highlightStart, _textArea->editor()->cursorPosition());
 }
 
+Range View::partialHighlightRange(const BufferState &st, Range focus)
+{
+    focus.grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, st.size());
+    // extend the range to make sure that we have non-empty lines at two ends
+    while (focus.from > 0 && st[focus.from].line.isEmpty()) {
+        focus.from--;
+    }
+    while (focus.to > 0 && focus.to < st.size() && st[focus.to-1].line.isEmpty()) {
+        focus.to++;
+    }
+    return focus;
+}
+
 void View::updateTextAreaPartialHighlight()
 {
     _modifyingTextArea = true;
@@ -894,7 +907,7 @@ void View::updateTextAreaPartialHighlight()
     int startLine = _buffer->state().focus(start).lineIndex;
     int endLine = start == end ? startLine : _buffer->state().focus(end).lineIndex;
     // this is the case where we've just moved cursor to another place
-    Range newRange = Range(startLine, endLine).grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, _buffer->state().size());
+    Range newRange = partialHighlightRange(_buffer->state(), Range(startLine, endLine));
     if (newRange != _highlightRange) {
         qDebug() << "## updating new partial highlight view";
         _highlightRange = newRange;
@@ -937,8 +950,7 @@ void View::onBufferStateChanged(BufferState& state, View *source, bool sourceCha
         int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
         // we assume that selectionStart == selectionEnd == pos in this case
         _modifyingTextArea = true;
-        _highlightRange = Range(state.focus(pos).lineIndex)
-                .grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, state.size());
+        _highlightRange = partialHighlightRange(state, Range(state.focus(pos).lineIndex));
         QString highlightedHtml;
         QTextStream output(&highlightedHtml);
         _highlightStart = state.writeHighlightedHtml(output, _highlightRange);

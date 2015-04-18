@@ -102,6 +102,7 @@ private:
     Range _highlightRange;
     ParserPosition _highlightStart;
     QTimer _partialHighlightUpdateTimer;
+    Range partialHighlightRange(const BufferState &st, Range focus);
     Q_SLOT void updateTextAreaPartialHighlight();
 
     Q_SLOT void select(const TextSelection &selection);
