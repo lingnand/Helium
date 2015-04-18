@@ -86,6 +86,7 @@ HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, 
 
 void BufferWorker::mergeChange(BufferState &state, View *source, const BufferStateChange &change)
 {
+    float currentProgress = 0, progressInc = 1.0 / (change.size()+1);
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
     int changeIndex = -1;
@@ -116,6 +117,7 @@ void BufferWorker::mergeChange(BufferState &state, View *source, const BufferSta
             state[bufferIndex] = lineState;
         }
         bufferIndex++;
+        emit inProgressChanged(currentProgress+=progressInc);
     }
     // if there is no merge edge then we can remove all the rest
     if (changeIndex < 0) {
@@ -126,14 +128,16 @@ void BufferWorker::mergeChange(BufferState &state, View *source, const BufferSta
         qDebug() << "continuing to highlight additional lines";
         highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData);
     }
+    bool sourceChanged = false;
     // if there is nothing left.
     // there can be no highlight change when the buffer is empty
     if (state.size() == 1 && state[0].line.isEmpty()) {
         state.removeAt(0);
-        emit changeMerged(state, source, false);
     } else {
-        emit changeMerged(state, source, !filetype().isEmpty() && !change.delayable());
+        sourceChanged = !filetype().isEmpty() && !change.delayable();
     }
+    emit inProgressChanged(1);
+    emit changeMerged(state, source, sourceChanged);
 }
 
 // TODO: set cursorPosition of the state to the end of last Replacement

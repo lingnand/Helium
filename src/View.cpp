@@ -716,6 +716,8 @@ void View::setBuffer(Buffer* buffer)
                 this, SLOT(onBufferFiletypeChanged(QString)));
             disconn(_buffer, SIGNAL(inProgressChanged(float)),
                 this, SLOT(onBufferProgressChanged(float)));
+            disconn(_buffer, SIGNAL(lockedChanged(bool)),
+                this, SLOT(onBufferLockedChanged(bool)));
             disconn(_buffer, SIGNAL(hasUndosChanged(bool)),
                 this, SLOT(onBufferHasUndosChanged(bool)));
             disconn(_buffer, SIGNAL(hasRedosChanged(bool)),
@@ -739,6 +741,10 @@ void View::setBuffer(Buffer* buffer)
         onBufferProgressChanged(0);
         conn(_buffer, SIGNAL(inProgressChanged(float)),
             this, SLOT(onBufferProgressChanged(float)));
+
+        onBufferLockedChanged(buffer->locked());
+        conn(_buffer, SIGNAL(lockedChanged(bool)),
+            this, SLOT(onBufferLockedChanged(bool)));
 
         _undoAction->setEnabled(_buffer->hasUndo());
         conn(_buffer, SIGNAL(hasUndosChanged(bool)),
@@ -970,12 +976,36 @@ void View::onBufferStateChanged(BufferState& state, View *source, bool sourceCha
 
 void View::onBufferProgressChanged(float progress)
 {
-    if (progress <= 0) {
-        _progressIndicator->setVisible(false);
-    } else {
-        _progressIndicator->setVisible(true);
-    }
     _progressIndicator->setValue(progress);
+    _progressIndicator->setVisible(progress > 0 && progress < 1);
+}
+
+void View::onBufferLockedChanged(bool locked)
+{
+    switch (_mode) {
+        case Normal:
+            _textArea->setEditable(!locked);
+            _titleField->setEnabled(!locked);
+            // actions
+            _saveAction->setEnabled(!locked);
+            _undoAction->setEnabled(!locked && _buffer->hasUndo());
+            _redoAction->setEnabled(!locked && _buffer->hasRedo());
+            _findAction->setEnabled(!locked);
+            break;
+        case Find:
+            _findField->setEnabled(!locked);
+            _replaceField->setEnabled(!locked);
+            // actions
+            _goToFindFieldAction->setEnabled(!locked);
+            _findPrevAction->setEnabled(!locked);
+            _findNextAction->setEnabled(!locked);
+            _replaceNextAction->setEnabled(!locked);
+            _replaceAllAction->setEnabled(!locked);
+            _findCancelAction->setEnabled(!locked);
+            _undoAction->setEnabled(!locked && _buffer->hasUndo());
+            _redoAction->setEnabled(!locked && _buffer->hasRedo());
+            break;
+    }
 }
 
 void View::onBufferHasUndosChanged(bool hasUndos)

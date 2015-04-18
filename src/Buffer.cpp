@@ -110,6 +110,7 @@ void Buffer::onWorkerChangeMerged(const BufferState &newSt, View *source, bool s
         qDebug() << "change merged and a new state is copied into our list!";
         st = newSt;
     }
+    setLocked(false);
     emit stateChanged(st, source, shouldUpdateSourceView, false);
 }
 

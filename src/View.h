@@ -132,6 +132,7 @@ private:
     Q_SLOT void onTextAreaCursorPositionChanged(int);
     Q_SLOT void onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onFindOptionButtonClicked();
+    Q_SLOT void onBufferLockedChanged(bool locked);
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
     Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
     Q_SLOT void onBufferProgressChanged(float progress);
