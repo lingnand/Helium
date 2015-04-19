@@ -49,9 +49,9 @@ public:
     // returns the name of the current buffer, "" for no name
     const QString &name() const;
     // the name the buffer will use to write to the filesystem when requested
-    Q_SLOT void setName(const QString &name, bool rehighlightBuffer=true);
-    Q_SLOT void setFiletype(const QString &filetype, bool rehighlightBuffer=true);
+    Q_SLOT void setName(const QString &name);
     const QString &filetype();
+    Q_SLOT void setFiletype(const QString &filetype);
     BufferState &state();
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
     Q_SLOT void parseReplacement(View *source, const Replacement &replace);

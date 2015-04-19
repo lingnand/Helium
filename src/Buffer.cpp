@@ -72,26 +72,26 @@ void Buffer::setLocked(bool lock) {
 
 const QString &Buffer::name() const { return _name; }
 
-void Buffer::setName(const QString& name, bool rehighlightBuffer)
+void Buffer::setName(const QString& name)
 {
     if (name != _name) {
         _name = name;
         // try to set the filetype
         std::string ft = name.toUtf8().constData();
         ft = _langMap->getMappedFileNameFromFileName(ft);
-        setFiletype(QString::fromUtf8(ft.c_str()), rehighlightBuffer);
+        setFiletype(QString::fromUtf8(ft.c_str()));
         emit nameChanged(name);
     }
 }
 
 const QString &Buffer::filetype() { return _worker.filetype(); }
 
-void Buffer::setFiletype(const QString &filetype, bool rehighlightBuffer)
+void Buffer::setFiletype(const QString &filetype)
 {
     if (_worker.setFiletype(filetype)) {
         BufferState &st = state();
-        if (rehighlightBuffer) {
-            _worker.highlight(st);
+        _worker.highlight(st);
+        if (!st.isEmpty()) {
             emit stateChanged(st, NULL, true, false);
         }
         emit filetypeChanged(filetype);
