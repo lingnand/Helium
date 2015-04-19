@@ -1,3 +1,4 @@
+#include <QMutexLocker>
 #include <src/BufferWorker.h>
 
 BufferWorker::BufferWorker():
@@ -15,10 +16,15 @@ BufferState BufferWorker::loadStateFromFile(const QString &filename)
     return BufferState();
 }
 
-const QString &BufferWorker::filetype() const { return _filetype; }
+const QString &BufferWorker::filetype()
+{
+    QMutexLocker locker(&_highlightMut);
+    return _filetype;
+}
 
 bool BufferWorker::setFiletype(const QString &filetype)
 {
+    QMutexLocker locker(&_highlightMut);
     if (filetype != _filetype) {
         _filetype = filetype;
         qDebug() << "Setting filetype to:" << _filetype;
@@ -37,17 +43,19 @@ bool BufferWorker::setFiletype(const QString &filetype)
     return false;
 }
 
+// the simpler version of the more powerful highlight() (for the client side)
 // when we don't have initial state, we deduce one
 void BufferWorker::highlight(BufferState &state, int index)
 {
+    QMutexLocker locker(&_highlightMut);
     highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState);
 }
 
 // the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
 void BufferWorker::highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState)
 {
-    if (state.filetype() != filetype()) {
-        state.setFiletype(filetype());
+    if (state.filetype() != _filetype) {
+        state.setFiletype(_filetype);
         // highlight without checking
         for (; index < state.size(); index++) {
             qDebug() << "highlighting line" << index;
@@ -64,7 +72,7 @@ void BufferWorker::highlight(BufferState &state, int index, HighlightStateData::
 
 HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState)
 {
-    if (filetype().isEmpty() || lineState.line.isEmpty() || !highlightState) {
+    if (_filetype.isEmpty() || lineState.line.isEmpty() || !highlightState) {
         lineState.highlightText.clear();
         lineState.endHighlightState = highlightState;
     } else {
@@ -86,6 +94,7 @@ HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, 
 
 void BufferWorker::mergeChange(BufferState &state, View *source, const BufferStateChange &change)
 {
+    QMutexLocker locker(&_highlightMut);
     float currentProgress = 0, progressInc = 1.0 / (change.size()+1);
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
@@ -134,7 +143,7 @@ void BufferWorker::mergeChange(BufferState &state, View *source, const BufferSta
     if (state.size() == 1 && state[0].line.isEmpty()) {
         state.removeAt(0);
     } else {
-        sourceChanged = !filetype().isEmpty() && !change.delayable();
+        sourceChanged = !_filetype.isEmpty() && !change.delayable();
     }
     emit inProgressChanged(1);
     emit changeMerged(state, source, sourceChanged);
@@ -144,6 +153,7 @@ void BufferWorker::mergeChange(BufferState &state, View *source, const BufferSta
 // potentially needing to record a second counter
 void BufferWorker::replace(BufferState &state, const QList<Replacement> &replaces)
 {
+    QMutexLocker locker(&_highlightMut);
     if (state.empty() || replaces.empty())
         return;
     int charCount = 0;

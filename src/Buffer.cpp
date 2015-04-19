@@ -84,7 +84,7 @@ void Buffer::setName(const QString& name, bool rehighlightBuffer)
     }
 }
 
-const QString &Buffer::filetype() const { return _worker.filetype(); }
+const QString &Buffer::filetype() { return _worker.filetype(); }
 
 void Buffer::setFiletype(const QString &filetype, bool rehighlightBuffer)
 {

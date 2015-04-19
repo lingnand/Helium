@@ -50,8 +50,8 @@ public:
     const QString &name() const;
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name, bool rehighlightBuffer=true);
-    const QString &filetype() const;
     Q_SLOT void setFiletype(const QString &filetype, bool rehighlightBuffer=true);
+    const QString &filetype();
     BufferState &state();
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
     Q_SLOT void parseReplacement(View *source, const Replacement &replace);
