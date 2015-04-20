@@ -81,7 +81,8 @@ View::View(Buffer* buffer):
         _titleField(NULL), _textArea(NULL), _progressIndicator(NULL),
         _buffer(NULL),
         _mode(Normal),
-        _findBufferDirty(true), _modifyingTextArea(false)
+        _findBufferDirty(true),
+        _modifyingTextArea(false)
 {
     _textArea = TextArea::create()
         .format(TextFormat::Html)
@@ -889,7 +890,8 @@ void View::onTextAreaTextChanged(const QString& text)
 
 Range View::partialHighlightRange(const BufferState &st, Range focus)
 {
-    focus.grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, st.size());
+    // NOTE: the minium range would be (0,1)
+    focus.grow(PARTIAL_HIGHLIGHT_RANGE).clamp(0, qMax(st.size(), 1));
     // extend the range to make sure that we have non-empty lines at two ends
     while (focus.from > 0 && st[focus.from].line.isEmpty()) {
         focus.from--;
