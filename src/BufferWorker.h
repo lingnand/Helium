@@ -43,7 +43,9 @@ private:
     srchilite::LangMap *_langMap;
 
     HighlightStateData::ptr highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState);
-    void highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState=HighlightStateData::ptr());
+    void highlight(BufferState &state, int index,
+            HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState=HighlightStateData::ptr(),
+            float startProgress=0, float endProgress=1);
 };
 
 #endif /* BUFFERWORKER_H_ */

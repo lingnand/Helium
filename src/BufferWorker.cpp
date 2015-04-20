@@ -77,22 +77,26 @@ void BufferWorker::rehighlight(unsigned int requestId, BufferState &state, View 
 }
 
 // the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
-void BufferWorker::highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState)
+void BufferWorker::highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, float startProgress, float endProgress)
 {
+    float progressInc = (endProgress - startProgress) / (state.size() - index);
     if (state.filetype() != _filetype) {
         state.setFiletype(_filetype);
         // highlight without checking
         for (; index < state.size(); index++) {
             qDebug() << "highlighting line" << index;
             highlightState = highlightLine(state[index], highlightState);
+            emit inProgressChanged(startProgress += progressInc);
         }
     } else {
         for (; index < state.size() && HighlightStateData::unequal(highlightState, oldHighlightState); index++) {
             oldHighlightState = state[index].endHighlightState;
             qDebug() << "highlighting line" << index;
             highlightState = highlightLine(state[index], highlightState);
+            emit inProgressChanged(startProgress += progressInc);
         }
     }
+    emit inProgressChanged(endProgress);
 }
 
 HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState)
@@ -162,9 +166,10 @@ void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View 
         while (bufferIndex < state.size()) {
             state.removeLast();
         }
+        emit inProgressChanged(1);
     } else {
         qDebug() << "continuing to highlight additional lines";
-        highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData);
+        highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData, currentProgress);
     }
     bool sourceChanged = false;
     // if there is nothing left.
@@ -174,7 +179,6 @@ void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View 
     } else {
         sourceChanged = !_filetype.isEmpty() && !change.delayable();
     }
-    emit inProgressChanged(1);
     emit stateUpdated(requestId, state, source, sourceChanged);
 }
 
@@ -183,6 +187,7 @@ void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View 
 void BufferWorker::replace(unsigned int requestId, BufferState &state, const QList<Replacement> &replaces)
 {
     QMutexLocker locker(&_highlightMut);
+    float currentProgress = 0, progressInc = 1.0 / (replaces.size()+1);
     if (state.filetype() != _filetype) {
         Q_ASSERT(state.isEmpty());
         state.setFiletype(_filetype);
@@ -284,6 +289,7 @@ void BufferWorker::replace(unsigned int requestId, BufferState &state, const QLi
         qDebug() << "splitting again to remove the final part of the selection, split:" << temp;
         qDebug() << "pointing current to split";
         current = &temp;
+        emit inProgressChanged(currentProgress += progressInc);
     }
     qDebug() << "finished all the replacements";
     qDebug() << "current:" << current;
@@ -297,6 +303,6 @@ void BufferWorker::replace(unsigned int requestId, BufferState &state, const QLi
     before->endHighlightState = current->endHighlightState;
     qDebug() << "continuing to highlight";
     qDebug() << "pointing current to before";
-    highlight(state, stateIndex, highlightState, oldHighlightState);
+    highlight(state, stateIndex, highlightState, oldHighlightState, currentProgress);
     emit stateUpdated(requestId, state);
 }
