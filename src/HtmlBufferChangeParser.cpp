@@ -21,7 +21,6 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(const QString &input
                 _change.removeLast();
             }
         }
-        _change._delayable = _change._delayable && _change.startIndex() == _change[_cursorLine].index;
     }
     qDebug() << ">>>>>> end parsing >>>>>>";
     _lastDelayable = _change._delayable;
@@ -75,6 +74,11 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
                 _change.removeFirst();
             _change._startIndex = index;
             qDebug() << "setting startIndex to:" << _change.startIndex();
+        } else if (_change._delayable && _change.size() == _cursorLine+1) {
+            // reading a q tag after the cursor in the same line:
+            // this means there has just been a deletion that joins two lines
+            // together
+            _change._delayable = false;
         }
         _change.last().index = index;
     } else if (name == "/q") {
