@@ -910,7 +910,7 @@ void View::updateTextAreaPartialHighlight()
     // this is the case where we've just moved cursor to another place
     Range newRange = partialHighlightRange(_buffer->state(), Range(startLine, endLine));
     if (newRange != _highlightRange) {
-        qDebug() << "## updating new partial highlight view";
+        qDebug() << "## updating new partial highlight view from" << _highlightRange << "to" << newRange;
         _highlightRange = newRange;
         QString highlightedHtml;
         QTextStream output(&highlightedHtml);

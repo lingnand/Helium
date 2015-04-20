@@ -13,17 +13,6 @@
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
 
-// debug functions
-QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
-{
-    if (!lineState) {
-        dbg << "<nil>";
-    } else {
-        dbg << *lineState;
-    }
-    return dbg;
-}
-
 // Buffer
 Buffer::Buffer(int historyLimit):
     _requestId(0),

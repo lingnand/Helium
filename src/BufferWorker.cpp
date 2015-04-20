@@ -3,6 +3,17 @@
 #include <src/srchilite/instances.h>
 #include <src/srchilite/langmap.h>
 
+// debug functions
+QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
+{
+    if (!lineState) {
+        dbg << "<nil>";
+    } else {
+        dbg << *lineState;
+    }
+    return dbg;
+}
+
 BufferWorker::BufferWorker():
     _langMap(srchilite::Instances::getLangMap()),
     _sourceHighlight("default.style", "xhtml.outlang")
