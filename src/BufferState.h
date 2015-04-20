@@ -41,8 +41,7 @@ struct Range {
         to = qMin(to, toLimit);
         return *this;
     }
-    Range(int _from=-1): from(_from), to(_from) {}
-    Range(int _from, int _to): from(_from), to(_to) {}
+    Range(int _from=-1, int _to=-1): from(_from), to(_to) {}
 };
 
 class BufferLine
