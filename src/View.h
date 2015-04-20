@@ -134,7 +134,7 @@ private:
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferLockedChanged(bool locked);
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
-    Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
+    Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged);
     Q_SLOT void onBufferProgressChanged(float progress);
     Q_SLOT void onBufferHasUndosChanged(bool hasUndos);
     Q_SLOT void onBufferHasRedosChanged(bool hasRedos);

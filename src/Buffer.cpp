@@ -7,8 +7,6 @@
 
 #include <QTextStream>
 #include <src/Buffer.h>
-#include <src/srchilite/instances.h>
-#include <src/srchilite/langmap.h>
 #include <src/SaveWork.h>
 #include <QDebug>
 
@@ -28,26 +26,38 @@ QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
 
 // Buffer
 Buffer::Buffer(int historyLimit):
-    _langMap(srchilite::Instances::getLangMap()),
+    _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
     _locked(false)
 {
     _worker.moveToThread(&_workerThread);
+    conn(this, SIGNAL(workerInitialize()),
+            &_worker, SLOT(initialize()));
+    conn(this, SIGNAL(workerSetFiletype(unsigned int, BufferState &, const QString &)),
+            &_worker, SLOT(setFiletype(unsigned int, BufferState &, const QString &)));
     conn(this, SIGNAL(workerSaveStateToFile(const BufferState &, const QString &)),
             &_worker, SLOT(saveStateToFile(const BufferState &, const QString &)));
     conn(this, SIGNAL(workerLoadStateFromFile(const QString &)),
             &_worker, SLOT(loadStateFromFile(const QString &)));
-    conn(this, SIGNAL(workerMergeChange(BufferState &, View *, const BufferStateChange &)),
-            &_worker, SLOT(mergeChange(BufferState &, View *, const BufferStateChange &)));
+    conn(this, SIGNAL(workerMergeChange(unsigned int, BufferState &, View *, const BufferStateChange &)),
+            &_worker, SLOT(mergeChange(unsigned int, BufferState &, View *, const BufferStateChange &)));
+    conn(this, SIGNAL(workerReplace(unsigned int, BufferState &, const QList<Replacement> &)),
+            &_worker, SLOT(replace(unsigned int, BufferState &, const QList<Replacement> &)));
+    conn(this, SIGNAL(workerRehighlight(unsigned int, BufferState &, View *, int)),
+            &_worker, SLOT(rehighlight(unsigned int, BufferState &, View *, int)));
 
     conn(&_worker, SIGNAL(inProgressChanged(float)),
             this, SIGNAL(inProgressChanged(float)));
+    conn(&_worker, SIGNAL(noUpdate(unsigned int)),
+            this, SLOT(onWorkerNoUpdate(unsigned int)));
     conn(&_worker, SIGNAL(stateLoadedFromFile(const BufferState &, const QString &)),
             this, SLOT(onWorkerStateLoadedFromFile(const BufferState &, const QString &)));
-    conn(&_worker, SIGNAL(changeMerged(const BufferState &, View *, bool)),
-            this, SLOT(onWorkerChangeMerged(const BufferState &, View *, bool)));
+    conn(&_worker, SIGNAL(stateUpdated(unsigned int, const BufferState &, View *, bool)),
+            this, SLOT(onWorkerStateUpdated(unsigned int, const BufferState &, View *, bool)));
     _workerThread.start();
+    // initialize in the background
+    emit workerInitialize();
 
     conn(&_states, SIGNAL(retractableChanged(bool)),
             this, SIGNAL(hasUndosChanged(bool)));
@@ -76,10 +86,7 @@ void Buffer::setName(const QString& name)
 {
     if (name != _name) {
         _name = name;
-        // try to set the filetype
-        std::string ft = name.toUtf8().constData();
-        ft = _langMap->getMappedFileNameFromFileName(ft);
-        setFiletype(QString::fromUtf8(ft.c_str()));
+        setFiletype(_worker.filetypeForName(name));
         emit nameChanged(name);
     }
 }
@@ -88,30 +95,44 @@ const QString &Buffer::filetype() { return _worker.filetype(); }
 
 void Buffer::setFiletype(const QString &filetype)
 {
-    if (_worker.setFiletype(filetype)) {
-        BufferState &st = state();
-        _worker.highlight(st);
-        if (!st.isEmpty()) {
-            emit stateChanged(st, NULL, true, false);
-        }
-        emit filetypeChanged(filetype);
+    QString oldft = _worker.filetype();
+    if (filetype == oldft)
+        return;
+    BufferState &st = state();
+    if (!st.isEmpty()) {
+        // if state is empty we don't need to lock the textArea -- really
+        setLocked(true);
     }
+    emit workerSetFiletype(++_requestId, state(), filetype);
+    emit filetypeChanged(filetype);
 }
 
 BufferState &Buffer::state() { return _states.current(); }
 
+void Buffer::onWorkerNoUpdate(unsigned int requestId)
+{
+    if (_requestId > requestId)
+        return;
+    setLocked(false);
+}
+
 // assumption: input does contain some change
 // the state was in sync before the change in the input (with the correct filetype and all)
 // returning: have we highlighted any change?
-void Buffer::onWorkerChangeMerged(const BufferState &newSt, View *source, bool shouldUpdateSourceView)
+void Buffer::onWorkerStateUpdated(unsigned int requestId, const BufferState &newSt, View *source, bool shouldUpdateSourceView)
 {
+    if (_requestId > requestId) {
+        qDebug() << "got result for" << requestId << ", but expecting" << _requestId;
+        return;
+    }
+    qDebug() << "got new state";
     BufferState &st = state();
     if (&st != &newSt) {
-        qDebug() << "change merged and a new state is copied into our list!";
+        qDebug() << "a new state is copied into our list!";
         st = newSt;
     }
     setLocked(false);
-    emit stateChanged(st, source, shouldUpdateSourceView, false);
+    emit stateChanged(st, source, shouldUpdateSourceView);
 }
 
 void Buffer::onWorkerStateLoadedFromFile(const BufferState &st, const QString &filename)
@@ -143,37 +164,42 @@ void Buffer::parseChange(View *source, const QString &content, ParserPosition st
     state.setCursorPosition(cursorPosition);
     BufferStateChange change = _bufferChangeParser.parseBufferChange(content, start, cursorPosition);
     qDebug() << "change:" << change;
-    if (change.size() > 100) {
-        // put this into background
+    if (change.size() > 100) { // put this into background
         setLocked(true);
-        emit workerMergeChange(state, source, change);
+        emit workerMergeChange(++_requestId, state, source, change);
     } else {
-        _worker.mergeChange(state, source, change);
+        _worker.mergeChange(++_requestId, state, source, change);
     }
 }
 
-void Buffer::parseReplacement(View *source, const Replacement &replace)
+void Buffer::parseReplacement(const Replacement &replace)
 {
-    parseReplacement(source, QList<Replacement>() << replace);
+    parseReplacement(QList<Replacement>() << replace);
 }
 
-void Buffer::parseReplacement(View *source, const QList<Replacement> &replaces)
+void Buffer::parseReplacement(const QList<Replacement> &replaces)
 {
-    if (!replaces.empty()) {
+    if (!replaces.empty() && !state().isEmpty()) {
         BufferState &state = modifyState();
-        _worker.replace(state, replaces);
-        emit stateChanged(state, source, true, false);
+        if (replaces.size() > 20) { // put this into background
+            setLocked(true);
+            emit workerReplace(++_requestId, state, replaces);
+        } else {
+            _worker.replace(++_requestId, state, replaces);
+        }
     }
 }
 
 // deleting until the start of the specified line and
-void Buffer::killLine(int index)
+void Buffer::killLine(View *source, int cursorPosition)
 {
-    if (!state()[index].line.isEmpty()) {
+    BufferState::Position pos = state().focus(cursorPosition);
+    if (!state()[pos.lineIndex].line.isEmpty()) {
         BufferState &state = modifyState();
-        state[index].line.clear();
-        _worker.highlight(state, index);
-        emit stateChanged(state, NULL, true, false);
+        state.setCursorPosition(cursorPosition - pos.linePosition);
+        state[pos.lineIndex].line.clear();
+        // blocking rehighlight (we assume the chagne is small)
+        _worker.rehighlight(++_requestId, state, source);
     }
 }
 
@@ -185,11 +211,15 @@ void Buffer::undo()
 {
     if (_states.retract()) {
         BufferState &st = state();
-        if (st.filetype() != filetype()) {
-            _worker.highlight(st);
-        }
         _lastEdited = DEFAULT_EDIT_TIME;
-        emit stateChanged(st, NULL, true, true);
+        if (st.filetype() != filetype()) {
+            // rehighlight in the background
+            setLocked(true);
+            emit workerRehighlight(++_requestId, st);
+        } else {
+            // directly emit a state change
+            emit stateChanged(st, NULL, true);
+        }
     }
 }
 
@@ -197,11 +227,13 @@ void Buffer::redo()
 {
     if (_states.advance()) {
         BufferState &st = state();
-        if (st.filetype() != filetype()) {
-            _worker.highlight(st);
-        }
         _lastEdited = DEFAULT_EDIT_TIME;
-        emit stateChanged(st, NULL, true, true);
+        if (st.filetype() != filetype()) {
+            setLocked(true);
+            emit workerRehighlight(++_requestId, st);
+        } else {
+            emit stateChanged(st, NULL, true);
+        }
     }
 }
 

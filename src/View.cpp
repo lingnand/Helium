@@ -619,7 +619,7 @@ void View::replaceNext()
                 _textArea->editor()->selectionEnd());
         if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].selection) {
             // TODO: should we set the cursor to be just after the replacement?
-            _buffer->parseReplacement(this, Replacement(current,
+            _buffer->parseReplacement(Replacement(current,
                     QString::fromStdWString(_findHits[_findIndex].match.format(_replaceField->text().toStdWString()))));
             // TODO: modify the findbuffer appropriately instead of doing plainText() again in the next findNext call
             _findBufferDirty = true;
@@ -660,7 +660,7 @@ void View::replaceAll()
                 QString::fromStdWString(_findHits[index].match.format(replacement))));
     }
     // do the actual replaces
-    _buffer->parseReplacement(this, _replaces);
+    _buffer->parseReplacement(_replaces);
     _numberOfReplacesTillBottom = _replaces.count();
     _replaces.clear();
     for (; i < _findHits.count(); i++) {
@@ -680,7 +680,7 @@ void View::replaceAll()
 void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        _buffer->parseReplacement(this, _replaces);
+        _buffer->parseReplacement(_replaces);
         dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
                 tr(DIALOG_REPLACE_FINISHED_TITLE),
                 QString(tr(DIALOG_REPLACE_FINISHED_BODY))
@@ -708,8 +708,8 @@ void View::setBuffer(Buffer* buffer)
         if (_buffer) {
             disconn(_textArea, SIGNAL(textChanging(QString)),
                 this, SLOT(onTextAreaTextChanged(QString)));
-            disconn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
-                this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
+            disconn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool)),
+                this, SLOT(onBufferStateChanged(BufferState &, View *, bool)));
             disconn(_buffer, SIGNAL(nameChanged(QString)),
                 this, SLOT(setTitle(QString)));
             disconn(_buffer, SIGNAL(filetypeChanged(QString)),
@@ -724,11 +724,11 @@ void View::setBuffer(Buffer* buffer)
                 this, SLOT(onBufferHasRedosChanged(bool)));
         }
         _buffer = buffer;
-        onBufferStateChanged(buffer->state(), NULL, false, false);
+        onBufferStateChanged(buffer->state(), NULL, false);
         conn(_textArea, SIGNAL(textChanging(QString)),
             this, SLOT(onTextAreaTextChanged(QString)));
-        conn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
-            this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
+        conn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool)),
+            this, SLOT(onBufferStateChanged(BufferState &, View *, bool)));
 
         setTitle(_buffer->name());
         conn(_buffer, SIGNAL(nameChanged(QString)),
@@ -873,12 +873,7 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
 }
 
 void View::killCurrentLine() {
-    _modifyingTextArea = true;
-    int current = _textArea->editor()->cursorPosition();
-    BufferState::Position pos = _buffer->state().focus(current);
-    _textArea->editor()->setCursorPosition(current - pos.linePosition);
-    _buffer->killLine(pos.lineIndex);
-    _modifyingTextArea = false;
+    _buffer->killLine(this, _textArea->editor()->cursorPosition());
 }
 
 void View::onTextAreaTextChanged(const QString& text)
@@ -951,9 +946,9 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
 }
 
 // Is textChanging or cursorPositionChanged emitted first?
-void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
+void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged) {
     if (this != source || sourceChanged) {
-        int pos = shouldMatchCursorPosition ? state.cursorPosition() : _textArea->editor()->cursorPosition();
+        int pos = this == source ? state.cursorPosition() : _textArea->editor()->cursorPosition();
         // we assume that selectionStart == selectionEnd == pos in this case
         _modifyingTextArea = true;
         _highlightRange = partialHighlightRange(state, Range(state.focus(pos).lineIndex));

@@ -32,10 +32,6 @@
 #include <src/HtmlBufferChangeParser.h>
 #include <src/BufferHistory.h>
 
-namespace srchilite {
-    class LangMap;
-}
-
 class View;
 
 class Buffer : public QObject
@@ -54,9 +50,9 @@ public:
     Q_SLOT void setFiletype(const QString &filetype);
     BufferState &state();
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
-    Q_SLOT void parseReplacement(View *source, const Replacement &replace);
-    Q_SLOT void parseReplacement(View *source, const QList<Replacement> &replaces);
-    void killLine(int index);
+    Q_SLOT void parseReplacement(const Replacement &replace);
+    Q_SLOT void parseReplacement(const QList<Replacement> &replaces);
+    void killLine(View *source, int cursorPosition);
     bool hasUndo();
     Q_SLOT void undo();
     bool hasRedo();
@@ -66,24 +62,30 @@ Q_SIGNALS:
     void lockedChanged(bool);
     void nameChanged(const QString &name);
     void filetypeChanged(const QString &filetype);
-    void stateChanged(BufferState &state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
+    void stateChanged(BufferState &state, View *source, bool sourceChanged);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
     void inProgressChanged(float progress);
     void hasUndosChanged(bool hasUndos);
     void hasRedosChanged(bool hasRedos);
     // worker
-    void workerMergeChange(BufferState &, View *, const BufferStateChange &);
+    void workerInitialize();
+    void workerSetFiletype(unsigned int, BufferState &, const QString &);
+    void workerMergeChange(unsigned int, BufferState &, View *, const BufferStateChange &);
+    void workerReplace(unsigned int, BufferState &, const QList<Replacement> &);
+    void workerRehighlight(unsigned int, BufferState &, View *source=NULL, int index=0);
     void workerSaveStateToFile(const BufferState &, const QString &);
     void workerLoadStateFromFile(const QString &);
 private:
     bool _locked;
     QThread _workerThread;
+    // requestId is a non-decreasing id that identifies
+    // the current request to the worker
+    unsigned int _requestId;
     BufferWorker _worker;
     QString _name;
     BufferHistory _states;
     QDateTime _lastEdited;
-    srchilite::LangMap *_langMap;
 
     // for highlighting
     HtmlBufferChangeParser _bufferChangeParser;
@@ -91,7 +93,8 @@ private:
     BufferState &modifyState();
     void setLocked(bool);
 
-    Q_SLOT void onWorkerChangeMerged(const BufferState &state, View *source, bool shouldUpdateSourceView);
+    Q_SLOT void onWorkerNoUpdate(unsigned int requestId);
+    Q_SLOT void onWorkerStateUpdated(unsigned int requestId, const BufferState &state, View *source, bool shouldUpdateSourceView);
     Q_SLOT void onWorkerStateLoadedFromFile(const BufferState &state, const QString &filename);
 };
 

@@ -1,14 +1,22 @@
 #include <QMutexLocker>
 #include <src/BufferWorker.h>
+#include <src/srchilite/instances.h>
+#include <src/srchilite/langmap.h>
 
 BufferWorker::BufferWorker():
+    _langMap(srchilite::Instances::getLangMap()),
     _sourceHighlight("default.style", "xhtml.outlang")
 {
 }
 
+void BufferWorker::initialize()
+{
+    QMutexLocker locker(&_highlightMut);
+    _langMap->open();
+}
+
 void BufferWorker::saveStateToFile(const BufferState &state, const QString &filename)
 {
-
 }
 
 BufferState BufferWorker::loadStateFromFile(const QString &filename)
@@ -22,33 +30,39 @@ const QString &BufferWorker::filetype()
     return _filetype;
 }
 
-bool BufferWorker::setFiletype(const QString &filetype)
+QString BufferWorker::filetypeForName(const QString &name)
 {
     QMutexLocker locker(&_highlightMut);
-    if (filetype != _filetype) {
-        _filetype = filetype;
-        qDebug() << "Setting filetype to:" << _filetype;
-        if (_filetype.isEmpty()) {
-            _mainStateData.reset();
-        } else {
-            _sourceHighlight.setInputLang(std::string(_filetype.toUtf8().constData()) + ".lang");
-            // initialize the main state data
-            _mainStateData = HighlightStateData::ptr(new HighlightStateData(
-                    _sourceHighlight.getHighlighter()->getMainState(),
-                    srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
-            ));
-        }
-        return true;
+    return QString::fromUtf8(_langMap->getMappedFileNameFromFileName(name.toUtf8().constData()).c_str());
+}
+
+void BufferWorker::setFiletype(unsigned int requestId, BufferState &state, const QString &filetype)
+{
+    QMutexLocker locker(&_highlightMut);
+    _filetype = filetype;
+    qDebug() << "Setting filetype to:" << _filetype;
+    if (_filetype.isEmpty()) {
+        _mainStateData.reset();
+    } else {
+        _sourceHighlight.setInputLang(std::string(_filetype.toUtf8().constData()) + ".lang");
+        // initialize the main state data
+        _mainStateData = HighlightStateData::ptr(new HighlightStateData(
+                _sourceHighlight.getHighlighter()->getMainState(),
+                srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
+        ));
     }
-    return false;
+    highlight(state, 0, _mainStateData);
+    qDebug() << "sending new state update";
+    emit stateUpdated(requestId, state);
 }
 
 // the simpler version of the more powerful highlight() (for the client side)
-// when we don't have initial state, we deduce one
-void BufferWorker::highlight(BufferState &state, int index)
+// we deduce the initial state from the index
+void BufferWorker::rehighlight(unsigned int requestId, BufferState &state, View *source, int index)
 {
     QMutexLocker locker(&_highlightMut);
     highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState);
+    emit stateUpdated(requestId, state, source);
 }
 
 // the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
@@ -92,10 +106,14 @@ HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, 
     return lineState.endHighlightState;
 }
 
-void BufferWorker::mergeChange(BufferState &state, View *source, const BufferStateChange &change)
+void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View *source, const BufferStateChange &change)
 {
     QMutexLocker locker(&_highlightMut);
     float currentProgress = 0, progressInc = 1.0 / (change.size()+1);
+    if (state.filetype() != _filetype) {
+        Q_ASSERT(state.isEmpty());
+        state.setFiletype(_filetype);
+    }
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
     int changeIndex = -1;
@@ -146,16 +164,18 @@ void BufferWorker::mergeChange(BufferState &state, View *source, const BufferSta
         sourceChanged = !_filetype.isEmpty() && !change.delayable();
     }
     emit inProgressChanged(1);
-    emit changeMerged(state, source, sourceChanged);
+    emit stateUpdated(requestId, state, source, sourceChanged);
 }
 
 // TODO: set cursorPosition of the state to the end of last Replacement
 // potentially needing to record a second counter
-void BufferWorker::replace(BufferState &state, const QList<Replacement> &replaces)
+void BufferWorker::replace(unsigned int requestId, BufferState &state, const QList<Replacement> &replaces)
 {
     QMutexLocker locker(&_highlightMut);
-    if (state.empty() || replaces.empty())
-        return;
+    if (state.filetype() != _filetype) {
+        Q_ASSERT(state.isEmpty());
+        state.setFiletype(_filetype);
+    }
     int charCount = 0;
     int stateIndex = 0;
     BufferLineState temp; // used as a temp storage for pointers
@@ -267,5 +287,5 @@ void BufferWorker::replace(BufferState &state, const QList<Replacement> &replace
     qDebug() << "continuing to highlight";
     qDebug() << "pointing current to before";
     highlight(state, stateIndex, highlightState, oldHighlightState);
-    return;
+    emit stateUpdated(requestId, state);
 }
