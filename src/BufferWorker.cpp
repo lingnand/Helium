@@ -22,7 +22,7 @@ BufferWorker::BufferWorker():
 
 void BufferWorker::initialize()
 {
-    QMutexLocker locker(&_highlightMut);
+    QMutexLocker locker(&_mut);
     _langMap->open();
 }
 
@@ -35,21 +35,17 @@ BufferState BufferWorker::loadStateFromFile(const QString &filename)
     return BufferState();
 }
 
-const QString &BufferWorker::filetype()
-{
-    QMutexLocker locker(&_highlightMut);
-    return _filetype;
-}
-
+// TODO: finer locking here? we only need to exclude it from initialize's
+// open call
 QString BufferWorker::filetypeForName(const QString &name)
 {
-    QMutexLocker locker(&_highlightMut);
+    QMutexLocker locker(&_mut);
     return QString::fromUtf8(_langMap->getMappedFileNameFromFileName(name.toUtf8().constData()).c_str());
 }
 
 void BufferWorker::setFiletype(unsigned int requestId, BufferState &state, const QString &filetype)
 {
-    QMutexLocker locker(&_highlightMut);
+    QMutexLocker locker(&_mut);
     _filetype = filetype;
     qDebug() << "Setting filetype to:" << _filetype;
     if (_filetype.isEmpty()) {
@@ -62,22 +58,22 @@ void BufferWorker::setFiletype(unsigned int requestId, BufferState &state, const
                 srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
         ));
     }
-    highlight(state, 0, _mainStateData);
+    _highlight(state, 0, _mainStateData);
     qDebug() << "sending new state update";
     emit stateUpdated(requestId, state);
 }
 
-// the simpler version of the more powerful highlight() (for the client side)
+// the simpler version of the more powerful _highlight() (for the client side)
 // we deduce the initial state from the index
-void BufferWorker::rehighlight(unsigned int requestId, BufferState &state, View *source, int index)
+void BufferWorker::rehighlight(unsigned int requestId, BufferState &state, View *source, int index, bool shouldMatchCursorPosition)
 {
-    QMutexLocker locker(&_highlightMut);
-    highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState);
-    emit stateUpdated(requestId, state, source);
+    QMutexLocker locker(&_mut);
+    _highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState);
+    emit stateUpdated(requestId, state, source, true, shouldMatchCursorPosition);
 }
 
 // the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
-void BufferWorker::highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, float startProgress, float endProgress)
+void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, float startProgress, float endProgress)
 {
     float progressInc = (endProgress - startProgress) / (state.size() - index);
     if (state.filetype() != _filetype) {
@@ -121,10 +117,35 @@ HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, 
     return lineState.endHighlightState;
 }
 
-void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View *source, const BufferStateChange &change)
+BufferStateChange BufferWorker::parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition)
 {
-    QMutexLocker locker(&_highlightMut);
-    float currentProgress = 0, progressInc = 1.0 / (change.size()+1);
+    QMutexLocker locker(&_mut);
+    return _parseBufferChange(state, content, start, cursorPosition);
+}
+
+
+BufferStateChange BufferWorker::_parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition)
+{
+    state.setCursorPosition(cursorPosition);
+    return _bufferChangeParser.parseBufferChange(content, start, cursorPosition);
+}
+
+void BufferWorker::parseAndMergeChange(unsigned int requestId, BufferState &state, View *source, const QString &content, ParserPosition start, int cursorPosition, bool trackProgress)
+{
+    QMutexLocker locker(&_mut);
+    _mergeChange(requestId, state, source, _parseBufferChange(state, content, start, cursorPosition), trackProgress);
+}
+
+void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View *source, const BufferStateChange &change, bool trackProgress)
+{
+    QMutexLocker locker(&_mut);
+    _mergeChange(requestId, state, source, change, trackProgress);
+}
+
+void BufferWorker::_mergeChange(unsigned int requestId, BufferState &state, View *source, const BufferStateChange &change, bool trackProgress)
+{
+    // if the filetype is empty then we don't need to track progress
+    float currentProgress = 0, progressInc = trackProgress ? 1.0 / (change.size()+1) : 0;
     if (state.filetype() != _filetype) {
         Q_ASSERT(state.isEmpty());
         state.setFiletype(_filetype);
@@ -169,7 +190,7 @@ void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View 
         emit inProgressChanged(1);
     } else {
         qDebug() << "continuing to highlight additional lines";
-        highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData, currentProgress);
+        _highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData, currentProgress);
     }
     bool sourceChanged = false;
     // if there is nothing left.
@@ -186,7 +207,7 @@ void BufferWorker::mergeChange(unsigned int requestId, BufferState &state, View 
 // potentially needing to record a second counter
 void BufferWorker::replace(unsigned int requestId, BufferState &state, const QList<Replacement> &replaces)
 {
-    QMutexLocker locker(&_highlightMut);
+    QMutexLocker locker(&_mut);
     float currentProgress = 0, progressInc = 1.0 / (replaces.size()+1);
     if (state.filetype() != _filetype) {
         Q_ASSERT(state.isEmpty());
@@ -303,6 +324,6 @@ void BufferWorker::replace(unsigned int requestId, BufferState &state, const QLi
     before->endHighlightState = current->endHighlightState;
     qDebug() << "continuing to highlight";
     qDebug() << "pointing current to before";
-    highlight(state, stateIndex, highlightState, oldHighlightState, currentProgress);
+    _highlight(state, stateIndex, highlightState, oldHighlightState, currentProgress);
     emit stateUpdated(requestId, state);
 }

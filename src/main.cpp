@@ -29,6 +29,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     Application app(argc, argv);
     qRegisterMetaType<BufferState>("BufferState&");
     qRegisterMetaType<BufferStateChange>();
+    qRegisterMetaType<ParserPosition>();
 
     ApplicationUI appui;
 

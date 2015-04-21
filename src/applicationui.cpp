@@ -61,7 +61,13 @@ ApplicationUI::ApplicationUI() :
         .add(_openFileTab);
 
     // create a single view
-    appendNewView();
+//    appendNewView();
+    // create a test case two View one Buffer
+    Buffer *buf = new Buffer(100);
+    View *v1 = new View(buf), *v2 = new View(buf);
+    _rootPane->add(v1);
+    _rootPane->add(v2);
+    _rootPane->setActiveTab(v1);
 
     // label initial load
     onSystemLanguageChanged();

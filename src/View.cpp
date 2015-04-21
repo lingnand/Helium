@@ -101,7 +101,7 @@ View::View(Buffer* buffer):
         .handleFocusOn(_textArea, SIGNAL(focusedChanged(bool)));
     _textArea->addKeyListener(_textAreaModKeyListener);
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
-            this, SLOT(onTextAreaCursorPositionChanged(int)));
+            this, SLOT(onTextAreaCursorPositionChanged()));
     // setup the timer for partial highlight update
     _partialHighlightUpdateTimer.setSingleShot(true);
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
@@ -709,8 +709,8 @@ void View::setBuffer(Buffer* buffer)
         if (_buffer) {
             disconn(_textArea, SIGNAL(textChanging(QString)),
                 this, SLOT(onTextAreaTextChanged(QString)));
-            disconn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool)),
-                this, SLOT(onBufferStateChanged(BufferState &, View *, bool)));
+            disconn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
+                this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
             disconn(_buffer, SIGNAL(nameChanged(QString)),
                 this, SLOT(setTitle(QString)));
             disconn(_buffer, SIGNAL(filetypeChanged(QString)),
@@ -725,17 +725,17 @@ void View::setBuffer(Buffer* buffer)
                 this, SLOT(onBufferHasRedosChanged(bool)));
         }
         _buffer = buffer;
-        onBufferStateChanged(buffer->state(), NULL, false);
+        onBufferStateChanged(buffer->state(), NULL, false, false);
         conn(_textArea, SIGNAL(textChanging(QString)),
             this, SLOT(onTextAreaTextChanged(QString)));
-        conn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool)),
-            this, SLOT(onBufferStateChanged(BufferState &, View *, bool)));
+        conn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
+            this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
 
         setTitle(_buffer->name());
         conn(_buffer, SIGNAL(nameChanged(QString)),
             this, SLOT(setTitle(QString)));
 
-        onBufferFiletypeChanged(_buffer->filetype());
+        onBufferFiletypeChanged(_buffer->state().filetype());
         conn(_buffer, SIGNAL(filetypeChanged(QString)),
             this, SLOT(onBufferFiletypeChanged(QString)));
 
@@ -928,9 +928,9 @@ void View::updateTextAreaPartialHighlight()
     _modifyingTextArea = false;
 }
 
-void View::onTextAreaCursorPositionChanged(int cursorPosition)
+void View::onTextAreaCursorPositionChanged()
 {
-    if (_modifyingTextArea || _buffer->filetype().isEmpty()) {
+    if (_modifyingTextArea || _buffer->state().filetype().isEmpty()) {
         return;
     }
     if (!_partialHighlightUpdateTimer.isActive())
@@ -948,9 +948,11 @@ void View::onBufferFiletypeChanged(const QString& filetype) {
 }
 
 // Is textChanging or cursorPositionChanged emitted first?
-void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged) {
+void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
     if (this != source || sourceChanged) {
-        int pos = this == source ? state.cursorPosition() : _textArea->editor()->cursorPosition();
+        int pos = shouldMatchCursorPosition || this == source ?
+                state.cursorPosition() :
+                _textArea->editor()->cursorPosition();
         // we assume that selectionStart == selectionEnd == pos in this case
         _modifyingTextArea = true;
         _highlightRange = partialHighlightRange(state, Range(state.focus(pos).lineIndex));
@@ -959,7 +961,6 @@ void View::onBufferStateChanged(BufferState& state, View *source, bool sourceCha
         _highlightStart = state.writeHighlightedHtml(output, _highlightRange);
         output.flush();
 
-        qDebug() << "## text area out of sync";
         qDebug() << "### text area:";
         qDebug() << _textArea->text();
         qDebug() << "### buffer:";

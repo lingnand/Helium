@@ -46,7 +46,6 @@ public:
     const QString &name() const;
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name);
-    const QString &filetype();
     Q_SLOT void setFiletype(const QString &filetype);
     BufferState &state();
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
@@ -62,7 +61,7 @@ Q_SIGNALS:
     void lockedChanged(bool);
     void nameChanged(const QString &name);
     void filetypeChanged(const QString &filetype);
-    void stateChanged(BufferState &state, View *source, bool sourceChanged);
+    void stateChanged(BufferState &state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
     void inProgressChanged(float progress);
@@ -71,9 +70,10 @@ Q_SIGNALS:
     // worker
     void workerInitialize();
     void workerSetFiletype(unsigned int, BufferState &, const QString &);
+    void workerParseAndMergeChange(unsigned int, BufferState &, View *, const QString &, ParserPosition, int);
     void workerMergeChange(unsigned int, BufferState &, View *, const BufferStateChange &);
     void workerReplace(unsigned int, BufferState &, const QList<Replacement> &);
-    void workerRehighlight(unsigned int, BufferState &, View *source=NULL, int index=0);
+    void workerRehighlight(unsigned int, BufferState &, View *source=NULL, int index=0, bool shouldMatchCursorPosition=false);
     void workerSaveStateToFile(const BufferState &, const QString &);
     void workerLoadStateFromFile(const QString &);
 private:
@@ -87,14 +87,11 @@ private:
     BufferHistory _states;
     QDateTime _lastEdited;
 
-    // for highlighting
-    HtmlBufferChangeParser _bufferChangeParser;
-
     BufferState &modifyState();
     void setLocked(bool);
 
     Q_SLOT void onWorkerNoUpdate(unsigned int requestId);
-    Q_SLOT void onWorkerStateUpdated(unsigned int requestId, const BufferState &state, View *source, bool shouldUpdateSourceView);
+    Q_SLOT void onWorkerStateUpdated(unsigned int requestId, const BufferState &state, View *source, bool shouldUpdateSourceView, bool shouldMatchCursorPosition);
     Q_SLOT void onWorkerStateLoadedFromFile(const BufferState &state, const QString &filename);
 };
 

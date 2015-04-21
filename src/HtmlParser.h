@@ -19,6 +19,7 @@ struct ParserPosition {
     ParserPosition(int _charCount=0, int _htmlCount=0):
         charCount(_charCount), htmlCount(_htmlCount) {}
 };
+Q_DECLARE_METATYPE(ParserPosition)
 
 /* A general purpose html parser
  * only works for the simple syntax inside a textarea
