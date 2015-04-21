@@ -38,6 +38,7 @@ Q_SIGNALS:
     void stateUpdated(unsigned int requestId, const BufferState &state, View *source=NULL, bool shouldUpdateSourceView=true, bool shouldMatchCursorPosition=false);
 private:
     QString _filetype;
+    QMutex _langMapMut;
     QMutex _mut;
 
     HtmlBufferChangeParser _bufferChangeParser;

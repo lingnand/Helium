@@ -22,7 +22,7 @@ BufferWorker::BufferWorker():
 
 void BufferWorker::initialize()
 {
-    QMutexLocker locker(&_mut);
+    QMutexLocker locker(&_langMapMut);
     _langMap->open();
 }
 
@@ -39,7 +39,7 @@ BufferState BufferWorker::loadStateFromFile(const QString &filename)
 // open call
 QString BufferWorker::filetypeForName(const QString &name)
 {
-    QMutexLocker locker(&_mut);
+    QMutexLocker locker(&_langMapMut);
     return QString::fromUtf8(_langMap->getMappedFileNameFromFileName(name.toUtf8().constData()).c_str());
 }
 
