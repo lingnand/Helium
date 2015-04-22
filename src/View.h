@@ -12,9 +12,9 @@
 #include <QTimer>
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
+#include <bb/system/SystemUiResult>
 #include <src/Type.h>
 #include <src/BufferState.h>
-#include <bb/system/SystemUiResult>
 
 namespace bb {
     namespace cascades {

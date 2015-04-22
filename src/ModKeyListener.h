@@ -12,6 +12,7 @@
 #include <bb/cascades/KeyListener>
 #include <bb/cascades/TextFieldInputMode>
 #include <bb/cascades/TextAreaInputMode>
+#include <src/Utility.h>
 
 namespace bb {
     namespace cascades {

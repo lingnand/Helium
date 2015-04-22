@@ -5,9 +5,6 @@
  *      Author: lingnan
  */
 
-#include <src/View.h>
-#include <src/Buffer.h>
-#include <src/ModKeyListener.h>
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/UIPalette>
 #include <bb/cascades/Page>
@@ -30,6 +27,10 @@
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Shortcut>
 #include <bb/system/Clipboard>
+#include <src/View.h>
+#include <src/Buffer.h>
+#include <src/ModKeyListener.h>
+#include <src/Utility.h>
 
 using namespace bb::cascades;
 
@@ -361,7 +362,7 @@ View::FindQueryUpdateStatus View::updateFindQuery(bool interactive)
     QString find = _findField->text();
     if (find.isEmpty()) {
         if (interactive)
-            toast(tr(TOAST_FIND_INVALID_QUERY_EMPTY));
+            Utility::toast(tr(TOAST_FIND_INVALID_QUERY_EMPTY));
         _findComplete = true;
         return Invalid;
     }
@@ -415,7 +416,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
         case Unchanged: {
             if (_findComplete && _findHits.isEmpty()) {
                 if (interactive)
-                    toast(tr(TOAST_FIND_NOT_FOUND));
+                    Utility::toast(tr(TOAST_FIND_NOT_FOUND));
                 return;
             }
             // check if there is something on findIndex
@@ -424,7 +425,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
                 _findIndex = 0;
             }
             if (_findIndex == _bofIndex && interactive) {
-                toast(tr(TOAST_FIND_REACHED_END));
+                Utility::toast(tr(TOAST_FIND_REACHED_END));
             }
             if (_findIndex < _findHits.count()) {
                 if (interactive)
@@ -444,7 +445,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             _findIndex = 0;
             if(_findHits.isEmpty()) {
                 if (interactive)
-                    toast(tr(TOAST_FIND_NOT_FOUND));
+                    Utility::toast(tr(TOAST_FIND_NOT_FOUND));
             } else {
                 if (interactive)
                     select(_findHits[0].selection);
@@ -459,14 +460,14 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
                     _findRegex);
             if (_findIterator == end) {
                 if (interactive)
-                    toast(tr(TOAST_FIND_NOT_FOUND));
+                    Utility::toast(tr(TOAST_FIND_NOT_FOUND));
                 Q_ASSERT(_findHits.isEmpty());
                 _findComplete = true;
                 return;
             }
             _bofIndex = _findIndex;
             if (interactive)
-                toast(tr(TOAST_FIND_REACHED_END));
+                Utility::toast(tr(TOAST_FIND_REACHED_END));
         }
     }
     // found something
@@ -527,7 +528,7 @@ void View::findPrev()
                     if (_findIndex < 1) {
                         // if this is the first find index, we don't have anything before
                         // the current cursor
-                        toast(tr(TOAST_FIND_REACHED_TOP));
+                        Utility::toast(tr(TOAST_FIND_REACHED_TOP));
                     } else {
                         // let's rewind by one
                         --_findIndex;
@@ -539,7 +540,7 @@ void View::findPrev()
             // now hopefully we've settled down on the correct index
             if (_findIndex < 0) {
                 Q_ASSERT(_findHits.isEmpty());
-                toast(tr(TOAST_FIND_NOT_FOUND));
+                Utility::toast(tr(TOAST_FIND_NOT_FOUND));
             } else {
                 select(_findHits[_findIndex].selection);
             }
@@ -548,11 +549,11 @@ void View::findPrev()
         case Unchanged: {
             _textArea->requestFocus();
             if (_findComplete && _findHits.isEmpty()) {
-                toast(tr(TOAST_FIND_NOT_FOUND));
+                Utility::toast(tr(TOAST_FIND_NOT_FOUND));
                 return;
             }
             if (_findIndex == _bofIndex) {
-                toast(tr(TOAST_FIND_REACHED_TOP));
+                Utility::toast(tr(TOAST_FIND_REACHED_TOP));
             }
             // check if there is something on findIndex
             --_findIndex;
@@ -579,7 +580,7 @@ void View::findPrev()
                                 _findBuffer.end(),
                                 _findRegex);
                         if (_findIterator == end) {
-                            toast(tr(TOAST_FIND_NOT_FOUND));
+                            Utility::toast(tr(TOAST_FIND_NOT_FOUND));
                             _findComplete = true;
                             break;
                         }
@@ -596,7 +597,7 @@ void View::findPrev()
                     _findComplete = true;
                     if (_bofIndex == _findHits.count()) {
                         _bofIndex = 0;
-                        toast(tr(TOAST_FIND_REACHED_TOP));
+                        Utility::toast(tr(TOAST_FIND_REACHED_TOP));
                     }
                     break;
                 } else {
@@ -672,7 +673,7 @@ void View::replaceAll()
     }
     // mark the buffer as dirty
     _findBufferDirty = true;
-    dialog(tr(DIALOG_REPLACE_FROM_TOP_CONFIRM), tr(DIALOG_REPLACE_FROM_TOP_CANCEL),
+    Utility::dialog(tr(DIALOG_REPLACE_FROM_TOP_CONFIRM), tr(DIALOG_REPLACE_FROM_TOP_CANCEL),
             tr(DIALOG_REPLACE_FROM_TOP_TITLE),
             QString(tr(DIALOG_REPLACE_FROM_TOP_BODY)).arg(_numberOfReplacesTillBottom),
             this, SLOT(onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type)));
@@ -682,7 +683,7 @@ void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
         _buffer->parseReplacement(_replaces);
-        dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
+        Utility::dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
                 tr(DIALOG_REPLACE_FINISHED_TITLE),
                 QString(tr(DIALOG_REPLACE_FINISHED_BODY))
                     .arg(_numberOfReplacesTillBottom+_replaces.count()));

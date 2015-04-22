@@ -5,8 +5,9 @@
  *      Author: lingnan
  */
 
-#include <src/ModKeyListener.h>
 #include <bb/cascades/KeyEvent>
+#include <src/ModKeyListener.h>
+#include <src/Utility.h>
 
 #define MOD_TIMEOUT 500
 

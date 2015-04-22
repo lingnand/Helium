@@ -6,9 +6,10 @@
  */
 
 #include <QTextStream>
+#include <QDebug>
 #include <src/Buffer.h>
 #include <src/SaveWork.h>
-#include <QDebug>
+#include <src/Utility.h>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
