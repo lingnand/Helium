@@ -6,7 +6,7 @@
  */
 
 #include <QTextStream>
-#include <src/SaveWork.h>
+#include <SaveWork.h>
 
 SaveWork::SaveWork(): BufferWork(Save)
 {

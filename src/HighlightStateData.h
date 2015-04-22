@@ -9,7 +9,7 @@
 #define HIGHLIGHTSTATEDATA_H_
 
 #include <boost/shared_ptr.hpp>
-#include <src/srchilite/sourcehighlighter.h>
+#include <srchilite/sourcehighlighter.h>
 
 struct HighlightStateData {
     /// the current state for the SourceHighlighter object

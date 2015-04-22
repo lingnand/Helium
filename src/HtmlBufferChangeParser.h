@@ -2,8 +2,8 @@
 #define HTMLBUFFERCHANGEPARSER_H_
 
 #include <QTextStream>
-#include <src/HtmlParser.h>
-#include <src/BufferState.h>
+#include <HtmlParser.h>
+#include <BufferState.h>
 #include <QDebug>
 
 struct ChangedBufferLine

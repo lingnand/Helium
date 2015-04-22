@@ -2,11 +2,11 @@
 #define BUFFERWORKER_H_
 
 #include <QMutex>
-#include <src/BufferState.h>
-#include <src/HtmlBufferChangeParser.h>
-#include <src/srchilite/sourcehighlight.h>
-#include <src/HighlightStateData.h>
-#include <src/Type.h>
+#include <BufferState.h>
+#include <HtmlBufferChangeParser.h>
+#include <srchilite/sourcehighlight.h>
+#include <HighlightStateData.h>
+#include <Type.h>
 
 namespace srchilite {
     class LangMap;

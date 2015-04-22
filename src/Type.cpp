@@ -4,7 +4,7 @@
  *  Created on: Apr 4, 2015
  *      Author: lingnan
  */
-#include <src/Type.h>
+#include <Type.h>
 
 QDebug operator<<(QDebug dbg, const TextSelection &selection)
 {

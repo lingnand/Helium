@@ -8,11 +8,10 @@
 #ifndef BUFFERSTATE_H_
 #define BUFFERSTATE_H_
 
-#include <QObject>
 #include <QStringList>
 #include <QTextStream>
-#include <src/HighlightStateData.h>
-#include <src/HtmlParser.h>
+#include <HighlightStateData.h>
+#include <HtmlParser.h>
 #include <QDebug>
 
 struct Range {

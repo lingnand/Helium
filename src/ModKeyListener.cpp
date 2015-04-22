@@ -6,8 +6,8 @@
  */
 
 #include <bb/cascades/KeyEvent>
-#include <src/ModKeyListener.h>
-#include <src/Utility.h>
+#include <ModKeyListener.h>
+#include <Utility.h>
 
 #define MOD_TIMEOUT 500
 

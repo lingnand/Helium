@@ -1,4 +1,4 @@
-#include <src/HtmlBufferChangeParser.h>
+#include <HtmlBufferChangeParser.h>
 
 HtmlBufferChangeParser::HtmlBufferChangeParser(): _lastDelayable(false)
 {

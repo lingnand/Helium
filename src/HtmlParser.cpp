@@ -5,7 +5,7 @@
  *      Author: lingnan
  */
 
-#include <src/HtmlParser.h>
+#include <HtmlParser.h>
 #include <QDebug>
 
 enum HtmlState { InChar, InTag };

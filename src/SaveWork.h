@@ -8,8 +8,8 @@
 #ifndef SAVEWORK_H_
 #define SAVEWORK_H_
 
-#include <src/BufferWork.h>
-#include <src/BufferState.h>
+#include <BufferWork.h>
+#include <BufferState.h>
 
 class SaveWork : public BufferWork
 {

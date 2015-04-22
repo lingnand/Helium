@@ -218,14 +218,15 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
+        $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
+        $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/SaveWork.cpp) \
         $$quote($$BASEDIR/src/Type.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
-        $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.cpp) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.cc) \
@@ -300,15 +301,16 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferState.h) \
         $$quote($$BASEDIR/src/BufferWork.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
+        $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
+        $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/SaveWork.h) \
         $$quote($$BASEDIR/src/Type.h) \
         $$quote($$BASEDIR/src/Utility.h) \
         $$quote($$BASEDIR/src/View.h) \
-        $$quote($$BASEDIR/src/applicationui.hpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.h) \
         $$quote($$BASEDIR/src/srchilite/colormap.h) \

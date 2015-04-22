@@ -5,7 +5,7 @@
  *      Author: lingnan
  */
 
-#include <src/Utility.h>
+#include <Utility.h>
 #include <bb/system/SystemToast>
 #include <bb/system/SystemDialog>
 #include <bb/system/SystemUiPosition>
@@ -38,13 +38,14 @@ void Utility::dialog(const QString &confirm, const QString &cancel,
 {
     if (!_dialog) {
         _dialog = new bb::system::SystemDialog;
+    } else {
+        _dialog->disconnect();
     }
     _dialog->confirmButton()->setLabel(confirm);
     _dialog->cancelButton()->setLabel(cancel);
     _dialog->setTitle(title);
     _dialog->setBody(body);
     if (receiver && method) {
-        _dialog->disconnect();
         conn(_dialog, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
     }
     _dialog->show();

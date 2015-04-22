@@ -10,7 +10,6 @@
 
 #define BOF '\0'
 
-#include <QObject>
 #include <QTextStream>
 
 struct ParserPosition {

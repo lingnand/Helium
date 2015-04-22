@@ -1,7 +1,7 @@
 #include <QMutexLocker>
-#include <src/BufferWorker.h>
-#include <src/srchilite/instances.h>
-#include <src/srchilite/langmap.h>
+#include <BufferWorker.h>
+#include <srchilite/instances.h>
+#include <srchilite/langmap.h>
 
 // debug functions
 QDebug operator<<(QDebug dbg, const BufferLineState *lineState)

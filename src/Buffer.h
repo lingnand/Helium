@@ -22,15 +22,14 @@
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
-#include <QObject>
 #include <QUrl>
 #include <QDateTime>
 #include <QTextStream>
 #include <QThread>
 #include <boost/regex.hpp>
-#include <src/BufferWorker.h>
-#include <src/HtmlBufferChangeParser.h>
-#include <src/BufferHistory.h>
+#include <BufferWorker.h>
+#include <HtmlBufferChangeParser.h>
+#include <BufferHistory.h>
 
 class View;
 

@@ -7,9 +7,9 @@
 
 #include <QTextStream>
 #include <QDebug>
-#include <src/Buffer.h>
-#include <src/SaveWork.h>
-#include <src/Utility.h>
+#include <Buffer.h>
+#include <SaveWork.h>
+#include <Utility.h>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
@@ -24,29 +24,29 @@ Buffer::Buffer(int historyLimit):
     _worker.moveToThread(&_workerThread);
     conn(this, SIGNAL(workerInitialize()),
             &_worker, SLOT(initialize()));
-    conn(this, SIGNAL(workerSetFiletype(unsigned int, BufferState &, const QString &)),
-            &_worker, SLOT(setFiletype(unsigned int, BufferState &, const QString &)));
-    conn(this, SIGNAL(workerSaveStateToFile(const BufferState &, const QString &)),
-            &_worker, SLOT(saveStateToFile(const BufferState &, const QString &)));
-    conn(this, SIGNAL(workerLoadStateFromFile(const QString &)),
-            &_worker, SLOT(loadStateFromFile(const QString &)));
-    conn(this, SIGNAL(workerParseAndMergeChange(unsigned int, BufferState &, View *, const QString &, ParserPosition, int)),
-            &_worker, SLOT(parseAndMergeChange(unsigned int, BufferState &, View *, const QString &, ParserPosition, int)));
-    conn(this, SIGNAL(workerMergeChange(unsigned int, BufferState &, View *, const BufferStateChange &)),
-            &_worker, SLOT(mergeChange(unsigned int, BufferState &, View *, const BufferStateChange &)));
-    conn(this, SIGNAL(workerReplace(unsigned int, BufferState &, const QList<Replacement> &)),
-            &_worker, SLOT(replace(unsigned int, BufferState &, const QList<Replacement> &)));
-    conn(this, SIGNAL(workerRehighlight(unsigned int, BufferState &, View *, int, bool)),
-            &_worker, SLOT(rehighlight(unsigned int, BufferState &, View *, int, bool)));
+    conn(this, SIGNAL(workerSetFiletype(unsigned int, BufferState&, const QString&)),
+            &_worker, SLOT(setFiletype(unsigned int, BufferState&, const QString&)));
+    conn(this, SIGNAL(workerSaveStateToFile(const BufferState&, const QString&)),
+            &_worker, SLOT(saveStateToFile(const BufferState&, const QString&)));
+    conn(this, SIGNAL(workerLoadStateFromFile(const QString&)),
+            &_worker, SLOT(loadStateFromFile(const QString&)));
+    conn(this, SIGNAL(workerParseAndMergeChange(unsigned int, BufferState&, View *, const QString&, ParserPosition, int)),
+            &_worker, SLOT(parseAndMergeChange(unsigned int, BufferState&, View *, const QString&, ParserPosition, int)));
+    conn(this, SIGNAL(workerMergeChange(unsigned int, BufferState&, View *, const BufferStateChange&)),
+            &_worker, SLOT(mergeChange(unsigned int, BufferState&, View *, const BufferStateChange&)));
+    conn(this, SIGNAL(workerReplace(unsigned int, BufferState&, const QList<Replacement>&)),
+            &_worker, SLOT(replace(unsigned int, BufferState&, const QList<Replacement>&)));
+    conn(this, SIGNAL(workerRehighlight(unsigned int, BufferState&, View *, int, bool)),
+            &_worker, SLOT(rehighlight(unsigned int, BufferState&, View *, int, bool)));
 
     conn(&_worker, SIGNAL(inProgressChanged(float)),
             this, SIGNAL(inProgressChanged(float)));
     conn(&_worker, SIGNAL(noUpdate(unsigned int)),
             this, SLOT(onWorkerNoUpdate(unsigned int)));
-    conn(&_worker, SIGNAL(stateLoadedFromFile(const BufferState &, const QString &)),
-            this, SLOT(onWorkerStateLoadedFromFile(const BufferState &, const QString &)));
-    conn(&_worker, SIGNAL(stateUpdated(unsigned int, const BufferState &, View *, bool, bool)),
-            this, SLOT(onWorkerStateUpdated(unsigned int, const BufferState &, View *, bool, bool)));
+    conn(&_worker, SIGNAL(stateLoadedFromFile(const BufferState&, const QString&)),
+            this, SLOT(onWorkerStateLoadedFromFile(const BufferState&, const QString&)));
+    conn(&_worker, SIGNAL(stateUpdated(unsigned int, const BufferState&, View *, bool, bool)),
+            this, SLOT(onWorkerStateUpdated(unsigned int, const BufferState&, View *, bool, bool)));
     _workerThread.start();
     // initialize in the background
     emit workerInitialize();
@@ -74,7 +74,7 @@ void Buffer::setLocked(bool lock) {
 
 const QString &Buffer::name() const { return _name; }
 
-void Buffer::setName(const QString& name)
+void Buffer::setName(const QString &name)
 {
     if (name != _name) {
         _name = name;

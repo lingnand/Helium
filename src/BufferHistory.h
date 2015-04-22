@@ -8,7 +8,7 @@
 #ifndef BUFFERHISTORY_H_
 #define BUFFERHISTORY_H_
 
-#include <src/BufferState.h>
+#include <BufferState.h>
 
 class BufferHistory: public QObject, public QList<BufferState>
 {

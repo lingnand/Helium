@@ -5,11 +5,11 @@
  *      Author: lingnan
  */
 
-#include <src/BufferState.h>
+#include <BufferState.h>
 
 // BufferLine
 
-BufferLine::BufferLine():_1size(0), _4size(0), _5size(0) {}
+BufferLine::BufferLine(): _1size(0), _4size(0), _5size(0) {}
 
 int BufferLine::size() const
 {

@@ -28,50 +28,17 @@
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/pickers/FilePicker>
 #include <bb/system/Clipboard>
-#include <src/View.h>
-#include <src/Buffer.h>
-#include <src/ModKeyListener.h>
-#include <src/Utility.h>
+#include <View.h>
+#include <MultiViewPane.h>
+#include <Buffer.h>
+#include <ModKeyListener.h>
+#include <Utility.h>
 
 using namespace bb::cascades;
 
-#define BUFFER_TITLE_EMPTY "No Name"
 // keys
 #define KEYFLAG_NONE 0
 #define KEYFLAG_RETURN 1
-// strings
-#define HINT_TEXT_TITLE_FIELD "Enter the title"
-#define HINT_TEXT_TEXT_AREA "Enter the content"
-
-#define ACTION_TITLE_SAVE "Save"
-#define ACTION_TITLE_UNDO "Undo"
-#define ACTION_TITLE_REDO "Redo"
-#define ACTION_TITLE_FIND "Find"
-
-#define ACTION_TITLE_GO_TO_FIND_FIELD "Go to find field"
-#define ACTION_TITLE_FIND_PREV "Find previous"
-#define ACTION_TITLE_FIND_NEXT "Find next"
-#define ACTION_TITLE_REPLACE_NEXT "Replace next"
-#define ACTION_TITLE_REPLACE_ALL "Replace all remaining"
-#define ACTION_TITLE_FIND_CANCEL "Cancel"
-
-#define HINT_TEXT_FIND_FIELD "Find text"
-#define HINT_TEXT_REPLACE_FIELD "Replace with"
-#define CHECKBOX_TEXT_FIND_CASE_SENSITIVE "Case sensitive"
-// messages
-#define TOAST_FIND_INVALID_QUERY_EMPTY "Search query can't be empty!"
-#define TOAST_FIND_NOT_FOUND "Not found"
-#define TOAST_FIND_REACHED_END "Reached end of document, beginning from top!"
-#define TOAST_FIND_REACHED_TOP "Reached top of document, beginning from bottom!"
-// dialog
-#define DIALOG_REPLACE_FROM_TOP_CONFIRM "Yes"
-#define DIALOG_REPLACE_FROM_TOP_CANCEL "No"
-#define DIALOG_REPLACE_FROM_TOP_TITLE "End of file reached"
-#define DIALOG_REPLACE_FROM_TOP_BODY "%1 replacement(s) were made. Do you want to continue from the beginning?"
-#define DIALOG_REPLACE_FINISHED_CONFIRM "OK"
-#define DIALOG_REPLACE_FINISHED_TITLE "Replace finished"
-#define DIALOG_REPLACE_FINISHED_BODY "%1 replacement(s) have been made."
-
 // the one side range for partial highlight (will be put into settings)
 #define PARTIAL_HIGHLIGHT_RANGE 20
 
@@ -79,9 +46,10 @@ using namespace bb::cascades;
 // TODO: it would be good if you can modulize the undo/redo functionality
 // and then attach it to each textfield/area like what you did with the modkeylistener!
 // that would be awesome...
-View::View(Buffer* buffer):
+View::View(Buffer* buffer, MultiViewPane *parent):
         _buffer(NULL),
         _findTitleBar(NULL),
+        _fpicker(NULL),
         _mode(Normal),
         _findBufferDirty(true),
         _modifyingTextArea(false)
@@ -158,9 +126,6 @@ View::View(Buffer* buffer):
     // set the final content
     setContent(_page);
 
-    // label initial load
-    onTranslatorChanged();
-
     // set the buffer
     setBuffer(buffer);
 }
@@ -208,6 +173,10 @@ void View::setNormalModeActions()
         .imageSource(QUrl("asset:///images/ic_save.png"))
         .addShortcut(Shortcut::create().key("s"))
         .onTriggered(this, SLOT(save()));
+    _openAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_open.png"))
+        .addShortcut(Shortcut::create().key("e"))
+        .onTriggered(this, SLOT(open()));
     setHistoryActions();
     _findAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_search.png"))
@@ -217,6 +186,7 @@ void View::setNormalModeActions()
     _page->addAction(_saveAction, ActionBarPlacement::Signature);
     _page->addAction(_undoAction, ActionBarPlacement::OnBar);
     _page->addAction(_redoAction, ActionBarPlacement::OnBar);
+    _page->addAction(_openAction);
     _page->addAction(_findAction);
 }
 
@@ -360,7 +330,7 @@ View::FindQueryUpdateStatus View::updateFindQuery(bool interactive)
     QString find = _findField->text();
     if (find.isEmpty()) {
         if (interactive)
-            Utility::toast(tr(TOAST_FIND_INVALID_QUERY_EMPTY));
+            Utility::toast(tr("Search query can't be empty!"));
         _findComplete = true;
         return Invalid;
     }
@@ -414,7 +384,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
         case Unchanged: {
             if (_findComplete && _findHits.isEmpty()) {
                 if (interactive)
-                    Utility::toast(tr(TOAST_FIND_NOT_FOUND));
+                    Utility::toast(tr("Not found"));
                 return;
             }
             // check if there is something on findIndex
@@ -423,7 +393,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
                 _findIndex = 0;
             }
             if (_findIndex == _bofIndex && interactive) {
-                Utility::toast(tr(TOAST_FIND_REACHED_END));
+                Utility::toast(tr("Reached end of document, beginning from top!"));
             }
             if (_findIndex < _findHits.count()) {
                 if (interactive)
@@ -443,7 +413,7 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             _findIndex = 0;
             if(_findHits.isEmpty()) {
                 if (interactive)
-                    Utility::toast(tr(TOAST_FIND_NOT_FOUND));
+                    Utility::toast(tr("Not found"));
             } else {
                 if (interactive)
                     select(_findHits[0].selection);
@@ -458,14 +428,14 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
                     _findRegex);
             if (_findIterator == end) {
                 if (interactive)
-                    Utility::toast(tr(TOAST_FIND_NOT_FOUND));
+                    Utility::toast(tr("Not found"));
                 Q_ASSERT(_findHits.isEmpty());
                 _findComplete = true;
                 return;
             }
             _bofIndex = _findIndex;
             if (interactive)
-                Utility::toast(tr(TOAST_FIND_REACHED_END));
+                Utility::toast(tr("Reached end of document, beginning from top!"));
         }
     }
     // found something
@@ -526,7 +496,7 @@ void View::findPrev()
                     if (_findIndex < 1) {
                         // if this is the first find index, we don't have anything before
                         // the current cursor
-                        Utility::toast(tr(TOAST_FIND_REACHED_TOP));
+                        Utility::toast(tr("Reached top of document, beginning from bottom!"));
                     } else {
                         // let's rewind by one
                         --_findIndex;
@@ -538,7 +508,7 @@ void View::findPrev()
             // now hopefully we've settled down on the correct index
             if (_findIndex < 0) {
                 Q_ASSERT(_findHits.isEmpty());
-                Utility::toast(tr(TOAST_FIND_NOT_FOUND));
+                Utility::toast(tr("Not found"));
             } else {
                 select(_findHits[_findIndex].selection);
             }
@@ -547,11 +517,11 @@ void View::findPrev()
         case Unchanged: {
             _textArea->requestFocus();
             if (_findComplete && _findHits.isEmpty()) {
-                Utility::toast(tr(TOAST_FIND_NOT_FOUND));
+                Utility::toast(tr("Not found"));
                 return;
             }
             if (_findIndex == _bofIndex) {
-                Utility::toast(tr(TOAST_FIND_REACHED_TOP));
+                Utility::toast(tr("Reached top of document, beginning from bottom!"));
             }
             // check if there is something on findIndex
             --_findIndex;
@@ -578,7 +548,7 @@ void View::findPrev()
                                 _findBuffer.end(),
                                 _findRegex);
                         if (_findIterator == end) {
-                            Utility::toast(tr(TOAST_FIND_NOT_FOUND));
+                            Utility::toast(tr("Not found"));
                             _findComplete = true;
                             break;
                         }
@@ -595,7 +565,7 @@ void View::findPrev()
                     _findComplete = true;
                     if (_bofIndex == _findHits.count()) {
                         _bofIndex = 0;
-                        Utility::toast(tr(TOAST_FIND_REACHED_TOP));
+                        Utility::toast(tr("Reached top of document, beginning from bottom!"));
                     }
                     break;
                 } else {
@@ -671,9 +641,8 @@ void View::replaceAll()
     }
     // mark the buffer as dirty
     _findBufferDirty = true;
-    Utility::dialog(tr(DIALOG_REPLACE_FROM_TOP_CONFIRM), tr(DIALOG_REPLACE_FROM_TOP_CANCEL),
-            tr(DIALOG_REPLACE_FROM_TOP_TITLE),
-            QString(tr(DIALOG_REPLACE_FROM_TOP_BODY)).arg(_numberOfReplacesTillBottom),
+    Utility::dialog(tr("Yes"), tr("No"), tr("End of file reached"),
+            tr("%n occurrence(s) replaced. Do you want to continue from the beginning?", "", _numberOfReplacesTillBottom),
             this, SLOT(onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type)));
 }
 
@@ -681,39 +650,37 @@ void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
         _buffer->parseReplacement(_replaces);
-        Utility::dialog(tr(DIALOG_REPLACE_FINISHED_CONFIRM),
-                tr(DIALOG_REPLACE_FINISHED_TITLE),
-                QString(tr(DIALOG_REPLACE_FINISHED_BODY))
-                    .arg(_numberOfReplacesTillBottom+_replaces.count()));
+        Utility::dialog(tr("OK"), tr("Replace finished"),
+                tr("%n occurrence(s) replaced.", "", _numberOfReplacesTillBottom+_replaces.count()));
     }
     _replaces.clear();
 }
 
-void View::setTitle(const QString& title)
+void View::setTitle(const QString &title)
 {
     if (title.isEmpty()) {
-        Tab::setTitle(tr(BUFFER_TITLE_EMPTY));
+        Tab::setTitle(tr("No Name"));
     } else {
         Tab::setTitle(title);
     }
     _titleField->setText(title);
 }
 
-void View::setBuffer(Buffer* buffer)
+void View::setBuffer(Buffer *buffer)
 {
     if (buffer != _buffer) {
         findModeOff();
         // we only deal with real buffers, can't set to NULL
         Q_ASSERT(buffer);
         if (_buffer) {
-            disconn(_textArea, SIGNAL(textChanging(QString)),
-                this, SLOT(onTextAreaTextChanged(QString)));
-            disconn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
-                this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
-            disconn(_buffer, SIGNAL(nameChanged(QString)),
-                this, SLOT(setTitle(QString)));
-            disconn(_buffer, SIGNAL(filetypeChanged(QString)),
-                this, SLOT(onBufferFiletypeChanged(QString)));
+            disconn(_textArea, SIGNAL(textChanging(const QString)),
+                this, SLOT(onTextAreaTextChanged(const QString&)));
+            disconn(_buffer, SIGNAL(stateChanged(BufferState&, View *, bool, bool)),
+                this, SLOT(onBufferStateChanged(BufferState&, View *, bool, bool)));
+            disconn(_buffer, SIGNAL(nameChanged(const QString&)),
+                this, SLOT(setTitle(const QString&)));
+            disconn(_buffer, SIGNAL(filetypeChanged(const QString&)),
+                this, SLOT(onBufferFiletypeChanged(const QString&)));
             disconn(_buffer, SIGNAL(inProgressChanged(float)),
                 this, SLOT(onBufferProgressChanged(float)));
             disconn(_buffer, SIGNAL(lockedChanged(bool)),
@@ -725,18 +692,18 @@ void View::setBuffer(Buffer* buffer)
         }
         _buffer = buffer;
         onBufferStateChanged(buffer->state(), NULL, false, false);
-        conn(_textArea, SIGNAL(textChanging(QString)),
-            this, SLOT(onTextAreaTextChanged(QString)));
-        conn(_buffer, SIGNAL(stateChanged(BufferState &, View *, bool, bool)),
-            this, SLOT(onBufferStateChanged(BufferState &, View *, bool, bool)));
+        conn(_textArea, SIGNAL(textChanging(const QString)),
+            this, SLOT(onTextAreaTextChanged(const QString&)));
+        conn(_buffer, SIGNAL(stateChanged(BufferState&, View *, bool, bool)),
+            this, SLOT(onBufferStateChanged(BufferState&, View *, bool, bool)));
 
         setTitle(_buffer->name());
-        conn(_buffer, SIGNAL(nameChanged(QString)),
-            this, SLOT(setTitle(QString)));
+        conn(_buffer, SIGNAL(nameChanged(const QString&)),
+            this, SLOT(setTitle(const QString&)));
 
         onBufferFiletypeChanged(_buffer->state().filetype());
-        conn(_buffer, SIGNAL(filetypeChanged(QString)),
-            this, SLOT(onBufferFiletypeChanged(QString)));
+        conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
+            this, SLOT(onBufferFiletypeChanged(const QString&)));
 
         onBufferProgressChanged(0);
         conn(_buffer, SIGNAL(inProgressChanged(float)),
@@ -863,6 +830,9 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
         case KEYCODE_S:
             save();
             break;
+        case KEYCODE_E:
+            open();
+            break;
         case KEYCODE_D:
             killCurrentLine();
             break;
@@ -936,7 +906,7 @@ void View::onTextAreaCursorPositionChanged()
         _partialHighlightUpdateTimer.start();
 }
 
-void View::onBufferFiletypeChanged(const QString& filetype) {
+void View::onBufferFiletypeChanged(const QString &filetype) {
     if (filetype.isEmpty()) {
         // use a default image
         // TODO: fill in the images
@@ -985,6 +955,7 @@ void View::onBufferLockedChanged(bool locked)
             _titleField->setEnabled(!locked);
             // actions
             _saveAction->setEnabled(!locked);
+            _openAction->setEnabled(!locked);
             _undoAction->setEnabled(!locked && _buffer->hasUndo());
             _redoAction->setEnabled(!locked && _buffer->hasRedo());
             _findAction->setEnabled(!locked);
@@ -1019,35 +990,36 @@ void View::onRedoTriggered()
 
 void View::reloadNormalModeActionTitles()
 {
-    _saveAction->setTitle(tr(ACTION_TITLE_SAVE));
-    _undoAction->setTitle(tr(ACTION_TITLE_UNDO));
-    _redoAction->setTitle(tr(ACTION_TITLE_REDO));
-    _findAction->setTitle(tr(ACTION_TITLE_FIND));
+    _saveAction->setTitle(tr("Save"));
+    _openAction->setTitle(tr("Open"));
+    _undoAction->setTitle(tr("Undo"));
+    _redoAction->setTitle(tr("Redo"));
+    _findAction->setTitle(tr("Find"));
 }
 
 void View::reloadFindModeActionTitles()
 {
-    _goToFindFieldAction->setTitle(tr(ACTION_TITLE_GO_TO_FIND_FIELD));
-    _findPrevAction->setTitle(tr(ACTION_TITLE_FIND_PREV));
-    _findNextAction->setTitle(tr(ACTION_TITLE_FIND_NEXT));
-    _replaceNextAction->setTitle(tr(ACTION_TITLE_REPLACE_NEXT));
-    _replaceAllAction->setTitle(tr(ACTION_TITLE_REPLACE_ALL));
-    _findCancelAction->setTitle(tr(ACTION_TITLE_FIND_CANCEL));
-    _undoAction->setTitle(tr(ACTION_TITLE_UNDO));
-    _redoAction->setTitle(tr(ACTION_TITLE_REDO));
+    _goToFindFieldAction->setTitle(tr("Go to find field"));
+    _findPrevAction->setTitle(tr("Find previous"));
+    _findNextAction->setTitle(tr("Find next"));
+    _replaceNextAction->setTitle(tr("Replace next"));
+    _replaceAllAction->setTitle(tr("Replace all remaining"));
+    _findCancelAction->setTitle(tr("Cancel"));
+    _undoAction->setTitle(tr("Undo"));
+    _redoAction->setTitle(tr("Redo"));
 }
 
 void View::reloadFindTitleBarLabels()
 {
-    _findCaseSensitiveCheckBox->setText(tr(CHECKBOX_TEXT_FIND_CASE_SENSITIVE));
-    _findField->setHintText(tr(HINT_TEXT_FIND_FIELD));
-    _replaceField->setHintText(tr(HINT_TEXT_REPLACE_FIELD));
+    _findCaseSensitiveCheckBox->setText(tr("Case sensitive"));
+    _findField->setHintText(tr("Find text"));
+    _replaceField->setHintText(tr("Replace with"));
 }
 
 void View::onTranslatorChanged()
 {
-    _titleField->setHintText(tr(HINT_TEXT_TITLE_FIELD));
-    _textArea->setHintText(tr(HINT_TEXT_TEXT_AREA));
+    _titleField->setHintText(tr("Enter the title"));
+    _textArea->setHintText(tr("Enter the content"));
 
     if (_findTitleBar) {
         reloadFindTitleBarLabels();
@@ -1076,8 +1048,9 @@ bb::cascades::pickers::FilePicker *View::filePicker()
         _fpicker = new bb::cascades::pickers::FilePicker(this);
         _fpicker->setType(bb::cascades::pickers::FileType::Document);
         _fpicker->setFilter(QStringList("*"));
-        conn(_fpicker, SIGNAL(fileSelected(const QStringList &)),
-                this, SLOT(onFileSelected(const QStringList &)));
+        _fpicker->setDirectories(QStringList("/accounts/1000/shared"));
+        conn(_fpicker, SIGNAL(fileSelected(const QStringList&)),
+                this, SLOT(onFileSelected(const QStringList&)));
     }
     return _fpicker;
 }
@@ -1088,14 +1061,16 @@ void View::save()
     // if yes, then directly save
     filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Saver);
     filePicker()->setDefaultSaveFileNames(QStringList(_buffer->name()));
+    filePicker()->setTitle(tr("Save"));
     filePicker()->open();
 }
 
-void View::load()
+void View::open()
 {
     // TODO: check if dirty
     // - yes, then prompt for user to save
     filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Picker);
+    filePicker()->setTitle(tr("Open"));
     filePicker()->open();
 }
 

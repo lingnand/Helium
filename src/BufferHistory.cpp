@@ -5,7 +5,7 @@
  *      Author: lingnan
  */
 
-#include <src/BufferHistory.h>
+#include <BufferHistory.h>
 
 // BufferHistory
 

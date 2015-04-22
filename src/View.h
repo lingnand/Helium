@@ -13,8 +13,8 @@
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
 #include <bb/system/SystemUiResult>
-#include <src/Type.h>
-#include <src/BufferState.h>
+#include <Type.h>
+#include <BufferState.h>
 
 namespace bb {
     namespace cascades {
@@ -35,6 +35,7 @@ namespace bb {
     }
 }
 
+class MultiViewPane;
 class ModKeyListener;
 class Buffer;
 
@@ -42,7 +43,7 @@ class View : public bb::cascades::Tab
 {
     Q_OBJECT
 public:
-    View(Buffer* buffer);
+    View(Buffer* buffer, MultiViewPane *parent=NULL);
     virtual ~View() {}
     Q_SLOT void onTranslatorChanged();
     Q_SLOT void setBuffer(Buffer* buffer);
@@ -70,6 +71,7 @@ private:
     bb::cascades::CheckBox *_findCaseSensitiveCheckBox;
 
     bb::cascades::ActionItem *_saveAction;
+    bb::cascades::ActionItem *_openAction;
     bb::cascades::ActionItem *_undoAction;
     bb::cascades::ActionItem *_redoAction;
     bb::cascades::ActionItem *_findAction;
@@ -106,7 +108,7 @@ private:
     bb::cascades::pickers::FilePicker *_fpicker;
     bb::cascades::pickers::FilePicker *filePicker();
     Q_SLOT void save();
-    Q_SLOT void load();
+    Q_SLOT void open();
     Q_SLOT void onFileSelected(const QStringList &files);
 
     // #### buffer and highlight

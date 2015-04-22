@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-#include "applicationui.hpp"
-#include <bb/cascades/Application>
-#include <QLocale>
-#include <QTranslator>
 #include <Qt/qdeclarativedebug.h>
-#include <src/BufferState.h>
-#include <src/HtmlBufferChangeParser.h>
-
-using namespace bb::cascades;
+#include <Helium.h>
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
-    Application app(argc, argv);
-    qRegisterMetaType<BufferState>("BufferState&");
-    qRegisterMetaType<BufferStateChange>();
-    qRegisterMetaType<ParserPosition>();
-
-    ApplicationUI appui;
-
+    Helium app(argc, argv);
     // Enter the application main event loop.
-    return Application::exec();
+    return Helium::exec();
 }

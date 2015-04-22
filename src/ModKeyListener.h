@@ -8,11 +8,10 @@
 #ifndef MODKEYLISTENER_H_
 #define MODKEYLISTENER_H_
 
-#include <QObject>
 #include <bb/cascades/KeyListener>
 #include <bb/cascades/TextFieldInputMode>
 #include <bb/cascades/TextAreaInputMode>
-#include <src/Utility.h>
+#include <Utility.h>
 
 namespace bb {
     namespace cascades {
