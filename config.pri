@@ -11,6 +11,7 @@ device {
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
+                -lbbcascadespickers \
                 -lbbsystem
 
             LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
@@ -28,6 +29,7 @@ device {
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
+                -lbbcascadespickers \
                 -lbbsystem
 
             LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
@@ -50,6 +52,7 @@ device {
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
+                -lbbcascadespickers \
                 -lbbsystem
 
             LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
@@ -70,7 +73,8 @@ simulator {
 
             DEPENDPATH += $$quote(${QNX_TARGET}/usr/include/bb/system)
 
-            LIBS += -lbbsystem
+            LIBS += -lbbcascadespickers \
+                -lbbsystem
 
             CONFIG += \
                 config_pri_assets \

@@ -56,7 +56,6 @@ public:
     Q_SLOT void undo();
     bool hasRedo();
     Q_SLOT void redo();
-    Q_SLOT void save();
 Q_SIGNALS:
     void lockedChanged(bool);
     void nameChanged(const QString &name);

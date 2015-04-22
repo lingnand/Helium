@@ -26,6 +26,7 @@
 #include <bb/cascades/TitleBarExpandableArea>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Shortcut>
+#include <bb/cascades/pickers/FilePicker>
 #include <bb/system/Clipboard>
 #include <src/View.h>
 #include <src/Buffer.h>
@@ -79,8 +80,8 @@ using namespace bb::cascades;
 // and then attach it to each textfield/area like what you did with the modkeylistener!
 // that would be awesome...
 View::View(Buffer* buffer):
-        _titleField(NULL), _textArea(NULL), _progressIndicator(NULL),
         _buffer(NULL),
+        _findTitleBar(NULL),
         _mode(Normal),
         _findBufferDirty(true),
         _modifyingTextArea(false)
@@ -133,52 +134,6 @@ View::View(Buffer* buffer):
         .vertical(VerticalAlignment::Bottom)
         .topMargin(0);
 
-    // the candidate titlebars
-    // the search and replace titlebar
-    _findField = TextField::create().vertical(VerticalAlignment::Center)
-        .focusPolicy(FocusPolicy::Touch)
-        .layoutProperties(StackLayoutProperties::create().spaceQuota(1));
-    _replaceField = TextField::create().vertical(VerticalAlignment::Center)
-        .focusPolicy(FocusPolicy::Touch)
-        .layoutProperties(StackLayoutProperties::create().spaceQuota(1));
-    // set up the find fields mod keys
-    // TODO: not only focus the replaceField, but also select the existing content of the replace field
-    _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
-        .onModKeyPressed(_replaceField, SLOT(requestFocus()))
-        .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
-        .handleFocusOn(_findField, SIGNAL(focusedChanged(bool))));
-    _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
-        .onModKeyPressed(this, SLOT(findNext()))
-        .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
-        .handleFocusOn(_replaceField, SIGNAL(focusedChanged(bool))));
-    _findCaseSensitiveCheckBox = new CheckBox;
-    FreeFormTitleBarKindProperties *findTitleBarProperties = FreeFormTitleBarKindProperties::create()
-        .expandableIndicator(TitleBarExpandableAreaIndicatorVisibility::Hidden)
-        .content(Container::create()
-            .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
-            .left(20).right(20)
-            .add(ImageView::create().vertical(VerticalAlignment::Center)
-                .imageSource((QUrl("asset:///images/ic_search.png")))
-                .filterColor(SystemDefaults::Paints::defaultText()))
-            .add(_findField)
-            .add(_replaceField)
-            .add(Button::create().vertical(VerticalAlignment::Center)
-                .imageSource(QUrl("asset:///images/ic_sort_black.png"))
-                .preferredWidth(0)
-                .onClicked(this, SLOT(onFindOptionButtonClicked()))))
-        .expandableContent(Container::create()
-                .background(_titleBar->ui()->palette()->plain())
-                .bottom(5)
-                .add(Container::create()
-                    .background(Color::White)
-                    .top(20).bottom(20).left(30).right(30)
-                    .add(_findCaseSensitiveCheckBox)));
-    _findExpandableArea = findTitleBarProperties->expandableArea();
-    _findTitleBar = TitleBar::create(TitleBarKind::FreeForm)
-        .kindProperties(findTitleBarProperties);
-
     // the page
     _page = Page::create()
         .titleBar(_titleBar)
@@ -204,7 +159,7 @@ View::View(Buffer* buffer):
     setContent(_page);
 
     // label initial load
-    onLanguageChanged();
+    onTranslatorChanged();
 
     // set the buffer
     setBuffer(buffer);
@@ -232,24 +187,28 @@ void View::autoFocus()
     }
 }
 
+void View::setHistoryActions()
+{
+    _undoAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_undo.png"))
+        .addShortcut(Shortcut::create().key("z"))
+        .onTriggered(this, SLOT(onUndoTriggered()));
+    conn(this, SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
+    _redoAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_redo.png"))
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SLOT(onRedoTriggered()));
+    conn(this, SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
+}
+
 void View::setNormalModeActions()
 {
     _page->removeAllActions();
     _saveAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_save.png"))
         .addShortcut(Shortcut::create().key("s"))
-        .onTriggered(this, SLOT(onSaveTriggered()));
-    // * undo/redo
-    _undoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_undo.png"))
-        .addShortcut(Shortcut::create().key("z"))
-        .onTriggered(this, SLOT(onUndoTriggered()));
-    _redoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(this, SLOT(onRedoTriggered()));
-    // TODO: add action items and shortcuts for:
-    // * search
+        .onTriggered(this, SLOT(save()));
+    setHistoryActions();
     _findAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_search.png"))
         .addShortcut(Shortcut::create().key("f"))
@@ -290,14 +249,7 @@ void View::setFindModeActions()
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("q"))
         .onTriggered(this, SLOT(findModeOff()));
-    _undoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_undo.png"))
-        .addShortcut(Shortcut::create().key("z"))
-        .onTriggered(this, SLOT(onUndoTriggered()));
-    _redoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(this, SLOT(onRedoTriggered()));
+    setHistoryActions();
     reloadFindModeActionTitles();
     _page->addAction(_goToFindFieldAction);
     _page->addAction(_findPrevAction);
@@ -316,6 +268,52 @@ bool View::findModeOn()
         // disable current key handler
         _textAreaModKeyListener->setEnabled(false);
         // titlebar
+        if (!_findTitleBar) {
+            _findField = TextField::create().vertical(VerticalAlignment::Center)
+                .focusPolicy(FocusPolicy::Touch)
+                .layoutProperties(StackLayoutProperties::create().spaceQuota(1));
+            _replaceField = TextField::create().vertical(VerticalAlignment::Center)
+                .focusPolicy(FocusPolicy::Touch)
+                .layoutProperties(StackLayoutProperties::create().spaceQuota(1));
+            // set up the find fields mod keys
+            // TODO: not only focus the replaceField, but also select the existing content of the replace field
+            _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
+                .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
+                .onModKeyPressed(_replaceField, SLOT(requestFocus()))
+                .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
+                .handleFocusOn(_findField, SIGNAL(focusedChanged(bool))));
+            _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
+                .onModifiedKeyPressed(this, SLOT(onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
+                .onModKeyPressed(this, SLOT(findNext()))
+                .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
+                .handleFocusOn(_replaceField, SIGNAL(focusedChanged(bool))));
+            _findCaseSensitiveCheckBox = new CheckBox;
+            FreeFormTitleBarKindProperties *findTitleBarProperties = FreeFormTitleBarKindProperties::create()
+                .expandableIndicator(TitleBarExpandableAreaIndicatorVisibility::Hidden)
+                .content(Container::create()
+                    .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
+                    .left(20).right(20)
+                    .add(ImageView::create().vertical(VerticalAlignment::Center)
+                        .imageSource((QUrl("asset:///images/ic_search.png")))
+                        .filterColor(SystemDefaults::Paints::defaultText()))
+                    .add(_findField)
+                    .add(_replaceField)
+                    .add(Button::create().vertical(VerticalAlignment::Center)
+                        .imageSource(QUrl("asset:///images/ic_sort_black.png"))
+                        .preferredWidth(0)
+                        .onClicked(this, SLOT(onFindOptionButtonClicked()))))
+                .expandableContent(Container::create()
+                        .background(_titleBar->ui()->palette()->plain())
+                        .bottom(5)
+                        .add(Container::create()
+                            .background(Color::White)
+                            .top(20).bottom(20).left(30).right(30)
+                            .add(_findCaseSensitiveCheckBox)));
+            _findExpandableArea = findTitleBarProperties->expandableArea();
+            _findTitleBar = TitleBar::create(TitleBarKind::FreeForm)
+                .kindProperties(findTitleBarProperties);
+            reloadFindTitleBarLabels();
+        }
         _page->setTitleBar(_findTitleBar);
         // actionbar
         setFindModeActions();
@@ -696,9 +694,9 @@ void View::setTitle(const QString& title)
     if (title.isEmpty()) {
         Tab::setTitle(tr(BUFFER_TITLE_EMPTY));
     } else {
-        _titleField->setText(title);
         Tab::setTitle(title);
     }
+    _titleField->setText(title);
 }
 
 void View::setBuffer(Buffer* buffer)
@@ -721,9 +719,9 @@ void View::setBuffer(Buffer* buffer)
             disconn(_buffer, SIGNAL(lockedChanged(bool)),
                 this, SLOT(onBufferLockedChanged(bool)));
             disconn(_buffer, SIGNAL(hasUndosChanged(bool)),
-                this, SLOT(onBufferHasUndosChanged(bool)));
+                this, SIGNAL(hasUndosChanged(bool)));
             disconn(_buffer, SIGNAL(hasRedosChanged(bool)),
-                this, SLOT(onBufferHasRedosChanged(bool)));
+                this, SIGNAL(hasRedosChanged(bool)));
         }
         _buffer = buffer;
         onBufferStateChanged(buffer->state(), NULL, false, false);
@@ -750,11 +748,11 @@ void View::setBuffer(Buffer* buffer)
 
         _undoAction->setEnabled(_buffer->hasUndo());
         conn(_buffer, SIGNAL(hasUndosChanged(bool)),
-            this, SLOT(onBufferHasUndosChanged(bool)));
+            this, SIGNAL(hasUndosChanged(bool)));
 
         _redoAction->setEnabled(_buffer->hasRedo());
         conn(_buffer, SIGNAL(hasRedosChanged(bool)),
-            this, SLOT(onBufferHasRedosChanged(bool)));
+            this, SIGNAL(hasRedosChanged(bool)));
     }
 }
 
@@ -817,7 +815,7 @@ void View::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
 {
     switch (event->keycap()) {
         case KEYCODE_S:
-            onSaveTriggered();
+            save();
             break;
         // TODO: add shortcut for open and new file, next/prev tab
         default:
@@ -863,7 +861,7 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
             findModeOn();
             break;
         case KEYCODE_S:
-            onSaveTriggered();
+            save();
             break;
         case KEYCODE_D:
             killCurrentLine();
@@ -1007,21 +1005,6 @@ void View::onBufferLockedChanged(bool locked)
     }
 }
 
-void View::onBufferHasUndosChanged(bool hasUndos)
-{
-    _undoAction->setEnabled(hasUndos);
-}
-
-void View::onBufferHasRedosChanged(bool hasRedos)
-{
-    _redoAction->setEnabled(hasRedos);
-}
-
-void View::onSaveTriggered()
-{
-    _buffer->save();
-}
-
 void View::onUndoTriggered()
 {
     _buffer->undo();
@@ -1054,14 +1037,21 @@ void View::reloadFindModeActionTitles()
     _redoAction->setTitle(tr(ACTION_TITLE_REDO));
 }
 
-void View::onLanguageChanged()
+void View::reloadFindTitleBarLabels()
+{
+    _findCaseSensitiveCheckBox->setText(tr(CHECKBOX_TEXT_FIND_CASE_SENSITIVE));
+    _findField->setHintText(tr(HINT_TEXT_FIND_FIELD));
+    _replaceField->setHintText(tr(HINT_TEXT_REPLACE_FIELD));
+}
+
+void View::onTranslatorChanged()
 {
     _titleField->setHintText(tr(HINT_TEXT_TITLE_FIELD));
     _textArea->setHintText(tr(HINT_TEXT_TEXT_AREA));
 
-    _findCaseSensitiveCheckBox->setText(tr(CHECKBOX_TEXT_FIND_CASE_SENSITIVE));
-    _findField->setHintText(tr(HINT_TEXT_FIND_FIELD));
-    _replaceField->setHintText(tr(HINT_TEXT_REPLACE_FIELD));
+    if (_findTitleBar) {
+        reloadFindTitleBarLabels();
+    }
 
     // actions
     switch (_mode) {
@@ -1076,5 +1066,48 @@ void View::onLanguageChanged()
     if (_buffer) {
         // reset the default name
         setTitle(_buffer->name());
+    }
+}
+
+/* file related operations */
+bb::cascades::pickers::FilePicker *View::filePicker()
+{
+    if (!_fpicker) {
+        _fpicker = new bb::cascades::pickers::FilePicker(this);
+        _fpicker->setType(bb::cascades::pickers::FileType::Document);
+        _fpicker->setFilter(QStringList("*"));
+        conn(_fpicker, SIGNAL(fileSelected(const QStringList &)),
+                this, SLOT(onFileSelected(const QStringList &)));
+    }
+    return _fpicker;
+}
+
+void View::save()
+{
+    // TODO: check if already have path associated
+    // if yes, then directly save
+    filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Saver);
+    filePicker()->setDefaultSaveFileNames(QStringList(_buffer->name()));
+    filePicker()->open();
+}
+
+void View::load()
+{
+    // TODO: check if dirty
+    // - yes, then prompt for user to save
+    filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Picker);
+    filePicker()->open();
+}
+
+void View::onFileSelected(const QStringList &files)
+{
+    switch (filePicker()->mode()) {
+        case bb::cascades::pickers::FilePickerMode::Picker:
+            Utility::toast("loading file: " + files[0]);
+            break;
+        case bb::cascades::pickers::FilePickerMode::Saver:
+            Utility::toast("saving file: " + files[0]);
+//            emit workerSaveStateToFile(state(), "");
+            break;
     }
 }

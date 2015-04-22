@@ -236,9 +236,3 @@ void Buffer::redo()
         }
     }
 }
-
-/* file related operations */
-void Buffer::save()
-{
-    emit workerSaveStateToFile(state(), "");
-}

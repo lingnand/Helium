@@ -19,18 +19,17 @@
 
 #include <QObject>
 #include <QList>
+#include <bb/cascades/LocaleHandler>
 
 namespace bb
 {
     namespace cascades
     {
-        class LocaleHandler;
         class TabbedPane;
         class Tab;
     }
 }
 
-class QTranslator;
 class View;
 
 /*!
@@ -44,20 +43,23 @@ class ApplicationUI : public QObject
 public:
     ApplicationUI();
     virtual ~ApplicationUI() {}
+Q_SIGNALS:
+    void translatorChanged();
 private:
-    QTranslator* _translator;
-    bb::cascades::LocaleHandler* _localeHandler;
+    QTranslator _translator;
+    bb::cascades::LocaleHandler _localeHandler;
     Q_SLOT void onSystemLanguageChanged();
 
     bb::cascades::TabbedPane* _rootPane;
 
-    bb::cascades::Tab* _openFileTab;
     bb::cascades::Tab* _newViewTab;
+    bb::cascades::Tab* _openFileTab;
     Q_SLOT void openFile();
     Q_SLOT void newView();
     Q_SLOT void prevView();
     Q_SLOT void nextView();
     Q_SLOT void activateViewWithOffset(int offset);
+    Q_SLOT void onTranslatorChanged();
     void appendNewView();
 };
 

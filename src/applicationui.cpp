@@ -16,27 +16,25 @@
 
 #include "applicationui.hpp"
 
+#include <QSignalMapper>
 #include <bb/cascades/Application>
 #include <bb/cascades/TabbedPane>
-#include <bb/cascades/LocaleHandler>
 #include <bb/cascades/Tab>
 #include <bb/cascades/Shortcut>
 #include <src/View.h>
 #include <src/Buffer.h>
+#include <src/Utility.h>
 
 using namespace bb::cascades;
 
 #define TAB_TITLE_NEW "New"
 #define TAB_TITLE_OPEN "Open"
 
-ApplicationUI::ApplicationUI() :
-        QObject()
+ApplicationUI::ApplicationUI()
 {
-    // prepare the localization
-    _translator = new QTranslator(this);
-    _localeHandler = new LocaleHandler(this);
-    conn(_localeHandler, SIGNAL(systemLanguageChanged()),
+    conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(onSystemLanguageChanged()));
+    conn(this, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
 
     _newViewTab = Tab::create()
         .imageSource(QUrl("asset:///images/ic_compose.png"))
@@ -76,31 +74,38 @@ ApplicationUI::ApplicationUI() :
     Application::instance()->setScene(_rootPane);
 }
 
-void ApplicationUI::newView() {
+void ApplicationUI::newView()
+{
     View *c = (View *) _rootPane->activeTab();
     appendNewView();
     c->onOutOfView();
 }
 
-void ApplicationUI::appendNewView() {
+void ApplicationUI::appendNewView()
+{
     View *v = new View(new Buffer(100));
+    conn(this, SIGNAL(translatorChanged()), v, SLOT(onTranslatorChanged()));
     _rootPane->add(v);
     _rootPane->setActiveTab(v);
 }
 
-void ApplicationUI::openFile() {
-    toast("Open file");
+void ApplicationUI::openFile()
+{
+    Utility::toast("Open file");
 }
 
-void ApplicationUI::prevView() {
+void ApplicationUI::prevView()
+{
     activateViewWithOffset(-1);
 }
 
-void ApplicationUI::nextView() {
+void ApplicationUI::nextView()
+{
     activateViewWithOffset(1);
 }
 
-void ApplicationUI::activateViewWithOffset(int offset) {
+void ApplicationUI::activateViewWithOffset(int offset)
+{
     int nv = _rootPane->count() - 2;
     View *c = (View *) _rootPane->activeTab();
     int i = PMOD(_rootPane->indexOf(c) - 2 + offset, nv) + 2;
@@ -108,21 +113,20 @@ void ApplicationUI::activateViewWithOffset(int offset) {
     c->onOutOfView();
 }
 
+void ApplicationUI::onTranslatorChanged()
+{
+    _newViewTab->setTitle(tr(TAB_TITLE_NEW));
+    _openFileTab->setTitle(tr(TAB_TITLE_OPEN));
+}
+
 void ApplicationUI::onSystemLanguageChanged()
 {
-    QCoreApplication::instance()->removeTranslator(_translator);
+    QCoreApplication::instance()->removeTranslator(&_translator);
     // Initiate, load and install the application translation files.
     QString locale_string = QLocale().name();
     QString file_name = QString("Char_%1").arg(locale_string);
-    if (_translator->load(file_name, "app/native/qm")) {
-        QCoreApplication::instance()->installTranslator(_translator);
-        // new file tab
-        _newViewTab->setTitle(tr(TAB_TITLE_NEW));
-        // open file tab
-        _openFileTab->setTitle(tr(TAB_TITLE_OPEN));
-        // loop through all the views to reset the texts
-        for (int i=2; i< _rootPane->count(); ++i) {
-            ((View *) _rootPane->at(i))->onLanguageChanged();
-        }
+    if (_translator.load(file_name, "app/native/qm")) {
+        QCoreApplication::instance()->installTranslator(&_translator);
+        emit translatorChanged();
     }
 }

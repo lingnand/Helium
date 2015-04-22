@@ -29,6 +29,9 @@ namespace bb {
         class TitleBarExpandableArea;
         class Button;
         class CheckBox;
+        namespace pickers {
+            class FilePicker;
+        }
     }
 }
 
@@ -41,12 +44,15 @@ class View : public bb::cascades::Tab
 public:
     View(Buffer* buffer);
     virtual ~View() {}
-    Q_SLOT void onLanguageChanged();
+    Q_SLOT void onTranslatorChanged();
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void onOutOfView();
+Q_SIGNALS:
+    void hasUndosChanged(bool);
+    void hasRedosChanged(bool);
 private:
-    enum ViewMode { Normal, Find };
-    ViewMode _mode;
+    enum ViewMode { Normal, Find } _mode;
+    // #### main UI elements
     bb::cascades::Page *_page;
 
     bb::cascades::TitleBar *_titleBar;
@@ -57,7 +63,7 @@ private:
     ModKeyListener *_textAreaModKeyListener;
     bb::cascades::ProgressIndicator *_progressIndicator;
 
-    // #### find and replace
+    // #### find and replace (lazy loaded on demand)
     bb::cascades::TitleBarExpandableArea *_findExpandableArea;
     bb::cascades::TextField *_findField;
     bb::cascades::TextField *_replaceField;
@@ -96,6 +102,13 @@ private:
     QList<Replacement> _replaces;
     int _numberOfReplacesTillBottom;
 
+    // #### file related
+    bb::cascades::pickers::FilePicker *_fpicker;
+    bb::cascades::pickers::FilePicker *filePicker();
+    Q_SLOT void save();
+    Q_SLOT void load();
+    Q_SLOT void onFileSelected(const QStringList &files);
+
     // #### buffer and highlight
     bool _modifyingTextArea;
     Buffer *_buffer;
@@ -106,10 +119,12 @@ private:
     Q_SLOT void updateTextAreaPartialHighlight();
 
     Q_SLOT void select(const TextSelection &selection);
+    Q_SLOT void setHistoryActions();
     Q_SLOT void setNormalModeActions();
     Q_SLOT void setFindModeActions();
     Q_SLOT void reloadNormalModeActionTitles();
     Q_SLOT void reloadFindModeActionTitles();
+    Q_SLOT void reloadFindTitleBarLabels();
     Q_SLOT bool findModeOn();
     Q_SLOT bool findModeOff();
     Q_SLOT void findNext();
@@ -136,9 +151,6 @@ private:
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
     Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
     Q_SLOT void onBufferProgressChanged(float progress);
-    Q_SLOT void onBufferHasUndosChanged(bool hasUndos);
-    Q_SLOT void onBufferHasRedosChanged(bool hasRedos);
-    Q_SLOT void onSaveTriggered();
     Q_SLOT void onUndoTriggered();
     Q_SLOT void onRedoTriggered();
     Q_SLOT void autoFocus();
