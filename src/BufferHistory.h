@@ -20,10 +20,12 @@ public:
     // this will remove all items after current
     BufferState &copyCurrent();
     BufferState &current();
+    const BufferState &current() const;
     bool advance();
     bool retract();
     bool advanceable();
     bool retractable();
+    void clear();
 Q_SIGNALS:
     void advanceableChanged(bool advanceable);
     void retractableChanged(bool retractable);

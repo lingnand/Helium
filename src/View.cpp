@@ -32,6 +32,7 @@
 #include <MultiViewPane.h>
 #include <Buffer.h>
 #include <ModKeyListener.h>
+#include <SignalBlocker.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -51,8 +52,7 @@ View::View(Buffer* buffer, MultiViewPane *parent):
         _findTitleBar(NULL),
         _fpicker(NULL),
         _mode(Normal),
-        _findBufferDirty(true),
-        _modifyingTextArea(false)
+        _findBufferDirty(true)
 {
     _textArea = TextArea::create()
         .format(TextFormat::Html)
@@ -99,11 +99,12 @@ View::View(Buffer* buffer, MultiViewPane *parent):
         .kindProperties(titleBarProperties);
 
     _progressIndicator = ProgressIndicator::create()
+        .visible(false)
         .vertical(VerticalAlignment::Bottom)
         .topMargin(0);
 
     // the page
-    _page = Page::create()
+    setContent(Page::create()
         .titleBar(_titleBar)
         .content(Container::create()
             .add(_textArea)
@@ -119,15 +120,17 @@ View::View(Buffer* buffer, MultiViewPane *parent):
         .actionBarVisibility(ChromeVisibility::Visible)
         // shortcuts
         .addShortcut(Shortcut::create().key("Enter")
-            .onTriggered(this, SLOT(autoFocus())));
+            .onTriggered(this, SLOT(autoFocus()))));
 
     setNormalModeActions();
 
-    // set the final content
-    setContent(_page);
-
     // set the buffer
     setBuffer(buffer);
+}
+
+Page *View::content() const
+{
+    return (Page *) bb::cascades::Tab::content();
 }
 
 /* miscellaneous actions */
@@ -168,7 +171,7 @@ void View::setHistoryActions()
 
 void View::setNormalModeActions()
 {
-    _page->removeAllActions();
+    content()->removeAllActions();
     _saveAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_save.png"))
         .addShortcut(Shortcut::create().key("s"))
@@ -183,16 +186,16 @@ void View::setNormalModeActions()
         .addShortcut(Shortcut::create().key("f"))
         .onTriggered(this, SLOT(findModeOn()));
     reloadNormalModeActionTitles();
-    _page->addAction(_saveAction, ActionBarPlacement::Signature);
-    _page->addAction(_undoAction, ActionBarPlacement::OnBar);
-    _page->addAction(_redoAction, ActionBarPlacement::OnBar);
-    _page->addAction(_openAction);
-    _page->addAction(_findAction);
+    content()->addAction(_saveAction, ActionBarPlacement::Signature);
+    content()->addAction(_undoAction, ActionBarPlacement::OnBar);
+    content()->addAction(_redoAction, ActionBarPlacement::OnBar);
+    content()->addAction(_openAction);
+    content()->addAction(_findAction);
 }
 
 void View::setFindModeActions()
 {
-    _page->removeAllActions();
+    content()->removeAllActions();
     _goToFindFieldAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_search.png"))
         .addShortcut(Shortcut::create().key("f"))
@@ -221,14 +224,14 @@ void View::setFindModeActions()
         .onTriggered(this, SLOT(findModeOff()));
     setHistoryActions();
     reloadFindModeActionTitles();
-    _page->addAction(_goToFindFieldAction);
-    _page->addAction(_findPrevAction);
-    _page->addAction(_findNextAction, ActionBarPlacement::Signature);
-    _page->addAction(_replaceNextAction, ActionBarPlacement::OnBar);
-    _page->addAction(_replaceAllAction);
-    _page->addAction(_findCancelAction, ActionBarPlacement::OnBar);
-    _page->addAction(_undoAction);
-    _page->addAction(_redoAction);
+    content()->addAction(_goToFindFieldAction);
+    content()->addAction(_findPrevAction);
+    content()->addAction(_findNextAction, ActionBarPlacement::Signature);
+    content()->addAction(_replaceNextAction, ActionBarPlacement::OnBar);
+    content()->addAction(_replaceAllAction);
+    content()->addAction(_findCancelAction, ActionBarPlacement::OnBar);
+    content()->addAction(_undoAction);
+    content()->addAction(_redoAction);
 }
 
 bool View::findModeOn()
@@ -284,7 +287,7 @@ bool View::findModeOn()
                 .kindProperties(findTitleBarProperties);
             reloadFindTitleBarLabels();
         }
-        _page->setTitleBar(_findTitleBar);
+        content()->setTitleBar(_findTitleBar);
         // actionbar
         setFindModeActions();
         // focus
@@ -303,7 +306,7 @@ bool View::findModeOff()
         _findQuery.clear();
         _findBufferDirty = true;
 
-        _page->setTitleBar(_titleBar);
+        content()->setTitleBar(_titleBar);
         setNormalModeActions();
         _mode = Normal;
         _textArea->loseFocus();
@@ -342,11 +345,7 @@ View::FindQueryUpdateStatus View::updateFindQuery(bool interactive)
     }
     if (_findBufferDirty) {
         _findBufferDirty = false;
-        QString output;
-        QTextStream stream(&output);
-        _buffer->state().writePlainText(stream);
-        stream.flush();
-        _findBuffer = output.toStdWString();
+        _findBuffer = _buffer->state().plainText().toStdWString();
         status = Changed;
     }
     if (status == Changed)
@@ -675,14 +674,14 @@ void View::setBuffer(Buffer *buffer)
         if (_buffer) {
             disconn(_textArea, SIGNAL(textChanging(const QString)),
                 this, SLOT(onTextAreaTextChanged(const QString&)));
-            disconn(_buffer, SIGNAL(stateChanged(BufferState&, View *, bool, bool)),
-                this, SLOT(onBufferStateChanged(BufferState&, View *, bool, bool)));
+            disconn(_buffer, SIGNAL(stateChanged(const StateChangeContext&, const BufferState&)),
+                this, SLOT(onBufferStateChanged(const StateChangeContext&, const BufferState&)));
             disconn(_buffer, SIGNAL(nameChanged(const QString&)),
                 this, SLOT(setTitle(const QString&)));
             disconn(_buffer, SIGNAL(filetypeChanged(const QString&)),
                 this, SLOT(onBufferFiletypeChanged(const QString&)));
-            disconn(_buffer, SIGNAL(inProgressChanged(float)),
-                this, SLOT(onBufferProgressChanged(float)));
+            disconn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
+                this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
             disconn(_buffer, SIGNAL(lockedChanged(bool)),
                 this, SLOT(onBufferLockedChanged(bool)));
             disconn(_buffer, SIGNAL(hasUndosChanged(bool)),
@@ -691,23 +690,22 @@ void View::setBuffer(Buffer *buffer)
                 this, SIGNAL(hasRedosChanged(bool)));
         }
         _buffer = buffer;
-        onBufferStateChanged(buffer->state(), NULL, false, false);
+        onBufferStateChanged(StateChangeContext(), buffer->state());
         conn(_textArea, SIGNAL(textChanging(const QString)),
             this, SLOT(onTextAreaTextChanged(const QString&)));
-        conn(_buffer, SIGNAL(stateChanged(BufferState&, View *, bool, bool)),
-            this, SLOT(onBufferStateChanged(BufferState&, View *, bool, bool)));
+        conn(_buffer, SIGNAL(stateChanged(const StateChangeContext&, const BufferState&)),
+            this, SLOT(onBufferStateChanged(const StateChangeContext&, const BufferState&)));
 
         setTitle(_buffer->name());
         conn(_buffer, SIGNAL(nameChanged(const QString&)),
             this, SLOT(setTitle(const QString&)));
 
-        onBufferFiletypeChanged(_buffer->state().filetype());
+        onBufferFiletypeChanged(_buffer->filetype());
         conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
             this, SLOT(onBufferFiletypeChanged(const QString&)));
 
-        onBufferProgressChanged(0);
-        conn(_buffer, SIGNAL(inProgressChanged(float)),
-            this, SLOT(onBufferProgressChanged(float)));
+        conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
+            this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
 
         onBufferLockedChanged(buffer->locked());
         conn(_buffer, SIGNAL(lockedChanged(bool)),
@@ -848,9 +846,6 @@ void View::killCurrentLine() {
 
 void View::onTextAreaTextChanged(const QString& text)
 {
-    if (_modifyingTextArea) {
-        return;
-    }
     qDebug() << "## parsing change from text area";
 //    qDebug() << "lines from the highlightStart:" <<
 //            text.right(text.size() - _highlightStart.htmlCount + 1).left(100);
@@ -873,7 +868,7 @@ Range View::partialHighlightRange(const BufferState &st, Range focus)
 
 void View::updateTextAreaPartialHighlight()
 {
-    _modifyingTextArea = true;
+    SignalBlocker blocker(_textArea);
     int start = _textArea->editor()->selectionStart();
     int end = _textArea->editor()->selectionEnd();
     int startLine = _buffer->state().focus(start).lineIndex;
@@ -894,36 +889,38 @@ void View::updateTextAreaPartialHighlight()
         _textArea->setText(highlightedHtml);
         _textArea->editor()->setSelection(start, end);
     }
-    _modifyingTextArea = false;
 }
 
 void View::onTextAreaCursorPositionChanged()
 {
-    if (_modifyingTextArea || _buffer->state().filetype().isEmpty()) {
+    if (_buffer->filetype().isEmpty()) {
         return;
     }
     if (!_partialHighlightUpdateTimer.isActive())
         _partialHighlightUpdateTimer.start();
 }
 
-void View::onBufferFiletypeChanged(const QString &filetype) {
+void View::onBufferFiletypeChanged(const QString &filetype)
+{
     if (filetype.isEmpty()) {
         // use a default image
         // TODO: fill in the images
 //        setImageSource(QUrl("asset:///images/txt.png"));
     } else {
+        Utility::toast(tr("Filetype set to %1").arg(filetype));
 //        setImageSource(QUrl("asset:///images/"+filetype+".png"));
     }
 }
 
 // Is textChanging or cursorPositionChanged emitted first?
-void View::onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition) {
-    if (this != source || sourceChanged) {
-        int pos = shouldMatchCursorPosition || this == source ?
+void View::onBufferStateChanged(const StateChangeContext &ctx, const BufferState &state)
+{
+    if (this != ctx.sourceView || ctx.sourceViewShouldUpdate) {
+        int pos = ctx.shouldMatchCursorPosition || this == ctx.sourceView ?
                 state.cursorPosition() :
                 _textArea->editor()->cursorPosition();
         // we assume that selectionStart == selectionEnd == pos in this case
-        _modifyingTextArea = true;
+        SignalBlocker blocker(_textArea);
         _highlightRange = partialHighlightRange(state, Range(state.focus(pos).lineIndex));
         QString highlightedHtml;
         QTextStream output(&highlightedHtml);
@@ -937,14 +934,22 @@ void View::onBufferStateChanged(BufferState& state, View *source, bool sourceCha
 
         _textArea->setText(highlightedHtml);
         _textArea->editor()->setCursorPosition(pos);
-        _modifyingTextArea = false;
     }
 }
 
-void View::onBufferProgressChanged(float progress)
+void View::onBufferProgressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state, const QString &msg)
 {
+    qDebug() << "received progress change" << progress;
+    _progressIndicator->setState(state);
     _progressIndicator->setValue(progress);
     _progressIndicator->setVisible(progress > 0 && progress < 1);
+    if (!msg.isNull())
+        Utility::toast(msg, tr("Dismiss"), this, SLOT(onProgressMessageDismissed(bb::system::SystemUiResult::Type)));
+}
+
+void View::onProgressMessageDismissed(bb::system::SystemUiResult::Type)
+{
+    _progressIndicator->setVisible(false);
 }
 
 void View::onBufferLockedChanged(bool locked)
@@ -1081,7 +1086,7 @@ void View::onFileSelected(const QStringList &files)
             Utility::toast("loading file: " + files[0]);
             break;
         case bb::cascades::pickers::FilePickerMode::Saver:
-            Utility::toast("saving file: " + files[0]);
+            _buffer->save(files[0]);
 //            emit workerSaveStateToFile(state(), "");
             break;
     }

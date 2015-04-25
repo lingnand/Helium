@@ -2,6 +2,13 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="zh_CN">
 <context>
+    <name>BufferWorker</name>
+    <message>
+        <source>Error opening file</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MultiViewPane</name>
     <message>
         <source>New</source>
@@ -125,6 +132,14 @@
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Filetype set to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

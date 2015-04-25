@@ -1,10 +1,9 @@
 /*
- * Type.cpp
  *
  *  Created on: Apr 4, 2015
  *      Author: lingnan
  */
-#include <Type.h>
+#include <Replacement.h>
 
 QDebug operator<<(QDebug dbg, const TextSelection &selection)
 {

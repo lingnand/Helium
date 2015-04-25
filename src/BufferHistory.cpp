@@ -14,6 +14,13 @@ BufferHistory::BufferHistory(int upperLimit): _upperLimit(upperLimit), _currentI
     append(BufferState());
 }
 
+void BufferHistory::clear()
+{
+    QList<BufferState>::clear();
+    _currentIndex=0;
+    append(BufferState());
+}
+
 BufferState &BufferHistory::copyCurrent()
 {
     bool a = advanceable();
@@ -39,6 +46,11 @@ BufferState &BufferHistory::copyCurrent()
 BufferState &BufferHistory::current()
 {
     return operator[](_currentIndex);
+}
+
+const BufferState &BufferHistory::current() const
+{
+    return at(_currentIndex);
 }
 
 bool BufferHistory::advance()

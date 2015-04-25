@@ -157,7 +157,7 @@ QString BufferLine::preText() const
 
 // BufferState
 
-BufferState::BufferState(): _cursorPosition(-1) {}
+BufferState::BufferState(): _cursorPosition(0) {}
 
 const QString &BufferState::filetype() const
 {
@@ -194,15 +194,19 @@ BufferState::Position BufferState::focus(int cursorPosition) const
     return pos;
 }
 
-void BufferState::writePlainText(QTextStream &output) const
+QString BufferState::plainText() const
 {
+    QString text;
     if (empty())
-       return;
+       return text;
+    QTextStream output(&text);
     at(0).line.writePlainText(output);
     for (int i = 1; i < size(); i++) {
         output << '\n';
         at(i).line.writePlainText(output);
     }
+    output.flush();
+    return text;
 }
 
 ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, const Range &range) const

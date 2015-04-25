@@ -11,6 +11,7 @@
 #include <QTranslator>
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
+#include <bb/cascades/ProgressIndicatorState>
 #include <MultiViewPane.h>
 
 class Helium : public bb::cascades::Application
@@ -27,5 +28,7 @@ private:
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
 };
+
+Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)
 
 #endif /* APPLICATION_H_ */

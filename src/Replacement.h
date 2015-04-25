@@ -1,12 +1,11 @@
 /*
- * type.h
  *
  *  Created on: Feb 1, 2015
  *      Author: lingnan
  */
 
-#ifndef TYPE_H_
-#define TYPE_H_
+#ifndef REPLACEMENT_H_
+#define REPLACEMENT_H_
 
 #include <QDebug>
 
@@ -32,4 +31,4 @@ struct Replacement {
 QDebug operator<<(QDebug dbg, const TextSelection &selection);
 QDebug operator<<(QDebug dbg, const Replacement &replacement);
 
-#endif /* TYPE_H_ */
+#endif /* REPLACEMENT_H_ */

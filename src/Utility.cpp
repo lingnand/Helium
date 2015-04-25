@@ -13,13 +13,20 @@
 static bb::system::SystemToast *_toast = NULL;
 static bb::system::SystemDialog *_dialog = NULL;
 
-void Utility::toast(const QString &msg)
+void Utility::toast(const QString &msg, const QString &label,
+        const QObject *receiver, const char *method)
 {
     if (!_toast) {
         _toast = new bb::system::SystemToast;
         _toast->setPosition(bb::system::SystemUiPosition::BottomCenter);
+        _toast->button()->setLabel(label);
+    } else {
+        _toast->disconnect();
     }
     _toast->setBody(msg);
+    if (receiver && method) {
+        conn(_toast, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
+    }
     _toast->show();
 }
 

@@ -223,8 +223,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
-        $$quote($$BASEDIR/src/SaveWork.cpp) \
-        $$quote($$BASEDIR/src/Type.cpp) \
+        $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
@@ -307,8 +306,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/MultiViewPane.h) \
-        $$quote($$BASEDIR/src/SaveWork.h) \
-        $$quote($$BASEDIR/src/Type.h) \
+        $$quote($$BASEDIR/src/Replacement.h) \
+        $$quote($$BASEDIR/src/SignalBlocker.h) \
+        $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \
         $$quote($$BASEDIR/src/View.h) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \

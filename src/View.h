@@ -13,7 +13,9 @@
 #include <boost/regex.hpp>
 #include <bb/cascades/Tab>
 #include <bb/system/SystemUiResult>
-#include <Type.h>
+#include <bb/cascades/ProgressIndicatorState>
+#include <Replacement.h>
+#include <StateChangeContext.h>
 #include <BufferState.h>
 
 namespace bb {
@@ -45,6 +47,7 @@ class View : public bb::cascades::Tab
 public:
     View(Buffer* buffer, MultiViewPane *parent=NULL);
     virtual ~View() {}
+    bb::cascades::Page *content() const;
     Q_SLOT void onTranslatorChanged();
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void onOutOfView();
@@ -112,7 +115,6 @@ private:
     Q_SLOT void onFileSelected(const QStringList &files);
 
     // #### buffer and highlight
-    bool _modifyingTextArea;
     Buffer *_buffer;
     Range _highlightRange;
     ParserPosition _highlightStart;
@@ -151,8 +153,9 @@ private:
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferLockedChanged(bool locked);
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
-    Q_SLOT void onBufferStateChanged(BufferState& state, View *source, bool sourceChanged, bool shouldMatchCursorPosition);
-    Q_SLOT void onBufferProgressChanged(float progress);
+    Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);
+    Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
+    Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);
     Q_SLOT void onUndoTriggered();
     Q_SLOT void onRedoTriggered();
     Q_SLOT void autoFocus();

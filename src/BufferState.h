@@ -108,7 +108,7 @@ public:
     // return the index of the line where the cursor is currently in
     // NOTE: the cursorPosition is assumed to be based on plainText
     Position focus(int cursorPosition) const;
-    void writePlainText(QTextStream &output) const;
+    QString plainText() const;
     // beginIndex should always be smaller than endIndex
     // return: the parser position at the beginning of the highlight section
     ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;
