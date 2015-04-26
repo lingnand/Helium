@@ -15,6 +15,13 @@ namespace srchilite {
 
 class View;
 
+struct Progress {
+    float current;
+    float cap;
+    Progress(float start=0, float end=1): current(start), cap(end) {}
+};
+Q_DECLARE_METATYPE(Progress)
+
 class BufferWorker : public QObject
 {
     Q_OBJECT
@@ -25,14 +32,14 @@ public:
     QString filetypeForName(const QString &name);
     Q_SLOT void initialize();
     // all these functions always do the specified job
-    Q_SLOT void setFiletype(StateChangeContext &, BufferState &, const QString &filetype);
+    Q_SLOT void setFiletype(StateChangeContext &, BufferState &, const QString &filetype, Progress &);
     Q_SLOT BufferStateChange parseBufferChange(BufferState &, const QString &content, ParserPosition, int cursorPosition);
-    Q_SLOT void parseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, bool trackProgress=true);
-    Q_SLOT void mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, bool trackProgress=true);
-    Q_SLOT void replace(StateChangeContext &, BufferState &, const QList<Replacement> &);
-    Q_SLOT void rehighlight(StateChangeContext &, BufferState &, int index=0);
-    Q_SLOT void saveStateToFile(const BufferState &, const QString &filename);
-    Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename);
+    Q_SLOT void parseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
+    Q_SLOT void mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
+    Q_SLOT void replace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
+    Q_SLOT void rehighlight(StateChangeContext &, BufferState &, int index, Progress &);
+    Q_SLOT void saveStateToFile(const BufferState &, const QString &filename, Progress &);
+    Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename, Progress &);
 Q_SIGNALS:
     void progressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state=bb::cascades::ProgressIndicatorState::Progress, const QString &msg=QString());
     void filetypeChanged(const StateChangeContext &, const BufferState &);
@@ -51,13 +58,18 @@ private:
     srchilite::SourceHighlight _sourceHighlight;
     srchilite::LangMap *_langMap;
 
-    void writePlainText(const BufferState &state, QTextStream &output, float startProgress=0, float endProgress=1);
+    QString _filetypeForName(const QString &name);
+    void _setFiletype(const QString &filetype);
+    void writePlainText(const BufferState &state, QTextStream &output, Progress &);
     BufferStateChange _parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition);
-    void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, bool trackProgress=true);
+    void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &progress);
     HighlightStateData::ptr highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState);
     void _highlight(BufferState &state, int index,
-            HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState=HighlightStateData::ptr(),
-            float startProgress=0, float endProgress=1);
+            HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState,
+            Progress &);
 };
+
+QDebug operator<<(QDebug dbg, const BufferLineState *lineState);
+QDebug operator<<(QDebug dbg, const Progress &progress);
 
 #endif /* BUFFERWORKER_H_ */

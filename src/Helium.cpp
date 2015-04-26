@@ -17,6 +17,7 @@ Helium::Helium(int &argc, char **argv): bb::cascades::Application(argc, argv)
 {
     qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>();
     qRegisterMetaType<BufferState>("BufferState&");
+    qRegisterMetaType<Progress>("Progress&");
     qRegisterMetaType<BufferStateChange>();
     qRegisterMetaType<StateChangeContext>("StateChangeContext&");
     qRegisterMetaType<ParserPosition>();

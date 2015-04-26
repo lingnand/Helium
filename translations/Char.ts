@@ -138,7 +138,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Dismiss</source>
+        <source>Saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save As</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unsaved change detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

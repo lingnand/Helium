@@ -65,10 +65,10 @@ View::View(Buffer* buffer, MultiViewPane *parent):
             .spaceQuota(1))
         .bottomMargin(0);
     _textAreaModKeyListener = ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent*)))
+        .onModifiedKeyPressed(this, SLOT(onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
         .onModKeyPressed(this, SLOT(onTextAreaModKeyPressed(bb::cascades::KeyEvent*)))
         .onTextAreaInputModeChanged(_textArea, SLOT(setInputMode(bb::cascades::TextAreaInputMode::Type)))
-        .handleFocusOn(_textArea, SIGNAL(focusedChanged(bool)));
+        .modOffOn(_textArea, SIGNAL(focusedChanged(bool)));
     _textArea->addKeyListener(_textAreaModKeyListener);
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
             this, SLOT(onTextAreaCursorPositionChanged()));
@@ -90,10 +90,10 @@ View::View(Buffer* buffer, MultiViewPane *parent):
     conn(_titleField, SIGNAL(focusedChanged(bool)),
         this, SLOT(onTitleFieldFocusChanged(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
+        .onModifiedKeyPressed(this, SLOT(onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
         .onModKeyPressed(_textArea, SLOT(requestFocus()))
         .onTextFieldInputModeChanged(_titleField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
-        .handleFocusOn(_titleField, SIGNAL(focusedChanged(bool))));
+        .modOffOn(_titleField, SIGNAL(focusedChanged(bool))));
     // the default titlebar
     _titleBar = TitleBar::create(TitleBarKind::TextField)
         .kindProperties(titleBarProperties);
@@ -176,6 +176,9 @@ void View::setNormalModeActions()
         .imageSource(QUrl("asset:///images/ic_save.png"))
         .addShortcut(Shortcut::create().key("s"))
         .onTriggered(this, SLOT(save()));
+    _saveAsAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_save_as.png"))
+        .onTriggered(this, SLOT(saveAs()));
     _openAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_open.png"))
         .addShortcut(Shortcut::create().key("e"))
@@ -189,6 +192,7 @@ void View::setNormalModeActions()
     content()->addAction(_saveAction, ActionBarPlacement::Signature);
     content()->addAction(_undoAction, ActionBarPlacement::OnBar);
     content()->addAction(_redoAction, ActionBarPlacement::OnBar);
+    content()->addAction(_saveAsAction);
     content()->addAction(_openAction);
     content()->addAction(_findAction);
 }
@@ -254,12 +258,12 @@ bool View::findModeOn()
                 .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
                 .onModKeyPressed(_replaceField, SLOT(requestFocus()))
                 .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
-                .handleFocusOn(_findField, SIGNAL(focusedChanged(bool))));
+                .modOffOn(_findField, SIGNAL(focusedChanged(bool))));
             _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
                 .onModifiedKeyPressed(this, SLOT(onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
                 .onModKeyPressed(this, SLOT(findNext()))
                 .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
-                .handleFocusOn(_replaceField, SIGNAL(focusedChanged(bool))));
+                .modOffOn(_replaceField, SIGNAL(focusedChanged(bool))));
             _findCaseSensitiveCheckBox = new CheckBox;
             FreeFormTitleBarKindProperties *findTitleBarProperties = FreeFormTitleBarKindProperties::create()
                 .expandableIndicator(TitleBarExpandableAreaIndicatorVisibility::Hidden)
@@ -680,6 +684,8 @@ void View::setBuffer(Buffer *buffer)
                 this, SLOT(setTitle(const QString&)));
             disconn(_buffer, SIGNAL(filetypeChanged(const QString&)),
                 this, SLOT(onBufferFiletypeChanged(const QString&)));
+            disconn(_buffer, SIGNAL(filepathChanged(const QString&)),
+                this, SLOT(onBufferFilepathChanged(const QString&)));
             disconn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
                 this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
             disconn(_buffer, SIGNAL(lockedChanged(bool)),
@@ -688,6 +694,10 @@ void View::setBuffer(Buffer *buffer)
                 this, SIGNAL(hasUndosChanged(bool)));
             disconn(_buffer, SIGNAL(hasRedosChanged(bool)),
                 this, SIGNAL(hasRedosChanged(bool)));
+            disconn(_buffer, SIGNAL(savedToFile(const QString&)),
+                this, SLOT(onBufferSavedToFile(const QString&)))
+            disconn(_buffer, SIGNAL(dirtyChanged(bool)),
+                this, SLOT(onBufferDirtyChanged(bool)))
         }
         _buffer = buffer;
         onBufferStateChanged(StateChangeContext(), buffer->state());
@@ -704,6 +714,10 @@ void View::setBuffer(Buffer *buffer)
         conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
             this, SLOT(onBufferFiletypeChanged(const QString&)));
 
+        onBufferFilepathChanged(_buffer->filepath());
+        conn(_buffer, SIGNAL(filepathChanged(const QString&)),
+            this, SLOT(onBufferFilepathChanged(const QString&)));
+
         conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
             this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
 
@@ -718,6 +732,12 @@ void View::setBuffer(Buffer *buffer)
         _redoAction->setEnabled(_buffer->hasRedo());
         conn(_buffer, SIGNAL(hasRedosChanged(bool)),
             this, SIGNAL(hasRedosChanged(bool)));
+
+        conn(_buffer, SIGNAL(savedToFile(const QString&)),
+            this, SLOT(onBufferSavedToFile(const QString&)))
+
+        conn(_buffer, SIGNAL(dirtyChanged(bool)),
+            this, SLOT(onBufferDirtyChanged(bool)))
     }
 }
 
@@ -776,11 +796,12 @@ void View::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::
     }
 }
 
-void View::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
+void View::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener)
 {
     switch (event->keycap()) {
         case KEYCODE_S:
-            save();
+            if (save() == OpenedFilePicker)
+                listener->modOff();
             break;
         // TODO: add shortcut for open and new file, next/prev tab
         default:
@@ -806,7 +827,7 @@ void View::onTextAreaModKeyPressed(bb::cascades::KeyEvent *event)
     _textArea->editor()->insertPlainText(event->unicode());
 }
 
-void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
+void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener)
 {
     switch (event->keycap()) {
         case KEYCODE_T:
@@ -826,15 +847,17 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event)
             findModeOn();
             break;
         case KEYCODE_S:
-            save();
+            if (save() == OpenedFilePicker)
+                listener->modOff();
             break;
         case KEYCODE_E:
-            open();
+            open(); // this always opens some sort of UI
+            listener->modOff();
             break;
         case KEYCODE_D:
             killCurrentLine();
             break;
-        // TODO: add shortcut for open and new file, next/prev tab
+        // TODO: add shortcut for next/prev tab
         default:
             onTextControlModifiedKeyPressed(_textArea->editor(), event);
     }
@@ -912,6 +935,14 @@ void View::onBufferFiletypeChanged(const QString &filetype)
     }
 }
 
+void View::onBufferFilepathChanged(const QString &filepath)
+{
+    qDebug() << "filepath set to" << filepath;
+    _titleField->setEnabled(filepath.isEmpty());
+    // TODO: we might also want to change the font color to grey
+    // to make it clearer to the user
+}
+
 // Is textChanging or cursorPositionChanged emitted first?
 void View::onBufferStateChanged(const StateChangeContext &ctx, const BufferState &state)
 {
@@ -944,7 +975,7 @@ void View::onBufferProgressChanged(float progress, bb::cascades::ProgressIndicat
     _progressIndicator->setValue(progress);
     _progressIndicator->setVisible(progress > 0 && progress < 1);
     if (!msg.isNull())
-        Utility::toast(msg, tr("Dismiss"), this, SLOT(onProgressMessageDismissed(bb::system::SystemUiResult::Type)));
+        Utility::toast(msg, tr("OK"), this, SLOT(onProgressMessageDismissed(bb::system::SystemUiResult::Type)));
 }
 
 void View::onProgressMessageDismissed(bb::system::SystemUiResult::Type)
@@ -957,9 +988,10 @@ void View::onBufferLockedChanged(bool locked)
     switch (_mode) {
         case Normal:
             _textArea->setEditable(!locked);
-            _titleField->setEnabled(!locked);
+            _titleField->setEnabled(!locked && _buffer->filepath().isEmpty());
             // actions
             _saveAction->setEnabled(!locked);
+            _saveAsAction->setEnabled(!locked);
             _openAction->setEnabled(!locked);
             _undoAction->setEnabled(!locked && _buffer->hasUndo());
             _redoAction->setEnabled(!locked && _buffer->hasRedo());
@@ -981,6 +1013,12 @@ void View::onBufferLockedChanged(bool locked)
     }
 }
 
+void View::onBufferDirtyChanged(bool dirty)
+{
+    // TODO: set the font style to default when not dirty
+    // and italic when dirty
+}
+
 void View::onUndoTriggered()
 {
     _buffer->undo();
@@ -996,6 +1034,7 @@ void View::onRedoTriggered()
 void View::reloadNormalModeActionTitles()
 {
     _saveAction->setTitle(tr("Save"));
+    _saveAsAction->setTitle(tr("Save As"));
     _openAction->setTitle(tr("Open"));
     _undoAction->setTitle(tr("Undo"));
     _redoAction->setTitle(tr("Redo"));
@@ -1053,37 +1092,70 @@ bb::cascades::pickers::FilePicker *View::filePicker()
         _fpicker = new bb::cascades::pickers::FilePicker(this);
         _fpicker->setType(bb::cascades::pickers::FileType::Document);
         _fpicker->setFilter(QStringList("*"));
-        _fpicker->setDirectories(QStringList("/accounts/1000/shared"));
         conn(_fpicker, SIGNAL(fileSelected(const QStringList&)),
                 this, SLOT(onFileSelected(const QStringList&)));
+    }
+    if (_buffer->filepath().isEmpty()) {
+        _fpicker->setDirectories(QStringList("/accounts/1000/shared"));
+    } else {
+        _fpicker->setDirectories(QStringList(QFileInfo(_buffer->filepath()).absolutePath()));
     }
     return _fpicker;
 }
 
-void View::save()
+View::SaveStatus View::save()
 {
-    // TODO: check if already have path associated
-    // if yes, then directly save
+    if (!_buffer->filepath().isEmpty()) {
+        _buffer->save(_buffer->filepath());
+        return Finished;
+    }
+    return saveAs();
+}
+
+View::SaveStatus View::saveAs()
+{
     filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Saver);
     filePicker()->setDefaultSaveFileNames(QStringList(_buffer->name()));
     filePicker()->setTitle(tr("Save"));
     filePicker()->open();
+    return OpenedFilePicker;
+}
+
+void View::onBufferSavedToFile(const QString &)
+{
+    Utility::toast(tr("Saved"));
 }
 
 void View::open()
 {
-    // TODO: check if dirty
-    // - yes, then prompt for user to save
+    // TODO: we need to detach the current view from its buffer
+    // if there are more than 1 view attached to the same buffer
+    if  (_buffer->dirty()) {
+        Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
+                tr("Do you want to continue?"),
+                this, SLOT(onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type)));
+    }
+}
+
+void View::pickFileToOpen()
+{
     filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Picker);
     filePicker()->setTitle(tr("Open"));
     filePicker()->open();
+}
+
+void View::onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        pickFileToOpen();
+    }
 }
 
 void View::onFileSelected(const QStringList &files)
 {
     switch (filePicker()->mode()) {
         case bb::cascades::pickers::FilePickerMode::Picker:
-            Utility::toast("loading file: " + files[0]);
+            _buffer->load(files[0]);
             break;
         case bb::cascades::pickers::FilePickerMode::Saver:
             _buffer->save(files[0]);

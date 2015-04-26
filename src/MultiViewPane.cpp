@@ -24,6 +24,11 @@
 #include <Buffer.h>
 #include <Utility.h>
 
+// TODO: delete the buffer when needed!!!!!!!
+// OR: we can store the buffers in a list and remove as necessary
+// that will require the view to transmit a signal back
+// when it wants detach from a buffer
+
 MultiViewPane::MultiViewPane()
 {
     setShowTabsOnActionBar(false);

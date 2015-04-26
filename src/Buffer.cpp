@@ -25,20 +25,20 @@ Buffer::Buffer(int historyLimit):
     _worker.moveToThread(&_workerThread);
     conn(this, SIGNAL(workerInitialize()),
             &_worker, SLOT(initialize()));
-    conn(this, SIGNAL(workerSetFiletype(StateChangeContext&, BufferState&, const QString&)),
-         &_worker, SLOT(setFiletype(StateChangeContext&, BufferState&, const QString&)));
-    conn(this, SIGNAL(workerParseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, bool)),
-         &_worker, SLOT(parseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, bool)));
-    conn(this, SIGNAL(workerMergeChange(StateChangeContext&, BufferState&, const BufferStateChange&, bool)),
-         &_worker, SLOT(mergeChange(StateChangeContext&, BufferState&, const BufferStateChange&, bool)));
-    conn(this, SIGNAL(workerReplace(StateChangeContext&, BufferState&, const QList<Replacement>&)),
-         &_worker, SLOT(replace(StateChangeContext&, BufferState&, const QList<Replacement>&)));
-    conn(this, SIGNAL(workerRehighlight(StateChangeContext&, BufferState&, int)),
-         &_worker, SLOT(rehighlight(StateChangeContext&, BufferState&, int)));
-    conn(this, SIGNAL(workerSaveStateToFile(const BufferState&, const QString&)),
-         &_worker, SLOT(saveStateToFile(const BufferState&, const QString&)));
-    conn(this, SIGNAL(workerLoadStateFromFile(StateChangeContext&, const QString&)),
-         &_worker, SLOT(loadStateFromFile(StateChangeContext&, const QString&)));
+    conn(this, SIGNAL(workerSetFiletype(StateChangeContext&, BufferState&, const QString&, Progress&)),
+         &_worker, SLOT(setFiletype(StateChangeContext&, BufferState&, const QString&, Progress&)));
+    conn(this, SIGNAL(workerParseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, Progress&)),
+         &_worker, SLOT(parseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, Progress&)));
+    conn(this, SIGNAL(workerMergeChange(StateChangeContext&, BufferState&, const BufferStateChange&, Progress&)),
+         &_worker, SLOT(mergeChange(StateChangeContext&, BufferState&, const BufferStateChange&, Progress&)));
+    conn(this, SIGNAL(workerReplace(StateChangeContext&, BufferState&, const QList<Replacement>&, Progress&)),
+         &_worker, SLOT(replace(StateChangeContext&, BufferState&, const QList<Replacement>&, Progress&)));
+    conn(this, SIGNAL(workerRehighlight(StateChangeContext&, BufferState&, int, Progress&)),
+         &_worker, SLOT(rehighlight(StateChangeContext&, BufferState&, int, Progress&)));
+    conn(this, SIGNAL(workerSaveStateToFile(const BufferState&, const QString&, Progress&)),
+         &_worker, SLOT(saveStateToFile(const BufferState&, const QString&, Progress&)));
+    conn(this, SIGNAL(workerLoadStateFromFile(StateChangeContext&, const QString&, Progress&)),
+         &_worker, SLOT(loadStateFromFile(StateChangeContext&, const QString&, Progress&)));
 
     conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
             this, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
@@ -52,6 +52,9 @@ Buffer::Buffer(int historyLimit):
             this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
     conn(&_worker, SIGNAL(stateLoadedFromFile(const StateChangeContext&, const BufferState&, const QString&)),
             this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
+    // report
+    conn(&_worker, SIGNAL(stateSavedToFile(const QString&)),
+            this, SIGNAL(savedToFile(const QString&)));
     _workerThread.start();
     // initialize in the background
     emit workerInitialize();
@@ -88,23 +91,30 @@ void Buffer::setDirty(bool dirty) {
 
 const QString &Buffer::name() const { return _name; }
 
-void Buffer::setName(const QString &name, bool setft)
+void Buffer::setName(const QString &name)
+{
+    Progress progress;
+    _setName(name, true, progress);
+}
+
+void Buffer::_setName(const QString &name, bool setft, Progress &progress)
 {
     if (name != _name) {
         _name = name;
         if (setft)
-            setFiletype(_worker.filetypeForName(name));
+            _setFiletype(_worker.filetypeForName(name), progress);
         emit nameChanged(name);
     }
 }
 
 const QString &Buffer::filepath() const { return _filepath; }
 
-void Buffer::setFilepath(const QString &filepath, bool setFiletype)
+void Buffer::setFilepath(const QString &filepath, bool setFiletype, Progress &progress)
 {
     if (filepath != _filepath) {
         _filepath = filepath;
-        setName(QFileInfo(_filepath).fileName(), setFiletype);
+        _setName(QFileInfo(_filepath).fileName(), setFiletype, progress);
+        emit filepathChanged(_filepath);
     }
 }
 
@@ -115,6 +125,12 @@ const QString &Buffer::filetype() const
 
 void Buffer::setFiletype(const QString &filetype)
 {
+    Progress progress;
+    _setFiletype(filetype, progress);
+}
+
+void Buffer::_setFiletype(const QString &filetype, Progress &progress)
+{
     BufferState &st = _states.current();
     if (filetype != st.filetype()) {
         StateChangeContext ctx(++_requestId);
@@ -122,7 +138,8 @@ void Buffer::setFiletype(const QString &filetype)
             // if state is empty we don't need to lock the textArea -- really
             setLocked(true);
         }
-        emit workerSetFiletype(ctx, st, filetype);
+        emit workerSetFiletype(ctx, st, filetype, progress);
+        progress.current = progress.cap;
     }
 }
 
@@ -167,17 +184,19 @@ void Buffer::parseChange(View *source, const QString &content, ParserPosition st
         // furthermore, because of completeness we can throw away the
         // current state completely
         BufferState empty;
-        emit workerParseAndMergeChange(ctx, empty, content, start, cursorPosition, false);
+        Progress progress(0, 0);
+        emit workerParseAndMergeChange(ctx, empty, content, start, cursorPosition, progress);
     } else {
         BufferStateChange change = _worker.parseBufferChange(state, content, start, cursorPosition);
         qDebug() << "change:" << change;
         qDebug() << "changeSize:" << change.size();
+        Progress progress;
         if (change.size() > 100) { // put this into background
             setLocked(true);
-            emit workerMergeChange(ctx, state, change);
+            emit workerMergeChange(ctx, state, change, progress);
         } else {
             SignalBlocker blocker(&_worker);
-            _worker.mergeChange(ctx, state, change);
+            _worker.mergeChange(ctx, state, change, progress);
             emit stateChanged(ctx, state);
         }
     }
@@ -193,12 +212,13 @@ void Buffer::parseReplacement(const QList<Replacement> &replaces)
     if (!replaces.empty() && !state().isEmpty()) {
         StateChangeContext ctx(++_requestId);
         BufferState &state = modifyState();
+        Progress progress;
         if (replaces.size() > 20) { // put this into background
             setLocked(true);
-            emit workerReplace(ctx, state, replaces);
+            emit workerReplace(ctx, state, replaces, progress);
         } else {
             SignalBlocker blocker(&_worker);
-            _worker.replace(ctx, state, replaces);
+            _worker.replace(ctx, state, replaces, progress);
             emit stateChanged(ctx, state);
         }
     }
@@ -214,8 +234,9 @@ void Buffer::killLine(View *source, int cursorPosition)
         state.setCursorPosition(cursorPosition - pos.linePosition);
         state[pos.lineIndex].line.clear();
         // blocking rehighlight (we assume the change is small)
+        Progress progress;
         SignalBlocker blocker(&_worker);
-        _worker.rehighlight(ctx, state, pos.lineIndex);
+        _worker.rehighlight(ctx, state, pos.lineIndex, progress);
         emit stateChanged(ctx, state);
     }
 }
@@ -245,7 +266,8 @@ void Buffer::traverse(bool (BufferHistory::*fn)())
         if (st.filetype() != ft) {
             // rehighlight in the background
             setLocked(true);
-            emit workerRehighlight(ctx, st);
+            Progress progress;
+            emit workerRehighlight(ctx, st, 0, progress);
         } else {
             // directly emit a state change
             emit stateChanged(ctx, st);
@@ -255,17 +277,21 @@ void Buffer::traverse(bool (BufferHistory::*fn)())
 
 void Buffer::save(const QString &filepath)
 {
-    setFilepath(filepath, false);
-    // change the file type in the background
-    emit workerSaveStateToFile(state(), _filepath);
+    Progress progress(0, 0.5);
+    setFilepath(filepath, true, progress);
+    progress.cap = 1;
+    emit workerSaveStateToFile(state(), _filepath, progress);
+    setDirty(false);
 }
 
 void Buffer::load(const QString &filepath)
 {
-    setFilepath(filepath, false);
+    Progress progress;
+    setFilepath(filepath, false, progress);
     setLocked(true);
-    // first we need to clear all the existing states
+    // clear all the existing states
     _states.clear();
     StateChangeContext ctx(++_requestId);
-    emit workerLoadStateFromFile(ctx, filepath);
+    emit workerLoadStateFromFile(ctx, filepath, progress);
+    setDirty(false);
 }

@@ -47,7 +47,7 @@ public:
     // returns the name of the current buffer, "" for no name
     const QString &name() const;
     // the name the buffer will use to write to the filesystem when requested
-    Q_SLOT void setName(const QString &name, bool setFiletype=true);
+    Q_SLOT void setName(const QString &name);
     const QString &filepath() const; // the filepath of the buffer, empty if not yet bound
     const QString &filetype() const;
     Q_SLOT void setFiletype(const QString &filetype);
@@ -66,6 +66,7 @@ Q_SIGNALS:
     void lockedChanged(bool);
     void dirtyChanged(bool);
     void nameChanged(const QString &name);
+    void filepathChanged(const QString &filepath);
     void filetypeChanged(const QString &filetype);
     void stateChanged(const StateChangeContext &, const BufferState &);
     // this happens when a long-running operation is triggered
@@ -75,13 +76,15 @@ Q_SIGNALS:
     void hasRedosChanged(bool hasRedos);
     // worker
     void workerInitialize();
-    void workerSetFiletype(StateChangeContext &, BufferState &, const QString &filetype);
-    void workerParseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, bool trackProgress=true);
-    void workerMergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, bool trackProgress=true);
-    void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &);
-    void workerRehighlight(StateChangeContext &, BufferState &, int index=0);
-    void workerSaveStateToFile(const BufferState &, const QString &filename);
-    void workerLoadStateFromFile(StateChangeContext &, const QString &filename);
+    void workerSetFiletype(StateChangeContext &, BufferState &, const QString &filetype, Progress &);
+    void workerParseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
+    void workerMergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
+    void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
+    void workerRehighlight(StateChangeContext &, BufferState &, int index, Progress &);
+    void workerSaveStateToFile(const BufferState &, const QString &filename, Progress &);
+    void workerLoadStateFromFile(StateChangeContext &, const QString &filename, Progress &);
+    // task report
+    void savedToFile(const QString &filename);
 private:
     bool _dirty;
     bool _locked;
@@ -99,7 +102,9 @@ private:
     void setLocked(bool);
     void setDirty(bool);
 
-    void setFilepath(const QString &filepath, bool setFiletype=true);
+    void _setName(const QString &name, bool setFiletype, Progress &);
+    void _setFiletype(const QString &filetype, Progress &);
+    void setFilepath(const QString &filepath, bool setFiletype, Progress &);
     void traverse(bool (BufferHistory::*fn)());
     Q_SLOT void handleStateChangeResult(const StateChangeContext &, const BufferState &);
 };

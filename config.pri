@@ -96,6 +96,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_redo.png) \
         $$quote($$BASEDIR/assets/images/ic_rename.png) \
         $$quote($$BASEDIR/assets/images/ic_save.png) \
+        $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \
         $$quote($$BASEDIR/assets/images/ic_sort.png) \
         $$quote($$BASEDIR/assets/images/ic_sort_black.png) \

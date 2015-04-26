@@ -28,6 +28,7 @@ public:
     Q_SLOT void handleFocus(bool focus);
     bool enabled() const;
     Q_SLOT void setEnabled(bool enabled);
+    Q_SLOT bool modOff(); // turn off sticky mod
 
     template <typename BuilderType, typename BuiltType>
     class TBuilder : public BaseObject::TBuilder<BuilderType, BuiltType>
@@ -38,7 +39,7 @@ public:
           }
     public:
           BuilderType& onModifiedKeyPressed(const QObject *receiver, const char *method) {
-              this->connect(SIGNAL(modifiedKeyPressed(bb::cascades::KeyEvent*)), receiver, method);
+              this->connect(SIGNAL(modifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)), receiver, method);
               return this->builder();
           }
 
@@ -53,12 +54,12 @@ public:
           }
 
           BuilderType& onModKeyPressed(const QObject* receiver, const char *method) {
-              this->connect(SIGNAL(modKeyPressed(bb::cascades::KeyEvent*)), receiver, method);
+              this->connect(SIGNAL(modKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)), receiver, method);
               return this->builder();
           }
 
-          BuilderType& handleFocusOn(const QObject* sender, const char *method) {
-              conn(sender, method, &this->instance(), SLOT(handleFocus(bool)));
+          BuilderType& modOffOn(const QObject* sender, const char *method) {
+              conn(sender, method, &this->instance(), SLOT(modOff()));
               return this->builder();
           }
     };
@@ -72,8 +73,8 @@ public:
         return Builder(modKeycap);
     }
 Q_SIGNALS:
-    void modifiedKeyPressed(bb::cascades::KeyEvent *event);
-    void modKeyPressed(bb::cascades::KeyEvent *event);
+    void modifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
+    void modKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     void textFieldInputModeChanged(bb::cascades::TextFieldInputMode::Type newInputMode);
     void textAreaInputModeChanged(bb::cascades::TextAreaInputMode::Type newInputMode);
 private:
@@ -82,7 +83,6 @@ private:
     bool _modPressed;
     bool _modUsed;
     bool modOn();
-    bool modOff();
     Q_SLOT void onKeyEvent(bb::cascades::KeyEvent *event);
 };
 

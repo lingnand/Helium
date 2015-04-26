@@ -4,17 +4,6 @@
 #include <srchilite/instances.h>
 #include <srchilite/langmap.h>
 
-// debug functions
-QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
-{
-    if (!lineState) {
-        dbg << "<nil>";
-    } else {
-        dbg << *lineState;
-    }
-    return dbg;
-}
-
 BufferWorker::BufferWorker():
     _langMap(srchilite::Instances::getLangMap()),
     _sourceHighlight("default.style", "xhtml.outlang")
@@ -27,55 +16,65 @@ void BufferWorker::initialize()
     _langMap->open();
 }
 
-// TODO: finer locking here? we only need to exclude it from initialize's
-// open call
 QString BufferWorker::filetypeForName(const QString &name)
 {
     QMutexLocker locker(&_langMapMut);
+    return _filetypeForName(name);
+}
+
+QString BufferWorker::_filetypeForName(const QString &name)
+{
     return QString::fromUtf8(_langMap->getMappedFileNameFromFileName(name.toUtf8().constData()).c_str());
 }
 
-void BufferWorker::setFiletype(StateChangeContext &ctx, BufferState &state, const QString &filetype)
+void BufferWorker::setFiletype(StateChangeContext &ctx, BufferState &state, const QString &filetype, Progress &progress)
 {
     QMutexLocker locker(&_mut);
-    _filetype = filetype;
-    qDebug() << "Setting filetype to:" << _filetype;
-    if (_filetype.isEmpty()) {
-        _mainStateData.reset();
-    } else {
-        _sourceHighlight.setInputLang(std::string(_filetype.toUtf8().constData()) + ".lang");
-        // initialize the main state data
-        _mainStateData = HighlightStateData::ptr(new HighlightStateData(
-                _sourceHighlight.getHighlighter()->getMainState(),
-                srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
-        ));
-    }
-    _highlight(state, 0, _mainStateData);
+    _setFiletype(filetype);
+    _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "sending new state update";
     emit filetypeChanged(ctx, state);
 }
 
-// the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
-void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, float startProgress, float endProgress)
+void BufferWorker::_setFiletype(const QString &filetype)
 {
-    float progressInc = (endProgress-startProgress) / qMax(state.size()-index, 1);
+    if (filetype != _filetype) {
+        _filetype = filetype;
+        qDebug() << "Setting filetype to:" << _filetype;
+        if (_filetype.isEmpty()) {
+            _mainStateData.reset();
+        } else {
+            _sourceHighlight.setInputLang(std::string(_filetype.toUtf8().constData()) + ".lang");
+            // initialize the main state data
+            _mainStateData = HighlightStateData::ptr(new HighlightStateData(
+                    _sourceHighlight.getHighlighter()->getMainState(),
+                    srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
+            ));
+        }
+    }
+}
+
+// the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
+void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, Progress &progress)
+{
+    float progressInc = (progress.cap-progress.current) / qMax(state.size()-index, 1);
     if (state.filetype() != _filetype) {
         state.setFiletype(_filetype);
         // highlight without checking
         for (; index < state.size(); index++) {
             qDebug() << "highlighting line" << index;
             highlightState = highlightLine(state[index], highlightState);
-            emit progressChanged(startProgress+=progressInc);
+            emit progressChanged(progress.current+=progressInc);
         }
     } else {
         for (; index < state.size() && HighlightStateData::unequal(highlightState, oldHighlightState); index++) {
             oldHighlightState = state[index].endHighlightState;
             qDebug() << "highlighting line" << index;
             highlightState = highlightLine(state[index], highlightState);
-            emit progressChanged(startProgress+=progressInc);
+            emit progressChanged(progress.current+=progressInc);
         }
     }
-    emit progressChanged(endProgress);
+    emit progressChanged(progress.current=progress.cap);
 }
 
 HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState)
@@ -113,22 +112,22 @@ BufferStateChange BufferWorker::_parseBufferChange(BufferState &state, const QSt
     return _bufferChangeParser.parseBufferChange(content, start, cursorPosition);
 }
 
-void BufferWorker::parseAndMergeChange(StateChangeContext &ctx, BufferState &state, const QString &content, ParserPosition start, int cursorPosition, bool trackProgress)
+void BufferWorker::parseAndMergeChange(StateChangeContext &ctx, BufferState &state, const QString &content, ParserPosition start, int cursorPosition, Progress &progress)
 {
     QMutexLocker locker(&_mut);
-    _mergeChange(ctx, state, _parseBufferChange(state, content, start, cursorPosition), trackProgress);
+    _mergeChange(ctx, state, _parseBufferChange(state, content, start, cursorPosition), progress);
 }
 
-void BufferWorker::mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, bool trackProgress)
+void BufferWorker::mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, Progress &progress)
 {
     QMutexLocker locker(&_mut);
-    _mergeChange(ctx, state, change, trackProgress);
+    _mergeChange(ctx, state, change, progress);
 }
 
-void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, bool trackProgress)
+void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, Progress &progress)
 {
     // if the filetype is empty then we don't need to track progress
-    float currentProgress = 0, progressInc = trackProgress ? 1.0 / (change.size()+1) : 0;
+    float progressInc = (progress.cap-progress.current) / (change.size()+1);
     if (state.filetype() != _filetype) {
         Q_ASSERT(state.isEmpty());
         state.setFiletype(_filetype);
@@ -163,17 +162,17 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
             state[bufferIndex] = lineState;
         }
         bufferIndex++;
-        emit progressChanged(currentProgress+=progressInc);
+        emit progressChanged(progress.current+=progressInc);
     }
     // if there is no merge edge then we can remove all the rest
     if (changeIndex < 0) {
         while (bufferIndex < state.size()) {
             state.removeLast();
         }
-        emit progressChanged(1);
+        emit progressChanged(progress.current=progress.cap);
     } else {
         qDebug() << "continuing to highlight additional lines";
-        _highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData, currentProgress);
+        _highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData, progress);
     }
     // if there is nothing left.
     // there can be no highlight change when the buffer is empty
@@ -188,10 +187,10 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
 
 // TODO: set cursorPosition of the state to the end of last Replacement
 // potentially needing to record a second counter
-void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QList<Replacement> &replaces)
+void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QList<Replacement> &replaces, Progress &progress)
 {
     QMutexLocker locker(&_mut);
-    float currentProgress = 0, progressInc = 1.0 / (replaces.size()+1);
+    float progressInc = (progress.cap-progress.current) / (replaces.size()+1);
     if (state.filetype() != _filetype) {
         Q_ASSERT(state.isEmpty());
         state.setFiletype(_filetype);
@@ -293,7 +292,7 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
         qDebug() << "splitting again to remove the final part of the selection, split:" << temp;
         qDebug() << "pointing current to split";
         current = &temp;
-        emit progressChanged(currentProgress+=progressInc);
+        emit progressChanged(progress.current+=progressInc);
     }
     qDebug() << "finished all the replacements";
     qDebug() << "current:" << current;
@@ -307,51 +306,89 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
     before->endHighlightState = current->endHighlightState;
     qDebug() << "continuing to highlight";
     qDebug() << "pointing current to before";
-    _highlight(state, stateIndex, highlightState, oldHighlightState, currentProgress);
+    _highlight(state, stateIndex, highlightState, oldHighlightState, progress);
     emit occurrenceReplaced(ctx, state);
 }
 
-void BufferWorker::rehighlight(StateChangeContext &ctx, BufferState &state, int index)
+void BufferWorker::rehighlight(StateChangeContext &ctx, BufferState &state, int index, Progress &progress)
 {
     QMutexLocker locker(&_mut);
-    _highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState);
+    _highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState, HighlightStateData::ptr(), progress);
     emit stateRehighlighted(ctx, state);
 }
 
-void BufferWorker::writePlainText(const BufferState &state, QTextStream &output, float startProgress, float endProgress)
+void BufferWorker::writePlainText(const BufferState &state, QTextStream &output, Progress &progress)
 {
-    float progressInc = (endProgress-startProgress) / qMax(state.size(), 1);
-    if (state.empty())
-       return;
-    state[0].line.writePlainText(output);
-    emit progressChanged(startProgress+=progressInc);
-    for (int i = 1; i < state.size(); i++) {
-        output << '\n';
-        state[i].line.writePlainText(output);
-        emit progressChanged(startProgress+=progressInc);
+    if (!state.empty()) {
+        float progressInc = (progress.cap-progress.current) / qMax(state.size(), 1);
+        state[0].line.writePlainText(output);
+        emit progressChanged(progress.current+=progressInc);
+        for (int i = 1; i < state.size(); i++) {
+            output << '\n';
+            state[i].line.writePlainText(output);
+            emit progressChanged(progress.current+=progressInc);
+        }
     }
-    emit progressChanged(endProgress);
+    emit progressChanged(progress.current=progress.cap);
 }
 
-void BufferWorker::saveStateToFile(const BufferState &state, const QString &filename)
+void BufferWorker::saveStateToFile(const BufferState &state, const QString &filename, Progress &progress)
 {
-    float currentProgress = 0;
     QFile file(filename);
-    qDebug() << "preparing to write to " << filename;
+    qDebug() << "preparing to write to" << filename;
     bool success = file.open(QIODevice::WriteOnly | QIODevice::Text);
-    emit progressChanged(currentProgress += 0.25);
-    if (!success) {
-        emit progressChanged(currentProgress,
+    progress.current+=(progress.cap-progress.current)*0.25;
+    if (success) {
+        emit progressChanged(progress.current);
+    } else {
+        emit progressChanged(progress.current,
                 bb::cascades::ProgressIndicatorState::Error, tr("Error opening file"));
         return;
     }
     QTextStream out(&file);
-    writePlainText(state, out, currentProgress);
+    writePlainText(state, out, progress);
     file.close();
-    emit progressChanged(1);
+    emit stateSavedToFile(filename);
 }
 
-void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &filename)
+void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &filename, Progress &progress)
 {
-//    return BufferState();
+    QFile file(filename);
+    qDebug() << "preparing to open" << filename;
+    bool success = file.open(QIODevice::ReadOnly | QIODevice::Text);
+    progress.current+=(progress.cap-progress.current)*0.25;
+    if (success) {
+        emit progressChanged(progress.current);
+    } else {
+        emit progressChanged(progress.current,
+                bb::cascades::ProgressIndicatorState::Error, tr("Error opening file"));
+        return;
+    }
+    QTextStream input(&file);
+    // build the initial state
+    BufferState state;
+    while (!input.atEnd()) {
+        state.append(BufferLineState(BufferLine() << input.readLine()));
+    }
+    _setFiletype(_filetypeForName(filename));
+    _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
+    qDebug() << "state filetype after highlight" << state.filetype();
+    emit stateLoadedFromFile(ctx, state, filename);
+}
+
+// debug functions
+QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
+{
+    if (!lineState) {
+        dbg << "<nil>";
+    } else {
+        dbg << *lineState;
+    }
+    return dbg;
+}
+
+QDebug operator<<(QDebug dbg, const Progress &progress)
+{
+    dbg.nospace() << "Progress(" << progress.current << "," << progress.cap << ")";
+    return dbg.maybeSpace();
 }

@@ -98,7 +98,7 @@ struct BufferLineState {
 class BufferState : public QList<BufferLineState>
 {
 public:
-    BufferState();
+    BufferState(const QString &filetype=QString(), int cursorPosition=0);
     virtual ~BufferState() {}
     struct Position {
         int lineIndex;

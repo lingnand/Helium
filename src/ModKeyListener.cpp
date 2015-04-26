@@ -68,7 +68,7 @@ void ModKeyListener::onKeyEvent(bb::cascades::KeyEvent *event)
                 }
             } else {
                 _modUsed = true;
-                emit modifiedKeyPressed(event);
+                emit modifiedKeyPressed(event, this);
             }
         } else {
             if (event->keycap() == _modKeycap) {
@@ -79,7 +79,7 @@ void ModKeyListener::onKeyEvent(bb::cascades::KeyEvent *event)
     } else {
         if (event->keycap() == _modKeycap) {
             if (modOff() && !_modUsed) {
-                emit modKeyPressed(event);
+                emit modKeyPressed(event, this);
             }
         }
     }

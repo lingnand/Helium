@@ -74,6 +74,7 @@ private:
     bb::cascades::CheckBox *_findCaseSensitiveCheckBox;
 
     bb::cascades::ActionItem *_saveAction;
+    bb::cascades::ActionItem *_saveAsAction;
     bb::cascades::ActionItem *_openAction;
     bb::cascades::ActionItem *_undoAction;
     bb::cascades::ActionItem *_redoAction;
@@ -110,8 +111,11 @@ private:
     // #### file related
     bb::cascades::pickers::FilePicker *_fpicker;
     bb::cascades::pickers::FilePicker *filePicker();
-    Q_SLOT void save();
+    enum SaveStatus {OpenedFilePicker, Finished};
+    Q_SLOT SaveStatus save();
+    Q_SLOT SaveStatus saveAs();
     Q_SLOT void open();
+    void pickFileToOpen();
     Q_SLOT void onFileSelected(const QStringList &files);
 
     // #### buffer and highlight
@@ -139,23 +143,27 @@ private:
     Q_SLOT void replaceAll();
     // text operations
     Q_SLOT void killCurrentLine();
-    Q_SLOT void onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type);
+    Q_SLOT void onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onTitleFieldFocusChanged(bool focus);
-    Q_SLOT void onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onTextAreaTextChanged(const QString& text);
     Q_SLOT void onTextAreaModKeyPressed(bb::cascades::KeyEvent *event);
-    Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onTextAreaCursorPositionChanged();
     Q_SLOT void onTextControlModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void onFindOptionButtonClicked();
     Q_SLOT void onBufferLockedChanged(bool locked);
     Q_SLOT void onBufferFiletypeChanged(const QString& filetype);
+    Q_SLOT void onBufferFilepathChanged(const QString& filepath);
     Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);
     Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
     Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);
+    Q_SLOT void onBufferSavedToFile(const QString &filename);
+    Q_SLOT void onBufferDirtyChanged(bool dirty);
+    Q_SLOT void onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onUndoTriggered();
     Q_SLOT void onRedoTriggered();
     Q_SLOT void autoFocus();

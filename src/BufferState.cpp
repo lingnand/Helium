@@ -157,7 +157,8 @@ QString BufferLine::preText() const
 
 // BufferState
 
-BufferState::BufferState(): _cursorPosition(0) {}
+BufferState::BufferState(const QString &filetype, int cursorPosition):
+        _filetype(filetype), _cursorPosition(cursorPosition) {}
 
 const QString &BufferState::filetype() const
 {
