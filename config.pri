@@ -85,10 +85,11 @@ simulator {
 
 config_pri_assets {
     OTHER_FILES += \
+        $$quote($$BASEDIR/assets/images/ic_add.png) \
         $$quote($$BASEDIR/assets/images/ic_backward.png) \
         $$quote($$BASEDIR/assets/images/ic_cancel.png) \
         $$quote($$BASEDIR/assets/images/ic_clear.png) \
-        $$quote($$BASEDIR/assets/images/ic_compose.png) \
+        $$quote($$BASEDIR/assets/images/ic_copy_link.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
         $$quote($$BASEDIR/assets/images/ic_open.png) \

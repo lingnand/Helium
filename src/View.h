@@ -45,10 +45,12 @@ class View : public bb::cascades::Tab
 {
     Q_OBJECT
 public:
-    View(Buffer* buffer, MultiViewPane *parent=NULL);
+    View(Buffer *buffer=NULL);
     virtual ~View() {}
     bb::cascades::Page *content() const;
+    MultiViewPane *parent() const;
     Q_SLOT void onTranslatorChanged();
+    Buffer *buffer() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void onOutOfView();
 Q_SIGNALS:
@@ -79,6 +81,8 @@ private:
     bb::cascades::ActionItem *_undoAction;
     bb::cascades::ActionItem *_redoAction;
     bb::cascades::ActionItem *_findAction;
+    bb::cascades::ActionItem *_cloneAction;
+    bb::cascades::ActionItem *_closeAction;
 
     bb::cascades::ActionItem *_goToFindFieldAction;
     bb::cascades::ActionItem *_findPrevAction;
@@ -117,6 +121,10 @@ private:
     Q_SLOT void open();
     void pickFileToOpen();
     Q_SLOT void onFileSelected(const QStringList &files);
+
+    // #### view management
+    Q_SLOT void clone();
+    Q_SLOT void close();
 
     // #### buffer and highlight
     Buffer *_buffer;

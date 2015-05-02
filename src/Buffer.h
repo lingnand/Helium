@@ -38,7 +38,7 @@ class Buffer : public QObject
 {
     Q_OBJECT
 public:
-    Buffer(int historyLimit = 0);
+    Buffer(int historyLimit=0, QObject *parent=NULL);
     virtual ~Buffer();
     // a locked buffer shouldn't get any of its functions triggered
     bool locked() const;
@@ -62,6 +62,10 @@ public:
     Q_SLOT void redo();
     Q_SLOT void save(const QString &filepath);
     Q_SLOT void load(const QString &filepath);
+    // views
+    const QSet<View *> &views() const;
+    void attachView(View *);
+    void detachView(View *);
 Q_SIGNALS:
     void lockedChanged(bool);
     void dirtyChanged(bool);
@@ -86,6 +90,9 @@ Q_SIGNALS:
     // task report
     void savedToFile(const QString &filename);
 private:
+    // store the list of attached views
+    QSet<View *> _views;
+
     bool _dirty;
     bool _locked;
     QThread _workerThread;

@@ -47,7 +47,7 @@ using namespace bb::cascades;
 // TODO: it would be good if you can modulize the undo/redo functionality
 // and then attach it to each textfield/area like what you did with the modkeylistener!
 // that would be awesome...
-View::View(Buffer* buffer, MultiViewPane *parent):
+View::View(Buffer *buffer):
         _buffer(NULL),
         _findTitleBar(NULL),
         _fpicker(NULL),
@@ -60,6 +60,7 @@ View::View(Buffer* buffer, MultiViewPane *parent):
                     | TextInputFlag::AutoCorrectionOff
                     | TextInputFlag::AutoCapitalizationOff
                     | TextInputFlag::AutoPeriodOff)
+        .contentFlags(TextContentFlag::ActiveTextOff)
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))
@@ -72,14 +73,15 @@ View::View(Buffer* buffer, MultiViewPane *parent):
     _textArea->addKeyListener(_textAreaModKeyListener);
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
             this, SLOT(onTextAreaCursorPositionChanged()));
+    // TODO: monospace font doesn't play well with italic
+    // so what we need to do is to reformat the style file for highlight
+//    _textArea->textStyle()->setFontFamily("\"Andale Mono\", monospace");
+
     // setup the timer for partial highlight update
     _partialHighlightUpdateTimer.setSingleShot(true);
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
             this, SLOT(updateTextAreaPartialHighlight()));
 
-    // TODO: monospace font doesn't play well with italic
-    // so what we need to do is to reformat the style file for highlight
-//    _textArea->textStyle()->setFontFamily("\"Andale Mono\", monospace");
 
     // title bar
     TextFieldTitleBarKindProperties *titleBarProperties = new TextFieldTitleBarKindProperties;
@@ -124,7 +126,6 @@ View::View(Buffer* buffer, MultiViewPane *parent):
 
     setNormalModeActions();
 
-    // set the buffer
     setBuffer(buffer);
 }
 
@@ -133,10 +134,22 @@ Page *View::content() const
     return (Page *) bb::cascades::Tab::content();
 }
 
+MultiViewPane *View::parent() const
+{
+    return (MultiViewPane *) QObject::parent();
+}
+
+Buffer *View::buffer() const
+{
+    return _buffer;
+}
+
 /* miscellaneous actions */
 void View::onOutOfView()
 {
     findModeOff();
+    // default to lose focus for the text area
+    _textArea->loseFocus();
 }
 
 void View::autoFocus()
@@ -164,7 +177,7 @@ void View::setHistoryActions()
     conn(this, SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
     _redoAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("x"))
+        .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(onRedoTriggered()));
     conn(this, SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
 }
@@ -188,6 +201,14 @@ void View::setNormalModeActions()
         .imageSource(QUrl("asset:///images/ic_search.png"))
         .addShortcut(Shortcut::create().key("f"))
         .onTriggered(this, SLOT(findModeOn()));
+    _cloneAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_copy_link.png"))
+        .addShortcut(Shortcut::create().key("y"))
+        .onTriggered(this, SLOT(clone()));
+    _closeAction = ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_clear.png"))
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SLOT(close()));
     reloadNormalModeActionTitles();
     content()->addAction(_saveAction, ActionBarPlacement::Signature);
     content()->addAction(_undoAction, ActionBarPlacement::OnBar);
@@ -195,6 +216,8 @@ void View::setNormalModeActions()
     content()->addAction(_saveAsAction);
     content()->addAction(_openAction);
     content()->addAction(_findAction);
+    content()->addAction(_cloneAction);
+    content()->addAction(_closeAction);
 }
 
 void View::setFindModeActions()
@@ -392,13 +415,13 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
             }
             // check if there is something on findIndex
             ++_findIndex;
-            if (_findComplete && _findIndex == _findHits.count()) {
+            if (_findComplete && _findIndex == _findHits.size()) {
                 _findIndex = 0;
             }
             if (_findIndex == _bofIndex && interactive) {
                 Utility::toast(tr("Reached end of document, beginning from top!"));
             }
-            if (_findIndex < _findHits.count()) {
+            if (_findIndex < _findHits.size()) {
                 if (interactive)
                     select(_findHits[_findIndex].selection);
                 return;
@@ -443,8 +466,8 @@ void View::findNextWithOptions(bool interactive, FindQueryUpdateStatus status)
     }
     // found something
     // decide whether we need to insert the location into the list
-    qDebug() << "current findIndex:" << _findIndex << "findhits count:" << _findHits.count();
-    Q_ASSERT(_findIndex == _findHits.count());
+    qDebug() << "current findIndex:" << _findIndex << "findhits size:" << _findHits.size();
+    Q_ASSERT(_findIndex == _findHits.size());
     TextSelection selection((*_findIterator)[0].first - _findBuffer.begin(),
             (*_findIterator)[0].second - _findBuffer.begin());
     if (!_findHits.isEmpty() && selection == _findHits[0].selection) {
@@ -529,7 +552,7 @@ void View::findPrev()
             // check if there is something on findIndex
             --_findIndex;
             if (_findComplete && _findIndex < 0) {
-                _findIndex = _findHits.count() - 1;
+                _findIndex = _findHits.size() - 1;
             }
             if (_findIndex >= 0) {
                 select(_findHits[_findIndex].selection);
@@ -555,7 +578,7 @@ void View::findPrev()
                             _findComplete = true;
                             break;
                         }
-                        _bofIndex = _findHits.count();
+                        _bofIndex = _findHits.size();
                     } else {
                         _findComplete = true;
                         break;
@@ -566,7 +589,7 @@ void View::findPrev()
                     (*_findIterator)[0].second - _findBuffer.begin());
                 if (!_findHits.isEmpty() && selection == _findHits[0].selection) {
                     _findComplete = true;
-                    if (_bofIndex == _findHits.count()) {
+                    if (_bofIndex == _findHits.size()) {
                         _bofIndex = 0;
                         Utility::toast(tr("Reached top of document, beginning from bottom!"));
                     }
@@ -575,7 +598,7 @@ void View::findPrev()
                     _findHits.append(FindMatch(selection, *_findIterator));
                 }
             }
-            _findIndex = _findHits.count() - 1;
+            _findIndex = _findHits.size() - 1;
             select(_findHits[_findIndex].selection);
             break;
         }
@@ -590,7 +613,7 @@ void View::replaceNext()
     if (status == Unchanged) {
         TextSelection current(_textArea->editor()->selectionStart(),
                 _textArea->editor()->selectionEnd());
-        if (_findIndex >= 0 && _findIndex < _findHits.count() && current == _findHits[_findIndex].selection) {
+        if (_findIndex >= 0 && _findIndex < _findHits.size() && current == _findHits[_findIndex].selection) {
             // TODO: should we set the cursor to be just after the replacement?
             _buffer->parseReplacement(Replacement(current,
                     QString::fromStdWString(_findHits[_findIndex].match.format(_replaceField->text().toStdWString()))));
@@ -623,8 +646,8 @@ void View::replaceAll()
     int i = 0;
     int index;
     // now take from the replaceIndex to bofIndex - 1
-    for (; i < _findHits.count(); i++) {
-        index = (replaceIndex + i) % _findHits.count();
+    for (; i < _findHits.size(); i++) {
+        index = (replaceIndex + i) % _findHits.size();
 //        qDebug() << "adding index" << index << "to the first replaces queue";
         if (index == _bofIndex) {
             break;
@@ -634,10 +657,10 @@ void View::replaceAll()
     }
     // do the actual replaces
     _buffer->parseReplacement(_replaces);
-    _numberOfReplacesTillBottom = _replaces.count();
+    _numberOfReplacesTillBottom = _replaces.size();
     _replaces.clear();
-    for (; i < _findHits.count(); i++) {
-        index = (replaceIndex + i) % _findHits.count();
+    for (; i < _findHits.size(); i++) {
+        index = (replaceIndex + i) % _findHits.size();
 //        qDebug() << "adding index" << index << "to the second replaces queue";
         _replaces.append(Replacement(_findHits[index].selection,
                 QString::fromStdWString(_findHits[index].match.format(replacement))));
@@ -654,7 +677,7 @@ void View::onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type type)
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
         _buffer->parseReplacement(_replaces);
         Utility::dialog(tr("OK"), tr("Replace finished"),
-                tr("%n occurrence(s) replaced.", "", _numberOfReplacesTillBottom+_replaces.count()));
+                tr("%n occurrence(s) replaced.", "", _numberOfReplacesTillBottom+_replaces.size()));
     }
     _replaces.clear();
 }
@@ -673,9 +696,8 @@ void View::setBuffer(Buffer *buffer)
 {
     if (buffer != _buffer) {
         findModeOff();
-        // we only deal with real buffers, can't set to NULL
-        Q_ASSERT(buffer);
         if (_buffer) {
+            _buffer->detachView(this);
             disconn(_textArea, SIGNAL(textChanging(const QString)),
                 this, SLOT(onTextAreaTextChanged(const QString&)));
             disconn(_buffer, SIGNAL(stateChanged(const StateChangeContext&, const BufferState&)),
@@ -698,46 +720,52 @@ void View::setBuffer(Buffer *buffer)
                 this, SLOT(onBufferSavedToFile(const QString&)))
             disconn(_buffer, SIGNAL(dirtyChanged(bool)),
                 this, SLOT(onBufferDirtyChanged(bool)))
+            // remove the buffer if it no longer has other views attached
+            if (_buffer->views().empty())
+                parent()->removeBuffer(_buffer);
         }
         _buffer = buffer;
-        onBufferStateChanged(StateChangeContext(), buffer->state());
-        conn(_textArea, SIGNAL(textChanging(const QString)),
-            this, SLOT(onTextAreaTextChanged(const QString&)));
-        conn(_buffer, SIGNAL(stateChanged(const StateChangeContext&, const BufferState&)),
-            this, SLOT(onBufferStateChanged(const StateChangeContext&, const BufferState&)));
+        if (_buffer) {
+            _buffer->attachView(this);
+            onBufferStateChanged(StateChangeContext(), _buffer->state());
+            conn(_textArea, SIGNAL(textChanging(const QString)),
+                this, SLOT(onTextAreaTextChanged(const QString&)));
+            conn(_buffer, SIGNAL(stateChanged(const StateChangeContext&, const BufferState&)),
+                this, SLOT(onBufferStateChanged(const StateChangeContext&, const BufferState&)));
 
-        setTitle(_buffer->name());
-        conn(_buffer, SIGNAL(nameChanged(const QString&)),
-            this, SLOT(setTitle(const QString&)));
+            setTitle(_buffer->name());
+            conn(_buffer, SIGNAL(nameChanged(const QString&)),
+                this, SLOT(setTitle(const QString&)));
 
-        onBufferFiletypeChanged(_buffer->filetype());
-        conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
-            this, SLOT(onBufferFiletypeChanged(const QString&)));
+            onBufferFiletypeChanged(_buffer->filetype());
+            conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
+                this, SLOT(onBufferFiletypeChanged(const QString&)));
 
-        onBufferFilepathChanged(_buffer->filepath());
-        conn(_buffer, SIGNAL(filepathChanged(const QString&)),
-            this, SLOT(onBufferFilepathChanged(const QString&)));
+            onBufferFilepathChanged(_buffer->filepath());
+            conn(_buffer, SIGNAL(filepathChanged(const QString&)),
+                this, SLOT(onBufferFilepathChanged(const QString&)));
 
-        conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
-            this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
+            conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
+                this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
 
-        onBufferLockedChanged(buffer->locked());
-        conn(_buffer, SIGNAL(lockedChanged(bool)),
-            this, SLOT(onBufferLockedChanged(bool)));
+            onBufferLockedChanged(_buffer->locked());
+            conn(_buffer, SIGNAL(lockedChanged(bool)),
+                this, SLOT(onBufferLockedChanged(bool)));
 
-        _undoAction->setEnabled(_buffer->hasUndo());
-        conn(_buffer, SIGNAL(hasUndosChanged(bool)),
-            this, SIGNAL(hasUndosChanged(bool)));
+            _undoAction->setEnabled(_buffer->hasUndo());
+            conn(_buffer, SIGNAL(hasUndosChanged(bool)),
+                this, SIGNAL(hasUndosChanged(bool)));
 
-        _redoAction->setEnabled(_buffer->hasRedo());
-        conn(_buffer, SIGNAL(hasRedosChanged(bool)),
-            this, SIGNAL(hasRedosChanged(bool)));
+            _redoAction->setEnabled(_buffer->hasRedo());
+            conn(_buffer, SIGNAL(hasRedosChanged(bool)),
+                this, SIGNAL(hasRedosChanged(bool)));
 
-        conn(_buffer, SIGNAL(savedToFile(const QString&)),
-            this, SLOT(onBufferSavedToFile(const QString&)))
+            conn(_buffer, SIGNAL(savedToFile(const QString&)),
+                this, SLOT(onBufferSavedToFile(const QString&)));
 
-        conn(_buffer, SIGNAL(dirtyChanged(bool)),
-            this, SLOT(onBufferDirtyChanged(bool)))
+            conn(_buffer, SIGNAL(dirtyChanged(bool)),
+                this, SLOT(onBufferDirtyChanged(bool)));
+        }
     }
 }
 
@@ -840,7 +868,7 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyLis
         case KEYCODE_G:
             _titleField->requestFocus();
             break;
-        case KEYCODE_X:
+        case KEYCODE_R:
             onRedoTriggered();
             break;
         case KEYCODE_F:
@@ -857,7 +885,22 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyLis
         case KEYCODE_D:
             killCurrentLine();
             break;
-        // TODO: add shortcut for next/prev tab
+        case KEYCODE_X:
+            close();
+            break;
+        // TODO: subject to change in keycode
+        case KEYCODE_Y:
+            clone();
+            break;
+        case KEYCODE_C:
+            parent()->addNewView();
+            break;
+        case KEYCODE_Q:
+            parent()->setPrevViewActive();
+            break;
+        case KEYCODE_W:
+            parent()->setNextViewActive();
+            break;
         default:
             onTextControlModifiedKeyPressed(_textArea->editor(), event);
     }
@@ -996,6 +1039,8 @@ void View::onBufferLockedChanged(bool locked)
             _undoAction->setEnabled(!locked && _buffer->hasUndo());
             _redoAction->setEnabled(!locked && _buffer->hasRedo());
             _findAction->setEnabled(!locked);
+            _cloneAction->setEnabled(!locked);
+            _closeAction->setEnabled(!locked);
             break;
         case Find:
             _findField->setEnabled(!locked);
@@ -1039,6 +1084,8 @@ void View::reloadNormalModeActionTitles()
     _undoAction->setTitle(tr("Undo"));
     _redoAction->setTitle(tr("Redo"));
     _findAction->setTitle(tr("Find"));
+    _cloneAction->setTitle(tr("Clone"));
+    _closeAction->setTitle(tr("Close"));
 }
 
 void View::reloadFindModeActionTitles()
@@ -1128,12 +1175,13 @@ void View::onBufferSavedToFile(const QString &)
 
 void View::open()
 {
-    // TODO: we need to detach the current view from its buffer
-    // if there are more than 1 view attached to the same buffer
-    if  (_buffer->dirty()) {
+    // if there is only 1 view attached to this buffer and it is dirty
+    if  (_buffer->views().size() == 1 && _buffer->dirty()) {
         Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
                 tr("Do you want to continue?"),
                 this, SLOT(onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type)));
+    } else {
+        pickFileToOpen();
     }
 }
 
@@ -1155,11 +1203,31 @@ void View::onFileSelected(const QStringList &files)
 {
     switch (filePicker()->mode()) {
         case bb::cascades::pickers::FilePickerMode::Picker:
-            _buffer->load(files[0]);
+            if (files[0] != _buffer->filepath()) {
+                Buffer *b =parent()->bufferForFilepath(files[0]);
+                if (b) {
+                    setBuffer(b);
+                } else {
+                    if (_buffer->views().size() != 1) {
+                        // not only bound to this view!
+                        setBuffer(parent()->newBuffer());
+                    }
+                    _buffer->load(files[0]);
+                }
+            }
             break;
         case bb::cascades::pickers::FilePickerMode::Saver:
             _buffer->save(files[0]);
-//            emit workerSaveStateToFile(state(), "");
             break;
     }
+}
+
+void View::clone()
+{
+    parent()->cloneActive();
+}
+
+void View::close()
+{
+    parent()->remove(this);
 }

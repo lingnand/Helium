@@ -16,7 +16,8 @@
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
 
 // Buffer
-Buffer::Buffer(int historyLimit):
+Buffer::Buffer(int historyLimit, QObject *parent):
+    QObject(parent),
     _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
@@ -294,4 +295,19 @@ void Buffer::load(const QString &filepath)
     StateChangeContext ctx(++_requestId);
     emit workerLoadStateFromFile(ctx, filepath, progress);
     setDirty(false);
+}
+
+const QSet<View *> &Buffer::views() const
+{
+    return _views;
+}
+
+void Buffer::attachView(View *view)
+{
+    _views.insert(view);
+}
+
+void Buffer::detachView(View *view)
+{
+    _views.remove(view);
 }

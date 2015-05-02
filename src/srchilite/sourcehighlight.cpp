@@ -84,9 +84,6 @@ SourceHighlight::~SourceHighlight() {
 
     if (preFormatter)
         delete preFormatter;
-
-    delete langDefManager->getRuleFactory();
-    delete langDefManager;
 }
 
 void SourceHighlight::setInputLang(const std::string &_inputLang) {

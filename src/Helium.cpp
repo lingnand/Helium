@@ -27,7 +27,7 @@ Helium::Helium(int &argc, char **argv): bb::cascades::Application(argc, argv)
     conn(this, SIGNAL(translatorChanged()),
          &_rootPane, SLOT(onTranslatorChanged()));
 
-    _rootPane.addNewView();
+    _rootPane.addNewView(false);
 
     reloadTranslator();
     setScene(&_rootPane);

@@ -19,7 +19,9 @@
 
 #include <QList>
 #include <bb/cascades/TabbedPane>
+#include <Buffer.h>
 
+class Buffer;
 class View;
 
 class MultiViewPane : public bb::cascades::TabbedPane
@@ -29,19 +31,29 @@ public:
     MultiViewPane();
     virtual ~MultiViewPane() {}
     View *activeView() const;
-    Q_SLOT void setActiveView(View *);
-    Q_SLOT void setPrevViewActive();
-    Q_SLOT void setNextViewActive();
-    bb::cascades::Tab *newViewControl();
+    Q_SLOT void setActiveView(View *, bool toast=false);
+    Q_SLOT void setPrevViewActive(bool toast=true);
+    Q_SLOT void setNextViewActive(bool toast=true);
+    bb::cascades::Tab *newViewControl() const;
     View *at(int i) const; // the view at a given index
     View *atOffset(int offset) const; // the view with the given offset from the active one
     int indexOf(View *) const; // give the index of the given view
     int count() const; // number of views
-    void add(View *);
-    Q_SLOT void addNewView();
+    void add(View *, bool toast=false);
+    void insert(int index, View *view, bool toast=false);
+    void cloneActive(bool toast=true); // clone the current
+    void remove(View *);
+    Q_SLOT void addNewView(bool toast=true);
+    Q_SLOT Buffer *newBuffer();
+    Buffer *bufferForFilepath(const QString &filepath);
+    void removeBuffer(Buffer *buffer);
     Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
+private:
+    // the list of buffers driving the views
+    QList<Buffer *> _buffers;
+    void connectView(View *);
 };
 
 #endif /* MULTIVIEWPANE_H_ */
