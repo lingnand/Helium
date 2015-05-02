@@ -37,7 +37,6 @@ public:
     BufferStateChange parseBufferChange(const QString &input, ParserPosition position, int cursorPosition);
 private:
     bool _stopParsing;
-    bool _afterQTag;
     bool _lastDelayable;
     int _cursorPosition;
     int _cursorLine; // index of cursorLine inside _change; or -1 when not found yet

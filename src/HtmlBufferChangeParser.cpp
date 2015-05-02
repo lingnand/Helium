@@ -4,23 +4,42 @@ HtmlBufferChangeParser::HtmlBufferChangeParser(): _lastDelayable(false)
 {
 }
 
+bool delayableInStructure(const BufferStateChange &change, int cursorLine)
+{
+    int diff = -1;
+    for (int i = 0; i < change.size(); i++) {
+        if (i > cursorLine && diff < 0) // not a single context line
+            return false;
+        if (change[i].index < 0) {
+            if (!change[i].line.isEmpty()) {
+                return false;
+            }
+        } else {
+            if (diff < 0) {
+                diff = change[i].index - i;
+            } else if (diff != change[i].index - i) { // not in order
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 BufferStateChange HtmlBufferChangeParser::parseBufferChange(const QString &input, ParserPosition position, int cursorPosition)
 {
     _stopParsing = false;
-    _afterQTag = false;
     _cursorPosition = cursorPosition;
     _cursorLine = -1;
     _change = BufferStateChange();
     qDebug() << ">>>>>> start parsing >>>>>>";
     parse(input, position);
-    if (_cursorLine >= 0) { // this should generally be the case
-        // remove everything after the cursorLine, if the line after cursorLine follows cursorLine immediately
-        if (_cursorLine+1 < _change.size() && _change[_cursorLine].index >= 0 &&
-                _change[_cursorLine].index + 1 == _change[_cursorLine+1].index) {
-            while (_change.size() > _cursorLine+1) {
-                _change.removeLast();
-            }
-        }
+    assert(_cursorLine >= 0);
+    _change._delayable = _change._delayable && delayableInStructure(_change, _cursorLine);
+    // remove unneeded lines
+    // TODO: for more efficiency we could remove all the last lines that are in order
+    // (similar to detecting change in delayableInStructure)
+    while (_change.size() > 1 && _change.last().index > 0 && _change.last().index == _change[_change.size()-2].index+1) {
+        _change.removeLast();
     }
     qDebug() << ">>>>>> end parsing >>>>>>";
     _lastDelayable = _change._delayable;
@@ -33,12 +52,12 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
     bool shouldChangeLine = ch == '\n' || ch == '\r';
     if (shouldChangeLine) {
         qDebug() << "encountered newline, charCount:" << charCount;
-        if (_cursorLine >= 0 && _change.last().index >= 0) {
-             // make sure we have at least one context line after the cursor line
+         // make sure we have at least one *valid* context line *after* the cursor line
+        if (_cursorLine >= 0 &&
+                _change.size() > _cursorLine+1 && _change.last().index >= 0) {
             _stopParsing = true;
             return;
         }
-        _change._delayable = _change._delayable && (_afterQTag || _change.last().line.isEmpty());
         // we always append new lines (let the <q> tag clear unuseful lines out!)
         _change.append(ChangedBufferLine());
     } else if (!ch.isNull()) {
@@ -59,7 +78,6 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         //    TODO: devise a strategy to reliably tell if there is prediction prompt
         _change._delayable =  _change._delayable && !shouldChangeLine && (ch.isLetterOrNumber() || (ch.isSpace() && !_lastDelayable));
     }
-    _afterQTag = false;
 }
 
 void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attributeName, const QString &attributeValue)
@@ -81,11 +99,10 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
             _change._delayable = false;
         }
         _change.last().index = index;
-    } else if (name == "/q") {
-        _afterQTag = true;
     }
 }
-void HtmlBufferChangeParser::parseHtmlCharacter(const QChar &ch) {}
+
+void HtmlBufferChangeParser::parseHtmlCharacter(const QChar &) {}
 bool HtmlBufferChangeParser::stopParsing() { return _stopParsing; }
 void HtmlBufferChangeParser::reachedEnd() {}
 
