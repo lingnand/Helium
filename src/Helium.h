@@ -12,7 +12,8 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 #include <bb/cascades/ProgressIndicatorState>
-#include <MultiViewPane.h>
+
+class MultiViewPane;
 
 class Helium : public bb::cascades::Application
 {
@@ -24,7 +25,7 @@ public:
 Q_SIGNALS:
     void translatorChanged();
 private:
-    MultiViewPane _rootPane;
+    MultiViewPane *_rootPane;
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
 };

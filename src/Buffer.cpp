@@ -21,7 +21,7 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
-    _locked(false), _dirty(false)
+    _locked(false), _dirty(true)
 {
     _worker.moveToThread(&_workerThread);
     conn(this, SIGNAL(workerInitialize()),

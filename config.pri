@@ -102,6 +102,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_sort.png) \
         $$quote($$BASEDIR/assets/images/ic_sort_black.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
+        $$quote($$BASEDIR/assets/images/ic_view_details.png) \
         $$quote($$BASEDIR/assets/srchilite/ada.lang) \
         $$quote($$BASEDIR/assets/srchilite/applescript.lang) \
         $$quote($$BASEDIR/assets/srchilite/asm.lang) \

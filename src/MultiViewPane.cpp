@@ -24,7 +24,7 @@
 #include <Buffer.h>
 #include <Utility.h>
 
-MultiViewPane::MultiViewPane()
+MultiViewPane::MultiViewPane(QObject *parent): bb::cascades::TabbedPane(parent)
 {
     setShowTabsOnActionBar(false);
     addShortcut(bb::cascades::Shortcut::create().key("q")
@@ -39,6 +39,9 @@ MultiViewPane::MultiViewPane()
         .addShortcut(bb::cascades::Shortcut::create().key("c")
                 .onTriggered(this, SLOT(addNewView())))
         .onTriggered(this, SLOT(addNewView())));
+
+    // load text
+    onTranslatorChanged();
 }
 
 View *MultiViewPane::activeView() const
@@ -46,18 +49,23 @@ View *MultiViewPane::activeView() const
     bb::cascades::Tab *tab = activeTab();
     if (tab == newViewControl())
         return NULL;
-    return (View *) activeTab();
+    return (View *) tab;
 }
 
 void MultiViewPane::setActiveView(View *view, bool toast)
 {
-    View *active = activeView();
+    setActiveView(indexOf(view), toast);
+}
+
+void MultiViewPane::setActiveView(int index, bool toast)
+{
+    View *active = activeView(), *view = at(index);
     if (active != view) {
         setActiveTab(view);
         if (active)
             active->onOutOfView();
         if (toast)
-            Utility::toast(view->title());
+            Utility::toast(QString("%1. %2").arg(index).arg(view->title()));
     }
 }
 
@@ -96,19 +104,19 @@ void MultiViewPane::insert(int index, View *view, bool toast)
 {
     connectView(view);
     bb::cascades::TabbedPane::insert(index+1, view);
-    setActiveView(view, toast);
+    setActiveView(index, toast);
 }
 
 void MultiViewPane::add(View *view, bool toast)
 {
     connectView(view);
     bb::cascades::TabbedPane::add(view);
-    setActiveView(view, toast);
+    setActiveView(count()-1, toast);
 }
 
 void MultiViewPane::cloneActive(bool toast)
 {
-    insert(indexOf(activeView())+1, new View(activeView()->buffer()), toast);
+    insert(activeIndex()+1, new View(activeView()->buffer()), toast);
 }
 
 void MultiViewPane::remove(View *view)
@@ -119,7 +127,7 @@ void MultiViewPane::remove(View *view)
             addNewView();
         } else {
             // activate the view before it
-            setActiveView(atOffset(-1));
+            setActiveView(activeIndex(-1));
         }
     }
     view->setBuffer(NULL);
@@ -131,19 +139,19 @@ void MultiViewPane::setPrevViewActive(bool toast)
 {
     if (count() == 0)
         return;
-    setActiveView(atOffset(-1), toast);
+    setActiveView(activeIndex(-1), toast);
 }
 
 void MultiViewPane::setNextViewActive(bool toast)
 {
     if (count() == 0)
         return;
-    setActiveView(atOffset(1), toast);
+    setActiveView(activeIndex(1), toast);
 }
 
-View *MultiViewPane::atOffset(int offset) const
+int MultiViewPane::activeIndex(int offset) const
 {
-    return at(PMOD(indexOf(activeView()) + offset, count()));
+    return PMOD(indexOf(activeView())+offset, count());
 }
 
 Buffer *MultiViewPane::newBuffer()

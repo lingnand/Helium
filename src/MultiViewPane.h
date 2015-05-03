@@ -28,15 +28,16 @@ class MultiViewPane : public bb::cascades::TabbedPane
 {
     Q_OBJECT
 public:
-    MultiViewPane();
+    MultiViewPane(QObject *parent=NULL);
     virtual ~MultiViewPane() {}
     View *activeView() const;
     Q_SLOT void setActiveView(View *, bool toast=false);
+    Q_SLOT void setActiveView(int, bool toast=false);
     Q_SLOT void setPrevViewActive(bool toast=true);
     Q_SLOT void setNextViewActive(bool toast=true);
     bb::cascades::Tab *newViewControl() const;
     View *at(int i) const; // the view at a given index
-    View *atOffset(int offset) const; // the view with the given offset from the active one
+    int activeIndex(int offset=0) const; // the view with the given offset from the active one
     int indexOf(View *) const; // give the index of the given view
     int count() const; // number of views
     void add(View *, bool toast=false);

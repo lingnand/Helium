@@ -124,7 +124,9 @@ View::View(Buffer *buffer):
         .addShortcut(Shortcut::create().key("Enter")
             .onTriggered(this, SLOT(autoFocus()))));
 
+    // actions and text
     setNormalModeActions();
+    onTranslatorChanged();
 
     setBuffer(buffer);
 }
@@ -288,20 +290,21 @@ bool View::findModeOn()
                 .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
                 .modOffOn(_replaceField, SIGNAL(focusedChanged(bool))));
             _findCaseSensitiveCheckBox = new CheckBox;
+            _findCancelButton = Button::create().vertical(VerticalAlignment::Center)
+                .preferredWidth(0)
+                .onClicked(this, SLOT(findModeOff()));
             FreeFormTitleBarKindProperties *findTitleBarProperties = FreeFormTitleBarKindProperties::create()
                 .expandableIndicator(TitleBarExpandableAreaIndicatorVisibility::Hidden)
                 .content(Container::create()
                     .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
                     .left(20).right(20)
-                    .add(ImageView::create().vertical(VerticalAlignment::Center)
-                        .imageSource((QUrl("asset:///images/ic_search.png")))
-                        .filterColor(SystemDefaults::Paints::defaultText()))
+                    .add(Button::create().vertical(VerticalAlignment::Center)
+                        .imageSource((QUrl("asset:///images/ic_view_details.png")))
+                        .preferredWidth(0)
+                        .onClicked(this, SLOT(onFindOptionButtonClicked())))
                     .add(_findField)
                     .add(_replaceField)
-                    .add(Button::create().vertical(VerticalAlignment::Center)
-                        .imageSource(QUrl("asset:///images/ic_sort_black.png"))
-                        .preferredWidth(0)
-                        .onClicked(this, SLOT(onFindOptionButtonClicked()))))
+                    .add(_findCancelButton))
                 .expandableContent(Container::create()
                         .background(_titleBar->ui()->palette()->plain())
                         .bottom(5)
@@ -689,7 +692,14 @@ void View::setTitle(const QString &title)
     } else {
         Tab::setTitle(title);
     }
-    _titleField->setText(title);
+    if (!_titleField->isEnabled()) {
+        // TODO: hack to get around the problem of title field not grey
+        _titleField->setEnabled(true);
+        _titleField->setText(title);
+        _titleField->setEnabled(false);
+    } else {
+        _titleField->setText(title);
+    }
 }
 
 void View::setBuffer(Buffer *buffer)
@@ -708,6 +718,8 @@ void View::setBuffer(Buffer *buffer)
                 this, SLOT(onBufferFiletypeChanged(const QString&)));
             disconn(_buffer, SIGNAL(filepathChanged(const QString&)),
                 this, SLOT(onBufferFilepathChanged(const QString&)));
+            disconn(_buffer, SIGNAL(dirtyChanged(bool)),
+                this, SLOT(onBufferDirtyChanged(bool)));
             disconn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
                 this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
             disconn(_buffer, SIGNAL(lockedChanged(bool)),
@@ -718,8 +730,6 @@ void View::setBuffer(Buffer *buffer)
                 this, SIGNAL(hasRedosChanged(bool)));
             disconn(_buffer, SIGNAL(savedToFile(const QString&)),
                 this, SLOT(onBufferSavedToFile(const QString&)))
-            disconn(_buffer, SIGNAL(dirtyChanged(bool)),
-                this, SLOT(onBufferDirtyChanged(bool)))
             // remove the buffer if it no longer has other views attached
             if (_buffer->views().empty())
                 parent()->removeBuffer(_buffer);
@@ -745,6 +755,10 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(filepathChanged(const QString&)),
                 this, SLOT(onBufferFilepathChanged(const QString&)));
 
+            onBufferDirtyChanged(_buffer->dirty());
+            conn(_buffer, SIGNAL(dirtyChanged(bool)),
+                this, SLOT(onBufferDirtyChanged(bool)));
+
             conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
                 this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
 
@@ -762,9 +776,6 @@ void View::setBuffer(Buffer *buffer)
 
             conn(_buffer, SIGNAL(savedToFile(const QString&)),
                 this, SLOT(onBufferSavedToFile(const QString&)));
-
-            conn(_buffer, SIGNAL(dirtyChanged(bool)),
-                this, SLOT(onBufferDirtyChanged(bool)));
         }
     }
 }
@@ -1060,8 +1071,7 @@ void View::onBufferLockedChanged(bool locked)
 
 void View::onBufferDirtyChanged(bool dirty)
 {
-    // TODO: set the font style to default when not dirty
-    // and italic when dirty
+    _titleField->textStyle()->setFontStyle(dirty ? FontStyle::Italic : FontStyle::Normal);
 }
 
 void View::onUndoTriggered()
@@ -1105,6 +1115,7 @@ void View::reloadFindTitleBarLabels()
     _findCaseSensitiveCheckBox->setText(tr("Case sensitive"));
     _findField->setHintText(tr("Find text"));
     _replaceField->setHintText(tr("Replace with"));
+    _findCancelButton->setText(tr("Cancel"));
 }
 
 void View::onTranslatorChanged()

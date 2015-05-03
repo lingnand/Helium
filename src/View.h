@@ -90,6 +90,7 @@ private:
     bb::cascades::ActionItem *_replaceNextAction;
     bb::cascades::ActionItem *_replaceAllAction;
     bb::cascades::ActionItem *_findCancelAction;
+    bb::cascades::Button *_findCancelButton;
 
     // the find state to keep track of the current find
     enum FindQueryUpdateStatus { Changed, Unchanged, Invalid };

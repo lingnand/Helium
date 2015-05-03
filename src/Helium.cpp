@@ -5,13 +5,14 @@
  *      Author: lingnan
  */
 
-#include <Utility.h>
 #include <Helium.h>
+#include <MultiViewPane.h>
 #include <View.h>
 #include <Buffer.h>
 #include <BufferState.h>
 #include <StateChangeContext.h>
 #include <HtmlBufferChangeParser.h>
+#include <Utility.h>
 
 Helium::Helium(int &argc, char **argv): bb::cascades::Application(argc, argv)
 {
@@ -22,15 +23,17 @@ Helium::Helium(int &argc, char **argv): bb::cascades::Application(argc, argv)
     qRegisterMetaType<StateChangeContext>("StateChangeContext&");
     qRegisterMetaType<ParserPosition>();
 
+    reloadTranslator();
     conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(reloadTranslator()));
+
+    _rootPane = new MultiViewPane(this);
     conn(this, SIGNAL(translatorChanged()),
-         &_rootPane, SLOT(onTranslatorChanged()));
+         _rootPane, SLOT(onTranslatorChanged()));
 
-    _rootPane.addNewView(false);
+    _rootPane->addNewView(false);
 
-    reloadTranslator();
-    setScene(&_rootPane);
+    setScene(_rootPane);
 }
 
 void Helium::reloadTranslator()
