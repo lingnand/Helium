@@ -171,7 +171,8 @@ private:
     Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);
     Q_SLOT void onBufferSavedToFile(const QString &filename);
     Q_SLOT void onBufferDirtyChanged(bool dirty);
-    Q_SLOT void onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type);
+    Q_SLOT void onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type);
+    Q_SLOT void onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type);
     Q_SLOT void onUndoTriggered();
     Q_SLOT void onRedoTriggered();
     Q_SLOT void autoFocus();

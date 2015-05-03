@@ -1175,12 +1175,18 @@ void View::onBufferSavedToFile(const QString &)
 
 void View::open()
 {
-    // if there is only 1 view attached to this buffer and it is dirty
     if  (_buffer->views().size() == 1 && _buffer->dirty()) {
         Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
                 tr("Do you want to continue?"),
-                this, SLOT(onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type)));
+                this, SLOT(onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type)));
     } else {
+        pickFileToOpen();
+    }
+}
+
+void View::onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
         pickFileToOpen();
     }
 }
@@ -1190,13 +1196,6 @@ void View::pickFileToOpen()
     filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Picker);
     filePicker()->setTitle(tr("Open"));
     filePicker()->open();
-}
-
-void View::onUnsavedChangeDialogFinished(bb::system::SystemUiResult::Type type)
-{
-    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        pickFileToOpen();
-    }
 }
 
 void View::onFileSelected(const QStringList &files)
@@ -1229,5 +1228,18 @@ void View::clone()
 
 void View::close()
 {
-    parent()->remove(this);
+    if  (_buffer->views().size() == 1 && _buffer->dirty()) {
+        Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
+                tr("Do you want to continue?"),
+                this, SLOT(onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type)));
+    } else {
+        parent()->remove(this);
+    }
+}
+
+void View::onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        parent()->remove(this);
+    }
 }
