@@ -90,6 +90,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_cancel.png) \
         $$quote($$BASEDIR/assets/images/ic_clear.png) \
         $$quote($$BASEDIR/assets/images/ic_copy_link.png) \
+        $$quote($$BASEDIR/assets/images/ic_edit.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
         $$quote($$BASEDIR/assets/images/ic_open.png) \
@@ -221,14 +222,18 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
+        $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
+        $$quote($$BASEDIR/src/NormalMode.cpp) \
+        $$quote($$BASEDIR/src/ReadMode.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
+        $$quote($$BASEDIR/src/ViewMode.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.cpp) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.cc) \
@@ -301,19 +306,22 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Buffer.h) \
         $$quote($$BASEDIR/src/BufferHistory.h) \
         $$quote($$BASEDIR/src/BufferState.h) \
-        $$quote($$BASEDIR/src/BufferWork.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
+        $$quote($$BASEDIR/src/FindMode.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/MultiViewPane.h) \
+        $$quote($$BASEDIR/src/NormalMode.h) \
+        $$quote($$BASEDIR/src/ReadMode.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \
         $$quote($$BASEDIR/src/View.h) \
+        $$quote($$BASEDIR/src/ViewMode.h) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.h) \
         $$quote($$BASEDIR/src/srchilite/colormap.h) \

@@ -210,6 +210,15 @@ QString BufferState::plainText() const
     return text;
 }
 
+int BufferState::plainTextSize() const
+{
+    int total = 0;
+    for (int i = 0; i < size(); i++) {
+        total += at(i).line.size();
+    }
+    return total;
+}
+
 ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, const Range &range) const
 {
     return writeHighlightedHtml(output, range.from, range.to);

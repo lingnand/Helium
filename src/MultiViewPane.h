@@ -40,12 +40,10 @@ public:
     int activeIndex(int offset=0) const; // the view with the given offset from the active one
     int indexOf(View *) const; // give the index of the given view
     int count() const; // number of views
-    void add(View *, bool toast=false);
-    void insert(int index, View *view, bool toast=false);
     void cloneActive(bool toast=true); // clone the current
-    void remove(View *);
+    void remove(View *, bool toast=true);
     Q_SLOT void addNewView(bool toast=true);
-    Q_SLOT Buffer *newBuffer();
+    Buffer *newBuffer();
     Buffer *bufferForFilepath(const QString &filepath);
     void removeBuffer(Buffer *buffer);
     Q_SLOT void onTranslatorChanged();
@@ -54,7 +52,8 @@ Q_SIGNALS:
 private:
     // the list of buffers driving the views
     QList<Buffer *> _buffers;
-    void connectView(View *);
+    void insert(int index, View *view);
+    void add(View *view);
 };
 
 #endif /* MULTIVIEWPANE_H_ */

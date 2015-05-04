@@ -31,16 +31,23 @@ struct Range {
         return from <= other.from && to >= other.to;
     }
     Range &grow(int diff) {
-        from -= diff;
-        to += diff;
+        if (diff >= from)
+            from = 0;
+        else
+            from -= diff;
+        if (INT_MAX - to <= diff) {
+            to = INT_MAX;
+        } else {
+            to += diff;
+        }
         return *this;
     }
     Range &clamp(int fromLimit, int toLimit) {
-        from = qMax(from, fromLimit);
-        to = qMin(to, toLimit);
+        from = qMin(qMax(from, fromLimit), to);
+        to = qMax(qMin(to, toLimit), from);
         return *this;
     }
-    Range(int _from=-1): from(_from), to(_from) {}
+    Range(int _from=0): from(_from), to(_from) {}
     Range(int _from, int _to): from(_from), to(_to) {}
 };
 
@@ -85,6 +92,10 @@ struct BufferLineState {
     HighlightStateData::ptr endHighlightState;
     BufferLineState(BufferLine _line = BufferLine(), HighlightStateData::ptr _endHighlightState = HighlightStateData::ptr()):
         line(_line), endHighlightState(_endHighlightState) {}
+    // return the size diff between html and plaintext
+    int diff() const {
+        return highlightText.size() - line.size();
+    }
 };
 
 // a buffer state is a snapshot of the current buffer content
@@ -103,12 +114,14 @@ public:
     struct Position {
         int lineIndex;
         int linePosition;
-        Position(): lineIndex(-1), linePosition(-1) {}
+        Position(): lineIndex(0), linePosition(0) {}
     };
     // return the index of the line where the cursor is currently in
     // NOTE: the cursorPosition is assumed to be based on plainText
     Position focus(int cursorPosition) const;
     QString plainText() const;
+    // TODO: int should be enough, shouldn't it?
+    int plainTextSize() const;
     // beginIndex should always be smaller than endIndex
     // return: the parser position at the beginning of the highlight section
     ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;

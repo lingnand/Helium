@@ -91,48 +91,47 @@ int MultiViewPane::count() const
 
 void MultiViewPane::addNewView(bool toast)
 {
-    // defaults to open a new buffer
-    add(new View(newBuffer()), toast);
+    int i = count();
+    View *v = new View(newBuffer());
+    insert(i, v);
+    setActiveView(i, toast);
 }
 
-void MultiViewPane::connectView(View *view)
+void MultiViewPane::insert(int index, View *view)
 {
     conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
-}
-
-void MultiViewPane::insert(int index, View *view, bool toast)
-{
-    connectView(view);
     bb::cascades::TabbedPane::insert(index+1, view);
-    setActiveView(index, toast);
 }
 
-void MultiViewPane::add(View *view, bool toast)
+void MultiViewPane::add(View *view)
 {
-    connectView(view);
-    bb::cascades::TabbedPane::add(view);
-    setActiveView(count()-1, toast);
+    insert(count(), view);
 }
 
 void MultiViewPane::cloneActive(bool toast)
 {
-    insert(activeIndex()+1, new View(activeView()->buffer()), toast);
+    int i = activeIndex()+1;
+    insert(i, new View(activeView()->buffer()));
+    setActiveView(i, toast);
 }
 
-void MultiViewPane::remove(View *view)
+void MultiViewPane::remove(View *view, bool toast)
 {
+    View *activateLater = NULL;
     if (view == activeView()) {
         if (count() == 1) {
             // better to create a new view
-            addNewView();
+            insert(1, activateLater = new View(newBuffer()));
         } else {
             // activate the view before it
-            setActiveView(activeIndex(-1));
+            activateLater = at(activeIndex(-1));
         }
     }
     view->setBuffer(NULL);
     bb::cascades::TabbedPane::remove(view);
     view->deleteLater();
+    if (activateLater)
+        setActiveView(activateLater, toast);
 }
 
 void MultiViewPane::setPrevViewActive(bool toast)
