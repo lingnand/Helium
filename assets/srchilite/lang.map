@@ -1,4 +1,4 @@
-java = java.lang 
+java = java
 moc = cpp
 cpp = cpp
 c = c
@@ -47,7 +47,7 @@ sig = sml
 syslog = log
 log = log
 pas = pascal
-pascal = pascal.lang 	
+pascal = pascal
 f = fortran
 fortran = fortran
 free-fortran = fortran

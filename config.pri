@@ -85,6 +85,83 @@ simulator {
 
 config_pri_assets {
     OTHER_FILES += \
+        $$quote($$BASEDIR/assets/images/filetype/_blank.png) \
+        $$quote($$BASEDIR/assets/images/filetype/ada.png) \
+        $$quote($$BASEDIR/assets/images/filetype/applescript.png) \
+        $$quote($$BASEDIR/assets/images/filetype/asm.png) \
+        $$quote($$BASEDIR/assets/images/filetype/awk.png) \
+        $$quote($$BASEDIR/assets/images/filetype/bat.png) \
+        $$quote($$BASEDIR/assets/images/filetype/bib.png) \
+        $$quote($$BASEDIR/assets/images/filetype/bison.png) \
+        $$quote($$BASEDIR/assets/images/filetype/c.png) \
+        $$quote($$BASEDIR/assets/images/filetype/caml.png) \
+        $$quote($$BASEDIR/assets/images/filetype/changelog.png) \
+        $$quote($$BASEDIR/assets/images/filetype/clipper.png) \
+        $$quote($$BASEDIR/assets/images/filetype/cobol.png) \
+        $$quote($$BASEDIR/assets/images/filetype/coffeescript.png) \
+        $$quote($$BASEDIR/assets/images/filetype/conf.png) \
+        $$quote($$BASEDIR/assets/images/filetype/cpp.png) \
+        $$quote($$BASEDIR/assets/images/filetype/csharp.png) \
+        $$quote($$BASEDIR/assets/images/filetype/css.png) \
+        $$quote($$BASEDIR/assets/images/filetype/d.png) \
+        $$quote($$BASEDIR/assets/images/filetype/desktop.png) \
+        $$quote($$BASEDIR/assets/images/filetype/diff.png) \
+        $$quote($$BASEDIR/assets/images/filetype/erlang.png) \
+        $$quote($$BASEDIR/assets/images/filetype/errors.png) \
+        $$quote($$BASEDIR/assets/images/filetype/fixed-fortran.png) \
+        $$quote($$BASEDIR/assets/images/filetype/flex.png) \
+        $$quote($$BASEDIR/assets/images/filetype/fortran.png) \
+        $$quote($$BASEDIR/assets/images/filetype/glsl.png) \
+        $$quote($$BASEDIR/assets/images/filetype/haskell.png) \
+        $$quote($$BASEDIR/assets/images/filetype/haskell_literate.png) \
+        $$quote($$BASEDIR/assets/images/filetype/haxe.png) \
+        $$quote($$BASEDIR/assets/images/filetype/html.png) \
+        $$quote($$BASEDIR/assets/images/filetype/islisp.png) \
+        $$quote($$BASEDIR/assets/images/filetype/java.png) \
+        $$quote($$BASEDIR/assets/images/filetype/javalog.png) \
+        $$quote($$BASEDIR/assets/images/filetype/javascript.png) \
+        $$quote($$BASEDIR/assets/images/filetype/langdef.png) \
+        $$quote($$BASEDIR/assets/images/filetype/latex.png) \
+        $$quote($$BASEDIR/assets/images/filetype/ldap.png) \
+        $$quote($$BASEDIR/assets/images/filetype/lilypond.png) \
+        $$quote($$BASEDIR/assets/images/filetype/lisp.png) \
+        $$quote($$BASEDIR/assets/images/filetype/log.png) \
+        $$quote($$BASEDIR/assets/images/filetype/logtalk.png) \
+        $$quote($$BASEDIR/assets/images/filetype/lsm.png) \
+        $$quote($$BASEDIR/assets/images/filetype/lua.png) \
+        $$quote($$BASEDIR/assets/images/filetype/m4.png) \
+        $$quote($$BASEDIR/assets/images/filetype/makefile.png) \
+        $$quote($$BASEDIR/assets/images/filetype/manifest.png) \
+        $$quote($$BASEDIR/assets/images/filetype/opa.png) \
+        $$quote($$BASEDIR/assets/images/filetype/outlang.png) \
+        $$quote($$BASEDIR/assets/images/filetype/oz.png) \
+        $$quote($$BASEDIR/assets/images/filetype/pascal.png) \
+        $$quote($$BASEDIR/assets/images/filetype/pc.png) \
+        $$quote($$BASEDIR/assets/images/filetype/perl.png) \
+        $$quote($$BASEDIR/assets/images/filetype/php.png) \
+        $$quote($$BASEDIR/assets/images/filetype/po.png) \
+        $$quote($$BASEDIR/assets/images/filetype/postscript.png) \
+        $$quote($$BASEDIR/assets/images/filetype/prolog.png) \
+        $$quote($$BASEDIR/assets/images/filetype/properties.png) \
+        $$quote($$BASEDIR/assets/images/filetype/proto.png) \
+        $$quote($$BASEDIR/assets/images/filetype/python.png) \
+        $$quote($$BASEDIR/assets/images/filetype/ruby.png) \
+        $$quote($$BASEDIR/assets/images/filetype/scala.png) \
+        $$quote($$BASEDIR/assets/images/filetype/scheme.png) \
+        $$quote($$BASEDIR/assets/images/filetype/sh.png) \
+        $$quote($$BASEDIR/assets/images/filetype/slang.png) \
+        $$quote($$BASEDIR/assets/images/filetype/sml.png) \
+        $$quote($$BASEDIR/assets/images/filetype/spec.png) \
+        $$quote($$BASEDIR/assets/images/filetype/sql.png) \
+        $$quote($$BASEDIR/assets/images/filetype/style.png) \
+        $$quote($$BASEDIR/assets/images/filetype/tcl.png) \
+        $$quote($$BASEDIR/assets/images/filetype/texinfo.png) \
+        $$quote($$BASEDIR/assets/images/filetype/tml.png) \
+        $$quote($$BASEDIR/assets/images/filetype/upc.png) \
+        $$quote($$BASEDIR/assets/images/filetype/vala.png) \
+        $$quote($$BASEDIR/assets/images/filetype/vbscript.png) \
+        $$quote($$BASEDIR/assets/images/filetype/xml.png) \
+        $$quote($$BASEDIR/assets/images/filetype/xorg.png) \
         $$quote($$BASEDIR/assets/images/ic_add.png) \
         $$quote($$BASEDIR/assets/images/ic_backward.png) \
         $$quote($$BASEDIR/assets/images/ic_cancel.png) \
@@ -433,6 +510,9 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../assets/images/*.qml) \
         $$quote($$BASEDIR/../assets/images/*.js) \
         $$quote($$BASEDIR/../assets/images/*.qs) \
+        $$quote($$BASEDIR/../assets/images/filetype/*.qml) \
+        $$quote($$BASEDIR/../assets/images/filetype/*.js) \
+        $$quote($$BASEDIR/../assets/images/filetype/*.qs) \
         $$quote($$BASEDIR/../assets/srchilite/*.qml) \
         $$quote($$BASEDIR/../assets/srchilite/*.js) \
         $$quote($$BASEDIR/../assets/srchilite/*.qs)

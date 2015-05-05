@@ -387,11 +387,9 @@ void View::onTextAreaCursorPositionChanged()
 void View::onBufferFiletypeChanged(const QString &filetype, bool toast)
 {
     if (filetype.isEmpty()) {
-        // use a default image
-        // TODO: fill in the images
-//        setImageSource(QUrl("asset:///images/txt.png"));
+        setImageSource(QUrl("asset:///images/filetype/_blank.png"));
     } else {
-//        setImageSource(QUrl("asset:///images/"+filetype+".png"));
+        setImageSource(QUrl("asset:///images/filetype/"+filetype+".png"));
         if (toast)
             Utility::toast(tr("Filetype set to %1").arg(filetype));
     }
