@@ -123,8 +123,14 @@ void MultiViewPane::remove(View *view, bool toast)
             // better to create a new view
             insert(1, activateLater = new View(newBuffer()));
         } else {
-            // activate the view before it
-            activateLater = at(activeIndex(-1));
+            // activate the view before it (or after it if it's the first one)
+            int ai = activeIndex();
+            if (ai == 0) {
+                ai = 1;
+            } else {
+                ai--;
+            }
+            activateLater = at(ai);
         }
     }
     view->setBuffer(NULL);
