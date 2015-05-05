@@ -180,6 +180,15 @@ void BufferState::setCursorPosition(int cursorPosition)
     _cursorPosition = cursorPosition;
 }
 
+int BufferState::cursorPositionAtLine(int line) const
+{
+    int cpos = 0;
+    for (int i = 0; i < line; i++) {
+        cpos += at(i).line.size() + 1;
+    }
+    return cpos;
+}
+
 BufferState::Position BufferState::focus(int cursorPosition) const
 {
     Position pos;
@@ -212,9 +221,11 @@ QString BufferState::plainText() const
 
 int BufferState::plainTextSize() const
 {
-    int total = 0;
-    for (int i = 0; i < size(); i++) {
-        total += at(i).line.size();
+    if (empty())
+        return 0;
+    int total = at(0).line.size();
+    for (int i = 1; i < size(); i++) {
+        total += 1 + at(i).line.size();
     }
     return total;
 }

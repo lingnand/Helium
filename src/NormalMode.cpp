@@ -116,7 +116,7 @@ void NormalMode::onEnter(bool hasPreviousMode)
     conn(view(), SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
     _redoAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("r"))
+        .addShortcut(Shortcut::create().key("y"))
         .onTriggered(view(), SIGNAL(redo()));
     conn(view(), SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
     _findAction = ActionItem::create()
@@ -125,7 +125,7 @@ void NormalMode::onEnter(bool hasPreviousMode)
         .onTriggered(view(), SLOT(setFindMode()));
     _cloneAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_copy_link.png"))
-        .addShortcut(Shortcut::create().key("y"))
+        .addShortcut(Shortcut::create().key("g"))
         .onTriggered(view(), SLOT(clone()));
     _closeAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_clear.png"))

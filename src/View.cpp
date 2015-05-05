@@ -25,12 +25,14 @@
 
 using namespace bb::cascades;
 
+#define SCROLL_RANGE 30
+
 #define HIGHLIGHT_RANGE_LIMIT 20
 // totalResource = plainTextSize + c * diffLimit
 // we are now assumign c to be 5
 // we have (for playlist.c): plainTextSize = 42000, diffLimit = 15000
 // so totalResource = 42000 + 5 * 15000 = 117000
-#define DIFF_LIMIT(plainTextSize) ((117000 - plainTextSize) / 5)
+#define DIFF_LIMIT(plainTextSize) ((118000 - plainTextSize) / 5)
 
 // keys
 #define KEYFLAG_NONE 0
@@ -86,7 +88,23 @@ View::View(Buffer *buffer):
             .add(_progressIndicator))
         .actionBarVisibility(ChromeVisibility::Visible)
         .addShortcut(Shortcut::create().key("Enter")
-            .onTriggered(this, SLOT(autoFocus()))));
+            .onTriggered(this, SLOT(autoFocus())))
+        // attach the touch keyboard handler to the page so
+        // that we can enable touch-less scrolling
+        .addShortcut(Shortcut::create().key("j")
+            .onTriggered(this, SLOT(oneLineDown())))
+        .addShortcut(Shortcut::create().key("k")
+            .onTriggered(this, SLOT(oneLineUp())))
+        .addShortcut(Shortcut::create().key("t")
+            .onTriggered(this, SLOT(scrollToTop())))
+        .addShortcut(Shortcut::create().key("b")
+            .onTriggered(this, SLOT(scrollToBottom())))
+        .addShortcut(Shortcut::create().key("Space")
+            .onTriggered(this, SLOT(scrollDown())))
+        .addShortcut(Shortcut::create().key("u") // for passport users
+            .onTriggered(this, SLOT(scrollUp())))
+        .addShortcut(Shortcut::create().key("Shift+Space")
+            .onTriggered(this, SLOT(scrollUp()))));
 
     setBuffer(buffer);
 
@@ -238,6 +256,10 @@ void View::handleTextControlBasicModifiedKeys(bb::cascades::TextEditor *editor, 
             editor->insertPlainText(paste);
             break;
         }
+        case KEYCODE_SPACE:
+            // TODO: this is kinda of a hack
+            ((bb::cascades::AbstractTextControl *) editor->parent())->loseFocus();
+            break;
     }
 }
 
@@ -249,41 +271,39 @@ void View::onTextAreaModKeyPressed(bb::cascades::KeyEvent *event)
 void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener)
 {
     switch (event->keycap()) {
-        case KEYCODE_T:
+        case KEYCODE_T: // Tab
             _textArea->editor()->insertPlainText("\t");
             break;
-        case KEYCODE_Z:
+        case KEYCODE_Z: // Z on most platforms
             _buffer->undo();
             break;
-        // TODO: subject to change in keycode
-        case KEYCODE_G:
-            _mode->autoFocus(true);
-            break;
-        case KEYCODE_R:
+        case KEYCODE_Y: // Redo
             _buffer->redo();
             break;
-        case KEYCODE_F:
+        case KEYCODE_H: // Head
+            _mode->autoFocus(true);
+            break;
+        case KEYCODE_F: // Find
             setFindMode();
             break;
-        case KEYCODE_S:
+        case KEYCODE_S: // Save
             if (save() == OpenedFilePicker)
                 listener->modOff();
             break;
-        case KEYCODE_E:
+        case KEYCODE_E: // Edit
             open(); // this always opens some sort of UI
             listener->modOff();
             break;
-        case KEYCODE_D:
+        case KEYCODE_D: // Delete
             killCurrentLine();
             break;
-        case KEYCODE_X:
+        case KEYCODE_X: // Kill
             close();
             break;
-        // TODO: subject to change in keycode
-        case KEYCODE_Y:
+        case KEYCODE_G: // Germinate
             clone();
             break;
-        case KEYCODE_C:
+        case KEYCODE_C: // Create
             parent()->addNewView();
             break;
         case KEYCODE_Q:
@@ -297,7 +317,59 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyLis
     }
 }
 
-void View::killCurrentLine() {
+void View::scrollTo(int cursorPosition)
+{
+    SignalBlocker blocker(_textArea);
+    _textArea->editor()->setCursorPosition(cursorPosition);
+    updateTextAreaPartialHighlight();
+    _textArea->requestFocus();
+    _textArea->loseFocus();
+}
+
+void View::scrollByLine(int offset)
+{
+    if (_buffer->state().empty() || _buffer->state().size() == 1)
+        return;
+    BufferState::Position focus = _buffer->state().focus(_textArea->editor()->cursorPosition());
+    int to = qMin(qMax(focus.lineIndex+offset, 0), _buffer->state().size()-1);
+    scrollTo(_buffer->state().cursorPositionAtLine(to) +
+            qMin(focus.linePosition, _buffer->state()[to].line.size()));
+}
+
+void View::oneLineUp()
+{
+    scrollByLine(-1);
+}
+
+void View::oneLineDown()
+{
+    scrollByLine(1);
+}
+
+void View::scrollUp()
+{
+    scrollByLine(-SCROLL_RANGE);
+}
+
+void View::scrollDown()
+{
+    scrollByLine(SCROLL_RANGE);
+}
+
+void View::scrollToTop()
+{
+    if (!_buffer->state().empty())
+        scrollTo(0);
+}
+
+void View::scrollToBottom()
+{
+    if (!_buffer->state().empty())
+        scrollTo(_buffer->state().plainTextSize());
+}
+
+void View::killCurrentLine()
+{
     _buffer->killLine(this, _textArea->editor()->cursorPosition());
 }
 

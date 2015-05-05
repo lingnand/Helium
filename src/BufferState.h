@@ -116,6 +116,8 @@ public:
         int linePosition;
         Position(): lineIndex(0), linePosition(0) {}
     };
+    // return the cursorPosition at the beginning of the specified line
+    int cursorPositionAtLine(int line) const;
     // return the index of the line where the cursor is currently in
     // NOTE: the cursorPosition is assumed to be based on plainText
     Position focus(int cursorPosition) const;

@@ -57,6 +57,7 @@ public:
     Q_SLOT SaveStatus saveAs();
     Q_SLOT void open();
     Q_SLOT void handleTextControlBasicModifiedKeys(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
+    Q_SLOT void updateTextAreaPartialHighlight();
     Q_SLOT void onOutOfView();
     Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
@@ -87,6 +88,16 @@ private:
     void pickFileToOpen();
     Q_SLOT void onFileSelected(const QStringList &files);
 
+    /** navigation **/
+    void scrollTo(int cursorPosition);
+    void scrollByLine(int offset);
+    Q_SLOT void oneLineUp();
+    Q_SLOT void oneLineDown();
+    Q_SLOT void scrollToTop();
+    Q_SLOT void scrollToBottom();
+    Q_SLOT void scrollUp();
+    Q_SLOT void scrollDown();
+
     /** view management **/
     Q_SLOT void clone();
     Q_SLOT void close();
@@ -98,7 +109,6 @@ private:
     ParserPosition _highlightStart;
     QTimer _partialHighlightUpdateTimer;
     Range partialHighlightRange(const BufferState &st, Range focus);
-    Q_SLOT void updateTextAreaPartialHighlight();
 
     /** text operation **/
     Q_SLOT void killCurrentLine();

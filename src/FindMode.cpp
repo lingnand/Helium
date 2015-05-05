@@ -24,6 +24,7 @@
 #include <View.h>
 #include <Buffer.h>
 #include <ModKeyListener.h>
+#include <SignalBlocker.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -116,7 +117,7 @@ void FindMode::onEnter(bool hasPreviousMode)
     conn(view(), SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
     _redoAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("r"))
+        .addShortcut(Shortcut::create().key("y"))
         .onTriggered(view(), SIGNAL(redo()));
     conn(view(), SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
     _findCancelAction = ActionItem::create()
@@ -204,9 +205,11 @@ void FindMode::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, 
 
 void FindMode::select(const TextSelection &selection)
 {
+    SignalBlocker blocker(view()->textArea());
     // use lose focus and then refocus to force scrolling to the right position
     view()->textArea()->loseFocus();
     view()->textArea()->editor()->setSelection(selection.start, selection.end);
+    view()->updateTextAreaPartialHighlight();
     view()->textArea()->requestFocus();
 }
 
