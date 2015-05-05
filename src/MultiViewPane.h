@@ -46,10 +46,12 @@ public:
     Buffer *newBuffer();
     Buffer *bufferForFilepath(const QString &filepath);
     void removeBuffer(Buffer *buffer);
+    Q_SLOT void onActiveTabChanged(bb::cascades::Tab *);
     Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
 private:
+    View *_lastActive;
     // the list of buffers driving the views
     QList<Buffer *> _buffers;
     void insert(int index, View *view);

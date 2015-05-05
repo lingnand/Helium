@@ -24,21 +24,26 @@
 #include <Buffer.h>
 #include <Utility.h>
 
-MultiViewPane::MultiViewPane(QObject *parent): bb::cascades::TabbedPane(parent)
+using namespace bb::cascades;
+
+MultiViewPane::MultiViewPane(QObject *parent): TabbedPane(parent), _lastActive(NULL)
 {
     setShowTabsOnActionBar(false);
-    addShortcut(bb::cascades::Shortcut::create().key("q")
+    addShortcut(Shortcut::create().key("q")
             .onTriggered(this, SLOT(setPrevViewActive())));
-    addShortcut(bb::cascades::Shortcut::create().key("w")
+    addShortcut(Shortcut::create().key("w")
             .onTriggered(this, SLOT(setNextViewActive())));
 
     // TODO: handle auto focus properly: focus on the textarea when the tab is switched to
     // However, think about the case when you press enter+<switching between tabs> and you want to do it again on the next switched to tab
-    bb::cascades::TabbedPane::add(bb::cascades::Tab::create()
+    TabbedPane::add(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add.png"))
-        .addShortcut(bb::cascades::Shortcut::create().key("c")
+        .addShortcut(Shortcut::create().key("c")
                 .onTriggered(this, SLOT(addNewView())))
         .onTriggered(this, SLOT(addNewView())));
+
+    conn(this, SIGNAL(activeTabChanged(bb::cascades::Tab*)),
+            this, SLOT(onActiveTabChanged(bb::cascades::Tab*)));
 
     // load text
     onTranslatorChanged();
@@ -46,7 +51,7 @@ MultiViewPane::MultiViewPane(QObject *parent): bb::cascades::TabbedPane(parent)
 
 View *MultiViewPane::activeView() const
 {
-    bb::cascades::Tab *tab = activeTab();
+    Tab *tab = activeTab();
     if (tab == newViewControl())
         return NULL;
     return (View *) tab;
@@ -62,31 +67,29 @@ void MultiViewPane::setActiveView(int index, bool toast)
     View *active = activeView(), *view = at(index);
     if (active != view) {
         setActiveTab(view);
-        if (active)
-            active->onOutOfView();
         if (toast)
             Utility::toast(QString("%1. %2").arg(index).arg(view->title()));
     }
 }
 
-bb::cascades::Tab *MultiViewPane::newViewControl() const
+Tab *MultiViewPane::newViewControl() const
 {
-    return bb::cascades::TabbedPane::at(0);
+    return TabbedPane::at(0);
 }
 
 View *MultiViewPane::at(int i) const
 {
-    return (View *) bb::cascades::TabbedPane::at(i+1);
+    return (View *) TabbedPane::at(i+1);
 }
 
 int MultiViewPane::indexOf(View *view) const
 {
-    return bb::cascades::TabbedPane::indexOf(view) - 1;
+    return TabbedPane::indexOf(view) - 1;
 }
 
 int MultiViewPane::count() const
 {
-    return bb::cascades::TabbedPane::count() - 1;
+    return TabbedPane::count() - 1;
 }
 
 void MultiViewPane::addNewView(bool toast)
@@ -100,7 +103,7 @@ void MultiViewPane::addNewView(bool toast)
 void MultiViewPane::insert(int index, View *view)
 {
     conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
-    bb::cascades::TabbedPane::insert(index+1, view);
+    TabbedPane::insert(index+1, view);
 }
 
 void MultiViewPane::add(View *view)
@@ -134,7 +137,7 @@ void MultiViewPane::remove(View *view, bool toast)
         }
     }
     view->setBuffer(NULL);
-    bb::cascades::TabbedPane::remove(view);
+    TabbedPane::remove(view);
     view->deleteLater();
     if (activateLater)
         setActiveView(activateLater, toast);
@@ -180,6 +183,16 @@ void MultiViewPane::removeBuffer(Buffer *buffer)
 {
     if (_buffers.removeOne(buffer)) {
         buffer->deleteLater();
+    }
+}
+
+void MultiViewPane::onActiveTabChanged(Tab *tab)
+{
+    if (tab != newViewControl() && tab != _lastActive) {
+        if (_lastActive) {
+            _lastActive->onOutOfView();
+        }
+        _lastActive = (View *) tab;
     }
 }
 
