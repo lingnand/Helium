@@ -87,7 +87,7 @@ void FindMode::autoFocus(bool)
     _findField->requestFocus();
 }
 
-void FindMode::onEnter(bool hasPreviousMode)
+void FindMode::onEnter()
 {
     view()->content()->removeAllActions();
     _goToFindFieldAction = ActionItem::create()
@@ -122,13 +122,12 @@ void FindMode::onEnter(bool hasPreviousMode)
     conn(view(), SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
     _findCancelAction = ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
-        .addShortcut(Shortcut::create().key("q"))
+        .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view(), SLOT(setNormalMode()));
     reloadActionTitles();
 
     setLocked(view()->buffer()->locked());
     conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
-    conn(view(), SIGNAL(outOfView()), view(), SLOT(setNormalMode()));
 
     view()->content()->addAction(_goToFindFieldAction);
     view()->content()->addAction(_findPrevAction);
@@ -143,15 +142,12 @@ void FindMode::onEnter(bool hasPreviousMode)
     view()->textArea()->setEditable(false);
     view()->textAreaModKeyListener()->setEnabled(false);
 
-    // focus
-    if (hasPreviousMode)
-        _findField->requestFocus();
+    _findField->requestFocus();
 }
 
 void FindMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
-    disconn(view(), SIGNAL(outOfView()), view(), SLOT(setNormalMode()));
     _goToFindFieldAction = NULL;
 
     _findBuffer.clear();
@@ -195,7 +191,7 @@ void FindMode::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, 
         case KEYCODE_A:
             replaceAll();
             break;
-        case KEYCODE_Q:
+        case KEYCODE_X:
             view()->setNormalMode();
             break;
         default:

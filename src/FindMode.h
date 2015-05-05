@@ -33,7 +33,7 @@ public:
     FindMode(View *);
     void autoFocus(bool goToModeControl);
     Q_SLOT void setLocked(bool);
-    void onEnter(bool hasPreviousMode);
+    void onEnter();
     void onExit();
 private:
     bb::cascades::TitleBar *_findTitleBar;

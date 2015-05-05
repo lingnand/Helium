@@ -17,7 +17,7 @@ public:
     ViewMode(View *);
     View *view() const;
     virtual void autoFocus(bool goToModeControl=false) = 0;
-    virtual void onEnter(bool hasPreviousMode) = 0;
+    virtual void onEnter() = 0;
     virtual void onExit() = 0;
 };
 

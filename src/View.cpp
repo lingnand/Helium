@@ -86,7 +86,8 @@ View::View(Buffer *buffer):
         .content(Container::create()
             .add(_textArea)
             .add(_progressIndicator))
-        .actionBarVisibility(ChromeVisibility::Visible)
+//        .actionBarVisibility(ChromeVisibility::Visible)
+        .actionBarVisibility(ChromeVisibility::Hidden)
         .addShortcut(Shortcut::create().key("Enter")
             .onTriggered(this, SLOT(autoFocus())))
         // attach the touch keyboard handler to the page so
@@ -118,10 +119,10 @@ void View::setMode(ViewMode *mode)
         if (_mode) {
             _mode->onExit();
         }
-        if (mode) {
-            mode->onEnter(_mode);
-        }
         _mode = mode;
+        if (_mode) {
+            _mode->onEnter();
+        }
     }
 }
 
@@ -152,7 +153,7 @@ Buffer *View::buffer() const
 
 void View::onOutOfView()
 {
-    emit outOfView();
+    _textArea->loseFocus();
 }
 
 void View::autoFocus()

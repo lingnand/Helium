@@ -29,11 +29,13 @@ public:
     NormalMode(View *);
     void autoFocus(bool goToModeControl);
     Q_SLOT void setLocked(bool);
-    void onEnter(bool hasPreviousMode);
+    void onEnter();
     void onExit();
     bb::cascades::TitleBar *titleBar() const;
     bb::cascades::TextField *titleField() const;
-protected:
+private:
+    bool _lastFocused;
+
     bb::cascades::TitleBar *_titleBar;
     bb::cascades::TextField *_titleField;
 

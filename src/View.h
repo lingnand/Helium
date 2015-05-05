@@ -61,7 +61,6 @@ public:
     Q_SLOT void onOutOfView();
     Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
-    void outOfView();
     void undo();
     void redo();
     void hasUndosChanged(bool);

@@ -23,7 +23,7 @@
 
 using namespace bb::cascades;
 
-NormalMode::NormalMode(View *view): ViewMode(view), _saveAction(NULL)
+NormalMode::NormalMode(View *view): ViewMode(view), _saveAction(NULL), _lastFocused(false)
 {
     TextFieldTitleBarKindProperties *titleBarProperties = new TextFieldTitleBarKindProperties;
     _titleField = titleBarProperties->textField();
@@ -95,7 +95,7 @@ void NormalMode::autoFocus(bool goToModeControl)
         view()->textArea()->requestFocus();
 }
 
-void NormalMode::onEnter(bool hasPreviousMode)
+void NormalMode::onEnter()
 {
     view()->content()->removeAllActions();
     _saveAction = ActionItem::create()
@@ -135,7 +135,6 @@ void NormalMode::onEnter(bool hasPreviousMode)
 
     setLocked(view()->buffer()->locked());
     conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
-    conn(view(), SIGNAL(outOfView()), view()->textArea(), SLOT(loseFocus()));
 
     view()->content()->addAction(_saveAction, ActionBarPlacement::Signature);
     view()->content()->addAction(_undoAction, ActionBarPlacement::OnBar);
@@ -150,7 +149,7 @@ void NormalMode::onEnter(bool hasPreviousMode)
     view()->textArea()->setEditable(true);
     view()->textAreaModKeyListener()->setEnabled(true);
 
-    if (hasPreviousMode) {
+    if (_lastFocused) {
         view()->textArea()->loseFocus();
         view()->textArea()->requestFocus();
     }
@@ -159,8 +158,8 @@ void NormalMode::onEnter(bool hasPreviousMode)
 void NormalMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
-    disconn(view(), SIGNAL(outOfView()), view()->textArea(), SLOT(loseFocus()));
     _saveAction = NULL;
+    _lastFocused = view()->textArea()->isFocused();
 }
 
 void NormalMode::onBufferDirtyChanged(bool dirty)
