@@ -11,10 +11,6 @@
 <context>
     <name>FindMode</name>
     <message>
-        <source>Case sensitive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Find text</source>
         <translation type="unfinished"></translation>
     </message>
@@ -102,6 +98,18 @@
         <source>Replace with</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Regex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ignore case</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exact match</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiViewPane</name>
@@ -146,25 +154,6 @@
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ReadMode</name>
-    <message>
-        <source>Edit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Clone</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

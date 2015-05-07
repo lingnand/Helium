@@ -11,7 +11,6 @@
 #include <bb/cascades/StackLayoutProperties>
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/FreeFormTitleBarKindProperties>
-#include <bb/cascades/TitleBarExpandableArea>
 #include <bb/cascades/Button>
 #include <bb/cascades/Container>
 #include <bb/cascades/ActionItem>
@@ -20,8 +19,10 @@
 #include <bb/cascades/UIPalette>
 #include <bb/cascades/Page>
 #include <bb/cascades/KeyEvent>
+#include <bb/cascades/Tab>
 #include <FindMode.h>
 #include <View.h>
+#include <MultiViewPane.h>
 #include <Buffer.h>
 #include <ModKeyListener.h>
 #include <SignalBlocker.h>
@@ -37,12 +38,45 @@ FindMode::FindMode(View *view):
     _replaceField(TextField::create().vertical(VerticalAlignment::Center)
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create().spaceQuota(1))),
-    _findCaseSensitiveCheckBox(new CheckBox),
-    _findCancelButton(Button::create().vertical(VerticalAlignment::Center)
-        .preferredWidth(0)
-        .onClicked(view, SLOT(setNormalMode()))),
-    _findBufferDirty(true),
-    _goToFindFieldAction(NULL)
+    _goToFindFieldAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_search.png"))
+        .addShortcut(Shortcut::create().key("f"))
+        .onTriggered(_findField, SLOT(requestFocus()))),
+    _findPrevAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_backward.png"))
+        .addShortcut(Shortcut::create().key("p"))
+        .onTriggered(this, SLOT(findPrev()))),
+    _findNextAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_forward.png"))
+        .addShortcut(Shortcut::create().key("n"))
+        .onTriggered(this, SLOT(findNext()))),
+    _replaceNextAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_rename.png"))
+        .addShortcut(Shortcut::create().key("r"))
+        .onTriggered(this, SLOT(replaceNext()))),
+    _replaceAllAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_rename.png"))
+        .addShortcut(Shortcut::create().key("a"))
+        .onTriggered(this, SLOT(replaceAll()))),
+    _undoAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_undo.png"))
+        .addShortcut(Shortcut::create().key("z"))
+        .onTriggered(view, SIGNAL(undo()))),
+    _redoAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_redo.png"))
+        .addShortcut(Shortcut::create().key("y"))
+        .onTriggered(view, SIGNAL(redo()))),
+    _findCancelAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_cancel.png"))
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(view, SLOT(setNormalMode()))),
+    _regexOption(Tab::create()
+        .onTriggered(this, SLOT(onRegexSelected()))),
+    _ignoreCaseOption(Tab::create()
+        .onTriggered(this, SLOT(onIgnoreCaseSelected()))),
+    _exactMatchOption(Tab::create()
+        .onTriggered(this, SLOT(onExactMatchSelected()))),
+    _findBufferDirty(true)
 {
     // TODO: not only focus the replaceField, but also select the existing content of the replace field
     _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
@@ -55,28 +89,16 @@ FindMode::FindMode(View *view):
         .onModKeyPressed(this, SLOT(findNext()))
         .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_replaceField, SIGNAL(focusedChanged(bool))));
-    FreeFormTitleBarKindProperties *findTitleBarProperties = FreeFormTitleBarKindProperties::create()
-        .expandableIndicator(TitleBarExpandableAreaIndicatorVisibility::Hidden)
-        .content(Container::create()
-            .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
-            .left(20).right(20)
-            .add(Button::create().vertical(VerticalAlignment::Center)
-                .imageSource((QUrl("asset:///images/ic_view_details.png")))
-                .preferredWidth(0)
-                .onClicked(this, SLOT(onFindOptionButtonClicked())))
-            .add(_findField)
-            .add(_replaceField)
-            .add(_findCancelButton))
-        .expandableContent(Container::create()
-                .background(view->ui()->palette()->plain())
-                .bottom(5)
-                .add(Container::create()
-                    .background(Color::White)
-                    .top(20).bottom(20).left(30).right(30)
-                    .add(_findCaseSensitiveCheckBox)));
-    _findExpandableArea = findTitleBarProperties->expandableArea();
     _findTitleBar = TitleBar::create(TitleBarKind::FreeForm)
-        .kindProperties(findTitleBarProperties);
+        .kindProperties(FreeFormTitleBarKindProperties::create()
+            .content(Container::create()
+                .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
+                .left(20).right(20)
+                .add(_findField)
+                .add(_replaceField)));
+
+    conn(view, SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
+    conn(view, SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
 
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
@@ -89,55 +111,28 @@ void FindMode::autoFocus(bool)
 
 void FindMode::onEnter()
 {
-    view()->content()->removeAllActions();
-    _goToFindFieldAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_search.png"))
-        .addShortcut(Shortcut::create().key("f"))
-        .onTriggered(_findField, SLOT(requestFocus()));
-    _findPrevAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_backward.png"))
-        .addShortcut(Shortcut::create().key("p"))
-        .onTriggered(this, SLOT(findPrev()));
-    _findNextAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_forward.png"))
-        .addShortcut(Shortcut::create().key("n"))
-        .onTriggered(this, SLOT(findNext()));
-    _replaceNextAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_rename.png"))
-        .addShortcut(Shortcut::create().key("r"))
-        .onTriggered(this, SLOT(replaceNext()));
-    _replaceAllAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_rename.png"))
-        .addShortcut(Shortcut::create().key("a"))
-        .onTriggered(this, SLOT(replaceAll()));
-    _undoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_undo.png"))
-        .addShortcut(Shortcut::create().key("z"))
-        .onTriggered(view(), SIGNAL(undo()));
-    conn(view(), SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
-    _redoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("y"))
-        .onTriggered(view(), SIGNAL(redo()));
-    conn(view(), SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
-    _findCancelAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_cancel.png"))
-        .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(view(), SLOT(setNormalMode()));
-    reloadActionTitles();
+    view()->hideAllPageActions();
 
     setLocked(view()->buffer()->locked());
     conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
 
-    view()->content()->addAction(_goToFindFieldAction);
-    view()->content()->addAction(_findPrevAction);
-    view()->content()->addAction(_findNextAction, ActionBarPlacement::Signature);
-    view()->content()->addAction(_replaceNextAction, ActionBarPlacement::OnBar);
-    view()->content()->addAction(_replaceAllAction);
-    view()->content()->addAction(_undoAction);
-    view()->content()->addAction(_redoAction);
-    view()->content()->addAction(_findCancelAction, ActionBarPlacement::OnBar);
-    view()->content()->setTitleBar(_findTitleBar);
+    view()->page()->addAction(_goToFindFieldAction);
+    view()->page()->addAction(_findPrevAction);
+    view()->page()->addAction(_findNextAction, ActionBarPlacement::Signature);
+    view()->page()->addAction(_replaceNextAction, ActionBarPlacement::OnBar);
+    view()->page()->addAction(_replaceAllAction);
+    view()->page()->addAction(_undoAction);
+    view()->page()->addAction(_redoAction);
+    view()->page()->addAction(_findCancelAction, ActionBarPlacement::OnBar);
+    view()->page()->setTitleBar(_findTitleBar);
+
+    // replace the tabs
+    view()->parent()->hideViews();
+    view()->detachPage();
+    view()->parent()->setActivePane(view()->page());
+    view()->parent()->add(_regexOption);
+    view()->parent()->add(_ignoreCaseOption);
+    view()->parent()->add(_exactMatchOption);
 
     view()->textArea()->setEditable(false);
     view()->textAreaModKeyListener()->setEnabled(false);
@@ -148,16 +143,28 @@ void FindMode::onEnter()
 void FindMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
-    _goToFindFieldAction = NULL;
+
+    view()->reattachPage();
+    view()->parent()->restoreViews();
 
     _findBuffer.clear();
     _findQuery.clear();
     _findBufferDirty = true;
 }
 
-void FindMode::onFindOptionButtonClicked()
+void FindMode::onRegexSelected()
 {
-    _findExpandableArea->setExpanded(!_findExpandableArea->isExpanded());
+    qDebug() << "regex selected";
+}
+
+void FindMode::onIgnoreCaseSelected()
+{
+    qDebug() << "ignore case selected";
+}
+
+void FindMode::onExactMatchSelected()
+{
+    qDebug() << "exact match selected";
 }
 
 void FindMode::onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
@@ -205,7 +212,8 @@ void FindMode::select(const TextSelection &selection)
     // use lose focus and then refocus to force scrolling to the right position
     view()->textArea()->loseFocus();
     view()->textArea()->editor()->setSelection(selection.start, selection.end);
-    view()->updateTextAreaPartialHighlight();
+    if (!view()->buffer()->filetype().isEmpty())
+        view()->updateTextAreaPartialHighlight();
     view()->textArea()->requestFocus();
 }
 
@@ -540,30 +548,21 @@ void FindMode::setLocked(bool locked)
 {
     _findField->setEnabled(!locked);
     _replaceField->setEnabled(!locked);
-    if (_goToFindFieldAction) {
-        _goToFindFieldAction->setEnabled(!locked);
-        _findPrevAction->setEnabled(!locked);
-        _findNextAction->setEnabled(!locked);
-        _replaceNextAction->setEnabled(!locked);
-        _replaceAllAction->setEnabled(!locked);
-        _undoAction->setEnabled(!locked && view()->buffer()->hasUndo());
-        _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
-        _findCancelAction->setEnabled(!locked);
-    }
+    _goToFindFieldAction->setEnabled(!locked);
+    _findPrevAction->setEnabled(!locked);
+    _findNextAction->setEnabled(!locked);
+    _replaceNextAction->setEnabled(!locked);
+    _replaceAllAction->setEnabled(!locked);
+    _undoAction->setEnabled(!locked && view()->buffer()->hasUndo());
+    _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
+    _findCancelAction->setEnabled(!locked);
 }
 
 void FindMode::onTranslatorChanged()
 {
-    _findCaseSensitiveCheckBox->setText(tr("Case sensitive"));
     _findField->setHintText(tr("Find text"));
     _replaceField->setHintText(tr("Replace with"));
-    _findCancelButton->setText(tr("Cancel"));
-    if (_goToFindFieldAction)
-        reloadActionTitles();
-}
-
-void FindMode::reloadActionTitles()
-{
+    // actions
     _goToFindFieldAction->setTitle(tr("Go to find field"));
     _findPrevAction->setTitle(tr("Find previous"));
     _findNextAction->setTitle(tr("Find next"));
@@ -572,4 +571,8 @@ void FindMode::reloadActionTitles()
     _findCancelAction->setTitle(tr("Cancel"));
     _undoAction->setTitle(tr("Undo"));
     _redoAction->setTitle(tr("Redo"));
+    // options
+    _regexOption->setTitle(tr("Regex"));
+    _ignoreCaseOption->setTitle(tr("Ignore case"));
+    _exactMatchOption->setTitle(tr("Exact match"));
 }

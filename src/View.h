@@ -43,7 +43,10 @@ public:
 
     View(Buffer *buffer=NULL);
     virtual ~View() {}
-    bb::cascades::Page *content() const;
+    bb::cascades::Page *page() const;
+    void detachPage();
+    void reattachPage();
+    void hideAllPageActions();
     MultiViewPane *parent() const;
     Buffer *buffer() const;
     bb::cascades::TextArea *textArea() const;
@@ -77,6 +80,7 @@ private:
     FindMode *_findMode;
     void setMode(ViewMode *);
 
+    bb::cascades::Page *_page;
     bb::cascades::TextArea *_textArea;
     ModKeyListener *_textAreaModKeyListener;
     bb::cascades::ProgressIndicator *_progressIndicator;

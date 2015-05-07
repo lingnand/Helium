@@ -17,12 +17,13 @@ namespace bb {
     namespace cascades {
         class TextField;
         class TitleBar;
-        class TitleBarExpandableArea;
         class ActionItem;
         class KeyEvent;
         class Button;
         class CheckBox;
         class TextEditor;
+        class Page;
+        class Tab;
     }
 }
 
@@ -37,11 +38,8 @@ public:
     void onExit();
 private:
     bb::cascades::TitleBar *_findTitleBar;
-    bb::cascades::TitleBarExpandableArea *_findExpandableArea;
     bb::cascades::TextField *_findField;
     bb::cascades::TextField *_replaceField;
-    bb::cascades::CheckBox *_findCaseSensitiveCheckBox;
-    bb::cascades::Button *_findCancelButton;
 
     bb::cascades::ActionItem *_goToFindFieldAction;
     bb::cascades::ActionItem *_findPrevAction;
@@ -51,6 +49,10 @@ private:
     bb::cascades::ActionItem *_undoAction;
     bb::cascades::ActionItem *_redoAction;
     bb::cascades::ActionItem *_findCancelAction;
+
+    bb::cascades::Tab *_regexOption;
+    bb::cascades::Tab *_ignoreCaseOption;
+    bb::cascades::Tab *_exactMatchOption;
 
     // the find state to keep track of the current find
     enum FindQueryUpdateStatus { Changed, Unchanged, Invalid };
@@ -81,11 +83,13 @@ private:
     Q_SLOT void replaceNext();
     Q_SLOT void replaceAll();
 
+    Q_SLOT void onRegexSelected();
+    Q_SLOT void onIgnoreCaseSelected();
+    Q_SLOT void onExactMatchSelected();
     Q_SLOT void onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
-    Q_SLOT void onFindOptionButtonClicked();
 
     Q_SLOT void onTranslatorChanged();
     void reloadActionTitles();

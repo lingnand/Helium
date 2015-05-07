@@ -55,7 +55,6 @@ private:
     Q_SLOT void onBufferFilepathChanged(const QString &);
 
     Q_SLOT void onTranslatorChanged();
-    void reloadActionTitles();
 };
 
 #endif /* NORMALMODE_H_ */

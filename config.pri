@@ -306,7 +306,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/NormalMode.cpp) \
-        $$quote($$BASEDIR/src/ReadMode.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
@@ -392,7 +391,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
-        $$quote($$BASEDIR/src/ReadMode.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \

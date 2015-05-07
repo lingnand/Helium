@@ -81,13 +81,12 @@ View::View(Buffer *buffer):
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
             this, SLOT(updateTextAreaPartialHighlight()));
 
-    // the page
-    setContent(Page::create()
+    setContent(_page = Page::create()
         .content(Container::create()
             .add(_textArea)
             .add(_progressIndicator))
 //        .actionBarVisibility(ChromeVisibility::Visible)
-        .actionBarVisibility(ChromeVisibility::Hidden)
+//        .actionBarVisibility(ChromeVisibility::Hidden)
         .addShortcut(Shortcut::create().key("Enter")
             .onTriggered(this, SLOT(autoFocus())))
         // attach the touch keyboard handler to the page so
@@ -136,9 +135,26 @@ ModKeyListener *View::textAreaModKeyListener() const
     return _textAreaModKeyListener;
 }
 
-Page *View::content() const
+Page *View::page() const
 {
-    return (Page *) bb::cascades::Tab::content();
+    return _page;
+}
+
+void View::detachPage()
+{
+    _page->setParent(NULL);
+}
+
+void View::reattachPage()
+{
+    setContent(_page);
+}
+
+void View::hideAllPageActions()
+{
+    while (page()->actionCount() > 0) {
+        page()->removeAction(page()->actionAt(0));
+    }
 }
 
 MultiViewPane *View::parent() const
@@ -244,7 +260,8 @@ void View::setHighlightRangeLimit(int limit)
     if (limit != _highlightRangeLimit) {
         qDebug() << "setting highlightRangeLimit to" << _highlightRangeLimit;
         _highlightRangeLimit = limit;
-        updateTextAreaPartialHighlight();
+        if (!_buffer->filetype().isEmpty())
+            updateTextAreaPartialHighlight();
     }
 }
 
@@ -308,10 +325,10 @@ void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyLis
             parent()->addNewView();
             break;
         case KEYCODE_Q:
-            parent()->setPrevViewActive();
+            parent()->setPrevTabActive();
             break;
         case KEYCODE_W:
-            parent()->setNextViewActive();
+            parent()->setNextTabActive();
             break;
         default:
             handleTextControlBasicModifiedKeys(_textArea->editor(), event);
@@ -322,7 +339,8 @@ void View::scrollTo(int cursorPosition)
 {
     SignalBlocker blocker(_textArea);
     _textArea->editor()->setCursorPosition(cursorPosition);
-    updateTextAreaPartialHighlight();
+    if (!_buffer->filetype().isEmpty())
+        updateTextAreaPartialHighlight();
     _textArea->requestFocus();
     _textArea->loseFocus();
 }
@@ -615,13 +633,13 @@ void View::close()
                 tr("Do you want to continue?"),
                 this, SLOT(onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type)));
     } else {
-        parent()->remove(this);
+        parent()->removeView(this);
     }
 }
 
 void View::onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        parent()->remove(this);
+        parent()->removeView(this);
     }
 }

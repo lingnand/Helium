@@ -23,7 +23,40 @@
 
 using namespace bb::cascades;
 
-NormalMode::NormalMode(View *view): ViewMode(view), _saveAction(NULL), _lastFocused(false)
+NormalMode::NormalMode(View *view):
+    ViewMode(view),
+    _saveAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_save.png"))
+        .addShortcut(Shortcut::create().key("s"))
+        .onTriggered(view, SLOT(save()))),
+    _saveAsAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_save_as.png"))
+        .onTriggered(view, SLOT(saveAs()))),
+    _openAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_open.png"))
+        .addShortcut(Shortcut::create().key("e"))
+        .onTriggered(view, SLOT(open()))),
+    _undoAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_undo.png"))
+        .addShortcut(Shortcut::create().key("z"))
+        .onTriggered(view, SIGNAL(undo()))),
+    _redoAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_redo.png"))
+        .addShortcut(Shortcut::create().key("y"))
+        .onTriggered(view, SIGNAL(redo()))),
+    _findAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_search.png"))
+        .addShortcut(Shortcut::create().key("f"))
+        .onTriggered(view, SLOT(setFindMode()))),
+    _cloneAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_copy_link.png"))
+        .addShortcut(Shortcut::create().key("g"))
+        .onTriggered(view, SLOT(clone()))),
+    _closeAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_clear.png"))
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(view, SLOT(close()))),
+    _lastFocused(false)
 {
     TextFieldTitleBarKindProperties *titleBarProperties = new TextFieldTitleBarKindProperties;
     _titleField = titleBarProperties->textField();
@@ -41,7 +74,9 @@ NormalMode::NormalMode(View *view): ViewMode(view), _saveAction(NULL), _lastFocu
     _titleBar = TitleBar::create(TitleBarKind::TextField)
         .kindProperties(titleBarProperties);
 
-    // text
+    conn(view, SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
+    conn(view, SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
+
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
 
@@ -97,60 +132,26 @@ void NormalMode::autoFocus(bool goToModeControl)
 
 void NormalMode::onEnter()
 {
-    view()->content()->removeAllActions();
-    _saveAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_save.png"))
-        .addShortcut(Shortcut::create().key("s"))
-        .onTriggered(view(), SLOT(save()));
-    _saveAsAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_save_as.png"))
-        .onTriggered(view(), SLOT(saveAs()));
-    _openAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_open.png"))
-        .addShortcut(Shortcut::create().key("e"))
-        .onTriggered(view(), SLOT(open()));
-    _undoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_undo.png"))
-        .addShortcut(Shortcut::create().key("z"))
-        .onTriggered(view(), SIGNAL(undo()));
-    conn(view(), SIGNAL(hasUndosChanged(bool)), _undoAction, SLOT(setEnabled(bool)));
-    _redoAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_redo.png"))
-        .addShortcut(Shortcut::create().key("y"))
-        .onTriggered(view(), SIGNAL(redo()));
-    conn(view(), SIGNAL(hasRedosChanged(bool)), _redoAction, SLOT(setEnabled(bool)));
-    _findAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_search.png"))
-        .addShortcut(Shortcut::create().key("f"))
-        .onTriggered(view(), SLOT(setFindMode()));
-    _cloneAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_copy_link.png"))
-        .addShortcut(Shortcut::create().key("g"))
-        .onTriggered(view(), SLOT(clone()));
-    _closeAction = ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_clear.png"))
-        .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(view(), SLOT(close()));
-    reloadActionTitles();
+    view()->hideAllPageActions();
 
     setLocked(view()->buffer()->locked());
     conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
 
-    view()->content()->addAction(_saveAction, ActionBarPlacement::Signature);
-    view()->content()->addAction(_undoAction, ActionBarPlacement::OnBar);
-    view()->content()->addAction(_redoAction, ActionBarPlacement::OnBar);
-    view()->content()->addAction(_saveAsAction);
-    view()->content()->addAction(_openAction);
-    view()->content()->addAction(_findAction);
-    view()->content()->addAction(_cloneAction);
-    view()->content()->addAction(_closeAction);
-    view()->content()->setTitleBar(_titleBar);
+    view()->page()->addAction(_saveAction, ActionBarPlacement::Signature);
+    view()->page()->addAction(_undoAction, ActionBarPlacement::OnBar);
+    view()->page()->addAction(_redoAction, ActionBarPlacement::OnBar);
+    view()->page()->addAction(_saveAsAction);
+    view()->page()->addAction(_openAction);
+    view()->page()->addAction(_findAction);
+    view()->page()->addAction(_cloneAction);
+    view()->page()->addAction(_closeAction);
+    view()->page()->setTitleBar(_titleBar);
 
     view()->textArea()->setEditable(true);
     view()->textAreaModKeyListener()->setEnabled(true);
 
+    view()->textArea()->loseFocus();
     if (_lastFocused) {
-        view()->textArea()->loseFocus();
         view()->textArea()->requestFocus();
     }
 }
@@ -158,7 +159,6 @@ void NormalMode::onEnter()
 void NormalMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
-    _saveAction = NULL;
     _lastFocused = view()->textArea()->isFocused();
 }
 
@@ -185,27 +185,19 @@ void NormalMode::setLocked(bool locked)
 {
     view()->textArea()->setEditable(!locked);
     _titleField->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
-    if (_saveAction) {
-        _saveAction->setEnabled(!locked);
-        _saveAsAction->setEnabled(!locked);
-        _openAction->setEnabled(!locked);
-        _undoAction->setEnabled(!locked && view()->buffer()->hasUndo());
-        _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
-        _findAction->setEnabled(!locked);
-        _cloneAction->setEnabled(!locked);
-        _closeAction->setEnabled(!locked);
-    }
+    _saveAction->setEnabled(!locked);
+    _saveAsAction->setEnabled(!locked);
+    _openAction->setEnabled(!locked);
+    _undoAction->setEnabled(!locked && view()->buffer()->hasUndo());
+    _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
+    _findAction->setEnabled(!locked);
+    _cloneAction->setEnabled(!locked);
+    _closeAction->setEnabled(!locked);
 }
 
 void NormalMode::onTranslatorChanged()
 {
     _titleField->setHintText(tr("Enter the title"));
-    if (_saveAction)
-        reloadActionTitles();
-}
-
-void NormalMode::reloadActionTitles()
-{
     _saveAction->setTitle(tr("Save"));
     _saveAsAction->setTitle(tr("Save As"));
     _openAction->setTitle(tr("Open"));

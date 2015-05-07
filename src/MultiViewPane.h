@@ -31,31 +31,36 @@ public:
     MultiViewPane(QObject *parent=NULL);
     virtual ~MultiViewPane() {}
     View *activeView() const;
-    Q_SLOT void setActiveView(View *, bool toast=false);
-    Q_SLOT void setActiveView(int, bool toast=false);
-    Q_SLOT void setPrevViewActive(bool toast=true);
-    Q_SLOT void setNextViewActive(bool toast=true);
-    bb::cascades::Tab *newViewControl() const;
-    View *at(int i) const; // the view at a given index
+    Q_SLOT void setActiveTab(int, bool toast=false);
+    Q_SLOT void setActiveTab(bb::cascades::Tab *, bool toast=false);
+    Q_SLOT void setPrevTabActive(bool toast=true);
+    Q_SLOT void setNextTabActive(bool toast=true);
+    bb::cascades::Tab *at(int i) const; // the view at a given index
     int activeIndex(int offset=0) const; // the view with the given offset from the active one
-    int indexOf(View *) const; // give the index of the given view
+    int indexOf(bb::cascades::Tab *) const; // give the index of the given view
     int count() const; // number of views
     void cloneActive(bool toast=true); // clone the current
-    void remove(View *, bool toast=true);
+    void removeView(View *, bool toast=true);
     Q_SLOT void addNewView(bool toast=true);
     Buffer *newBuffer();
     Buffer *bufferForFilepath(const QString &filepath);
     void removeBuffer(Buffer *buffer);
     Q_SLOT void onActiveTabChanged(bb::cascades::Tab *);
     Q_SLOT void onTranslatorChanged();
+    void hideViews();
+    void restoreViews();
 Q_SIGNALS:
     void translatorChanged();
 private:
+    // used for determining the correct list of tabs to cycle
+    int _base;
+    bb::cascades::Tab *newViewControl() const;
+
+    QList<bb::cascades::Tab *> _save;
     View *_lastActive;
     // the list of buffers driving the views
     QList<Buffer *> _buffers;
-    void insert(int index, View *view);
-    void add(View *view);
+    void insertView(int index, View *view);
 };
 
 #endif /* MULTIVIEWPANE_H_ */

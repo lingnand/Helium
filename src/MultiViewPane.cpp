@@ -19,6 +19,7 @@
 #include <bb/cascades/TabbedPane>
 #include <bb/cascades/Tab>
 #include <bb/cascades/Shortcut>
+#include <bb/cascades/Page>
 #include <MultiViewPane.h>
 #include <View.h>
 #include <Buffer.h>
@@ -26,17 +27,18 @@
 
 using namespace bb::cascades;
 
-MultiViewPane::MultiViewPane(QObject *parent): TabbedPane(parent), _lastActive(NULL)
+MultiViewPane::MultiViewPane(QObject *parent):
+        TabbedPane(parent), _lastActive(NULL), _base(1)
 {
     setShowTabsOnActionBar(false);
     addShortcut(Shortcut::create().key("q")
-            .onTriggered(this, SLOT(setPrevViewActive())));
+            .onTriggered(this, SLOT(setPrevTabActive())));
     addShortcut(Shortcut::create().key("w")
-            .onTriggered(this, SLOT(setNextViewActive())));
+            .onTriggered(this, SLOT(setNextTabActive())));
 
     // TODO: handle auto focus properly: focus on the textarea when the tab is switched to
     // However, think about the case when you press enter+<switching between tabs> and you want to do it again on the next switched to tab
-    TabbedPane::add(Tab::create()
+    add(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add.png"))
         .addShortcut(Shortcut::create().key("c")
                 .onTriggered(this, SLOT(addNewView())))
@@ -49,82 +51,103 @@ MultiViewPane::MultiViewPane(QObject *parent): TabbedPane(parent), _lastActive(N
     onTranslatorChanged();
 }
 
-View *MultiViewPane::activeView() const
-{
-    Tab *tab = activeTab();
-    if (tab == newViewControl())
-        return NULL;
-    return (View *) tab;
-}
-
-void MultiViewPane::setActiveView(View *view, bool toast)
-{
-    setActiveView(indexOf(view), toast);
-}
-
-void MultiViewPane::setActiveView(int index, bool toast)
-{
-    View *active = activeView(), *view = at(index);
-    if (active != view) {
-        setActiveTab(view);
-        if (toast)
-            Utility::toast(QString("%1. %2").arg(index).arg(view->title()));
-    }
-}
-
 Tab *MultiViewPane::newViewControl() const
 {
     return TabbedPane::at(0);
 }
 
-View *MultiViewPane::at(int i) const
+View *MultiViewPane::activeView() const
 {
-    return (View *) TabbedPane::at(i+1);
+    Tab *tab = activeTab();
+    return tab == newViewControl() ? NULL : (View *) tab;
 }
 
-int MultiViewPane::indexOf(View *view) const
+void MultiViewPane::setActiveTab(Tab *tab, bool toast)
 {
-    return TabbedPane::indexOf(view) - 1;
+    setActiveTab(indexOf(tab), toast);
+}
+
+void MultiViewPane::setActiveTab(int index, bool toast)
+{
+    Tab *active = activeTab(), *tab = at(index);
+    if (active != tab) {
+        TabbedPane::setActiveTab(tab);
+        if (toast)
+            // TODO: maybe not include index when we are cycling between options
+            Utility::toast(QString("%1. %2").arg(index).arg(tab->title()));
+    }
+}
+
+Tab *MultiViewPane::at(int i) const
+{
+    return TabbedPane::at(i+_base);
+}
+
+void MultiViewPane::hideViews()
+{
+    blockSignals(true);
+    _base = 0;
+    while (count() > 0) {
+        Tab *tab = at(0);
+        _save.append(tab);
+        remove(tab);
+    }
+}
+
+void MultiViewPane::restoreViews()
+{
+    while (count() > 0) {
+        remove(at(0));
+    }
+    for (int i = 0; i < _save.size(); i++) {
+        add(_save[i]);
+    }
+    _save.clear();
+    setActiveTab(_lastActive);
+    _base = 1;
+    blockSignals(false);
+}
+
+int MultiViewPane::indexOf(Tab *tab) const
+{
+    return TabbedPane::indexOf(tab) - _base;
 }
 
 int MultiViewPane::count() const
 {
-    return TabbedPane::count() - 1;
+    return TabbedPane::count() - _base;
 }
 
 void MultiViewPane::addNewView(bool toast)
 {
     int i = count();
     View *v = new View(newBuffer());
-    insert(i, v);
-    setActiveView(i, toast);
+    insertView(i, v);
+    setActiveTab(i, toast);
 }
 
-void MultiViewPane::insert(int index, View *view)
+void MultiViewPane::insertView(int index, View *view)
 {
     conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
-    TabbedPane::insert(index+1, view);
-}
-
-void MultiViewPane::add(View *view)
-{
-    insert(count(), view);
+    insert(index+_base, view);
 }
 
 void MultiViewPane::cloneActive(bool toast)
 {
     int i = activeIndex()+1;
-    insert(i, new View(activeView()->buffer()));
-    setActiveView(i, toast);
+    insertView(i, new View(activeView()->buffer()));
+    setActiveTab(i, toast);
 }
 
-void MultiViewPane::remove(View *view, bool toast)
+void MultiViewPane::removeView(View *view, bool toast)
 {
-    View *activateLater = NULL;
+    Tab *activateLater = NULL;
     if (view == activeView()) {
         if (count() == 1) {
             // better to create a new view
-            insert(1, activateLater = new View(newBuffer()));
+            View *v = new View(newBuffer());
+            insertView(1, v);
+            activateLater = v;
         } else {
             // activate the view before it (or after it if it's the first one)
             int ai = activeIndex();
@@ -137,29 +160,32 @@ void MultiViewPane::remove(View *view, bool toast)
         }
     }
     view->setBuffer(NULL);
-    TabbedPane::remove(view);
+    remove(view);
     view->deleteLater();
     if (activateLater)
-        setActiveView(activateLater, toast);
+        setActiveTab(activateLater, toast);
 }
 
-void MultiViewPane::setPrevViewActive(bool toast)
+void MultiViewPane::setPrevTabActive(bool toast)
 {
-    if (count() == 0)
-        return;
-    setActiveView(activeIndex(-1), toast);
+    int i = activeIndex(-1);
+    if (i >= 0)
+        setActiveTab(i, toast);
 }
 
-void MultiViewPane::setNextViewActive(bool toast)
+void MultiViewPane::setNextTabActive(bool toast)
 {
-    if (count() == 0)
-        return;
-    setActiveView(activeIndex(1), toast);
+    int i = activeIndex(1);
+    if (i >= 0)
+        setActiveTab(i, toast);
 }
 
 int MultiViewPane::activeIndex(int offset) const
 {
-    return PMOD(indexOf(activeView())+offset, count());
+    int i = indexOf(activeTab());
+    if (count() == 0 || i < 0)
+        return -1;
+    return PMOD(i+offset, count());
 }
 
 Buffer *MultiViewPane::newBuffer()
