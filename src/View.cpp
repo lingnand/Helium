@@ -25,9 +25,10 @@
 
 using namespace bb::cascades;
 
-#define SCROLL_RANGE 30
+#define SCROLL_RANGE 25
 
 #define HIGHLIGHT_RANGE_LIMIT 20
+#define USE_SMART_HIGHLIGHT_RANGE 0
 // totalResource = plainTextSize + c * diffLimit
 // we are now assumign c to be 5
 // we have (for playlist.c): plainTextSize = 42000, diffLimit = 15000
@@ -411,7 +412,8 @@ Range View::partialHighlightRange(const BufferState &st, Range focus)
     while (focus.to > 0 && focus.to < st.size() && st[focus.to-1].line.isEmpty()) {
         focus.to++;
     }
-    bool reachedLimit = focus.from == 0 && focus.to >= st.size();
+#if USE_SMART_HIGHLIGHT_RANGE
+    reachedLimit = focus.from == 0 && focus.to >= st.size();
     // smart expansion of range depending on the input size
     if (!st.empty() && !reachedLimit) {
         int diff = 0, size = st.plainTextSize();
@@ -438,6 +440,7 @@ Range View::partialHighlightRange(const BufferState &st, Range focus)
         }
         qDebug() << "expanded to diff of" << diff << ", range:" << focus;
     }
+#endif
     return focus;
 }
 
