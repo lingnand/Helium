@@ -84,11 +84,15 @@ FindMode::FindMode(View *view):
         .onModKeyPressed(_replaceField, SLOT(requestFocus()))
         .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_findField, SIGNAL(focusedChanged(bool))));
+    conn(_findField, SIGNAL(focusedChanged(bool)),
+        view, SLOT(blockPageKeyListener(bool)));
     _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyPressed(this, SLOT(onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
         .onModKeyPressed(this, SLOT(findNext()))
         .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_replaceField, SIGNAL(focusedChanged(bool))));
+    conn(_replaceField, SIGNAL(focusedChanged(bool)),
+        view, SLOT(blockPageKeyListener(bool)));
     _findTitleBar = TitleBar::create(TitleBarKind::FreeForm)
         .kindProperties(FreeFormTitleBarKindProperties::create()
             .content(Container::create()

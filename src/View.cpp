@@ -11,6 +11,7 @@
 #include <bb/cascades/StackLayoutProperties>
 #include <bb/cascades/TextArea>
 #include <bb/cascades/KeyEvent>
+#include <bb/cascades/KeyListener>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/pickers/FilePicker>
 #include <bb/system/Clipboard>
@@ -69,7 +70,9 @@ View::View(Buffer *buffer):
     _progressIndicator(ProgressIndicator::create()
         .visible(false)
         .vertical(VerticalAlignment::Bottom)
-        .topMargin(0))
+        .topMargin(0)),
+    _pageKeyListener(KeyListener::create()
+        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
 {
     _textArea->addKeyListener(_textAreaModKeyListener);
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
@@ -90,22 +93,8 @@ View::View(Buffer *buffer):
 //        .actionBarVisibility(ChromeVisibility::Hidden)
         .addShortcut(Shortcut::create().key("Enter")
             .onTriggered(this, SLOT(autoFocus())))
-        // attach the touch keyboard handler to the page so
-        // that we can enable touch-less scrolling
-        .addShortcut(Shortcut::create().key("j")
-            .onTriggered(this, SLOT(oneLineDown())))
-        .addShortcut(Shortcut::create().key("k")
-            .onTriggered(this, SLOT(oneLineUp())))
-        .addShortcut(Shortcut::create().key("t")
-            .onTriggered(this, SLOT(scrollToTop())))
-        .addShortcut(Shortcut::create().key("b")
-            .onTriggered(this, SLOT(scrollToBottom())))
-        .addShortcut(Shortcut::create().key("Space")
-            .onTriggered(this, SLOT(scrollDown())))
-        .addShortcut(Shortcut::create().key("u") // for passport users
-            .onTriggered(this, SLOT(scrollUp())))
-        .addShortcut(Shortcut::create().key("Shift+Space")
-            .onTriggered(this, SLOT(scrollUp()))));
+        // navigation
+        .addKeyListener(_pageKeyListener));
 
     setBuffer(buffer);
 
@@ -266,7 +255,42 @@ void View::setHighlightRangeLimit(int limit)
     }
 }
 
-void View::handleTextControlBasicModifiedKeys(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
+void View::blockPageKeyListener(bool block)
+{
+    _pageKeyListener->blockSignals(block);
+}
+
+void View::onPageKeyPressed(KeyEvent *event)
+{
+    switch (event->keycap()) {
+        case KEYCODE_J:
+            scrollByLine(1);
+            break;
+        case KEYCODE_K:
+            scrollByLine(-1);
+            break;
+        case KEYCODE_T:
+            if (!_buffer->state().empty())
+                scrollTo(0);
+            break;
+        case KEYCODE_B:
+            if (!_buffer->state().empty())
+                scrollTo(INT_MAX);
+            break;
+        case KEYCODE_SPACE:
+            if (event->isShiftPressed()) {
+                scrollByLine(-SCROLL_RANGE);
+            } else {
+                scrollByLine(SCROLL_RANGE);
+            }
+            break;
+        case KEYCODE_U:
+            scrollByLine(-SCROLL_RANGE);
+            break;
+    }
+}
+
+void View::handleTextControlBasicModifiedKeys(TextEditor *editor, KeyEvent *event)
 {
     switch (event->keycap()) {
         case KEYCODE_V: {
@@ -277,17 +301,17 @@ void View::handleTextControlBasicModifiedKeys(bb::cascades::TextEditor *editor, 
         }
         case KEYCODE_SPACE:
             // TODO: this is kinda of a hack
-            ((bb::cascades::AbstractTextControl *) editor->parent())->loseFocus();
+            ((AbstractTextControl *) editor->parent())->loseFocus();
             break;
     }
 }
 
-void View::onTextAreaModKeyPressed(bb::cascades::KeyEvent *event)
+void View::onTextAreaModKeyPressed(KeyEvent *event)
 {
     _textArea->editor()->insertPlainText(event->unicode());
 }
 
-void View::onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener)
+void View::onTextAreaModifiedKeyPressed(KeyEvent *event, ModKeyListener *listener)
 {
     switch (event->keycap()) {
         case KEYCODE_T: // Tab
@@ -354,38 +378,6 @@ void View::scrollByLine(int offset)
     int to = qMin(qMax(focus.lineIndex+offset, 0), _buffer->state().size()-1);
     scrollTo(_buffer->state().cursorPositionAtLine(to) +
             qMin(focus.linePosition, _buffer->state()[to].line.size()));
-}
-
-void View::oneLineUp()
-{
-    scrollByLine(-1);
-}
-
-void View::oneLineDown()
-{
-    scrollByLine(1);
-}
-
-void View::scrollUp()
-{
-    scrollByLine(-SCROLL_RANGE);
-}
-
-void View::scrollDown()
-{
-    scrollByLine(SCROLL_RANGE);
-}
-
-void View::scrollToTop()
-{
-    if (!_buffer->state().empty())
-        scrollTo(0);
-}
-
-void View::scrollToBottom()
-{
-    if (!_buffer->state().empty())
-        scrollTo(_buffer->state().plainTextSize());
 }
 
 void View::killCurrentLine()
@@ -514,7 +506,7 @@ void View::onBufferStateChanged(const StateChangeContext &ctx, const BufferState
     }
 }
 
-void View::onBufferProgressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state, const QString &msg)
+void View::onBufferProgressChanged(float progress, ProgressIndicatorState::Type state, const QString &msg)
 {
     qDebug() << "received progress change" << progress;
     _progressIndicator->setState(state);
@@ -536,11 +528,11 @@ void View::onTranslatorChanged()
 }
 
 /* file related operations */
-bb::cascades::pickers::FilePicker *View::filePicker()
+pickers::FilePicker *View::filePicker()
 {
     if (!_fpicker) {
-        _fpicker = new bb::cascades::pickers::FilePicker(this);
-        _fpicker->setType(bb::cascades::pickers::FileType::Document);
+        _fpicker = new pickers::FilePicker(this);
+        _fpicker->setType(pickers::FileType::Document);
         _fpicker->setFilter(QStringList("*"));
         conn(_fpicker, SIGNAL(fileSelected(const QStringList&)),
                 this, SLOT(onFileSelected(const QStringList&)));
@@ -564,7 +556,7 @@ View::SaveStatus View::save()
 
 View::SaveStatus View::saveAs()
 {
-    filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Saver);
+    filePicker()->setMode(pickers::FilePickerMode::Saver);
     filePicker()->setDefaultSaveFileNames(QStringList(_buffer->name()));
     filePicker()->setTitle(tr("Save"));
     filePicker()->open();
@@ -596,7 +588,7 @@ void View::onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::
 
 void View::pickFileToOpen()
 {
-    filePicker()->setMode(bb::cascades::pickers::FilePickerMode::Picker);
+    filePicker()->setMode(pickers::FilePickerMode::Picker);
     filePicker()->setTitle(tr("Open"));
     filePicker()->open();
 }
@@ -604,7 +596,7 @@ void View::pickFileToOpen()
 void View::onFileSelected(const QStringList &files)
 {
     switch (filePicker()->mode()) {
-        case bb::cascades::pickers::FilePickerMode::Picker:
+        case pickers::FilePickerMode::Picker:
             if (files[0] != _buffer->filepath()) {
                 Buffer *b =parent()->bufferForFilepath(files[0]);
                 if (b) {
@@ -618,7 +610,7 @@ void View::onFileSelected(const QStringList &files)
                 }
             }
             break;
-        case bb::cascades::pickers::FilePickerMode::Saver:
+        case pickers::FilePickerMode::Saver:
             _buffer->save(files[0]);
             break;
     }

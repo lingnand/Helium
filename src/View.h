@@ -22,6 +22,7 @@ namespace bb {
         class Page;
         class ProgressIndicator;
         class KeyEvent;
+        class KeyListener;
         namespace pickers {
             class FilePicker;
         }
@@ -81,6 +82,7 @@ private:
     void setMode(ViewMode *);
 
     bb::cascades::Page *_page;
+    bb::cascades::KeyListener *_pageKeyListener;
     bb::cascades::TextArea *_textArea;
     ModKeyListener *_textAreaModKeyListener;
     bb::cascades::ProgressIndicator *_progressIndicator;
@@ -94,12 +96,6 @@ private:
     /** navigation **/
     void scrollTo(int cursorPosition);
     void scrollByLine(int offset);
-    Q_SLOT void oneLineUp();
-    Q_SLOT void oneLineDown();
-    Q_SLOT void scrollToTop();
-    Q_SLOT void scrollToBottom();
-    Q_SLOT void scrollUp();
-    Q_SLOT void scrollDown();
 
     /** view management **/
     Q_SLOT void clone();
@@ -118,6 +114,8 @@ private:
 
     /** callbacks **/
     Q_SLOT void reloadTitle();
+    Q_SLOT void blockPageKeyListener(bool);
+    Q_SLOT void onPageKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString &text);
     Q_SLOT void onTextAreaModKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);

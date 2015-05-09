@@ -65,6 +65,8 @@ NormalMode::NormalMode(View *view):
     _titleField->textStyle()->setBase(SystemDefaults::TextStyles::titleText());
     conn(_titleField, SIGNAL(focusedChanged(bool)),
         this, SLOT(onTitleFieldFocusChanged(bool)));
+    conn(_titleField, SIGNAL(focusedChanged(bool)),
+        view, SLOT(blockPageKeyListener(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyPressed(this, SLOT(onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
         .onModKeyPressed(view->textArea(), SLOT(requestFocus()))
@@ -136,6 +138,9 @@ void NormalMode::onEnter()
 
     setLocked(view()->buffer()->locked());
     conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
+    // disable page navigation when focusing the text area
+    conn(view()->textArea(), SIGNAL(focusedChanged(bool)),
+        view(), SLOT(blockPageKeyListener(bool)));
 
     view()->page()->addAction(_saveAction, ActionBarPlacement::Signature);
     view()->page()->addAction(_undoAction, ActionBarPlacement::OnBar);
@@ -159,6 +164,8 @@ void NormalMode::onEnter()
 void NormalMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
+    disconn(view()->textArea(), SIGNAL(focusedChanged(bool)),
+        view(), SLOT(blockPageKeyListener(bool)));
     _lastFocused = view()->textArea()->isFocused();
 }
 
