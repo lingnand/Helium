@@ -8,6 +8,8 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+#include <QTextStream>
+
 #define conn(sender, signal, receiver, slot) { \
     bool res = ::QObject::connect(sender, signal, receiver, slot); \
     Q_ASSERT(res); \
@@ -26,6 +28,7 @@ class Utility {
 public:
     static void toast(const QString &msg, const QString &label=QString(),
         const QObject *receiver=NULL, const char *method=NULL);
+    static void escapeHtml(QTextStream &input, QTextStream &output);
     static void dialog(const QString &confirm,
             const QString &title, const QString &body,
             const QObject *receiver=NULL, const char *method=NULL);

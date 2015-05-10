@@ -30,6 +30,21 @@ void Utility::toast(const QString &msg, const QString &label,
     _toast->show();
 }
 
+void Utility::escapeHtml(QTextStream &input, QTextStream &output)
+{
+    QChar ch;
+    while (!input.atEnd()) {
+        input >> ch;
+        if (ch == '&') {
+            output << "&amp;";
+        } else if (ch == '<') {
+            output << "&lt;";
+        } else {
+            output << ch;
+        }
+    }
+}
+
 void Utility::dialog(const QString &confirm,
         const QString &title, const QString &body,
         const QObject *receiver, const char *method)

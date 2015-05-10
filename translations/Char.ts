@@ -9,6 +9,25 @@
     </message>
 </context>
 <context>
+    <name>CmdRunProfile</name>
+    <message>
+        <source>Kill</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rerun</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Back to editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FindMode</name>
     <message>
         <source>Find text</source>
@@ -154,6 +173,10 @@
     </message>
     <message>
         <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

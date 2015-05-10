@@ -15,6 +15,7 @@
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/KeyEvent>
 #include <bb/cascades/TextFieldTitleBarKindProperties>
+#include <CmdRunProfile.h>
 #include <NormalMode.h>
 #include <Utility.h>
 #include <ModKeyListener.h>
@@ -25,6 +26,7 @@ using namespace bb::cascades;
 
 NormalMode::NormalMode(View *view):
     ViewMode(view),
+    _runProfile(NULL),
     _saveAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_save.png"))
         .addShortcut(Shortcut::create().key("s"))
@@ -48,6 +50,9 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_search.png"))
         .addShortcut(Shortcut::create().key("f"))
         .onTriggered(view, SLOT(setFindMode()))),
+    _runAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_play.png"))
+        .addShortcut(Shortcut::create().key("r"))),
     _cloneAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_copy_link.png"))
         .addShortcut(Shortcut::create().key("g"))
@@ -93,6 +98,26 @@ NormalMode::NormalMode(View *view):
     onBufferFilepathChanged(view->buffer()->filepath());
     conn(view, SIGNAL(bufferFilepathChanged(const QString&)),
             this, SLOT(onBufferFilepathChanged(const QString&)))
+
+    setRunProfile(new CmdRunProfile(view, "cd '%2'; /base/usr/bin/python3.2 '%3'"));
+}
+
+void NormalMode::setRunProfile(RunProfile *profile)
+{
+    if (profile != _runProfile) {
+        if (_runProfile) {
+            _runProfile->disconnect(this);
+            _runAction->disconnect();
+            _runProfile->exit();
+            _runProfile->deleteLater();
+        }
+        _runProfile = profile;
+        if (_runProfile) {
+            conn(_runAction, SIGNAL(triggered()), _runProfile, SLOT(run()));
+            conn(_runProfile, SIGNAL(runnableChanged(bool)),
+                this, SLOT(onRunnableChanged(bool)));
+        }
+    }
 }
 
 TitleBar *NormalMode::titleBar() const
@@ -148,6 +173,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_saveAsAction);
     view()->page()->addAction(_openAction);
     view()->page()->addAction(_findAction);
+    view()->page()->addAction(_runAction);
     view()->page()->addAction(_cloneAction);
     view()->page()->addAction(_closeAction);
     view()->page()->setTitleBar(_titleBar);
@@ -198,8 +224,14 @@ void NormalMode::setLocked(bool locked)
     _undoAction->setEnabled(!locked && view()->buffer()->hasUndo());
     _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
     _findAction->setEnabled(!locked);
+    _runAction->setEnabled(!locked && _runProfile && _runProfile->runnable());
     _cloneAction->setEnabled(!locked);
     _closeAction->setEnabled(!locked);
+}
+
+void NormalMode::onRunnableChanged(bool runnable)
+{
+    _runAction->setEnabled(!view()->buffer()->locked() && runnable);
 }
 
 void NormalMode::onTranslatorChanged()
@@ -211,6 +243,7 @@ void NormalMode::onTranslatorChanged()
     _undoAction->setTitle(tr("Undo"));
     _redoAction->setTitle(tr("Redo"));
     _findAction->setTitle(tr("Find"));
+    _runAction->setTitle(tr("Run"));
     _cloneAction->setTitle(tr("Clone"));
     _closeAction->setTitle(tr("Close"));
 }

@@ -20,6 +20,7 @@ namespace bb {
         class TextEditor;
         class TextArea;
         class Page;
+        class NavigationPane;
         class ProgressIndicator;
         class KeyEvent;
         class KeyListener;
@@ -44,14 +45,15 @@ public:
 
     View(Buffer *buffer=NULL);
     virtual ~View() {}
+    bb::cascades::NavigationPane *content() const;
     bb::cascades::Page *page() const;
     void detachPage();
     void reattachPage();
     void hideAllPageActions();
     MultiViewPane *parent() const;
-    Buffer *buffer() const;
     bb::cascades::TextArea *textArea() const;
     ModKeyListener *textAreaModKeyListener() const;
+    Buffer *buffer() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void setHighlightRangeLimit(int limit);
     Q_SLOT void setNormalMode();

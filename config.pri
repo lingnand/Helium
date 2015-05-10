@@ -171,14 +171,14 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
         $$quote($$BASEDIR/assets/images/ic_open.png) \
+        $$quote($$BASEDIR/assets/images/ic_play.png) \
         $$quote($$BASEDIR/assets/images/ic_previous.png) \
         $$quote($$BASEDIR/assets/images/ic_redo.png) \
+        $$quote($$BASEDIR/assets/images/ic_reload.png) \
         $$quote($$BASEDIR/assets/images/ic_rename.png) \
         $$quote($$BASEDIR/assets/images/ic_save.png) \
         $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \
-        $$quote($$BASEDIR/assets/images/ic_sort.png) \
-        $$quote($$BASEDIR/assets/images/ic_sort_black.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
         $$quote($$BASEDIR/assets/images/ic_view_details.png) \
         $$quote($$BASEDIR/assets/srchilite/ada.lang) \
@@ -299,6 +299,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
+        $$quote($$BASEDIR/src/CmdRunProfile.cpp) \
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
@@ -307,6 +308,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/NormalMode.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
+        $$quote($$BASEDIR/src/RunProfile.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
@@ -383,6 +385,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferHistory.h) \
         $$quote($$BASEDIR/src/BufferState.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
+        $$quote($$BASEDIR/src/CmdRunProfile.h) \
         $$quote($$BASEDIR/src/FindMode.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
@@ -392,6 +395,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
+        $$quote($$BASEDIR/src/RunProfile.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \

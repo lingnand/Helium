@@ -21,6 +21,7 @@ namespace bb {
 
 class View;
 class ModKeyListener;
+class RunProfile;
 
 class NormalMode: public ViewMode
 {
@@ -45,8 +46,14 @@ private:
     bb::cascades::ActionItem *_undoAction;
     bb::cascades::ActionItem *_redoAction;
     bb::cascades::ActionItem *_findAction;
+    bb::cascades::ActionItem *_runAction;
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_closeAction;
+
+    /** run profile **/
+    RunProfile *_runProfile;
+    void setRunProfile(RunProfile *);
+    Q_SLOT void onRunnableChanged(bool);
 
     Q_SLOT void onTitleFieldFocusChanged(bool focus);
     Q_SLOT void onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);

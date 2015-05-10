@@ -148,6 +148,7 @@ void FindMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
 
+    view()->parent()->setActivePane(NULL);
     view()->reattachPage();
     view()->parent()->restoreViews();
 

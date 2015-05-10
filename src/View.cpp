@@ -6,6 +6,7 @@
  */
 
 #include <bb/cascades/Page>
+#include <bb/cascades/NavigationPane>
 #include <bb/cascades/Container>
 #include <bb/cascades/ProgressIndicator>
 #include <bb/cascades/StackLayoutProperties>
@@ -85,16 +86,17 @@ View::View(Buffer *buffer):
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
             this, SLOT(updateTextAreaPartialHighlight()));
 
-    setContent(_page = Page::create()
-        .content(Container::create()
-            .add(_textArea)
-            .add(_progressIndicator))
-//        .actionBarVisibility(ChromeVisibility::Visible)
-//        .actionBarVisibility(ChromeVisibility::Hidden)
-        .addShortcut(Shortcut::create().key("Enter")
-            .onTriggered(this, SLOT(autoFocus())))
-        // navigation
-        .addKeyListener(_pageKeyListener));
+    setContent(NavigationPane::create()
+        .add(_page = Page::create()
+            .content(Container::create()
+                .add(_textArea)
+                .add(_progressIndicator))
+    //        .actionBarVisibility(ChromeVisibility::Visible)
+    //        .actionBarVisibility(ChromeVisibility::Hidden)
+            .addShortcut(Shortcut::create().key("Enter")
+                .onTriggered(this, SLOT(autoFocus())))
+            // navigation
+            .addKeyListener(_pageKeyListener)));
 
     setBuffer(buffer);
 
@@ -115,6 +117,11 @@ void View::setMode(ViewMode *mode)
     }
 }
 
+NavigationPane *View::content() const
+{
+    return (NavigationPane *) Tab::content();
+}
+
 TextArea *View::textArea() const
 {
     return _textArea;
@@ -130,14 +137,19 @@ Page *View::page() const
     return _page;
 }
 
+// detachPage can only be called when at the main page
 void View::detachPage()
 {
+    Q_ASSERT(content()->top() == _page);
+    content()->pop();
     _page->setParent(NULL);
 }
 
 void View::reattachPage()
 {
-    setContent(_page);
+    Q_ASSERT(!content()->top());
+    _page->setParent(NULL);
+    content()->push(_page);
 }
 
 void View::hideAllPageActions()
@@ -211,11 +223,15 @@ void View::setBuffer(Buffer *buffer)
             reloadTitle();
             conn(_buffer, SIGNAL(nameChanged(const QString&)),
                 this, SLOT(reloadTitle()));
+
+            emit bufferNameChanged(_buffer->name());
             conn(_buffer, SIGNAL(nameChanged(const QString&)),
                 this, SIGNAL(bufferNameChanged(const QString&)));
 
             conn(_buffer, SIGNAL(dirtyChanged(bool)),
                 this, SLOT(reloadTitle()));
+
+            emit bufferDirtyChanged(_buffer->dirty());
             conn(_buffer, SIGNAL(dirtyChanged(bool)),
                 this, SIGNAL(bufferDirtyChanged(bool)));
 
@@ -229,16 +245,21 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(savedToFile(const QString&)),
                 this, SLOT(onBufferSavedToFile(const QString&)));
 
+            emit bufferFilepathChanged(_buffer->filepath());
             conn(_buffer, SIGNAL(filepathChanged(const QString&)),
                 this, SIGNAL(bufferFilepathChanged(const QString&)));
 
+            emit bufferLockedChanged(_buffer->locked());
             conn(_buffer, SIGNAL(lockedChanged(bool)),
                 this, SIGNAL(bufferLockedChanged(bool)));
 
             conn(this, SIGNAL(undo()), _buffer, SLOT(undo()));
-            conn(this, SIGNAL(redo()), _buffer, SLOT(redo()));
+            emit hasUndosChanged(_buffer->hasUndo());
             conn(_buffer, SIGNAL(hasUndosChanged(bool)),
                 this, SIGNAL(hasUndosChanged(bool)));
+
+            conn(this, SIGNAL(redo()), _buffer, SLOT(redo()));
+            emit hasRedosChanged(_buffer->hasRedo());
             conn(_buffer, SIGNAL(hasRedosChanged(bool)),
                 this, SIGNAL(hasRedosChanged(bool)));
         }
