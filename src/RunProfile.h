@@ -14,6 +14,7 @@ class RunProfile : public QObject
 {
     Q_OBJECT
 public:
+    static RunProfile *createRunProfile(View *, const QString &filetype);
     RunProfile(View *view);
     View *view() const;
     Q_SLOT virtual void run() = 0;

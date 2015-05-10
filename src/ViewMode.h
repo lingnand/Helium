@@ -16,7 +16,7 @@ class ViewMode: public QObject
 public:
     ViewMode(View *);
     View *view() const;
-    virtual void autoFocus(bool goToModeControl=false) = 0;
+    virtual void autoFocus() = 0;
     virtual void onEnter() = 0;
     virtual void onExit() = 0;
 };

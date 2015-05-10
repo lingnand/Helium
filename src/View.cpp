@@ -15,11 +15,9 @@
 #include <bb/cascades/KeyListener>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/pickers/FilePicker>
-#include <bb/system/Clipboard>
 #include <View.h>
 #include <MultiViewPane.h>
 #include <Buffer.h>
-#include <ModKeyListener.h>
 #include <SignalBlocker.h>
 #include <NormalMode.h>
 #include <FindMode.h>
@@ -63,11 +61,6 @@ View::View(Buffer *buffer):
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))
         .bottomMargin(0)),
-    _textAreaModKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
-        .onModKeyPressed(this, SLOT(onTextAreaModKeyPressed(bb::cascades::KeyEvent*)))
-        .onTextAreaInputModeChanged(_textArea, SLOT(setInputMode(bb::cascades::TextAreaInputMode::Type)))
-        .modOffOn(_textArea, SIGNAL(focusedChanged(bool)))),
     _progressIndicator(ProgressIndicator::create()
         .visible(false)
         .vertical(VerticalAlignment::Bottom)
@@ -75,7 +68,6 @@ View::View(Buffer *buffer):
     _pageKeyListener(KeyListener::create()
         .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
 {
-    _textArea->addKeyListener(_textAreaModKeyListener);
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
             this, SLOT(onTextAreaCursorPositionChanged()));
     conn(_textArea, SIGNAL(textChanging(const QString)),
@@ -125,11 +117,6 @@ NavigationPane *View::content() const
 TextArea *View::textArea() const
 {
     return _textArea;
-}
-
-ModKeyListener *View::textAreaModKeyListener() const
-{
-    return _textAreaModKeyListener;
 }
 
 Page *View::page() const
@@ -311,76 +298,6 @@ void View::onPageKeyPressed(KeyEvent *event)
     }
 }
 
-void View::handleTextControlBasicModifiedKeys(TextEditor *editor, KeyEvent *event)
-{
-    switch (event->keycap()) {
-        case KEYCODE_V: {
-            bb::system::Clipboard clipboard;
-            QString paste = clipboard.value("text/plain");
-            editor->insertPlainText(paste);
-            break;
-        }
-        case KEYCODE_SPACE:
-            // TODO: this is kinda of a hack
-            ((AbstractTextControl *) editor->parent())->loseFocus();
-            break;
-    }
-}
-
-void View::onTextAreaModKeyPressed(KeyEvent *event)
-{
-    _textArea->editor()->insertPlainText(event->unicode());
-}
-
-void View::onTextAreaModifiedKeyPressed(KeyEvent *event, ModKeyListener *listener)
-{
-    switch (event->keycap()) {
-        case KEYCODE_T: // Tab
-            _textArea->editor()->insertPlainText("\t");
-            break;
-        case KEYCODE_Z: // Z on most platforms
-            _buffer->undo();
-            break;
-        case KEYCODE_Y: // Redo
-            _buffer->redo();
-            break;
-        case KEYCODE_H: // Head
-            _mode->autoFocus(true);
-            break;
-        case KEYCODE_F: // Find
-            setFindMode();
-            break;
-        case KEYCODE_S: // Save
-            if (save() == OpenedFilePicker)
-                listener->modOff();
-            break;
-        case KEYCODE_E: // Edit
-            open(); // this always opens some sort of UI
-            listener->modOff();
-            break;
-        case KEYCODE_D: // Delete
-            killCurrentLine();
-            break;
-        case KEYCODE_X: // Kill
-            close();
-            break;
-        case KEYCODE_G: // Germinate
-            clone();
-            break;
-        case KEYCODE_C: // Create
-            parent()->addNewView();
-            break;
-        case KEYCODE_Q:
-            parent()->setPrevTabActive();
-            break;
-        case KEYCODE_W:
-            parent()->setNextTabActive();
-            break;
-        default:
-            handleTextControlBasicModifiedKeys(_textArea->editor(), event);
-    }
-}
-
 void View::scrollTo(int cursorPosition)
 {
     SignalBlocker blocker(_textArea);
@@ -500,6 +417,7 @@ void View::onBufferFiletypeChanged(const QString &filetype, bool toast)
         if (toast)
             Utility::toast(tr("Filetype set to %1").arg(filetype));
     }
+    emit bufferFiletypeChanged(filetype);
 }
 
 // Is textChanging or cursorPositionChanged emitted first?

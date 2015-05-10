@@ -32,8 +32,7 @@ class FindMode: public ViewMode
     Q_OBJECT
 public:
     FindMode(View *);
-    void autoFocus(bool goToModeControl);
-    Q_SLOT void setLocked(bool);
+    void autoFocus();
     void onEnter();
     void onExit();
 private:
@@ -53,6 +52,8 @@ private:
     bb::cascades::Tab *_regexOption;
     bb::cascades::Tab *_ignoreCaseOption;
     bb::cascades::Tab *_exactMatchOption;
+
+    Q_SLOT void setLocked(bool);
 
     // the find state to keep track of the current find
     enum FindQueryUpdateStatus { Changed, Unchanged, Invalid };

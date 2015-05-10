@@ -6,9 +6,13 @@
  */
 
 #include <Utility.h>
+#include <bb/cascades/AbstractTextControl>
+#include <bb/cascades/TextEditor>
+#include <bb/cascades/KeyEvent>
 #include <bb/system/SystemToast>
 #include <bb/system/SystemDialog>
 #include <bb/system/SystemUiPosition>
+#include <bb/system/Clipboard>
 
 static bb::system::SystemToast *_toast = NULL;
 static bb::system::SystemDialog *_dialog = NULL;
@@ -71,4 +75,20 @@ void Utility::dialog(const QString &confirm, const QString &cancel,
         conn(_dialog, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
     }
     _dialog->show();
+}
+
+void Utility::handleBasicTextControlModifiedKey(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
+{
+    switch (event->keycap()) {
+        case KEYCODE_V: {
+            bb::system::Clipboard clipboard;
+            QString paste = clipboard.value("text/plain");
+            editor->insertPlainText(paste);
+            break;
+        }
+        case KEYCODE_SPACE:
+            // TODO: this is kinda of a hack
+            ((bb::cascades::AbstractTextControl *) editor->parent())->loseFocus();
+            break;
+    }
 }

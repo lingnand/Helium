@@ -17,7 +17,6 @@
 
 namespace bb {
     namespace cascades {
-        class TextEditor;
         class TextArea;
         class Page;
         class NavigationPane;
@@ -31,7 +30,6 @@ namespace bb {
 }
 
 class MultiViewPane;
-class ModKeyListener;
 class Buffer;
 class ViewMode;
 class NormalMode;
@@ -52,7 +50,6 @@ public:
     void hideAllPageActions();
     MultiViewPane *parent() const;
     bb::cascades::TextArea *textArea() const;
-    ModKeyListener *textAreaModKeyListener() const;
     Buffer *buffer() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void setHighlightRangeLimit(int limit);
@@ -62,8 +59,10 @@ public:
     Q_SLOT SaveStatus save();
     Q_SLOT SaveStatus saveAs();
     Q_SLOT void open();
-    Q_SLOT void handleTextControlBasicModifiedKeys(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event);
     Q_SLOT void updateTextAreaPartialHighlight();
+    Q_SLOT void killCurrentLine();
+    Q_SLOT void clone();
+    Q_SLOT void close();
     Q_SLOT void onOutOfView();
     Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
@@ -73,6 +72,7 @@ Q_SIGNALS:
     void hasRedosChanged(bool);
     void translatorChanged();
     void bufferNameChanged(const QString &);
+    void bufferFiletypeChanged(const QString &);
     void bufferFilepathChanged(const QString &);
     void bufferDirtyChanged(bool);
     void bufferLockedChanged(bool);
@@ -86,7 +86,6 @@ private:
     bb::cascades::Page *_page;
     bb::cascades::KeyListener *_pageKeyListener;
     bb::cascades::TextArea *_textArea;
-    ModKeyListener *_textAreaModKeyListener;
     bb::cascades::ProgressIndicator *_progressIndicator;
 
     /** file related **/
@@ -99,10 +98,6 @@ private:
     void scrollTo(int cursorPosition);
     void scrollByLine(int offset);
 
-    /** view management **/
-    Q_SLOT void clone();
-    Q_SLOT void close();
-
     /** buffer and highlight **/
     Buffer *_buffer;
     int _highlightRangeLimit;
@@ -111,16 +106,11 @@ private:
     QTimer _partialHighlightUpdateTimer;
     Range partialHighlightRange(const BufferState &st, Range focus);
 
-    /** text operation **/
-    Q_SLOT void killCurrentLine();
-
     /** callbacks **/
     Q_SLOT void reloadTitle();
     Q_SLOT void blockPageKeyListener(bool);
     Q_SLOT void onPageKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString &text);
-    Q_SLOT void onTextAreaModKeyPressed(bb::cascades::KeyEvent *event);
-    Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onTextAreaCursorPositionChanged();
     Q_SLOT void onBufferFiletypeChanged(const QString &filetype, bool toast=true);
     Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);

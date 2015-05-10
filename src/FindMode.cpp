@@ -108,7 +108,7 @@ FindMode::FindMode(View *view):
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
 }
 
-void FindMode::autoFocus(bool)
+void FindMode::autoFocus()
 {
     _findField->requestFocus();
 }
@@ -139,7 +139,6 @@ void FindMode::onEnter()
     view()->parent()->add(_exactMatchOption);
 
     view()->textArea()->setEditable(false);
-    view()->textAreaModKeyListener()->setEnabled(false);
 
     _findField->requestFocus();
 }
@@ -207,7 +206,7 @@ void FindMode::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, 
             view()->setNormalMode();
             break;
         default:
-            view()->handleTextControlBasicModifiedKeys(editor, event);
+            Utility::handleBasicTextControlModifiedKey(editor, event);
     }
 }
 

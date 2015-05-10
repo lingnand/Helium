@@ -15,18 +15,24 @@
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/KeyEvent>
 #include <bb/cascades/TextFieldTitleBarKindProperties>
-#include <CmdRunProfile.h>
+#include <RunProfile.h>
 #include <NormalMode.h>
 #include <Utility.h>
 #include <ModKeyListener.h>
 #include <Buffer.h>
 #include <View.h>
+#include <MultiViewPane.h>
 
 using namespace bb::cascades;
 
 NormalMode::NormalMode(View *view):
     ViewMode(view),
     _runProfile(NULL),
+    _textAreaModKeyListener(ModKeyListener::create(KEYCODE_RETURN)
+        .onModifiedKeyPressed(this, SLOT(onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
+        .onModKeyPressed(this, SLOT(onTextAreaModKeyPressed(bb::cascades::KeyEvent*)))
+        .onTextAreaInputModeChanged(view->textArea(), SLOT(setInputMode(bb::cascades::TextAreaInputMode::Type)))
+        .modOffOn(view->textArea(), SIGNAL(focusedChanged(bool)))),
     _saveAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_save.png"))
         .addShortcut(Shortcut::create().key("s"))
@@ -52,7 +58,8 @@ NormalMode::NormalMode(View *view):
         .onTriggered(view, SLOT(setFindMode()))),
     _runAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_play.png"))
-        .addShortcut(Shortcut::create().key("r"))),
+        .addShortcut(Shortcut::create().key("r"))
+        .onTriggered(this, SLOT(run()))),
     _cloneAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_copy_link.png"))
         .addShortcut(Shortcut::create().key("g"))
@@ -63,6 +70,8 @@ NormalMode::NormalMode(View *view):
         .onTriggered(view, SLOT(close()))),
     _lastFocused(false)
 {
+    view->textArea()->addKeyListener(_textAreaModKeyListener);
+
     TextFieldTitleBarKindProperties *titleBarProperties = new TextFieldTitleBarKindProperties;
     _titleField = titleBarProperties->textField();
     _titleField->setFocusPolicy(FocusPolicy::Touch);
@@ -99,7 +108,9 @@ NormalMode::NormalMode(View *view):
     conn(view, SIGNAL(bufferFilepathChanged(const QString&)),
             this, SLOT(onBufferFilepathChanged(const QString&)))
 
-    setRunProfile(new CmdRunProfile(view, "cd '%2'; /base/usr/bin/python3.2 '%3'"));
+    onBufferFiletypeChanged(view->buffer()->filetype());
+    conn(view, SIGNAL(bufferFiletypeChanged(const QString&)),
+            this, SLOT(onBufferFiletypeChanged(const QString&)))
 }
 
 void NormalMode::setRunProfile(RunProfile *profile)
@@ -112,12 +123,18 @@ void NormalMode::setRunProfile(RunProfile *profile)
             _runProfile->deleteLater();
         }
         _runProfile = profile;
+        reloadRunnable();
         if (_runProfile) {
-            conn(_runAction, SIGNAL(triggered()), _runProfile, SLOT(run()));
             conn(_runProfile, SIGNAL(runnableChanged(bool)),
-                this, SLOT(onRunnableChanged(bool)));
+                this, SLOT(reloadRunnable()));
         }
     }
+}
+
+void NormalMode::run()
+{
+    if (_runProfile)
+        _runProfile->run();
 }
 
 TitleBar *NormalMode::titleBar() const
@@ -128,6 +145,63 @@ TitleBar *NormalMode::titleBar() const
 TextField *NormalMode::titleField() const
 {
     return _titleField;
+}
+
+void NormalMode::onTextAreaModKeyPressed(KeyEvent *event)
+{
+    view()->textArea()->editor()->insertPlainText(event->unicode());
+}
+
+void NormalMode::onTextAreaModifiedKeyPressed(KeyEvent *event, ModKeyListener *listener)
+{
+    switch (event->keycap()) {
+        case KEYCODE_T: // Tab
+            view()->textArea()->editor()->insertPlainText("\t");
+            break;
+        case KEYCODE_Z: // Z on most platforms
+            view()->buffer()->undo();
+            break;
+        case KEYCODE_Y: // Redo
+            view()->buffer()->redo();
+            break;
+        case KEYCODE_H: // Head
+            _titleField->requestFocus();
+            break;
+        case KEYCODE_F: // Find
+            view()->setFindMode();
+            break;
+        case KEYCODE_S: // Save
+            if (view()->save() == View::OpenedFilePicker)
+                listener->modOff();
+            break;
+        case KEYCODE_E: // Edit
+            view()->open(); // this always opens some sort of UI
+            listener->modOff();
+            break;
+        case KEYCODE_R: // Run
+            run();
+            break;
+        case KEYCODE_D: // Delete
+            view()->killCurrentLine();
+            break;
+        case KEYCODE_X: // Kill
+            view()->close();
+            break;
+        case KEYCODE_G: // Germinate
+            view()->clone();
+            break;
+        case KEYCODE_C: // Create
+            view()->parent()->addNewView();
+            break;
+        case KEYCODE_Q:
+            view()->parent()->setPrevTabActive();
+            break;
+        case KEYCODE_W:
+            view()->parent()->setNextTabActive();
+            break;
+        default:
+            Utility::handleBasicTextControlModifiedKey(view()->textArea()->editor(), event);
+    }
 }
 
 void NormalMode::onBufferNameChanged(const QString &name)
@@ -148,10 +222,15 @@ void NormalMode::onBufferFilepathChanged(const QString &filepath)
     _titleField->setEnabled(filepath.isEmpty());
 }
 
-void NormalMode::autoFocus(bool goToModeControl)
+void NormalMode::onBufferFiletypeChanged(const QString &filetype)
+{
+    setRunProfile(RunProfile::createRunProfile(view(), filetype));
+}
+
+void NormalMode::autoFocus()
 {
     // focus title text only when the text area is empty
-    if (goToModeControl || view()->buffer()->state().empty())
+    if (view()->buffer()->state().empty())
         _titleField->requestFocus();
     else
         view()->textArea()->requestFocus();
@@ -161,8 +240,8 @@ void NormalMode::onEnter()
 {
     view()->hideAllPageActions();
 
-    setLocked(view()->buffer()->locked());
-    conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
+    reloadLocked();
+    conn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(reloadLocked()));
     // disable page navigation when focusing the text area
     conn(view()->textArea(), SIGNAL(focusedChanged(bool)),
         view(), SLOT(blockPageKeyListener(bool)));
@@ -179,7 +258,7 @@ void NormalMode::onEnter()
     view()->page()->setTitleBar(_titleBar);
 
     view()->textArea()->setEditable(true);
-    view()->textAreaModKeyListener()->setEnabled(true);
+    _textAreaModKeyListener->setEnabled(true);
 
     view()->textArea()->loseFocus();
     if (_lastFocused) {
@@ -189,9 +268,10 @@ void NormalMode::onEnter()
 
 void NormalMode::onExit()
 {
-    disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
+    disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(reloadLocked()));
     disconn(view()->textArea(), SIGNAL(focusedChanged(bool)),
         view(), SLOT(blockPageKeyListener(bool)));
+    _textAreaModKeyListener->setEnabled(false);
     _lastFocused = view()->textArea()->isFocused();
 }
 
@@ -211,11 +291,12 @@ void NormalMode::onTitleFieldFocusChanged(bool focus)
 
 void NormalMode::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *)
 {
-    view()->handleTextControlBasicModifiedKeys(_titleField->editor(), event);
+    Utility::handleBasicTextControlModifiedKey(_titleField->editor(), event);
 }
 
-void NormalMode::setLocked(bool locked)
+void NormalMode::reloadLocked()
 {
+    bool locked = view()->buffer()->locked();
     view()->textArea()->setEditable(!locked);
     _titleField->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
     _saveAction->setEnabled(!locked);
@@ -224,14 +305,14 @@ void NormalMode::setLocked(bool locked)
     _undoAction->setEnabled(!locked && view()->buffer()->hasUndo());
     _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
     _findAction->setEnabled(!locked);
-    _runAction->setEnabled(!locked && _runProfile && _runProfile->runnable());
     _cloneAction->setEnabled(!locked);
     _closeAction->setEnabled(!locked);
+    reloadRunnable();
 }
 
-void NormalMode::onRunnableChanged(bool runnable)
+void NormalMode::reloadRunnable()
 {
-    _runAction->setEnabled(!view()->buffer()->locked() && runnable);
+    _runAction->setEnabled(!view()->buffer()->locked() && _runProfile && _runProfile->runnable());
 }
 
 void NormalMode::onTranslatorChanged()

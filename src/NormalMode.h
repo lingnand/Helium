@@ -28,8 +28,7 @@ class NormalMode: public ViewMode
     Q_OBJECT
 public:
     NormalMode(View *);
-    void autoFocus(bool goToModeControl);
-    Q_SLOT void setLocked(bool);
+    void autoFocus();
     void onEnter();
     void onExit();
     bb::cascades::TitleBar *titleBar() const;
@@ -39,6 +38,8 @@ private:
 
     bb::cascades::TitleBar *_titleBar;
     bb::cascades::TextField *_titleField;
+
+    ModKeyListener *_textAreaModKeyListener;
 
     bb::cascades::ActionItem *_saveAction;
     bb::cascades::ActionItem *_saveAsAction;
@@ -50,16 +51,22 @@ private:
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_closeAction;
 
+    Q_SLOT void reloadLocked();
+
     /** run profile **/
     RunProfile *_runProfile;
     void setRunProfile(RunProfile *);
-    Q_SLOT void onRunnableChanged(bool);
+    Q_SLOT void reloadRunnable();
+    Q_SLOT void run();
 
+    Q_SLOT void onTextAreaModKeyPressed(bb::cascades::KeyEvent *event);
+    Q_SLOT void onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onTitleFieldFocusChanged(bool focus);
     Q_SLOT void onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onBufferDirtyChanged(bool dirty);
     Q_SLOT void onBufferNameChanged(const QString &);
     Q_SLOT void onBufferFilepathChanged(const QString &);
+    Q_SLOT void onBufferFiletypeChanged(const QString &);
 
     Q_SLOT void onTranslatorChanged();
 };

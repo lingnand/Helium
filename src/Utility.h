@@ -10,6 +10,13 @@
 
 #include <QTextStream>
 
+namespace bb {
+    namespace cascades {
+        class TextEditor;
+        class KeyEvent;
+    }
+}
+
 #define conn(sender, signal, receiver, slot) { \
     bool res = ::QObject::connect(sender, signal, receiver, slot); \
     Q_ASSERT(res); \
@@ -35,6 +42,7 @@ public:
     static void dialog(const QString &confirm, const QString &cancel,
             const QString &title, const QString &body,
             const QObject *receiver=NULL, const char *method=NULL);
+    static void handleBasicTextControlModifiedKey(bb::cascades::TextEditor *, bb::cascades::KeyEvent *);
 };
 
 #endif /* UTILITY_H_ */
