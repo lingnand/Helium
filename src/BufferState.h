@@ -114,7 +114,7 @@ public:
     struct Position {
         int lineIndex;
         int linePosition;
-        Position(): lineIndex(0), linePosition(0) {}
+        Position(): lineIndex(-1), linePosition(-1) {}
     };
     // return the cursorPosition at the beginning of the specified line
     int cursorPositionAtLine(int line) const;
@@ -142,5 +142,6 @@ Q_DECLARE_METATYPE(BufferState)
 QDebug operator<<(QDebug dbg, const BufferLine &line);
 QDebug operator<<(QDebug dbg, const BufferLineState &lineState);
 QDebug operator<<(QDebug dbg, const Range &range);
+QDebug operator<<(QDebug dbg, const BufferState::Position &pos);
 
 #endif /* BUFFERSTATE_H_ */

@@ -229,7 +229,8 @@ void Buffer::parseReplacement(const QList<Replacement> &replaces)
 void Buffer::killLine(View *source, int cursorPosition)
 {
     BufferState::Position pos = state().focus(cursorPosition);
-    if (!state()[pos.lineIndex].line.isEmpty()) {
+    qDebug() << "killing line with position:" << pos;
+    if (pos.lineIndex >= 0 && !state()[pos.lineIndex].line.isEmpty()) {
         StateChangeContext ctx(++_requestId, source);
         BufferState &state = modifyState();
         state.setCursorPosition(cursorPosition - pos.linePosition);

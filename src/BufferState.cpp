@@ -318,3 +318,9 @@ QDebug operator<<(QDebug dbg, const Range &range)
     dbg.nospace() << "Range(from:" << range.from << ", to:" << range.to << ")";
     return dbg.maybeSpace();
 }
+
+QDebug operator<<(QDebug dbg, const BufferState::Position &position)
+{
+    dbg.nospace() << "BufferStatePosition(line:" << position.lineIndex << ", pos:" << position.linePosition << ")";
+    return dbg.maybeSpace();
+}
