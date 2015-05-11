@@ -80,15 +80,15 @@ FindMode::FindMode(View *view):
 {
     // TODO: not only focus the replaceField, but also select the existing content of the replace field
     _findField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
-        .onModKeyPressed(_replaceField, SLOT(requestFocus()))
+        .onModifiedKeyReleased(this, SLOT(onFindFieldModifiedKey(bb::cascades::KeyEvent*)))
+        .onModKeyPressedAndReleased(_replaceField, SLOT(requestFocus()))
         .onTextFieldInputModeChanged(_findField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_findField, SIGNAL(focusedChanged(bool))));
     conn(_findField, SIGNAL(focusedChanged(bool)),
         view, SLOT(blockPageKeyListener(bool)));
     _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent*)))
-        .onModKeyPressed(this, SLOT(findNext()))
+        .onModifiedKeyReleased(this, SLOT(onReplaceFieldModifiedKey(bb::cascades::KeyEvent*)))
+        .onModKeyPressedAndReleased(this, SLOT(findNext()))
         .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_replaceField, SIGNAL(focusedChanged(bool))));
     conn(_replaceField, SIGNAL(focusedChanged(bool)),
@@ -171,17 +171,17 @@ void FindMode::onExactMatchSelected()
     qDebug() << "exact match selected";
 }
 
-void FindMode::onFindFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
+void FindMode::onFindFieldModifiedKey(bb::cascades::KeyEvent *event)
 {
-    onFindFieldsModifiedKeyPressed(_findField->editor(), event);
+    onFindFieldsModifiedKey(_findField->editor(), event);
 }
 
-void FindMode::onReplaceFieldModifiedKeyPressed(bb::cascades::KeyEvent *event)
+void FindMode::onReplaceFieldModifiedKey(bb::cascades::KeyEvent *event)
 {
-    onFindFieldsModifiedKeyPressed(_replaceField->editor(), event);
+    onFindFieldsModifiedKey(_replaceField->editor(), event);
 }
 
-void FindMode::onFindFieldsModifiedKeyPressed(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
+void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
 {
     switch (event->keycap()) {
         case KEYCODE_T:

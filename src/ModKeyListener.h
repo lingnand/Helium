@@ -38,8 +38,8 @@ public:
           {
           }
     public:
-          BuilderType& onModifiedKeyPressed(const QObject *receiver, const char *method) {
-              this->connect(SIGNAL(modifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)), receiver, method);
+          BuilderType& onModifiedKeyReleased(const QObject *receiver, const char *method) {
+              this->connect(SIGNAL(modifiedKeyReleased(bb::cascades::KeyEvent*, ModKeyListener*)), receiver, method);
               return this->builder();
           }
 
@@ -53,8 +53,8 @@ public:
               return this->builder();
           }
 
-          BuilderType& onModKeyPressed(const QObject* receiver, const char *method) {
-              this->connect(SIGNAL(modKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)), receiver, method);
+          BuilderType& onModKeyPressedAndReleased(const QObject* receiver, const char *method) {
+              this->connect(SIGNAL(modKeyPressedAndReleased(bb::cascades::KeyEvent*, ModKeyListener*)), receiver, method);
               return this->builder();
           }
 
@@ -73,8 +73,9 @@ public:
         return Builder(modKeycap);
     }
 Q_SIGNALS:
-    void modifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
-    void modKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *listener);
+    void modifiedKeyReleased(bb::cascades::KeyEvent *event, ModKeyListener *listener);
+    // this is when modKey is pressed and released alone, not modifying any key
+    void modKeyPressedAndReleased(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     void textFieldInputModeChanged(bb::cascades::TextFieldInputMode::Type newInputMode);
     void textAreaInputModeChanged(bb::cascades::TextAreaInputMode::Type newInputMode);
 private:

@@ -29,8 +29,8 @@ NormalMode::NormalMode(View *view):
     ViewMode(view),
     _runProfile(NULL),
     _textAreaModKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onTextAreaModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
-        .onModKeyPressed(this, SLOT(onTextAreaModKeyPressed(bb::cascades::KeyEvent*)))
+        .onModifiedKeyReleased(this, SLOT(onTextAreaModifiedKey(bb::cascades::KeyEvent*, ModKeyListener*)))
+        .onModKeyPressedAndReleased(this, SLOT(onTextAreaModKey(bb::cascades::KeyEvent*)))
         .onTextAreaInputModeChanged(view->textArea(), SLOT(setInputMode(bb::cascades::TextAreaInputMode::Type)))
         .modOffOn(view->textArea(), SIGNAL(focusedChanged(bool)))),
     _saveAction(ActionItem::create()
@@ -82,8 +82,8 @@ NormalMode::NormalMode(View *view):
     conn(_titleField, SIGNAL(focusedChanged(bool)),
         view, SLOT(blockPageKeyListener(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyPressed(this, SLOT(onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent*, ModKeyListener*)))
-        .onModKeyPressed(view->textArea(), SLOT(requestFocus()))
+        .onModifiedKeyReleased(this, SLOT(onTitleFieldModifiedKey(bb::cascades::KeyEvent*, ModKeyListener*)))
+        .onModKeyPressedAndReleased(view->textArea(), SLOT(requestFocus()))
         .onTextFieldInputModeChanged(_titleField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_titleField, SIGNAL(focusedChanged(bool))));
     // the default titlebar
@@ -147,12 +147,12 @@ TextField *NormalMode::titleField() const
     return _titleField;
 }
 
-void NormalMode::onTextAreaModKeyPressed(KeyEvent *event)
+void NormalMode::onTextAreaModKey(KeyEvent *event)
 {
     view()->textArea()->editor()->insertPlainText(event->unicode());
 }
 
-void NormalMode::onTextAreaModifiedKeyPressed(KeyEvent *event, ModKeyListener *listener)
+void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener)
 {
     switch (event->keycap()) {
         case KEYCODE_T: // Tab
@@ -289,7 +289,7 @@ void NormalMode::onTitleFieldFocusChanged(bool focus)
     }
 }
 
-void NormalMode::onTitleFieldModifiedKeyPressed(bb::cascades::KeyEvent *event, ModKeyListener *)
+void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *)
 {
     Utility::handleBasicTextControlModifiedKey(_titleField->editor(), event);
 }

@@ -61,25 +61,25 @@ void ModKeyListener::onKeyEvent(bb::cascades::KeyEvent *event)
     if (!_enabled)
         return;
     if (event->isPressed()) {
-        if (_modPressed) {
-            if (event->keycap() == _modKeycap) {
+        if (event->keycap() == _modKeycap) {
+            if (_modPressed) {
                 if (!_modUsed && event->duration() > MOD_TIMEOUT) {
                     _modUsed = true;
                 }
             } else {
-                _modUsed = true;
-                emit modifiedKeyPressed(event, this);
-            }
-        } else {
-            if (event->keycap() == _modKeycap) {
                 modOn();
                 _modUsed = false;
             }
         }
     } else {
-        if (event->keycap() == _modKeycap) {
-            if (modOff() && !_modUsed) {
-                emit modKeyPressed(event, this);
+        if (_modPressed) {
+            if (event->keycap() == _modKeycap) {
+                if (modOff() && !_modUsed) {
+                    emit modKeyPressedAndReleased(event, this);
+                }
+            } else {
+                _modUsed = true;
+                emit modifiedKeyReleased(event, this);
             }
         }
     }
