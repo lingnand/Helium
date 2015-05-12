@@ -109,7 +109,7 @@ void HtmlBufferChangeParser::reachedEnd() {}
 QDebug operator<<(QDebug dbg, const ChangedBufferLine &line)
 {
     dbg.nospace() << "ChangedBufferLine(index:" << line.index << ", " << line.line << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }
 
 QDebug operator<<(QDebug dbg, const BufferStateChange &change)
@@ -117,5 +117,5 @@ QDebug operator<<(QDebug dbg, const BufferStateChange &change)
     dbg.nospace() << "Change(delayable:" << change.delayable() <<
             ", startIndex:" << change.startIndex() <<
             ", " << QList<ChangedBufferLine>(change) << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }

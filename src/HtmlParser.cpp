@@ -115,5 +115,5 @@ QDebug operator<<(QDebug dbg, const ParserPosition &pos)
 {
     dbg.nospace() << "ParserPosition(charCount:" << pos.charCount <<
             ", htmlCount:" << pos.htmlCount << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }

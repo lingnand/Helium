@@ -8,11 +8,11 @@
 QDebug operator<<(QDebug dbg, const TextSelection &selection)
 {
     dbg.nospace() << "TextSelection(" << selection.start << "," << selection.end << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }
 
 QDebug operator<<(QDebug dbg, const Replacement &replacement)
 {
     dbg.nospace() << "Replacement(" << replacement.selection << ", " << replacement.replacement << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }

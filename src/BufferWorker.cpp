@@ -390,5 +390,5 @@ QDebug operator<<(QDebug dbg, const BufferLineState *lineState)
 QDebug operator<<(QDebug dbg, const Progress &progress)
 {
     dbg.nospace() << "Progress(" << progress.current << "," << progress.cap << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }

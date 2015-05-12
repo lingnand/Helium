@@ -305,22 +305,22 @@ ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginI
 
 QDebug operator<<(QDebug dbg, const BufferLine &line) {
     dbg.nospace() << "{" << line.plainText() << "}";
-    return dbg.maybeSpace();
+    return dbg.space();
 }
 
 QDebug operator<<(QDebug dbg, const BufferLineState &lineState) {
     dbg.nospace() << "BufferLineState(" << lineState.line << ", " << lineState.highlightText << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }
 
 QDebug operator<<(QDebug dbg, const Range &range)
 {
     dbg.nospace() << "Range(from:" << range.from << ", to:" << range.to << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }
 
 QDebug operator<<(QDebug dbg, const BufferState::Position &position)
 {
     dbg.nospace() << "BufferStatePosition(line:" << position.lineIndex << ", pos:" << position.linePosition << ")";
-    return dbg.maybeSpace();
+    return dbg.space();
 }
