@@ -35,6 +35,7 @@ typedef std::map<std::string, std::string> SubstitutionMapping;
  */
 class TextStyle {
 private:
+    SubstitutionMapping substitutionmapping;
     typedef std::vector<std::string> StringVector;
     typedef std::vector<int> IndexVector;
     typedef std::map<std::string, IndexVector> SubstitutionIndexes;

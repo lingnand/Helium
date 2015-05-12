@@ -18,8 +18,6 @@ using namespace std;
 
 namespace srchilite {
 
-static SubstitutionMapping substitutionmapping;
-
 TextStyle::TextStyle(const string &s,const char **vars) : repr((s.size() ? s : TEXT_VAR_TEXT)),
   invalid(true)
 {

@@ -151,6 +151,11 @@ MultiViewPane *View::parent() const
     return (MultiViewPane *) QObject::parent();
 }
 
+bool View::active() const
+{
+    return parent() && parent()->activeTab() == this;
+}
+
 Buffer *View::buffer() const
 {
     return _buffer;
@@ -222,7 +227,7 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(dirtyChanged(bool)),
                 this, SIGNAL(bufferDirtyChanged(bool)));
 
-            onBufferFiletypeChanged(_buffer->filetype(), false);
+            onBufferFiletypeChanged(_buffer->filetype());
             conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
                 this, SLOT(onBufferFiletypeChanged(const QString&)));
 
@@ -408,13 +413,13 @@ void View::onTextAreaCursorPositionChanged()
         _partialHighlightUpdateTimer.start();
 }
 
-void View::onBufferFiletypeChanged(const QString &filetype, bool toast)
+void View::onBufferFiletypeChanged(const QString &filetype)
 {
     if (filetype.isEmpty()) {
         setImageSource(QUrl("asset:///images/filetype/_blank.png"));
     } else {
         setImageSource(QUrl("asset:///images/filetype/"+filetype+".png"));
-        if (toast)
+        if (active())
             Utility::toast(tr("Filetype set to %1").arg(filetype));
     }
     emit bufferFiletypeChanged(filetype);
@@ -527,7 +532,7 @@ void View::onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::
 
 void View::pickFileToOpen()
 {
-    filePicker()->setMode(pickers::FilePickerMode::Picker);
+    filePicker()->setMode(pickers::FilePickerMode::PickerMultiple);
     filePicker()->setTitle(tr("Open"));
     filePicker()->open();
 }
@@ -535,9 +540,23 @@ void View::pickFileToOpen()
 void View::onFileSelected(const QStringList &files)
 {
     switch (filePicker()->mode()) {
-        case pickers::FilePickerMode::Picker:
-            if (files[0] != _buffer->filepath()) {
-                Buffer *b =parent()->bufferForFilepath(files[0]);
+        case pickers::FilePickerMode::PickerMultiple: {
+            int index = parent()->indexOf(this), i = 0;
+            Buffer *b;
+            for (; i < files.size()-1; i++) {
+                b = parent() -> bufferForFilepath(files[i]);
+                if (!b) {
+                    b = parent()->newBuffer();
+                    b->load(files[i]);
+                }
+                parent()->insertView(index, new View(b));
+            }
+            qDebug() << i << "views inserted during opening";
+            if (i > 0) {
+                Utility::toast(tr("%1 new views inserted").arg(i));
+            }
+            if (files[i] != _buffer->filepath()) {
+                b =parent()->bufferForFilepath(files[i]);
                 if (b) {
                     setBuffer(b);
                 } else {
@@ -545,10 +564,11 @@ void View::onFileSelected(const QStringList &files)
                         // not only bound to this view!
                         setBuffer(parent()->newBuffer());
                     }
-                    _buffer->load(files[0]);
+                    _buffer->load(files[i]);
                 }
             }
             break;
+        }
         case pickers::FilePickerMode::Saver:
             _buffer->save(files[0]);
             break;

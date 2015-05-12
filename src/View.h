@@ -49,6 +49,7 @@ public:
     void reattachPage();
     void hideAllPageActions();
     MultiViewPane *parent() const;
+    bool active() const;
     bb::cascades::TextArea *textArea() const;
     Buffer *buffer() const;
     Q_SLOT void setBuffer(Buffer* buffer);
@@ -112,7 +113,7 @@ private:
     Q_SLOT void onPageKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString &text);
     Q_SLOT void onTextAreaCursorPositionChanged();
-    Q_SLOT void onBufferFiletypeChanged(const QString &filetype, bool toast=true);
+    Q_SLOT void onBufferFiletypeChanged(const QString &filetype);
     Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);
     Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
     Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);

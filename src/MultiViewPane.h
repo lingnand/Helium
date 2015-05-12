@@ -42,6 +42,7 @@ public:
     void cloneActive(bool toast=true); // clone the current
     void removeView(View *, bool toast=true);
     Q_SLOT void addNewView(bool toast=true);
+    void insertView(int index, View *view);
     Buffer *newBuffer();
     Buffer *bufferForFilepath(const QString &filepath);
     void removeBuffer(Buffer *buffer);
@@ -60,7 +61,6 @@ private:
     View *_lastActive;
     // the list of buffers driving the views
     QList<Buffer *> _buffers;
-    void insertView(int index, View *view);
 };
 
 #endif /* MULTIVIEWPANE_H_ */

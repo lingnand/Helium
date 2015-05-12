@@ -226,5 +226,9 @@
         <source>Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>%1 new views inserted</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>
