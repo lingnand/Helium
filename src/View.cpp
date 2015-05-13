@@ -549,7 +549,7 @@ void View::onFileSelected(const QStringList &files)
                     b = parent()->newBuffer();
                     b->load(files[i]);
                 }
-                parent()->insertView(index, new View(b));
+                parent()->insertView(index+i, new View(b));
             }
             qDebug() << i << "views inserted during opening";
             if (i > 0) {
