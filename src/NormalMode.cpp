@@ -16,6 +16,8 @@
 #include <bb/cascades/KeyEvent>
 #include <bb/cascades/TextFieldTitleBarKindProperties>
 #include <RunProfile.h>
+#include <RunProfileManager.h>
+#include <Filetype.h>
 #include <NormalMode.h>
 #include <Utility.h>
 #include <ModKeyListener.h>
@@ -108,9 +110,9 @@ NormalMode::NormalMode(View *view):
     conn(view, SIGNAL(bufferFilepathChanged(const QString&)),
             this, SLOT(onBufferFilepathChanged(const QString&)))
 
-    onBufferFiletypeChanged(view->buffer()->filetype());
-    conn(view, SIGNAL(bufferFiletypeChanged(const QString&)),
-            this, SLOT(onBufferFiletypeChanged(const QString&)))
+    onBufferFiletypeChanged(NULL, view->buffer()->filetype());
+    conn(view, SIGNAL(bufferFiletypeChanged(Filetype*, Filetype*)),
+            this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)))
 }
 
 void NormalMode::setRunProfile(RunProfile *profile)
@@ -222,9 +224,21 @@ void NormalMode::onBufferFilepathChanged(const QString &filepath)
     _titleField->setEnabled(filepath.isEmpty());
 }
 
-void NormalMode::onBufferFiletypeChanged(const QString &filetype)
+void NormalMode::onBufferFiletypeChanged(Filetype *from, Filetype *to)
 {
-    setRunProfile(RunProfile::createRunProfile(view(), filetype));
+    if (from) {
+        from->disconnect(this);
+    }
+    if (to) {
+        onRunProfileManagerChanged(to->runProfileManager());
+        conn(to, SIGNAL(runProfileManagerChanged(RunProfileManager*)),
+                this, SLOT(onRunProfileManagerChanged(RunProfileManager*)));
+    }
+}
+
+void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager)
+{
+    setRunProfile(runProfileManager ? runProfileManager->createRunProfile(view()) : NULL);
 }
 
 void NormalMode::autoFocus()

@@ -300,6 +300,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferState.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfile.cpp) \
+        $$quote($$BASEDIR/src/CmdRunProfileManager.cpp) \
+        $$quote($$BASEDIR/src/Filetype.cpp) \
+        $$quote($$BASEDIR/src/FiletypeMap.cpp) \
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
@@ -309,6 +312,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/NormalMode.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/RunProfile.cpp) \
+        $$quote($$BASEDIR/src/RunProfileManager.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
@@ -386,6 +390,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferState.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
         $$quote($$BASEDIR/src/CmdRunProfile.h) \
+        $$quote($$BASEDIR/src/CmdRunProfileManager.h) \
+        $$quote($$BASEDIR/src/Filetype.h) \
+        $$quote($$BASEDIR/src/FiletypeMap.h) \
         $$quote($$BASEDIR/src/FindMode.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
@@ -396,6 +403,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/NormalMode.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
         $$quote($$BASEDIR/src/RunProfile.h) \
+        $$quote($$BASEDIR/src/RunProfileManager.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \

@@ -6,6 +6,7 @@
  */
 
 #include <BufferHistory.h>
+#include <Filetype.h>
 
 // BufferHistory
 
@@ -17,7 +18,7 @@ BufferHistory::BufferHistory(int upperLimit): _upperLimit(upperLimit), _currentI
 void BufferHistory::clear()
 {
     // we should retain the should filetype
-    QString oldft = current().filetype();
+    Filetype *oldft = current().filetype();
     QList<BufferState>::clear();
     _currentIndex=0;
     append(BufferState(oldft));

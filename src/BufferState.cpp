@@ -6,6 +6,8 @@
  */
 
 #include <BufferState.h>
+#include <Helium.h>
+#include <Filetype.h>
 
 // BufferLine
 
@@ -157,15 +159,15 @@ QString BufferLine::preText() const
 
 // BufferState
 
-BufferState::BufferState(const QString &filetype, int cursorPosition):
+BufferState::BufferState(Filetype *filetype, int cursorPosition):
         _filetype(filetype), _cursorPosition(cursorPosition) {}
 
-const QString &BufferState::filetype() const
+Filetype *BufferState::filetype() const
 {
     return _filetype;
 }
 
-void BufferState::setFiletype(const QString &filetype)
+void BufferState::setFiletype(Filetype *filetype)
 {
     _filetype = filetype;
 }
@@ -246,13 +248,7 @@ ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginI
     if (empty())
         return pos;
     output << "<pre>";
-    if (filetype().isEmpty()) {
-        at(0).line.writePreText(output);
-        for (int i = 1; i < size(); i++) {
-            output << '\n';
-            at(i).line.writePreText(output);
-        }
-    } else {
+    if (_filetype->highlightEnabled()) {
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;
@@ -295,6 +291,12 @@ ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginI
             output << '\n';
         }
         for (; i < size(); i++) {
+            output << '\n';
+            at(i).line.writePreText(output);
+        }
+    } else {
+        at(0).line.writePreText(output);
+        for (int i = 1; i < size(); i++) {
             output << '\n';
             at(i).line.writePreText(output);
         }

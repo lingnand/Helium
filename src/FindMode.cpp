@@ -26,6 +26,7 @@
 #include <Buffer.h>
 #include <ModKeyListener.h>
 #include <SignalBlocker.h>
+#include <Filetype.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -216,8 +217,7 @@ void FindMode::select(const TextSelection &selection)
     // use lose focus and then refocus to force scrolling to the right position
     view()->textArea()->loseFocus();
     view()->textArea()->editor()->setSelection(selection.start, selection.end);
-    if (!view()->buffer()->filetype().isEmpty())
-        view()->updateTextAreaPartialHighlight();
+    view()->updateTextAreaPartialHighlight();
     view()->textArea()->requestFocus();
 }
 

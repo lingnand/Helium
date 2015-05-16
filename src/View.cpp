@@ -21,6 +21,7 @@
 #include <SignalBlocker.h>
 #include <NormalMode.h>
 #include <FindMode.h>
+#include <Filetype.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -227,9 +228,9 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(dirtyChanged(bool)),
                 this, SIGNAL(bufferDirtyChanged(bool)));
 
-            onBufferFiletypeChanged(_buffer->filetype());
-            conn(_buffer, SIGNAL(filetypeChanged(const QString&)),
-                this, SLOT(onBufferFiletypeChanged(const QString&)));
+            onBufferFiletypeChanged(NULL, _buffer->filetype());
+            conn(_buffer, SIGNAL(filetypeChanged(Filetype*, Filetype*)),
+                this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)));
 
             conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
                 this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
@@ -263,8 +264,7 @@ void View::setHighlightRangeLimit(int limit)
     if (limit != _highlightRangeLimit) {
         qDebug() << "setting highlightRangeLimit to" << _highlightRangeLimit;
         _highlightRangeLimit = limit;
-        if (!_buffer->filetype().isEmpty())
-            updateTextAreaPartialHighlight();
+        updateTextAreaPartialHighlight();
     }
 }
 
@@ -307,8 +307,7 @@ void View::scrollTo(int cursorPosition)
 {
     SignalBlocker blocker(_textArea);
     _textArea->editor()->setCursorPosition(cursorPosition);
-    if (!_buffer->filetype().isEmpty())
-        updateTextAreaPartialHighlight();
+    updateTextAreaPartialHighlight();
     _textArea->requestFocus();
     _textArea->loseFocus();
 }
@@ -381,6 +380,8 @@ Range View::partialHighlightRange(const BufferState &st, Range focus)
 
 void View::updateTextAreaPartialHighlight()
 {
+    if (!_buffer->filetype() || !_buffer->filetype()->highlightEnabled())
+        return;
     SignalBlocker blocker(_textArea);
     int start = _textArea->editor()->selectionStart();
     int end = _textArea->editor()->selectionEnd();
@@ -406,23 +407,22 @@ void View::updateTextAreaPartialHighlight()
 
 void View::onTextAreaCursorPositionChanged()
 {
-    if (_buffer->filetype().isEmpty()) {
+    if (!_buffer->filetype() || !_buffer->filetype()->highlightEnabled())
         return;
-    }
     if (!_partialHighlightUpdateTimer.isActive())
         _partialHighlightUpdateTimer.start();
 }
 
-void View::onBufferFiletypeChanged(const QString &filetype)
+void View::onBufferFiletypeChanged(Filetype *from, Filetype *to)
 {
-    if (filetype.isEmpty()) {
-        setImageSource(QUrl("asset:///images/filetype/_blank.png"));
-    } else {
-        setImageSource(QUrl("asset:///images/filetype/"+filetype+".png"));
+    if (to) {
+        setImageSource(QUrl("asset:///images/filetype/"+to->name()+".png"));
         if (active())
-            Utility::toast(tr("Filetype set to %1").arg(filetype));
+            Utility::toast(tr("Filetype set to %1").arg(to->name()));
+    } else {
+        setImageSource(QUrl("asset:///images/filetype/_blank.png"));
     }
-    emit bufferFiletypeChanged(filetype);
+    emit bufferFiletypeChanged(from, to);
 }
 
 // Is textChanging or cursorPositionChanged emitted first?

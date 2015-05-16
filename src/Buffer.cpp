@@ -9,7 +9,9 @@
 #include <QTextStream>
 #include <QDebug>
 #include <Buffer.h>
+#include <Helium.h>
 #include <SignalBlocker.h>
+#include <Filetype.h>
 #include <Utility.h>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
@@ -24,10 +26,8 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _locked(false), _dirty(false)
 {
     _worker.moveToThread(&_workerThread);
-    conn(this, SIGNAL(workerInitialize()),
-            &_worker, SLOT(initialize()));
-    conn(this, SIGNAL(workerSetFiletype(StateChangeContext&, BufferState&, const QString&, Progress&)),
-         &_worker, SLOT(setFiletype(StateChangeContext&, BufferState&, const QString&, Progress&)));
+    conn(this, SIGNAL(workerSetFiletype(StateChangeContext&, BufferState&, Filetype*, Progress&)),
+         &_worker, SLOT(setFiletype(StateChangeContext&, BufferState&, Filetype*, Progress&)));
     conn(this, SIGNAL(workerParseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, Progress&)),
          &_worker, SLOT(parseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, Progress&)));
     conn(this, SIGNAL(workerMergeChange(StateChangeContext&, BufferState&, const BufferStateChange&, Progress&)),
@@ -57,8 +57,6 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     conn(&_worker, SIGNAL(stateSavedToFile(const QString&)),
             this, SIGNAL(savedToFile(const QString&)));
     _workerThread.start();
-    // initialize in the background
-    emit workerInitialize();
 
     conn(&_states, SIGNAL(retractableChanged(bool)),
             this, SIGNAL(hasUndosChanged(bool)));
@@ -103,7 +101,7 @@ void Buffer::_setName(const QString &name, bool setft, Progress &progress)
     if (name != _name) {
         _name = name;
         if (setft)
-            _setFiletype(_worker.filetypeForName(name), progress);
+            _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(name), progress);
         emit nameChanged(name);
     }
 }
@@ -119,18 +117,18 @@ void Buffer::setFilepath(const QString &filepath, bool setFiletype, Progress &pr
     }
 }
 
-const QString &Buffer::filetype() const
+Filetype *Buffer::filetype() const
 {
     return state().filetype();
 }
 
-void Buffer::setFiletype(const QString &filetype)
+void Buffer::setFiletype(Filetype *filetype)
 {
     Progress progress;
     _setFiletype(filetype, progress);
 }
 
-void Buffer::_setFiletype(const QString &filetype, Progress &progress)
+void Buffer::_setFiletype(Filetype *filetype, Progress &progress)
 {
     BufferState &st = _states.current();
     if (filetype != st.filetype()) {
@@ -154,7 +152,7 @@ void Buffer::handleStateChangeResult(const StateChangeContext &ctx, const Buffer
         return;
     }
     if (newSt.filetype() != filetype()) {
-        emit filetypeChanged(newSt.filetype());
+        emit filetypeChanged(filetype(), newSt.filetype());
     }
     _states.current() = newSt;
     setLocked(false);
@@ -179,15 +177,7 @@ void Buffer::parseChange(View *source, const QString &content, ParserPosition st
 {
     StateChangeContext ctx(++_requestId, source);
     BufferState &state = modifyState();
-    if (state.filetype().isEmpty()) {
-        // for empty filetype we can process the change in the background
-        // without locking because each change is considered complete
-        // furthermore, because of completeness we can throw away the
-        // current state completely
-        BufferState empty;
-        Progress progress(0, 0);
-        emit workerParseAndMergeChange(ctx, empty, content, start, cursorPosition, progress);
-    } else {
+    if (state.filetype() && state.filetype()->highlightEnabled()) {
         BufferStateChange change = _worker.parseBufferChange(state, content, start, cursorPosition);
         qDebug() << "change:" << change;
         qDebug() << "changeSize:" << change.size();
@@ -200,6 +190,14 @@ void Buffer::parseChange(View *source, const QString &content, ParserPosition st
             _worker.mergeChange(ctx, state, change, progress);
             emit stateChanged(ctx, state);
         }
+    } else {
+        // for empty filetype we can process the change in the background
+        // without locking because each change is considered complete
+        // furthermore, because of completeness we can throw away the
+        // current state completely
+        BufferState empty;
+        Progress progress(0, 0);
+        emit workerParseAndMergeChange(ctx, empty, content, start, cursorPosition, progress);
     }
 }
 
@@ -259,7 +257,7 @@ void Buffer::redo()
 
 void Buffer::traverse(bool (BufferHistory::*fn)())
 {
-    QString ft = filetype();
+    Filetype *ft = filetype();
     if ((_states.*fn)()) {
         StateChangeContext ctx(++_requestId, NULL, true, true);
         setDirty(true);

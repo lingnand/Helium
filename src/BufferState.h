@@ -98,6 +98,9 @@ struct BufferLineState {
     }
 };
 
+
+class Filetype;
+
 // a buffer state is a snapshot of the current buffer content
 // it consists of a list of BufferLine's
 // each line is identified by its index inside the BufferState
@@ -109,7 +112,7 @@ struct BufferLineState {
 class BufferState : public QList<BufferLineState>
 {
 public:
-    BufferState(const QString &filetype=QString(), int cursorPosition=0);
+    BufferState(Filetype *filetype=NULL, int cursorPosition=0);
     virtual ~BufferState() {}
     struct Position {
         int lineIndex;
@@ -129,12 +132,12 @@ public:
     ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;
     ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
     ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex = 0) const;
-    const QString &filetype() const;
+    Filetype *filetype() const;
     int cursorPosition() const;
     void setCursorPosition(int cursorPosition);
-    void setFiletype(const QString &filetype);
+    void setFiletype(Filetype *filetype);
 private:
-    QString _filetype;
+    Filetype *_filetype;
     int _cursorPosition;
 };
 Q_DECLARE_METATYPE(BufferState)

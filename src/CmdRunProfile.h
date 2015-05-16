@@ -30,6 +30,7 @@ public:
     CmdRunProfile(View *, const QString &cmd);
     void run();
     Q_SLOT void rerun();
+    Q_SLOT void setCmd(const QString &cmd);
     bool runnable() const;
     void exit();
 private:

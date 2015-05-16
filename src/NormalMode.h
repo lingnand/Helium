@@ -22,6 +22,8 @@ namespace bb {
 class View;
 class ModKeyListener;
 class RunProfile;
+class RunProfileManager;
+class Filetype;
 
 class NormalMode: public ViewMode
 {
@@ -66,7 +68,8 @@ private:
     Q_SLOT void onBufferDirtyChanged(bool dirty);
     Q_SLOT void onBufferNameChanged(const QString &);
     Q_SLOT void onBufferFilepathChanged(const QString &);
-    Q_SLOT void onBufferFiletypeChanged(const QString &);
+    Q_SLOT void onBufferFiletypeChanged(Filetype *from, Filetype *to);
+    Q_SLOT void onRunProfileManagerChanged(RunProfileManager *);
 
     Q_SLOT void onTranslatorChanged();
 };

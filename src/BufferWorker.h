@@ -9,11 +9,8 @@
 #include <HighlightStateData.h>
 #include <Replacement.h>
 
-namespace srchilite {
-    class LangMap;
-}
-
 class View;
+class Filetype;
 
 struct Progress {
     float current;
@@ -28,11 +25,9 @@ class BufferWorker : public QObject
 public:
     BufferWorker();
     virtual ~BufferWorker() {}
-    const QString &filetype();
-    QString filetypeForName(const QString &name);
-    Q_SLOT void initialize();
+    Filetype *filetype() const;
     // all these functions always do the specified job
-    Q_SLOT void setFiletype(StateChangeContext &, BufferState &, const QString &filetype, Progress &);
+    Q_SLOT void setFiletype(StateChangeContext &, BufferState &, Filetype *, Progress &);
     Q_SLOT BufferStateChange parseBufferChange(BufferState &, const QString &content, ParserPosition, int cursorPosition);
     Q_SLOT void parseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
     Q_SLOT void mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
@@ -49,17 +44,14 @@ Q_SIGNALS:
     void stateSavedToFile(const QString &filename);
     void stateLoadedFromFile(const StateChangeContext &, const BufferState &, const QString &filename);
 private:
-    QString _filetype;
-    QMutex _langMapMut;
+    Filetype *_filetype;
     QMutex _mut;
 
     HtmlBufferChangeParser _bufferChangeParser;
     HighlightStateData::ptr _mainStateData;
     srchilite::SourceHighlight _sourceHighlight;
-    srchilite::LangMap *_langMap;
 
-    QString _filetypeForName(const QString &name);
-    void _setFiletype(const QString &filetype);
+    void _setFiletype(Filetype *filetype);
     void writePlainText(const BufferState &state, QTextStream &output, Progress &);
     BufferStateChange _parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition);
     void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &progress);

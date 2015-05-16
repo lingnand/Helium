@@ -33,6 +33,7 @@
 #include <BufferHistory.h>
 
 class View;
+class Filetype;
 
 class Buffer : public QObject
 {
@@ -49,8 +50,8 @@ public:
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name);
     const QString &filepath() const; // the filepath of the buffer, empty if not yet bound
-    const QString &filetype() const;
-    Q_SLOT void setFiletype(const QString &filetype);
+    Filetype *filetype() const;
+    Q_SLOT void setFiletype(Filetype *);
     const BufferState &state() const;
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
     Q_SLOT void parseReplacement(const Replacement &replace);
@@ -71,7 +72,7 @@ Q_SIGNALS:
     void dirtyChanged(bool);
     void nameChanged(const QString &name);
     void filepathChanged(const QString &filepath);
-    void filetypeChanged(const QString &filetype);
+    void filetypeChanged(Filetype *from, Filetype *to);
     void stateChanged(const StateChangeContext &, const BufferState &);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
@@ -79,8 +80,7 @@ Q_SIGNALS:
     void hasUndosChanged(bool hasUndos);
     void hasRedosChanged(bool hasRedos);
     // worker
-    void workerInitialize();
-    void workerSetFiletype(StateChangeContext &, BufferState &, const QString &filetype, Progress &);
+    void workerSetFiletype(StateChangeContext &, BufferState &, Filetype *, Progress &);
     void workerParseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
     void workerMergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
     void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
@@ -110,7 +110,7 @@ private:
     void setDirty(bool);
 
     void _setName(const QString &name, bool setFiletype, Progress &);
-    void _setFiletype(const QString &filetype, Progress &);
+    void _setFiletype(Filetype *, Progress &);
     void setFilepath(const QString &filepath, bool setFiletype, Progress &);
     void traverse(bool (BufferHistory::*fn)());
     Q_SLOT void handleStateChangeResult(const StateChangeContext &, const BufferState &);

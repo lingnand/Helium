@@ -1,0 +1,38 @@
+/*
+ * Filetype.h
+ *
+ *  Created on: May 15, 2015
+ *      Author: lingnan
+ */
+
+#ifndef FILETYPE_H_
+#define FILETYPE_H_
+
+class RunProfileManager;
+
+class Filetype : public QObject
+{
+    Q_OBJECT
+public:
+    Filetype(const QString &name=QString(),
+            bool highlightEnabled=true,
+            RunProfileManager *runProfileManager=NULL,
+            QObject *parent=NULL);
+    const QString &name() const;
+    std::string langName() const; // for working with srchilite
+    RunProfileManager *runProfileManager() const;
+    void setRunProfileManager(RunProfileManager *);
+    bool highlightEnabled() const;
+    void setHighlightEnabled(bool);
+Q_SIGNALS:
+    void runProfileManagerChanged(RunProfileManager *to);
+    void highlightEnabledChanged(bool enabled);
+private:
+    QString _name;
+    bool _highlightEnabled;
+    RunProfileManager *_runProfileManager;
+};
+
+QDebug operator<<(QDebug, const Filetype *);
+
+#endif /* FILETYPE_H_ */

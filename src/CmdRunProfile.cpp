@@ -105,6 +105,13 @@ void CmdRunProfile::rerun()
     _process.start("/bin/sh", args);
 }
 
+void CmdRunProfile::setCmd(const QString &cmd)
+{
+    if (cmd != _cmd) {
+        _cmd = cmd;
+    }
+}
+
 bool CmdRunProfile::runnable() const
 {
     return _runnable;
