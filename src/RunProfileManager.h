@@ -8,6 +8,7 @@
 #ifndef RUNPROFILEMANAGER_H_
 #define RUNPROFILEMANAGER_H_
 
+class Filetype;
 class RunProfile;
 class View;
 
@@ -15,7 +16,7 @@ class RunProfileManager : public QObject
 {
     Q_OBJECT
 public:
-    RunProfileManager(QObject *parent=NULL);
+    Filetype *parent() const;
     virtual RunProfile *createRunProfile(View *) = 0;
 };
 

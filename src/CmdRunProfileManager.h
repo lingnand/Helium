@@ -14,8 +14,9 @@ class CmdRunProfileManager: public RunProfileManager
 {
     Q_OBJECT
 public:
-    CmdRunProfileManager(const QString &cmd, QObject *parent=NULL);
+    CmdRunProfileManager(const QString &cmd);
     RunProfile *createRunProfile(View *);
+    const QString &cmd() const;
     void setCmd(const QString &cmd);
 Q_SIGNALS:
     void cmdChanged(const QString &cmd);

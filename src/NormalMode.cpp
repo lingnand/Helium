@@ -110,7 +110,7 @@ NormalMode::NormalMode(View *view):
     conn(view, SIGNAL(bufferFilepathChanged(const QString&)),
             this, SLOT(onBufferFilepathChanged(const QString&)))
 
-    onBufferFiletypeChanged(NULL, view->buffer()->filetype());
+    onBufferFiletypeChanged(view->buffer()->filetype());
     conn(view, SIGNAL(bufferFiletypeChanged(Filetype*, Filetype*)),
             this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)))
 }
@@ -120,7 +120,6 @@ void NormalMode::setRunProfile(RunProfile *profile)
     if (profile != _runProfile) {
         if (_runProfile) {
             _runProfile->disconnect(this);
-            _runAction->disconnect();
             _runProfile->exit();
             _runProfile->deleteLater();
         }
@@ -224,14 +223,14 @@ void NormalMode::onBufferFilepathChanged(const QString &filepath)
     _titleField->setEnabled(filepath.isEmpty());
 }
 
-void NormalMode::onBufferFiletypeChanged(Filetype *from, Filetype *to)
+void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
 {
-    if (from) {
-        from->disconnect(this);
+    if (old) {
+        old->disconnect(this);
     }
-    if (to) {
-        onRunProfileManagerChanged(to->runProfileManager());
-        conn(to, SIGNAL(runProfileManagerChanged(RunProfileManager*)),
+    if (change) {
+        onRunProfileManagerChanged(change->runProfileManager());
+        conn(change, SIGNAL(runProfileManagerChanged(RunProfileManager*, RunProfileManager*)),
                 this, SLOT(onRunProfileManagerChanged(RunProfileManager*)));
     }
 }

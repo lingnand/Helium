@@ -72,7 +72,7 @@ Q_SIGNALS:
     void dirtyChanged(bool);
     void nameChanged(const QString &name);
     void filepathChanged(const QString &filepath);
-    void filetypeChanged(Filetype *from, Filetype *to);
+    void filetypeChanged(Filetype *change, Filetype *old);
     void stateChanged(const StateChangeContext &, const BufferState &);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished

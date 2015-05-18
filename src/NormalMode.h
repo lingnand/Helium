@@ -68,7 +68,7 @@ private:
     Q_SLOT void onBufferDirtyChanged(bool dirty);
     Q_SLOT void onBufferNameChanged(const QString &);
     Q_SLOT void onBufferFilepathChanged(const QString &);
-    Q_SLOT void onBufferFiletypeChanged(Filetype *from, Filetype *to);
+    Q_SLOT void onBufferFiletypeChanged(Filetype *change, Filetype *old=NULL);
     Q_SLOT void onRunProfileManagerChanged(RunProfileManager *);
 
     Q_SLOT void onTranslatorChanged();

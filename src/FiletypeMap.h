@@ -10,6 +10,8 @@
 
 #include <QMutex>
 #include <QThread>
+#include <srchilite/langmap.h>
+#include <srchilite/instances.h>
 
 class Filetype;
 
@@ -17,20 +19,24 @@ class FiletypeMap : public QObject
 {
     Q_OBJECT
 public:
-    FiletypeMap();
-    virtual ~FiletypeMap();
+    FiletypeMap(QObject *parent=NULL);
     void add(Filetype *);
     FiletypeMap &operator<<(Filetype *);
-    Filetype *filetype() const;
     Filetype *filetype(const QString &filetypeName) const;
     Filetype *filetypeForName(const QString &filename);
-Q_SIGNALS:
-    void initialize();
+    QList<Filetype *> filetypes() const;
 private:
-    QThread _thread;
+    class LangMapOpener : public QThread {
+        QMutex &_mut;
+    public:
+        LangMapOpener(QMutex &mut): _mut(mut) {}
+        void run() {
+            QMutexLocker lock(&_mut);
+            srchilite::Instances::getLangMap()->open();
+        }
+    } _langMapOpener;
     QMutex _langMapMut;
     QMap<QString, Filetype *> _filetypeMap;
-    Q_SLOT void openLangMap();
 };
 
 #endif /* FILETYPEMAP_H_ */

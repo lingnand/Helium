@@ -7,4 +7,7 @@
 
 #include <RunProfileManager.h>
 
-RunProfileManager::RunProfileManager(QObject *parent): QObject(parent) {}
+Filetype *RunProfileManager::parent() const
+{
+    return (Filetype *) QObject::parent();
+}

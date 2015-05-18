@@ -12,8 +12,8 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 #include <bb/cascades/ProgressIndicatorState>
-#include <FiletypeMap.h>
 
+class FiletypeMap;
 class MultiViewPane;
 
 class Helium : public bb::cascades::Application
@@ -29,7 +29,7 @@ Q_SIGNALS:
     void translatorChanged();
 private:
     // settings
-    FiletypeMap _filetypeMap;
+    FiletypeMap *_filetypeMap;
 
     MultiViewPane *_rootPane;
     QTranslator _translator;

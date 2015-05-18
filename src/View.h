@@ -74,7 +74,7 @@ Q_SIGNALS:
     void hasRedosChanged(bool);
     void translatorChanged();
     void bufferNameChanged(const QString &);
-    void bufferFiletypeChanged(Filetype *from, Filetype *to);
+    void bufferFiletypeChanged(Filetype *change, Filetype *old);
     void bufferFilepathChanged(const QString &);
     void bufferDirtyChanged(bool);
     void bufferLockedChanged(bool);
@@ -114,7 +114,7 @@ private:
     Q_SLOT void onPageKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString &text);
     Q_SLOT void onTextAreaCursorPositionChanged();
-    Q_SLOT void onBufferFiletypeChanged(Filetype *from, Filetype *to);
+    Q_SLOT void onBufferFiletypeChanged(Filetype *change, Filetype *old=NULL);
     Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);
     Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
     Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);

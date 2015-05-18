@@ -25,8 +25,8 @@ public:
     bool highlightEnabled() const;
     void setHighlightEnabled(bool);
 Q_SIGNALS:
-    void runProfileManagerChanged(RunProfileManager *to);
-    void highlightEnabledChanged(bool enabled);
+    void runProfileManagerChanged(RunProfileManager *change, RunProfileManager *old);
+    void highlightEnabledChanged(bool);
 private:
     QString _name;
     bool _highlightEnabled;

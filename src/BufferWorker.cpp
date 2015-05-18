@@ -4,6 +4,7 @@
 #include <srchilite/langmap.h>
 #include <BufferWorker.h>
 #include <Filetype.h>
+#include <FiletypeMap.h>
 #include <Helium.h>
 
 BufferWorker::BufferWorker():

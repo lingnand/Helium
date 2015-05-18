@@ -6,24 +6,15 @@
  */
 
 #include <QMutexLocker>
-#include <srchilite/langmap.h>
-#include <srchilite/instances.h>
 #include <FiletypeMap.h>
 #include <Filetype.h>
 #include <Utility.h>
 
-FiletypeMap::FiletypeMap()
+FiletypeMap::FiletypeMap(QObject *parent):
+    QObject(parent),
+    _langMapOpener(_langMapMut)
 {
-    moveToThread(&_thread);
-    conn(this, SIGNAL(initialize()), this, SLOT(openLangMap()));
-    _thread.start();
-    emit initialize();
-}
-
-FiletypeMap::~FiletypeMap()
-{
-    _thread.quit();
-    _thread.wait();
+    _langMapOpener.start();
 }
 
 void FiletypeMap::add(Filetype *filetype)
@@ -42,16 +33,15 @@ Filetype *FiletypeMap::filetype(const QString &filetypeName) const
     return _filetypeMap.value(filetypeName);
 }
 
-void FiletypeMap::openLangMap()
-{
-    QMutexLocker lock(&_langMapMut);
-    srchilite::Instances::getLangMap()->open();
-}
-
 Filetype *FiletypeMap::filetypeForName(const QString &filename)
 {
     QMutexLocker lock(&_langMapMut);
     return filetype(QString::fromUtf8(
             srchilite::Instances::getLangMap()->getMappedFileNameFromFileName(
                 filename.toUtf8().constData()).c_str()));
+}
+
+QList<Filetype *> FiletypeMap::filetypes() const
+{
+    return _filetypeMap.values();
 }

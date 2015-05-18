@@ -7,6 +7,7 @@
 
 #include <QDebug>
 #include <Filetype.h>
+#include <RunProfileManager.h>
 
 Filetype::Filetype(const QString &name,
         bool highlightEnabled,
@@ -15,8 +16,9 @@ Filetype::Filetype(const QString &name,
     QObject(parent),
     _name(name),
     _highlightEnabled(highlightEnabled),
-    _runProfileManager(runProfileManager)
+    _runProfileManager(NULL)
 {
+    setRunProfileManager(runProfileManager);
 }
 
 const QString &Filetype::name() const
@@ -50,8 +52,14 @@ void Filetype::setHighlightEnabled(bool enabled)
 void Filetype::setRunProfileManager(RunProfileManager *runProfileManager)
 {
     if (runProfileManager != _runProfileManager) {
+        Q_ASSERT(!runProfileManager || !runProfileManager->parent());
+        RunProfileManager *old = _runProfileManager;
+        if (old)
+            old->deleteLater();
         _runProfileManager = runProfileManager;
-        emit runProfileManagerChanged(_runProfileManager);
+        if (_runProfileManager)
+            _runProfileManager->setParent(this);
+        emit runProfileManagerChanged(_runProfileManager, old);
     }
 }
 

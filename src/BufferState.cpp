@@ -248,7 +248,7 @@ ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginI
     if (empty())
         return pos;
     output << "<pre>";
-    if (_filetype->highlightEnabled()) {
+    if (_filetype && _filetype->highlightEnabled()) {
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;

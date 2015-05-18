@@ -9,17 +9,19 @@
 #include <CmdRunProfile.h>
 #include <Utility.h>
 
-CmdRunProfileManager::CmdRunProfileManager(const QString &cmd, QObject *parent):
-    RunProfileManager(parent), _cmd(cmd)
-{
-
-}
+CmdRunProfileManager::CmdRunProfileManager(const QString &cmd): _cmd(cmd)
+{}
 
 RunProfile *CmdRunProfileManager::createRunProfile(View *view)
 {
     CmdRunProfile *p = new CmdRunProfile(view, _cmd);
     conn(this, SIGNAL(cmdChanged(const QString&)), p, SLOT(setCmd(const QString&)));
     return p;
+}
+
+const QString &CmdRunProfileManager::cmd() const
+{
+    return _cmd;
 }
 
 void CmdRunProfileManager::setCmd(const QString &cmd)

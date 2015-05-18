@@ -12,6 +12,7 @@
 #include <Helium.h>
 #include <SignalBlocker.h>
 #include <Filetype.h>
+#include <FiletypeMap.h>
 #include <Utility.h>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
@@ -152,7 +153,7 @@ void Buffer::handleStateChangeResult(const StateChangeContext &ctx, const Buffer
         return;
     }
     if (newSt.filetype() != filetype()) {
-        emit filetypeChanged(filetype(), newSt.filetype());
+        emit filetypeChanged(newSt.filetype(), filetype());
     }
     _states.current() = newSt;
     setLocked(false);

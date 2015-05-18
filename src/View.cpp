@@ -228,7 +228,7 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(dirtyChanged(bool)),
                 this, SIGNAL(bufferDirtyChanged(bool)));
 
-            onBufferFiletypeChanged(NULL, _buffer->filetype());
+            onBufferFiletypeChanged(_buffer->filetype());
             conn(_buffer, SIGNAL(filetypeChanged(Filetype*, Filetype*)),
                 this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)));
 
@@ -413,16 +413,16 @@ void View::onTextAreaCursorPositionChanged()
         _partialHighlightUpdateTimer.start();
 }
 
-void View::onBufferFiletypeChanged(Filetype *from, Filetype *to)
+void View::onBufferFiletypeChanged(Filetype *change, Filetype *old)
 {
-    if (to) {
-        setImageSource(QUrl("asset:///images/filetype/"+to->name()+".png"));
+    if (change) {
+        setImageSource(QUrl("asset:///images/filetype/"+change->name()+".png"));
         if (active())
-            Utility::toast(tr("Filetype set to %1").arg(to->name()));
+            Utility::toast(tr("Filetype set to %1").arg(change->name()));
     } else {
         setImageSource(QUrl("asset:///images/filetype/_blank.png"));
     }
-    emit bufferFiletypeChanged(from, to);
+    emit bufferFiletypeChanged(change, old);
 }
 
 // Is textChanging or cursorPositionChanged emitted first?
