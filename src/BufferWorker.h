@@ -34,7 +34,7 @@ public:
     Q_SLOT void replace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
     Q_SLOT void rehighlight(StateChangeContext &, BufferState &, int index, Progress &);
     Q_SLOT void saveStateToFile(const BufferState &, const QString &filename, Progress &);
-    Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename, Progress &);
+    Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress &);
 Q_SIGNALS:
     void progressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state=bb::cascades::ProgressIndicatorState::Progress, const QString &msg=QString());
     void filetypeChanged(const StateChangeContext &, const BufferState &);

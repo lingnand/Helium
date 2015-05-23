@@ -337,7 +337,7 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
     emit stateSavedToFile(filename);
 }
 
-void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &filename, Progress &progress)
+void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &filename, bool autodetectFiletype, Progress &progress)
 {
     QFile file(filename);
     qDebug() << "preparing to open" << filename;
@@ -356,7 +356,9 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
     while (!input.atEnd()) {
         state.append(BufferLineState(BufferLine() << input.readLine()));
     }
-    _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(filename));
+    if (autodetectFiletype) {
+        _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(filename));
+    }
     _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "state filetype after highlight" << state.filetype();
     emit stateLoadedFromFile(ctx, state, filename);

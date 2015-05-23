@@ -162,26 +162,6 @@ QString BufferLine::preText() const
 BufferState::BufferState(Filetype *filetype, int cursorPosition):
         _filetype(filetype), _cursorPosition(cursorPosition) {}
 
-Filetype *BufferState::filetype() const
-{
-    return _filetype;
-}
-
-void BufferState::setFiletype(Filetype *filetype)
-{
-    _filetype = filetype;
-}
-
-int BufferState::cursorPosition() const
-{
-    return _cursorPosition;
-}
-
-void BufferState::setCursorPosition(int cursorPosition)
-{
-    _cursorPosition = cursorPosition;
-}
-
 int BufferState::cursorPositionAtLine(int line) const
 {
     int cpos = 0;

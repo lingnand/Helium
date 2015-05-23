@@ -22,6 +22,7 @@
 #include <NormalMode.h>
 #include <FindMode.h>
 #include <Filetype.h>
+#include <FiletypeControl.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -110,21 +111,6 @@ void View::setMode(ViewMode *mode)
     }
 }
 
-NavigationPane *View::content() const
-{
-    return (NavigationPane *) Tab::content();
-}
-
-TextArea *View::textArea() const
-{
-    return _textArea;
-}
-
-Page *View::page() const
-{
-    return _page;
-}
-
 // detachPage can only be called when at the main page
 void View::detachPage()
 {
@@ -147,19 +133,9 @@ void View::hideAllPageActions()
     }
 }
 
-MultiViewPane *View::parent() const
-{
-    return (MultiViewPane *) QObject::parent();
-}
-
 bool View::active() const
 {
     return parent() && parent()->activeTab() == this;
-}
-
-Buffer *View::buffer() const
-{
-    return _buffer;
 }
 
 void View::onOutOfView()
@@ -245,6 +221,10 @@ void View::setBuffer(Buffer *buffer)
             emit bufferLockedChanged(_buffer->locked());
             conn(_buffer, SIGNAL(lockedChanged(bool)),
                 this, SIGNAL(bufferLockedChanged(bool)));
+
+            emit bufferAutodetectFiletypeChanged(_buffer->autodetectFiletype());
+            conn(_buffer, SIGNAL(autodetectFiletypeChanged(bool)),
+                this, SIGNAL(bufferAutodetectFiletypeChanged(bool)));
 
             conn(this, SIGNAL(undo()), _buffer, SLOT(undo()));
             emit hasUndosChanged(_buffer->hasUndo());
@@ -596,4 +576,13 @@ void View::onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
         parent()->removeView(this);
     }
+}
+
+void View::setAutodetectFiletype(bool autodetect)
+{
+    _buffer->setAutodetectFiletype(autodetect);
+}
+void View::setFiletype(Filetype *filetype)
+{
+    _buffer->setFiletype(filetype);
 }

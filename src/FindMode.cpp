@@ -28,6 +28,7 @@
 #include <SignalBlocker.h>
 #include <Filetype.h>
 #include <Utility.h>
+#include <Defaults.h>
 
 using namespace bb::cascades;
 
@@ -98,7 +99,7 @@ FindMode::FindMode(View *view):
         .kindProperties(FreeFormTitleBarKindProperties::create()
             .content(Container::create()
                 .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
-                .left(20).right(20)
+                .left(Defaults::space()).right(Defaults::space())
                 .add(_findField)
                 .add(_replaceField)));
 

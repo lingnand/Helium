@@ -5,6 +5,8 @@
  *      Author: lingnan
  */
 
+#include <bb/cascades/NavigationPane>
+#include <bb/cascades/Page>
 #include <Helium.h>
 #include <MultiViewPane.h>
 #include <View.h>
@@ -12,7 +14,7 @@
 #include <BufferState.h>
 #include <StateChangeContext.h>
 #include <HtmlBufferChangeParser.h>
-#include <FiletypeMapSettings.h>
+#include <FiletypeMapStorage.h>
 #include <Filetype.h>
 #include <CmdRunProfileManager.h>
 #include <Utility.h>
@@ -24,7 +26,7 @@ Helium *Helium::instance()
 
 Helium::Helium(int &argc, char **argv):
         bb::cascades::Application(argc, argv),
-        _filetypeMap((new FiletypeMapSettings("filetypes", this))->read())
+        _filetypeMap((new FiletypeMapStorage("filetypes", this))->read())
 {
     qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>();
     qRegisterMetaType<BufferState>("BufferState&");
@@ -37,13 +39,11 @@ Helium::Helium(int &argc, char **argv):
     conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(reloadTranslator()));
 
-    _rootPane = new MultiViewPane(this);
+    MultiViewPane *rootPane = new MultiViewPane(this);
     conn(this, SIGNAL(translatorChanged()),
-         _rootPane, SLOT(onTranslatorChanged()));
-
-    _rootPane->addNewView(false);
-
-    setScene(_rootPane);
+         rootPane, SLOT(onTranslatorChanged()));
+    rootPane->addNewView(false);
+    setScene(rootPane);
 }
 
 void Helium::reloadTranslator()

@@ -1,5 +1,5 @@
 /*
- * FiletypeMapSettings.cpp
+ * FiletypeMapStorage.cpp
  *
  *  Created on: May 17, 2015
  *      Author: lingnan
@@ -7,19 +7,19 @@
 
 #include <QStringList>
 #include <QDebug>
-#include <FiletypeMapSettings.h>
+#include <FiletypeMapStorage.h>
 #include <Filetype.h>
 #include <FiletypeMap.h>
 #include <CmdRunProfileManager.h>
 #include <Utility.h>
 
-FiletypeMapSettings::FiletypeMapSettings(const QString &prefix, QObject *parent):
+FiletypeMapStorage::FiletypeMapStorage(const QString &prefix, QObject *parent):
     QObject(parent)
 {
     _settings.beginGroup(prefix);
 }
 
-void FiletypeMapSettings::onFiletypeRunProfileManagerChanged(RunProfileManager *from, RunProfileManager *to)
+void FiletypeMapStorage::onFiletypeRunProfileManagerChanged(RunProfileManager *from, RunProfileManager *to)
 {
     if (from) {
         from->disconnect(this);
@@ -28,7 +28,7 @@ void FiletypeMapSettings::onFiletypeRunProfileManagerChanged(RunProfileManager *
     insertRunProfileManager(to);
 }
 
-void FiletypeMapSettings::insertRunProfileManager(RunProfileManager *manager)
+void FiletypeMapStorage::insertRunProfileManager(RunProfileManager *manager)
 {
     if (manager) {
         _settings.beginGroup(manager->parent()->name() + "/run_profile_manager");
@@ -44,7 +44,7 @@ void FiletypeMapSettings::insertRunProfileManager(RunProfileManager *manager)
     }
 }
 
-void FiletypeMapSettings::insertFiletype(Filetype *filetype)
+void FiletypeMapStorage::insertFiletype(Filetype *filetype)
 {
     qDebug() << "inserting filetype" << filetype->name();
     _settings.setValue(filetype->name()+"/highlight_enabled", filetype->highlightEnabled());
@@ -52,7 +52,7 @@ void FiletypeMapSettings::insertFiletype(Filetype *filetype)
     connectFiletype(filetype);
 }
 
-void FiletypeMapSettings::connectFiletype(Filetype *filetype)
+void FiletypeMapStorage::connectFiletype(Filetype *filetype)
 {
     conn(filetype, SIGNAL(highlightEnabledChanged(bool)),
             this, SLOT(onFiletypeHighlightEnabledChanged(bool)));
@@ -60,19 +60,19 @@ void FiletypeMapSettings::connectFiletype(Filetype *filetype)
             this, SLOT(onFiletypeRunProfileManagerChanged(RunProfileManager*, RunProfileManager*)));
 }
 
-void FiletypeMapSettings::onCmdRunProfileManagerCmdChanged(const QString &cmd)
+void FiletypeMapStorage::onCmdRunProfileManagerCmdChanged(const QString &cmd)
 {
     CmdRunProfileManager *m = (CmdRunProfileManager *) sender();
     _settings.setValue(m->parent()->name()+"/run_profile_manager/cmd", cmd);
 }
 
-void FiletypeMapSettings::onFiletypeHighlightEnabledChanged(bool enabled)
+void FiletypeMapStorage::onFiletypeHighlightEnabledChanged(bool enabled)
 {
     Filetype *f = (Filetype *) sender();
     _settings.setValue(f->name()+"/highlight_enabled", enabled);
 }
 
-FiletypeMap *FiletypeMapSettings::read()
+FiletypeMap *FiletypeMapStorage::read()
 {
     FiletypeMap *map = new FiletypeMap(this);
     QStringList keys = _settings.childGroups();

@@ -1,12 +1,12 @@
 /*
- * FiletypeMapSettings.h
+ * FiletypeMapStorage.h
  *
  *  Created on: May 17, 2015
  *      Author: lingnan
  */
 
-#ifndef FILETYPEMAPSETTINGS_H_
-#define FILETYPEMAPSETTINGS_H_
+#ifndef FILETYPEMAPSTORAGE_H_
+#define FILETYPEMAPSTORAGE_H_
 
 #include <QSettings>
 
@@ -14,11 +14,11 @@ class Filetype;
 class FiletypeMap;
 class RunProfileManager;
 
-class FiletypeMapSettings : public QObject
+class FiletypeMapStorage : public QObject
 {
     Q_OBJECT
 public:
-    FiletypeMapSettings(const QString &prefix, QObject *parent=NULL);
+    FiletypeMapStorage(const QString &prefix, QObject *parent=NULL);
     FiletypeMap *read(); // read the map from settings, or create a default one
 private:
     QSettings _settings;
@@ -31,4 +31,4 @@ private:
 };
 
 
-#endif /* FILETYPEMAPSETTINGS_H_ */
+#endif /* FILETYPEMAPSTORAGE_H_ */

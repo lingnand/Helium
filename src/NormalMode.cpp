@@ -10,6 +10,7 @@
 #include <bb/cascades/TextField>
 #include <bb/cascades/TextArea>
 #include <bb/cascades/Page>
+#include <bb/cascades/NavigationPane>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/Shortcut>
@@ -17,12 +18,13 @@
 #include <bb/cascades/TextFieldTitleBarKindProperties>
 #include <RunProfile.h>
 #include <RunProfileManager.h>
-#include <Filetype.h>
 #include <NormalMode.h>
 #include <Utility.h>
 #include <ModKeyListener.h>
 #include <Buffer.h>
 #include <View.h>
+#include <Filetype.h>
+#include <FilePropertiesPage.h>
 #include <MultiViewPane.h>
 
 using namespace bb::cascades;
@@ -62,6 +64,10 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_play.png"))
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(run()))),
+    _propertiesAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_properties.png"))
+        .addShortcut(Shortcut::create().key("p"))
+        .onTriggered(this, SLOT(showProperties()))),
     _cloneAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_copy_link.png"))
         .addShortcut(Shortcut::create().key("g"))
@@ -70,6 +76,7 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_clear.png"))
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view, SLOT(close()))),
+    _propertiesPage(NULL),
     _lastFocused(false)
 {
     view->textArea()->addKeyListener(_textAreaModKeyListener);
@@ -138,14 +145,23 @@ void NormalMode::run()
         _runProfile->run();
 }
 
-TitleBar *NormalMode::titleBar() const
+void NormalMode::showProperties()
 {
-    return _titleBar;
-}
-
-TextField *NormalMode::titleField() const
-{
-    return _titleField;
+    if (!_propertiesPage) {
+        _propertiesPage = new FilePropertiesPage;
+        _propertiesPage->setFiletype(view()->buffer()->filetype());
+        _propertiesPage->setAutodetectFiletypeChecked(
+                view()->buffer()->autodetectFiletype());
+        conn(view(), SIGNAL(bufferAutodetectFiletypeChanged(bool)),
+                _propertiesPage, SLOT(setAutodetectFiletypeChecked(bool)));
+        conn(_propertiesPage, SIGNAL(autodetectFiletypeCheckedChanged(bool)),
+                view(), SLOT(setAutodetectFiletype(bool)));
+        conn(_propertiesPage, SIGNAL(filetypeSelectionChanged(Filetype *)),
+                view(), SLOT(setFiletype(Filetype *)));
+        conn(_propertiesPage, SIGNAL(backButtonTriggered()),
+                view()->content(), SLOT(pop()));
+    }
+    view()->content()->push(_propertiesPage);
 }
 
 void NormalMode::onTextAreaModKey(KeyEvent *event)
@@ -233,6 +249,8 @@ void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
         conn(change, SIGNAL(runProfileManagerChanged(RunProfileManager*, RunProfileManager*)),
                 this, SLOT(onRunProfileManagerChanged(RunProfileManager*)));
     }
+    if (_propertiesPage)
+        _propertiesPage->setFiletype(change);
 }
 
 void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager)
@@ -266,6 +284,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_openAction);
     view()->page()->addAction(_findAction);
     view()->page()->addAction(_runAction);
+    view()->page()->addAction(_propertiesAction);
     view()->page()->addAction(_cloneAction);
     view()->page()->addAction(_closeAction);
     view()->page()->setTitleBar(_titleBar);
@@ -338,6 +357,9 @@ void NormalMode::onTranslatorChanged()
     _redoAction->setTitle(tr("Redo"));
     _findAction->setTitle(tr("Find"));
     _runAction->setTitle(tr("Run"));
+    _propertiesAction->setTitle(tr("Properties"));
     _cloneAction->setTitle(tr("Clone"));
     _closeAction->setTitle(tr("Close"));
+    if (_propertiesPage)
+        _propertiesPage->onTranslatorChanged();
 }

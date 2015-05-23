@@ -44,15 +44,19 @@ public:
 
     View(Buffer *buffer=NULL);
     virtual ~View() {}
-    bb::cascades::NavigationPane *content() const;
-    bb::cascades::Page *page() const;
+    bb::cascades::Page *page() const { return _page; }
+    bb::cascades::TextArea *textArea() const { return _textArea; }
+    Buffer *buffer() const { return _buffer; }
+    bb::cascades::NavigationPane *content() const {
+        return (bb::cascades::NavigationPane *) Tab::content();
+    }
+    MultiViewPane *parent() const {
+        return (MultiViewPane *) QObject::parent();
+    }
     void detachPage();
     void reattachPage();
     void hideAllPageActions();
-    MultiViewPane *parent() const;
     bool active() const;
-    bb::cascades::TextArea *textArea() const;
-    Buffer *buffer() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void setHighlightRangeLimit(int limit);
     Q_SLOT void setNormalMode();
@@ -67,6 +71,9 @@ public:
     Q_SLOT void close();
     Q_SLOT void onOutOfView();
     Q_SLOT void onTranslatorChanged();
+    // wrappers over the linked buffer
+    Q_SLOT void setAutodetectFiletype(bool);
+    Q_SLOT void setFiletype(Filetype *);
 Q_SIGNALS:
     void undo();
     void redo();
@@ -78,6 +85,7 @@ Q_SIGNALS:
     void bufferFilepathChanged(const QString &);
     void bufferDirtyChanged(bool);
     void bufferLockedChanged(bool);
+    void bufferAutodetectFiletypeChanged(bool);
 private:
     /** mode **/
     ViewMode *_mode;

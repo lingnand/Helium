@@ -24,7 +24,7 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
-    _locked(false), _dirty(false)
+    _locked(false), _dirty(false), _autodetectFiletype(true)
 {
     _worker.moveToThread(&_workerThread);
     conn(this, SIGNAL(workerSetFiletype(StateChangeContext&, BufferState&, Filetype*, Progress&)),
@@ -39,8 +39,8 @@ Buffer::Buffer(int historyLimit, QObject *parent):
          &_worker, SLOT(rehighlight(StateChangeContext&, BufferState&, int, Progress&)));
     conn(this, SIGNAL(workerSaveStateToFile(const BufferState&, const QString&, Progress&)),
          &_worker, SLOT(saveStateToFile(const BufferState&, const QString&, Progress&)));
-    conn(this, SIGNAL(workerLoadStateFromFile(StateChangeContext&, const QString&, Progress&)),
-         &_worker, SLOT(loadStateFromFile(StateChangeContext&, const QString&, Progress&)));
+    conn(this, SIGNAL(workerLoadStateFromFile(StateChangeContext&, const QString&, bool, Progress&)),
+         &_worker, SLOT(loadStateFromFile(StateChangeContext&, const QString&, bool, Progress&)));
 
     conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
             this, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
@@ -71,16 +71,12 @@ Buffer::~Buffer()
     _workerThread.wait();
 }
 
-bool Buffer::locked() const { return _locked; }
-
 void Buffer::setLocked(bool lock) {
     if (_locked != lock) {
         _locked = lock;
         emit lockedChanged(lock);
     }
 }
-
-bool Buffer::dirty() const { return _dirty; }
 
 void Buffer::setDirty(bool dirty) {
     if (_dirty != dirty) {
@@ -89,12 +85,10 @@ void Buffer::setDirty(bool dirty) {
     }
 }
 
-const QString &Buffer::name() const { return _name; }
-
 void Buffer::setName(const QString &name)
 {
     Progress progress;
-    _setName(name, true, progress);
+    _setName(name, _autodetectFiletype, progress);
 }
 
 void Buffer::_setName(const QString &name, bool setft, Progress &progress)
@@ -107,8 +101,6 @@ void Buffer::_setName(const QString &name, bool setft, Progress &progress)
     }
 }
 
-const QString &Buffer::filepath() const { return _filepath; }
-
 void Buffer::setFilepath(const QString &filepath, bool setFiletype, Progress &progress)
 {
     if (filepath != _filepath) {
@@ -116,11 +108,6 @@ void Buffer::setFilepath(const QString &filepath, bool setFiletype, Progress &pr
         _setName(QFileInfo(_filepath).fileName(), setFiletype, progress);
         emit filepathChanged(_filepath);
     }
-}
-
-Filetype *Buffer::filetype() const
-{
-    return state().filetype();
 }
 
 void Buffer::setFiletype(Filetype *filetype)
@@ -143,7 +130,13 @@ void Buffer::_setFiletype(Filetype *filetype, Progress &progress)
     }
 }
 
-const BufferState &Buffer::state() const { return _states.current(); }
+void Buffer::setAutodetectFiletype(bool autodetect)
+{
+    if (autodetect != _autodetectFiletype) {
+        _autodetectFiletype = autodetect;
+        emit autodetectFiletypeChanged(_autodetectFiletype);
+    }
+}
 
 // assumption: this should handle result from another thread
 void Buffer::handleStateChangeResult(const StateChangeContext &ctx, const BufferState &newSt)
@@ -242,10 +235,6 @@ void Buffer::killLine(View *source, int cursorPosition)
     }
 }
 
-bool Buffer::hasUndo() { return _states.retractable(); }
-
-bool Buffer::hasRedo() { return _states.advanceable(); }
-
 void Buffer::undo()
 {
     traverse(&BufferHistory::retract);
@@ -279,7 +268,7 @@ void Buffer::traverse(bool (BufferHistory::*fn)())
 void Buffer::save(const QString &filepath)
 {
     Progress progress(0, 0.5);
-    setFilepath(filepath, true, progress);
+    setFilepath(filepath, _autodetectFiletype, progress);
     progress.cap = 1;
     emit workerSaveStateToFile(state(), _filepath, progress);
     setDirty(false);
@@ -293,7 +282,7 @@ void Buffer::load(const QString &filepath)
     // clear all the existing states
     _states.clear();
     StateChangeContext ctx(++_requestId);
-    emit workerLoadStateFromFile(ctx, filepath, progress);
+    emit workerLoadStateFromFile(ctx, filepath, _autodetectFiletype, progress);
     setDirty(false);
 }
 

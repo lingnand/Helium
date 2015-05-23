@@ -31,7 +31,6 @@ private:
     // settings
     FiletypeMap *_filetypeMap;
 
-    MultiViewPane *_rootPane;
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
 };

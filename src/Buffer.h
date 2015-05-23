@@ -42,24 +42,27 @@ public:
     Buffer(int historyLimit=0, QObject *parent=NULL);
     virtual ~Buffer();
     // a locked buffer shouldn't get any of its functions triggered
-    bool locked() const;
+    bool locked() const { return _locked; }
     // whether the buffer is dirty (have not been saved)
-    bool dirty() const;
+    bool dirty() const { return _dirty; }
     // returns the name of the current buffer, "" for no name
-    const QString &name() const;
+    const QString &name() const { return _name; }
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name);
-    const QString &filepath() const; // the filepath of the buffer, empty if not yet bound
-    Filetype *filetype() const;
+    bool autodetectFiletype() const { return _autodetectFiletype; }
+    Q_SLOT void setAutodetectFiletype(bool);
+    // the filepath of the buffer, empty if not yet bound
+    const QString &filepath() const { return _filepath; }
+    Filetype *filetype() const { return state().filetype(); }
     Q_SLOT void setFiletype(Filetype *);
-    const BufferState &state() const;
+    const BufferState &state() const { return _states.current(); }
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
     Q_SLOT void parseReplacement(const Replacement &replace);
     Q_SLOT void parseReplacement(const QList<Replacement> &replaces);
     void killLine(View *source, int cursorPosition);
-    bool hasUndo();
+    bool hasUndo() { return _states.retractable(); }
     Q_SLOT void undo();
-    bool hasRedo();
+    bool hasRedo() { return _states.advanceable(); }
     Q_SLOT void redo();
     Q_SLOT void save(const QString &filepath);
     Q_SLOT void load(const QString &filepath);
@@ -72,6 +75,7 @@ Q_SIGNALS:
     void dirtyChanged(bool);
     void nameChanged(const QString &name);
     void filepathChanged(const QString &filepath);
+    void autodetectFiletypeChanged(bool);
     void filetypeChanged(Filetype *change, Filetype *old);
     void stateChanged(const StateChangeContext &, const BufferState &);
     // this happens when a long-running operation is triggered
@@ -86,7 +90,7 @@ Q_SIGNALS:
     void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
     void workerRehighlight(StateChangeContext &, BufferState &, int index, Progress &);
     void workerSaveStateToFile(const BufferState &, const QString &filename, Progress &);
-    void workerLoadStateFromFile(StateChangeContext &, const QString &filename, Progress &);
+    void workerLoadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress &);
     // task report
     void savedToFile(const QString &filename);
 private:
@@ -101,6 +105,7 @@ private:
     unsigned int _requestId;
     BufferWorker _worker;
     QString _name;
+    bool _autodetectFiletype;
     QString _filepath;
     BufferHistory _states;
     QDateTime _lastEdited;

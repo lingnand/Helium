@@ -28,6 +28,52 @@
     </message>
 </context>
 <context>
+    <name>FilePropertiesPage</name>
+    <message>
+        <source>File Properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Autodetect filetype</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Automatically change filetype based on filename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The filetype for the current buffer. Each filetype uses a different set of highlight rules and comes with separate settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filetype</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FiletypeControl</name>
+    <message>
+        <source>Enable highlight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Highlight is automatically updated for a range of lines around the cursor</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FindMode</name>
     <message>
         <source>Find text</source>
@@ -177,6 +223,10 @@
     </message>
     <message>
         <source>Run</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Properties</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

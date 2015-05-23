@@ -8,6 +8,7 @@
 #ifndef NORMALMODE_H_
 #define NORMALMODE_H_
 
+#include <bb/cascades/Page>
 #include <ViewMode.h>
 
 namespace bb {
@@ -24,22 +25,24 @@ class ModKeyListener;
 class RunProfile;
 class RunProfileManager;
 class Filetype;
+class FilePropertiesPage;
 
 class NormalMode: public ViewMode
 {
     Q_OBJECT
 public:
     NormalMode(View *);
+    virtual ~NormalMode() {}
     void autoFocus();
     void onEnter();
     void onExit();
-    bb::cascades::TitleBar *titleBar() const;
-    bb::cascades::TextField *titleField() const;
 private:
     bool _lastFocused;
 
     bb::cascades::TitleBar *_titleBar;
     bb::cascades::TextField *_titleField;
+
+    FilePropertiesPage *_propertiesPage;
 
     ModKeyListener *_textAreaModKeyListener;
 
@@ -50,8 +53,10 @@ private:
     bb::cascades::ActionItem *_redoAction;
     bb::cascades::ActionItem *_findAction;
     bb::cascades::ActionItem *_runAction;
+    bb::cascades::ActionItem *_propertiesAction;
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_closeAction;
+    bb::cascades::ActionItem *_propertiesBackButton;
 
     Q_SLOT void reloadLocked();
 
@@ -60,6 +65,7 @@ private:
     void setRunProfile(RunProfile *);
     Q_SLOT void reloadRunnable();
     Q_SLOT void run();
+    Q_SLOT void showProperties();
 
     Q_SLOT void onTextAreaModKey(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *listener);

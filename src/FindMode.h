@@ -32,6 +32,7 @@ class FindMode: public ViewMode
     Q_OBJECT
 public:
     FindMode(View *);
+    virtual ~FindMode() {}
     void autoFocus();
     void onEnter();
     void onExit();

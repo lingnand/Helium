@@ -23,7 +23,7 @@ public:
     RunProfileManager *runProfileManager() const;
     void setRunProfileManager(RunProfileManager *);
     bool highlightEnabled() const;
-    void setHighlightEnabled(bool);
+    Q_SLOT void setHighlightEnabled(bool);
 Q_SIGNALS:
     void runProfileManagerChanged(RunProfileManager *change, RunProfileManager *old);
     void highlightEnabledChanged(bool);
@@ -32,6 +32,7 @@ private:
     bool _highlightEnabled;
     RunProfileManager *_runProfileManager;
 };
+Q_DECLARE_METATYPE(Filetype *)
 
 QDebug operator<<(QDebug, const Filetype *);
 

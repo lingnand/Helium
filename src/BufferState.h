@@ -132,10 +132,10 @@ public:
     ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;
     ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
     ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex = 0) const;
-    Filetype *filetype() const;
-    int cursorPosition() const;
-    void setCursorPosition(int cursorPosition);
-    void setFiletype(Filetype *filetype);
+    Filetype *filetype() const { return _filetype; }
+    void setFiletype(Filetype *filetype) { _filetype = filetype; }
+    int cursorPosition() const { return _cursorPosition; }
+    void setCursorPosition(int cursorPosition) { _cursorPosition = cursorPosition; }
 private:
     Filetype *_filetype;
     int _cursorPosition;
