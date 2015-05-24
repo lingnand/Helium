@@ -16,12 +16,13 @@ namespace bb {
         class ToggleButton;
         class Label;
         class DropDown;
+        class Option;
         class ActionItem;
     }
 }
 
 class Filetype;
-class FiletypeControl;
+class FiletypeSettings;
 class Segment;
 
 class FilePropertiesPage : public bb::cascades::Page
@@ -29,7 +30,6 @@ class FilePropertiesPage : public bb::cascades::Page
     Q_OBJECT
 public:
     FilePropertiesPage();
-    Segment *content() const;
     Q_SLOT void setFiletype(Filetype *);
     Q_SLOT void setAutodetectFiletypeChecked(bool checked);
     Q_SLOT void onTranslatorChanged();
@@ -38,14 +38,16 @@ Q_SIGNALS:
     void filetypeSelectionChanged(Filetype *);
     void backButtonTriggered();
 private:
+    Segment *_container;
     bb::cascades::TitleBar *_titleBar;
     bb::cascades::ToggleButton *_autodetectFiletypeToggle;
     bb::cascades::Label *_autodetectFiletypeToggleLabel;
     bb::cascades::Label *_autodetectFiletypeToggleHelp;
     bb::cascades::DropDown *_filetypeSelect;
+    bb::cascades::Option *_noneFiletypeOption;
     bb::cascades::Label *_filetypeSelectHelp;
     bb::cascades::ActionItem *_backButton;
-    FiletypeControl *_filetypeControl;
+    FiletypeSettings *_filetypeSettings;
     Q_SLOT void onFiletypeSelectionChanged(const QVariant);
 };
 

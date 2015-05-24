@@ -21,24 +21,9 @@ Filetype::Filetype(const QString &name,
     setRunProfileManager(runProfileManager);
 }
 
-const QString &Filetype::name() const
-{
-    return _name;
-}
-
 std::string Filetype::langName() const
 {
     return std::string(_name.toUtf8().constData()) + ".lang";
-}
-
-RunProfileManager *Filetype::runProfileManager() const
-{
-    return _runProfileManager;
-}
-
-bool Filetype::highlightEnabled() const
-{
-    return _highlightEnabled;
 }
 
 void Filetype::setHighlightEnabled(bool enabled)
@@ -46,6 +31,7 @@ void Filetype::setHighlightEnabled(bool enabled)
     if (enabled != _highlightEnabled) {
         _highlightEnabled = enabled;
         emit highlightEnabledChanged(_highlightEnabled);
+        emit highlightTypeChanged(highlightType());
     }
 }
 

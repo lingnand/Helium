@@ -7,7 +7,6 @@
 
 #include <BufferState.h>
 #include <Helium.h>
-#include <Filetype.h>
 
 // BufferLine
 
@@ -159,9 +158,6 @@ QString BufferLine::preText() const
 
 // BufferState
 
-BufferState::BufferState(Filetype *filetype, int cursorPosition):
-        _filetype(filetype), _cursorPosition(cursorPosition) {}
-
 int BufferState::cursorPositionAtLine(int line) const
 {
     int cpos = 0;
@@ -228,7 +224,7 @@ ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, int beginI
     if (empty())
         return pos;
     output << "<pre>";
-    if (_filetype && _filetype->highlightEnabled()) {
+    if (_highlightType.shouldHighlight()) {
         beginIndex = qMax(0, beginIndex);
         endIndex = qMin(endIndex, size());
         int i = 0;

@@ -33,12 +33,11 @@ void FiletypeMapStorage::insertRunProfileManager(RunProfileManager *manager)
     if (manager) {
         _settings.beginGroup(manager->parent()->name() + "/run_profile_manager");
         qDebug() << "Inserting RunProfileManager to Settings...";
-        if (CmdRunProfileManager *cp = dynamic_cast<CmdRunProfileManager *>(manager)) {
+        if (CmdRunProfileManager *cm = dynamic_cast<CmdRunProfileManager *>(manager)) {
             qDebug() << "CmdRunProfileManager detected...";
-            _settings.setValue("type", "cmd_run_profile_manager");
-            _settings.setValue("cmd", cp->cmd());
-            conn(cp, SIGNAL(cmdChanged(const QString&)),
-                    this, SLOT(onCmdRunProfileManagerCmdChanged(const QString&)));
+            _settings.setValue("type", RunProfileManager::Cmd);
+            _settings.setValue("cmd", cm->cmd());
+            connectCmdRunProfileManager(cm);
         }
         _settings.endGroup();
     }
@@ -60,9 +59,16 @@ void FiletypeMapStorage::connectFiletype(Filetype *filetype)
             this, SLOT(onFiletypeRunProfileManagerChanged(RunProfileManager*, RunProfileManager*)));
 }
 
+void FiletypeMapStorage::connectCmdRunProfileManager(CmdRunProfileManager *m)
+{
+    conn(m, SIGNAL(cmdChanged(const QString&)),
+            this, SLOT(onCmdRunProfileManagerCmdChanged(const QString&)));
+}
+
 void FiletypeMapStorage::onCmdRunProfileManagerCmdChanged(const QString &cmd)
 {
     CmdRunProfileManager *m = (CmdRunProfileManager *) sender();
+    qDebug() << "Saving CmdRunProfileManager cmd into" << m->parent()->name();
     _settings.setValue(m->parent()->name()+"/run_profile_manager/cmd", cmd);
 }
 
@@ -168,9 +174,13 @@ FiletypeMap *FiletypeMapStorage::read()
             RunProfileManager *m = NULL;
             _settings.beginGroup(keys[i]);
             _settings.beginGroup("run_profile_manager");
-            QString type = _settings.value("type").toString();
-            if (type == "cmd_run_profile_manager") {
-                m = new CmdRunProfileManager(_settings.value("cmd").toString());
+            switch (_settings.value("type").toInt()) {
+                case RunProfileManager::Cmd: {
+                    CmdRunProfileManager *cm = new CmdRunProfileManager(_settings.value("cmd").toString());
+                    connectCmdRunProfileManager(cm);
+                    m = cm;
+                    break;
+                }
             }
             _settings.endGroup();
             Filetype *filetype = new Filetype(keys[i],

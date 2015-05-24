@@ -104,40 +104,6 @@ void SourceHighlight::setInputLang(const std::string &_inputLang) {
     }
 }
 
-void SourceHighlight::checkLangDef(const std::string &langFile) {
-    // make sure to build the highlight state each time
-    langDefManager->buildHighlightState(dataDir, langFile);
-
-    // if we get here, no problems were found, otherwise this method
-    // exits with an exception
-}
-
-void SourceHighlight::checkOutLangDef(const std::string &outlangFile) {
-    // make sure to build the highlight state each time
-    parse_outlang_def(dataDir.c_str(), outlangFile.c_str());
-
-    // if we get here, no problems were found, otherwise this method
-    // exits with an exception
-}
-
-void SourceHighlight::printHighlightState(const std::string &langFile,
-        std::ostream &os) {
-    HighlightStatePrinter printer(os);
-
-    printer.printHighlightState(langDefManager->buildHighlightState(dataDir,
-            langFile).get());
-}
-
-void SourceHighlight::printLangElems(const std::string &langFile,
-        std::ostream &os) {
-    LangElemsPrinter printer;
-    LangElems *elems = langDefManager->getLangElems(dataDir, langFile);
-
-    printer.print(elems, os);
-
-    delete elems;
-}
-
 void SourceHighlight::clearBuffer() {
     buffer.clear();
     buffer.str("");

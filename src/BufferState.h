@@ -10,9 +10,10 @@
 
 #include <QStringList>
 #include <QTextStream>
+#include <QDebug>
 #include <HighlightStateData.h>
 #include <HtmlParser.h>
-#include <QDebug>
+#include <Filetype.h>
 
 struct Range {
     int from;
@@ -99,8 +100,6 @@ struct BufferLineState {
 };
 
 
-class Filetype;
-
 // a buffer state is a snapshot of the current buffer content
 // it consists of a list of BufferLine's
 // each line is identified by its index inside the BufferState
@@ -112,7 +111,8 @@ class Filetype;
 class BufferState : public QList<BufferLineState>
 {
 public:
-    BufferState(Filetype *filetype=NULL, int cursorPosition=0);
+    BufferState(HighlightType type=HighlightType(), int cursorPosition=0):
+        _highlightType(type), _cursorPosition(cursorPosition) {}
     virtual ~BufferState() {}
     struct Position {
         int lineIndex;
@@ -132,12 +132,13 @@ public:
     ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;
     ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex, int endIndex) const;
     ParserPosition writeHighlightedHtml(QTextStream &output, int beginIndex = 0) const;
-    Filetype *filetype() const { return _filetype; }
-    void setFiletype(Filetype *filetype) { _filetype = filetype; }
+    HighlightType highlightType() const { return _highlightType; }
+    Filetype *filetype() const { return _highlightType.filetype; }
+    void setHighlightType(const HighlightType &type) { _highlightType = type; }
     int cursorPosition() const { return _cursorPosition; }
     void setCursorPosition(int cursorPosition) { _cursorPosition = cursorPosition; }
 private:
-    Filetype *_filetype;
+    HighlightType _highlightType;
     int _cursorPosition;
 };
 Q_DECLARE_METATYPE(BufferState)

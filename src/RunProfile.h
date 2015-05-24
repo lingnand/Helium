@@ -15,6 +15,7 @@ class RunProfile : public QObject
     Q_OBJECT
 public:
     RunProfile(View *view);
+    virtual ~RunProfile() {}
     View *view() const;
     Q_SLOT virtual void run() = 0;
     virtual bool runnable() const = 0;

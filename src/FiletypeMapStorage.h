@@ -13,6 +13,7 @@
 class Filetype;
 class FiletypeMap;
 class RunProfileManager;
+class CmdRunProfileManager;
 
 class FiletypeMapStorage : public QObject
 {
@@ -24,7 +25,8 @@ private:
     QSettings _settings;
     void insertRunProfileManager(RunProfileManager *);
     void insertFiletype(Filetype *);
-    void connectFiletype(Filetype *filetype);
+    void connectFiletype(Filetype *);
+    void connectCmdRunProfileManager(CmdRunProfileManager *);
     Q_SLOT void onCmdRunProfileManagerCmdChanged(const QString &);
     Q_SLOT void onFiletypeRunProfileManagerChanged(RunProfileManager *from, RunProfileManager *to);
     Q_SLOT void onFiletypeHighlightEnabledChanged(bool);

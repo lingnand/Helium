@@ -11,6 +11,7 @@
 #include <bb/cascades/DropDown>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Divider>
+#include <bb/cascades/ScrollView>
 #include <bb/cascades/NavigationPaneProperties>
 #include <bb/cascades/StackLayoutProperties>
 #include <bb/cascades/SystemDefaults>
@@ -18,7 +19,7 @@
 #include <FilePropertiesPage.h>
 #include <Filetype.h>
 #include <FiletypeMap.h>
-#include <FiletypeControl.h>
+#include <FiletypeSettings.h>
 #include <Segment.h>
 #include <Helium.h>
 #include <Utility.h>
@@ -34,13 +35,12 @@ FilePropertiesPage::FilePropertiesPage():
         .checked(true)),
     _autodetectFiletypeToggleHelp(Label::create()
         .textStyle(Defaults::helpText())),
-    _filetypeSelect(DropDown::create()
-        .add("", QVariant::fromValue((Filetype *) NULL))
-        .enabled(false)),
+    _noneFiletypeOption(Option::create()
+        .value(QVariant::fromValue((Filetype *) NULL))),
     _filetypeSelectHelp(Label::create()
         .multiline(true)
         .textStyle(Defaults::helpText())),
-    _filetypeControl(new FiletypeControl),
+    _filetypeSettings(new FiletypeSettings),
     _titleBar(TitleBar::create()),
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
@@ -50,6 +50,9 @@ FilePropertiesPage::FilePropertiesPage():
     conn(_autodetectFiletypeToggle, SIGNAL(checkedChanged(bool)),
         this, SIGNAL(autodetectFiletypeCheckedChanged(bool)));
 
+    _filetypeSelect = DropDown::create()
+        .add(_noneFiletypeOption)
+        .enabled(false);
     QList<Filetype *> filetypes = Helium::instance()->filetypeMap()->filetypes();
     for (int i = 0; i < filetypes.size(); i++) {
         Filetype *f = filetypes[i];
@@ -61,15 +64,17 @@ FilePropertiesPage::FilePropertiesPage():
         this, SLOT(onFiletypeSelectionChanged(const QVariant)));
 
     setTitleBar(_titleBar);
-    setContent(Segment::create().section()
-        .add(Segment::create().subsection().leftToRight()
-            .add(_autodetectFiletypeToggleLabel)
-            .add(_autodetectFiletypeToggle))
-        .add(Segment::create().subsection().add(_autodetectFiletypeToggleHelp))
-        .add(Divider::create())
-        .add(Segment::create().subsection().add(_filetypeSelectHelp))
-        .add(Segment::create().subsection().add(_filetypeSelect))
-        .add(Divider::create()));
+    setContent(ScrollView::create(
+            _container = Segment::create().section()
+                .add(Segment::create().subsection().leftToRight()
+                    .add(_autodetectFiletypeToggleLabel)
+                    .add(_autodetectFiletypeToggle))
+                .add(Segment::create().subsection().add(_autodetectFiletypeToggleHelp))
+                .add(Divider::create())
+                .add(Segment::create().subsection().add(_filetypeSelect))
+                .add(Segment::create().subsection().add(_filetypeSelectHelp))
+                .add(Divider::create()))
+        .scrollMode(ScrollMode::Vertical));
     setPaneProperties(NavigationPaneProperties::create()
         .backButton(_backButton));
     onTranslatorChanged();
@@ -81,26 +86,21 @@ void FilePropertiesPage::setAutodetectFiletypeChecked(bool checked)
     _filetypeSelect->setEnabled(!checked);
 }
 
-Segment *FilePropertiesPage::content() const
-{
-    return (Segment *) bb::cascades::Page::content();
-}
-
 void FilePropertiesPage::setFiletype(Filetype *filetype)
 {
     if (filetype) {
         for (int i = 0; i < _filetypeSelect->count(); i++) {
             if (_filetypeSelect->at(i)->value().value<Filetype *>() == filetype) {
-                SignalBlocker block(_filetypeSelect);
+                SignalBlocker blocker(_filetypeSelect);
                 _filetypeSelect->setSelectedIndex(i);
             }
         }
-        content()->add(_filetypeControl);
+        _container->add(_filetypeSettings);
     } else {
         _filetypeSelect->setSelectedIndex(0);
-        content()->remove(_filetypeControl);
+        _container->remove(_filetypeSettings);
     }
-    _filetypeControl->setFiletype(filetype);
+    _filetypeSettings->setFiletype(filetype);
 }
 
 void FilePropertiesPage::onFiletypeSelectionChanged(const QVariant v)
@@ -115,6 +115,7 @@ void FilePropertiesPage::onTranslatorChanged()
     _autodetectFiletypeToggleHelp->setText(tr("Automatically change filetype based on filename"));
     _filetypeSelectHelp->setText(tr("The filetype for the current buffer. Each filetype uses a different set of highlight rules and comes with separate settings."));
     _filetypeSelect->setTitle(tr("Filetype"));
+    _noneFiletypeOption->setDescription(tr("<No Filetype>"));
     _backButton->setTitle(tr("Back"));
-    _filetypeControl->onTranslatorChanged();
+    _filetypeSettings->onTranslatorChanged();
 }

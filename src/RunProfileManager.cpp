@@ -6,6 +6,7 @@
  */
 
 #include <RunProfileManager.h>
+#include <CmdRunProfileManager.h>
 
 Filetype *RunProfileManager::parent() const
 {

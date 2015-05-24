@@ -28,6 +28,22 @@
     </message>
 </context>
 <context>
+    <name>CmdRunProfileSettings</name>
+    <message>
+        <source>Command Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The command to pass to /bin/sh
+
+These format specifiers will be replaced:
+%1: the absolute path to the file
+%2: the directory of the file
+%3: the name of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FilePropertiesPage</name>
     <message>
         <source>File Properties</source>
@@ -53,15 +69,23 @@
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&lt;No Filetype&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
-    <name>FiletypeControl</name>
+    <name>FiletypeSettings</name>
+    <message>
+        <source>%1 Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Enable highlight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1 Settings</source>
+        <source>Highlight is automatically updated for a range of lines around the cursor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -69,7 +93,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Highlight is automatically updated for a range of lines around the cursor</source>
+        <source>&lt;No Run Profile&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run Command</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pass a command to /bin/sh</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

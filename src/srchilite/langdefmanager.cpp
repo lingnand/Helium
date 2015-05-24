@@ -16,6 +16,8 @@
 #include "highlightstatebuilder.hpp"
 #include "settings.h"
 
+#include <QMutexLocker>
+
 using namespace std;
 
 namespace srchilite {
@@ -46,6 +48,7 @@ HighlightStatePtr LangDefManager::buildHighlightState(const string &path,
 
 HighlightStatePtr LangDefManager::getHighlightState(const string &path,
         const string &file) {
+    QMutexLocker lock(&mutex);
     const string key = (path.size() ? path + "/" : "") + file;
 
     HighlightStatePtr highlightState = highlightStateCache[key];

@@ -8,9 +8,9 @@
 #include <HtmlBufferChangeParser.h>
 #include <HighlightStateData.h>
 #include <Replacement.h>
+#include <Filetype.h>
 
 class View;
-class Filetype;
 
 struct Progress {
     float current;
@@ -25,9 +25,9 @@ class BufferWorker : public QObject
 public:
     BufferWorker();
     virtual ~BufferWorker() {}
-    Filetype *filetype() const;
+    HighlightType highlightType() const;
     // all these functions always do the specified job
-    Q_SLOT void setFiletype(StateChangeContext &, BufferState &, Filetype *, Progress &);
+    Q_SLOT void setHighlightType(StateChangeContext &, BufferState &, const HighlightType &, Progress &);
     Q_SLOT BufferStateChange parseBufferChange(BufferState &, const QString &content, ParserPosition, int cursorPosition);
     Q_SLOT void parseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
     Q_SLOT void mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
@@ -37,21 +37,21 @@ public:
     Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress &);
 Q_SIGNALS:
     void progressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state=bb::cascades::ProgressIndicatorState::Progress, const QString &msg=QString());
-    void filetypeChanged(const StateChangeContext &, const BufferState &);
+    void highlightTypeChanged(const StateChangeContext &, const BufferState &);
     void changeMerged(const StateChangeContext &, const BufferState &);
     void occurrenceReplaced(const StateChangeContext &, const BufferState &);
     void stateRehighlighted(const StateChangeContext &, const BufferState &);
     void stateSavedToFile(const QString &filename);
     void stateLoadedFromFile(const StateChangeContext &, const BufferState &, const QString &filename);
 private:
-    Filetype *_filetype;
+    HighlightType _highlightType;
     QMutex _mut;
 
     HtmlBufferChangeParser _bufferChangeParser;
     HighlightStateData::ptr _mainStateData;
     srchilite::SourceHighlight _sourceHighlight;
 
-    void _setFiletype(Filetype *filetype);
+    void _setHighlightType(const HighlightType &highlightType);
     void writePlainText(const BufferState &state, QTextStream &output, Progress &);
     BufferStateChange _parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition);
     void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &progress);

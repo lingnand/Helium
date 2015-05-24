@@ -11,6 +11,8 @@
 
 #include "highlightstate.h"
 
+#include <QMutex>
+
 namespace srchilite {
 
 /// store already generated HighlightState specific to a given file name
@@ -28,6 +30,9 @@ class LangDefManager {
 
     /// store already generated HighlightState specific to a given file name
     HighlightStateCache highlightStateCache;
+
+    // mutex for synchronizing access to this langDefManager
+    QMutex mutex;
 public:
     /**
      * @param ruleFactory the factory for creating highlight rules

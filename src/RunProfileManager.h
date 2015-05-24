@@ -16,8 +16,11 @@ class RunProfileManager : public QObject
 {
     Q_OBJECT
 public:
+    enum Type { None, Cmd };
+    virtual ~RunProfileManager() {};
     Filetype *parent() const;
     virtual RunProfile *createRunProfile(View *) = 0;
 };
+Q_DECLARE_METATYPE(RunProfileManager::Type)
 
 #endif /* RUNPROFILEMANAGER_H_ */

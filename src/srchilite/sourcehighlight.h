@@ -80,43 +80,6 @@ class SourceHighlight {
 public:
     SourceHighlight(const std::string &_styleFile, const std::string &_outputLang);
     ~SourceHighlight();
-    /**
-     * Only check the validity of the language definition file.
-     * If the language definition is valid it simply returns, otherwise,
-     * it throws an exception (with the details of the problems found)
-     * @param langFile
-     * @throws HighlightBuilderException
-     */
-    void checkLangDef(const std::string &langFile);
-
-    /**
-     * Only check the validity of the out language definition file.
-     * If the language definition is valid it simply returns, otherwise,
-     * it throws an exception (with the details of the problems found)
-     * @param langFile
-     * @throws ParserException
-     */
-    void checkOutLangDef(const std::string &langFile);
-
-    /**
-     * Prints the HighlightState corresponding to the language definition file.
-     * If the language definition is valid it simply prints the state and returns, otherwise,
-     * it throws an exception (with the details of the problems found)
-     * @param langFile
-     * @param os where to print the highlight state
-     * @throws HighlightBuilderException
-     */
-    void printHighlightState(const std::string &langFile, std::ostream &os);
-
-    /**
-     * Prints the language elements corresponding to the language definition file.
-     * If the language definition is valid it simply prints the state and returns, otherwise,
-     * it throws an exception (with the details of the problems found)
-     * @param langFile
-     * @param os where to print the highlight state
-     * @throws HighlightBuilderException
-     */
-    void printLangElems(const std::string &langFile, std::ostream &os);
 
     void clearBuffer();
     const std::ostringstream &getBuffer() {

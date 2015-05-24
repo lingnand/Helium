@@ -11,7 +11,6 @@
 #include <Buffer.h>
 #include <Helium.h>
 #include <SignalBlocker.h>
-#include <Filetype.h>
 #include <FiletypeMap.h>
 #include <Utility.h>
 
@@ -27,8 +26,8 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _locked(false), _dirty(false), _autodetectFiletype(true)
 {
     _worker.moveToThread(&_workerThread);
-    conn(this, SIGNAL(workerSetFiletype(StateChangeContext&, BufferState&, Filetype*, Progress&)),
-         &_worker, SLOT(setFiletype(StateChangeContext&, BufferState&, Filetype*, Progress&)));
+    conn(this, SIGNAL(workerSetHighlightType(StateChangeContext&, BufferState&, const HighlightType&, Progress&)),
+         &_worker, SLOT(setHighlightType(StateChangeContext&, BufferState&, const HighlightType&, Progress&)));
     conn(this, SIGNAL(workerParseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, Progress&)),
          &_worker, SLOT(parseAndMergeChange(StateChangeContext&, BufferState&, const QString&, ParserPosition, int, Progress&)));
     conn(this, SIGNAL(workerMergeChange(StateChangeContext&, BufferState&, const BufferStateChange&, Progress&)),
@@ -44,7 +43,7 @@ Buffer::Buffer(int historyLimit, QObject *parent):
 
     conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
             this, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
-    conn(&_worker, SIGNAL(filetypeChanged(const StateChangeContext&, const BufferState&)),
+    conn(&_worker, SIGNAL(highlightTypeChanged(const StateChangeContext&, const BufferState&)),
             this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
     conn(&_worker, SIGNAL(changeMerged(const StateChangeContext&, const BufferState&)),
             this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
@@ -91,21 +90,23 @@ void Buffer::setName(const QString &name)
     _setName(name, _autodetectFiletype, progress);
 }
 
-void Buffer::_setName(const QString &name, bool setft, Progress &progress)
+void Buffer::_setName(const QString &name, bool sethl, Progress &progress)
 {
     if (name != _name) {
         _name = name;
-        if (setft)
-            _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(name), progress);
+        if (sethl)
+            setHighlightType(Helium::instance()->filetypeMap()
+                    ->filetypeForName(name)->highlightType()
+                , progress);
         emit nameChanged(name);
     }
 }
 
-void Buffer::setFilepath(const QString &filepath, bool setFiletype, Progress &progress)
+void Buffer::setFilepath(const QString &filepath, bool setHighlightType, Progress &progress)
 {
     if (filepath != _filepath) {
         _filepath = filepath;
-        _setName(QFileInfo(_filepath).fileName(), setFiletype, progress);
+        _setName(QFileInfo(_filepath).fileName(), setHighlightType, progress);
         emit filepathChanged(_filepath);
     }
 }
@@ -113,19 +114,19 @@ void Buffer::setFilepath(const QString &filepath, bool setFiletype, Progress &pr
 void Buffer::setFiletype(Filetype *filetype)
 {
     Progress progress;
-    _setFiletype(filetype, progress);
+    setHighlightType(filetype->highlightType(), progress);
 }
 
-void Buffer::_setFiletype(Filetype *filetype, Progress &progress)
+void Buffer::setHighlightType(const HighlightType &type, Progress &progress)
 {
     BufferState &st = _states.current();
-    if (filetype != st.filetype()) {
+    if (type != st.highlightType()) {
         StateChangeContext ctx(++_requestId);
         if (!st.isEmpty()) {
             // if state is empty we don't need to lock the textArea -- really
             setLocked(true);
         }
-        emit workerSetFiletype(ctx, st, filetype, progress);
+        emit workerSetHighlightType(ctx, st, type, progress);
         progress.current = progress.cap;
     }
 }
@@ -145,12 +146,26 @@ void Buffer::handleStateChangeResult(const StateChangeContext &ctx, const Buffer
         qDebug() << "got result for" << ctx.requestId << ", but expecting" << _requestId;
         return;
     }
-    if (newSt.filetype() != filetype()) {
-        emit filetypeChanged(newSt.filetype(), filetype());
-    }
+    Filetype *oldFt = filetype(), *newFt = newSt.filetype();
     _states.current() = newSt;
+    if (newFt != oldFt) {
+        if (oldFt) {
+            oldFt->disconnect(this);
+        }
+        if (newFt) {
+            conn(newFt, SIGNAL(highlightTypeChanged(const HighlightType&)),
+                this, SLOT(onHighlightTypeChanged(const HighlightType&)));
+        }
+        emit filetypeChanged(newFt, oldFt);
+    }
     setLocked(false);
     emit stateChanged(ctx, newSt);
+}
+
+void Buffer::onHighlightTypeChanged(const HighlightType &type)
+{
+    Progress progress;
+    setHighlightType(type, progress);
 }
 
 BufferState &Buffer::modifyState()
@@ -171,7 +186,7 @@ void Buffer::parseChange(View *source, const QString &content, ParserPosition st
 {
     StateChangeContext ctx(++_requestId, source);
     BufferState &state = modifyState();
-    if (state.filetype() && state.filetype()->highlightEnabled()) {
+    if (state.highlightType().shouldHighlight()) {
         BufferStateChange change = _worker.parseBufferChange(state, content, start, cursorPosition);
         qDebug() << "change:" << change;
         qDebug() << "changeSize:" << change.size();
@@ -247,13 +262,13 @@ void Buffer::redo()
 
 void Buffer::traverse(bool (BufferHistory::*fn)())
 {
-    Filetype *ft = filetype();
+    HighlightType highlightType = state().highlightType();
     if ((_states.*fn)()) {
         StateChangeContext ctx(++_requestId, NULL, true, true);
         setDirty(true);
         BufferState &st = _states.current();
         _lastEdited = DEFAULT_EDIT_TIME;
-        if (st.filetype() != ft) {
+        if (st.highlightType() != highlightType) {
             // rehighlight in the background
             setLocked(true);
             Progress progress;

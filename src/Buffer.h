@@ -31,9 +31,9 @@
 #include <BufferWorker.h>
 #include <HtmlBufferChangeParser.h>
 #include <BufferHistory.h>
+#include <Filetype.h>
 
 class View;
-class Filetype;
 
 class Buffer : public QObject
 {
@@ -53,7 +53,7 @@ public:
     Q_SLOT void setAutodetectFiletype(bool);
     // the filepath of the buffer, empty if not yet bound
     const QString &filepath() const { return _filepath; }
-    Filetype *filetype() const { return state().filetype(); }
+    Filetype *filetype() { return state().filetype(); }
     Q_SLOT void setFiletype(Filetype *);
     const BufferState &state() const { return _states.current(); }
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
@@ -84,7 +84,7 @@ Q_SIGNALS:
     void hasUndosChanged(bool hasUndos);
     void hasRedosChanged(bool hasRedos);
     // worker
-    void workerSetFiletype(StateChangeContext &, BufferState &, Filetype *, Progress &);
+    void workerSetHighlightType(StateChangeContext &, BufferState &, const HighlightType &, Progress &);
     void workerParseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
     void workerMergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
     void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
@@ -114,11 +114,12 @@ private:
     void setLocked(bool);
     void setDirty(bool);
 
-    void _setName(const QString &name, bool setFiletype, Progress &);
-    void _setFiletype(Filetype *, Progress &);
-    void setFilepath(const QString &filepath, bool setFiletype, Progress &);
+    void _setName(const QString &name, bool setHighlightType, Progress &);
+    void setHighlightType(const HighlightType &, Progress &);
+    void setFilepath(const QString &filepath, bool setHighlightType, Progress &);
     void traverse(bool (BufferHistory::*fn)());
     Q_SLOT void handleStateChangeResult(const StateChangeContext &, const BufferState &);
+    Q_SLOT void onHighlightTypeChanged(const HighlightType &);
 };
 
 #endif /* BUFFER_H_ */

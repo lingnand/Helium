@@ -3,36 +3,34 @@
 #include <srchilite/instances.h>
 #include <srchilite/langmap.h>
 #include <BufferWorker.h>
-#include <Filetype.h>
 #include <FiletypeMap.h>
+#include <Utility.h>
 #include <Helium.h>
 
 BufferWorker::BufferWorker():
-    _sourceHighlight("default.style", "xhtml.outlang"),
-    _filetype(NULL)
+    _sourceHighlight("default.style", "xhtml.outlang")
 {
 }
 
-void BufferWorker::setFiletype(StateChangeContext &ctx, BufferState &state, Filetype *filetype, Progress &progress)
+void BufferWorker::setHighlightType(StateChangeContext &ctx, BufferState &state, const HighlightType &highlightType, Progress &progress)
 {
     QMutexLocker locker(&_mut);
-    _setFiletype(filetype);
+    _setHighlightType(highlightType);
     _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "sending new state update";
-    emit filetypeChanged(ctx, state);
+    emit highlightTypeChanged(ctx, state);
 }
 
-void BufferWorker::_setFiletype(Filetype *filetype)
+void BufferWorker::_setHighlightType(const HighlightType &type)
 {
-    if (filetype != _filetype) {
-        _filetype = filetype;
-        qDebug() << "Setting filetype to:" << _filetype;
-        if (_filetype && _filetype->highlightEnabled()) {
-            _sourceHighlight.setInputLang(_filetype->langName());
-            // initialize the main state data
+    if (type != _highlightType) {
+        _highlightType = type;
+        qDebug() << "Setting filetype to:" << _highlightType.filetype;
+        if (_highlightType.shouldHighlight()) {
+            _sourceHighlight.setInputLang(_highlightType.filetype->langName());
             _mainStateData = HighlightStateData::ptr(new HighlightStateData(
-                    _sourceHighlight.getHighlighter()->getMainState(),
-                    srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
+                _sourceHighlight.getHighlighter()->getMainState(),
+                srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
             ));
         } else {
             _mainStateData.reset();
@@ -44,8 +42,8 @@ void BufferWorker::_setFiletype(Filetype *filetype)
 void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, Progress &progress)
 {
     float progressInc = (progress.cap-progress.current) / qMax(state.size()-index, 1);
-    if (state.filetype() != _filetype) {
-        state.setFiletype(_filetype);
+    if (state.highlightType() != _highlightType) {
+        state.setHighlightType(_highlightType);
         // highlight without checking
         for (; index < state.size(); index++) {
             qDebug() << "highlighting line" << index;
@@ -65,7 +63,7 @@ void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData:
 
 HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState)
 {
-    if (!_filetype || !_filetype->highlightEnabled() || lineState.line.isEmpty() || !highlightState) {
+    if (!_highlightType.shouldHighlight() || lineState.line.isEmpty() || !highlightState) {
         lineState.highlightText.clear();
         lineState.endHighlightState = highlightState;
     } else {
@@ -114,9 +112,9 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
 {
     // if the filetype is empty then we don't need to track progress
     float progressInc = (progress.cap-progress.current) / (change.size()+1);
-    if (state.filetype() != _filetype) {
+    if (state.highlightType() != _highlightType) {
         Q_ASSERT(state.isEmpty());
-        state.setFiletype(_filetype);
+        state.setHighlightType(_highlightType);
     }
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
@@ -166,7 +164,7 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
         state.removeAt(0);
         ctx.sourceViewShouldUpdate = false;
     } else {
-        ctx.sourceViewShouldUpdate = _filetype && _filetype->highlightEnabled() && !change.delayable();
+        ctx.sourceViewShouldUpdate = _highlightType.shouldHighlight() && !change.delayable();
     }
     emit changeMerged(ctx, state);
 }
@@ -177,9 +175,9 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
 {
     QMutexLocker locker(&_mut);
     float progressInc = (progress.cap-progress.current) / (replaces.size()+1);
-    if (state.filetype() != _filetype) {
+    if (state.highlightType() != _highlightType) {
         Q_ASSERT(state.isEmpty());
-        state.setFiletype(_filetype);
+        state.setHighlightType(_highlightType);
     }
     int charCount = 0;
     int stateIndex = 0;
@@ -357,7 +355,8 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
         state.append(BufferLineState(BufferLine() << input.readLine()));
     }
     if (autodetectFiletype) {
-        _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(filename));
+        _setHighlightType(Helium::instance()->filetypeMap()
+                ->filetypeForName(filename)->highlightType());
     }
     _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "state filetype after highlight" << state.filetype();

@@ -18,10 +18,10 @@ BufferHistory::BufferHistory(int upperLimit): _upperLimit(upperLimit), _currentI
 void BufferHistory::clear()
 {
     // we should retain the should filetype
-    Filetype *oldft = current().filetype();
+    HighlightType oldhl = current().highlightType();
     QList<BufferState>::clear();
     _currentIndex=0;
-    append(BufferState(oldft));
+    append(BufferState(oldhl));
 }
 
 BufferState &BufferHistory::copyCurrent()

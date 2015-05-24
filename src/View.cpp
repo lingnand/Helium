@@ -22,7 +22,6 @@
 #include <NormalMode.h>
 #include <FindMode.h>
 #include <Filetype.h>
-#include <FiletypeControl.h>
 #include <Utility.h>
 
 using namespace bb::cascades;

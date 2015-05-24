@@ -5,6 +5,7 @@
  *      Author: lingnan
  */
 
+#include <QDebug>
 #include <CmdRunProfileManager.h>
 #include <CmdRunProfile.h>
 #include <Utility.h>

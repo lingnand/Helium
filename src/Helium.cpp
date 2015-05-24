@@ -29,6 +29,7 @@ Helium::Helium(int &argc, char **argv):
         _filetypeMap((new FiletypeMapStorage("filetypes", this))->read())
 {
     qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>();
+    qRegisterMetaType<HighlightType>();
     qRegisterMetaType<BufferState>("BufferState&");
     qRegisterMetaType<Progress>("Progress&");
     qRegisterMetaType<BufferStateChange>();

@@ -28,6 +28,7 @@ public:
     // %2: the directory the file is in
     // %3: the filename of the file
     CmdRunProfile(View *, const QString &cmd);
+    virtual ~CmdRunProfile() {}
     void run();
     Q_SLOT void rerun();
     Q_SLOT void setCmd(const QString &cmd);
