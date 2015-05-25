@@ -209,6 +209,24 @@ These format specifiers will be replaced:
     </message>
 </context>
 <context>
+    <name>GeneralSettings</name>
+    <message>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Highlight range controls the number of lines to be highlighted on each side of the cursor. Adjusting this value down will improve performance and vice versa.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>HighlightRangePicker</name>
+    <message>
+        <source>Highlight Range</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MultiViewPane</name>
     <message>
         <source>New</source>
@@ -267,6 +285,25 @@ These format specifiers will be replaced:
     <message>
         <source>Open</source>
         <translation type="obsolete">打开</translation>
+    </message>
+</context>
+<context>
+    <name>Settings</name>
+    <message>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Appearance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filetypes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -23,6 +23,7 @@
 #include <FindMode.h>
 #include <Filetype.h>
 #include <Utility.h>
+#include <Settings.h>
 
 using namespace bb::cascades;
 
@@ -70,7 +71,7 @@ View::View(Buffer *buffer):
         .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
 {
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
-            this, SLOT(onTextAreaCursorPositionChanged()));
+        this, SLOT(onTextAreaCursorPositionChanged()));
     conn(_textArea, SIGNAL(textChanging(const QString)),
         this, SLOT(onTextAreaTextChanged(const QString&)));
 
@@ -95,6 +96,11 @@ View::View(Buffer *buffer):
 
     onTranslatorChanged();
     setMode(_normalMode = new NormalMode(this));
+
+    Settings *settings = new Settings;
+    conn(settings, SIGNAL(pageSelected(bb::cascades::Page*)),
+        content(), SLOT(push(bb::cascades::Page*)));
+    content()->push(settings);
 }
 
 void View::setMode(ViewMode *mode)

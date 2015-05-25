@@ -310,7 +310,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FiletypeMapStorage.cpp) \
         $$quote($$BASEDIR/src/FiletypeSettings.cpp) \
         $$quote($$BASEDIR/src/FindMode.cpp) \
+        $$quote($$BASEDIR/src/GeneralSettings.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
+        $$quote($$BASEDIR/src/HighlightRangePicker.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
@@ -321,6 +323,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/RunProfileManager.cpp) \
         $$quote($$BASEDIR/src/RunProfileSettings.cpp) \
         $$quote($$BASEDIR/src/Segment.cpp) \
+        $$quote($$BASEDIR/src/Settings.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
@@ -407,7 +410,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FiletypeMapStorage.h) \
         $$quote($$BASEDIR/src/FiletypeSettings.h) \
         $$quote($$BASEDIR/src/FindMode.h) \
+        $$quote($$BASEDIR/src/GeneralSettings.h) \
         $$quote($$BASEDIR/src/Helium.h) \
+        $$quote($$BASEDIR/src/HighlightRangePicker.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
@@ -419,6 +424,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/RunProfileManager.h) \
         $$quote($$BASEDIR/src/RunProfileSettings.h) \
         $$quote($$BASEDIR/src/Segment.h) \
+        $$quote($$BASEDIR/src/Settings.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \
