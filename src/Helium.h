@@ -13,8 +13,10 @@
 #include <bb/cascades/LocaleHandler>
 #include <bb/cascades/ProgressIndicatorState>
 
-class FiletypeMap;
 class MultiViewPane;
+class FiletypeMap;
+class GeneralSettings;
+class SettingsPage;
 
 class Helium : public bb::cascades::Application
 {
@@ -23,16 +25,25 @@ public:
     static Helium *instance();
     Helium(int &argc, char **argv);
     virtual ~Helium() {}
-    FiletypeMap *filetypeMap();
+    FiletypeMap *filetypeMap() { return _filetypeMap; }
+    GeneralSettings *general() { return _general; }
     Q_SLOT void reloadTranslator();
 Q_SIGNALS:
     void translatorChanged();
 private:
     // settings
     FiletypeMap *_filetypeMap;
+    GeneralSettings *_general;
+    SettingsPage *_settingsPage;
 
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
+
+    MultiViewPane *scene() const {
+        return (MultiViewPane *) bb::cascades::Application::scene();
+    }
+    Q_SLOT void showSettings();
+    Q_SLOT void showHelp();
 };
 
 Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)

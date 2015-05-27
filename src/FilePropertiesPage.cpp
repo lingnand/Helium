@@ -19,7 +19,7 @@
 #include <FilePropertiesPage.h>
 #include <Filetype.h>
 #include <FiletypeMap.h>
-#include <FiletypeSettings.h>
+#include <FiletypeSettingsUI.h>
 #include <Segment.h>
 #include <Helium.h>
 #include <Utility.h>
@@ -40,7 +40,7 @@ FilePropertiesPage::FilePropertiesPage():
     _filetypeSelectHelp(Label::create()
         .multiline(true)
         .textStyle(Defaults::helpText())),
-    _filetypeSettings(new FiletypeSettings),
+    _filetypeSettingsUI(new FiletypeSettingsUI),
     _titleBar(TitleBar::create()),
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
@@ -95,12 +95,12 @@ void FilePropertiesPage::setFiletype(Filetype *filetype)
                 _filetypeSelect->setSelectedIndex(i);
             }
         }
-        _container->add(_filetypeSettings);
+        _container->add(_filetypeSettingsUI);
     } else {
         _filetypeSelect->setSelectedIndex(0);
-        _container->remove(_filetypeSettings);
+        _container->remove(_filetypeSettingsUI);
     }
-    _filetypeSettings->setFiletype(filetype);
+    _filetypeSettingsUI->setFiletype(filetype);
 }
 
 void FilePropertiesPage::onFiletypeSelectionChanged(const QVariant v)
@@ -117,5 +117,5 @@ void FilePropertiesPage::onTranslatorChanged()
     _filetypeSelect->setTitle(tr("Filetype"));
     _noneFiletypeOption->setDescription(tr("<No Filetype>"));
     _backButton->setTitle(tr("Back"));
-    _filetypeSettings->onTranslatorChanged();
+    _filetypeSettingsUI->onTranslatorChanged();
 }

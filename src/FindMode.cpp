@@ -18,6 +18,7 @@
 #include <bb/cascades/CheckBox>
 #include <bb/cascades/UIPalette>
 #include <bb/cascades/Page>
+#include <bb/cascades/NavigationPane>
 #include <bb/cascades/KeyEvent>
 #include <bb/cascades/Tab>
 #include <FindMode.h>
@@ -134,8 +135,8 @@ void FindMode::onEnter()
 
     // replace the tabs
     view()->parent()->hideViews();
-    view()->detachPage();
-    view()->parent()->setActivePane(view()->page());
+    view()->detachContent();
+    view()->parent()->setActivePane(view()->content());
     view()->parent()->add(_regexOption);
     view()->parent()->add(_ignoreCaseOption);
     view()->parent()->add(_exactMatchOption);
@@ -150,7 +151,7 @@ void FindMode::onExit()
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
 
     view()->parent()->setActivePane(NULL);
-    view()->reattachPage();
+    view()->reattachContent();
     view()->parent()->restoreViews();
 
     _findBuffer.clear();

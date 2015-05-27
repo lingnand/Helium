@@ -1,5 +1,5 @@
 /*
- * CmdRunProfileSettings.cpp
+ * CmdRunProfileSettingsUI.cpp
  *
  *  Created on: May 24, 2015
  *      Author: lingnan
@@ -8,8 +8,8 @@
 #include <bb/cascades/Header>
 #include <bb/cascades/Label>
 #include <bb/cascades/TextField>
-#include <RunProfileSettings.h>
-#include <CmdRunProfileSettings.h>
+#include <RunProfileSettingsUI.h>
+#include <CmdRunProfileSettingsUI.h>
 #include <CmdRunProfileManager.h>
 #include <SignalBlocker.h>
 #include <Segment.h>
@@ -18,7 +18,7 @@
 
 using namespace bb::cascades;
 
-CmdRunProfileSettings::CmdRunProfileSettings(CmdRunProfileManager *manager):
+CmdRunProfileSettingsUI::CmdRunProfileSettingsUI(CmdRunProfileManager *manager):
     _header(Header::create()),
     _field(TextField::create().text(manager->cmd())),
     _help(Label::create().multiline(true)
@@ -38,13 +38,13 @@ CmdRunProfileSettings::CmdRunProfileSettings(CmdRunProfileManager *manager):
     onTranslatorChanged();
 }
 
-void CmdRunProfileSettings::onCmdChanged(const QString &cmd)
+void CmdRunProfileSettingsUI::onCmdChanged(const QString &cmd)
 {
     SignalBlocker blocker(_field);
     _field->setText(cmd);
 }
 
-void CmdRunProfileSettings::onTranslatorChanged()
+void CmdRunProfileSettingsUI::onTranslatorChanged()
 {
     _header->setTitle(tr("Command Settings"));
     _help->setText(tr(

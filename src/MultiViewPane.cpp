@@ -20,6 +20,7 @@
 #include <bb/cascades/Tab>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/Page>
+#include <bb/cascades/NavigationPane>
 #include <MultiViewPane.h>
 #include <View.h>
 #include <Buffer.h>
@@ -28,7 +29,12 @@
 using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(QObject *parent):
-        TabbedPane(parent), _lastActive(NULL), _base(1)
+    TabbedPane(parent), _lastActive(NULL), _base(1),
+    _newViewControl(Tab::create()
+        .imageSource(QUrl("asset:///images/ic_add.png"))
+        .addShortcut(Shortcut::create().key("c")
+                .onTriggered(this, SLOT(addNewView())))
+        .onTriggered(this, SLOT(addNewView())))
 {
     setShowTabsOnActionBar(false);
     addShortcut(Shortcut::create().key("q")
@@ -38,11 +44,7 @@ MultiViewPane::MultiViewPane(QObject *parent):
 
     // TODO: handle auto focus properly: focus on the textarea when the tab is switched to
     // However, think about the case when you press enter+<switching between tabs> and you want to do it again on the next switched to tab
-    add(Tab::create()
-        .imageSource(QUrl("asset:///images/ic_add.png"))
-        .addShortcut(Shortcut::create().key("c")
-                .onTriggered(this, SLOT(addNewView())))
-        .onTriggered(this, SLOT(addNewView())));
+    add(_newViewControl);
 
     conn(this, SIGNAL(activeTabChanged(bb::cascades::Tab*)),
             this, SLOT(onActiveTabChanged(bb::cascades::Tab*)));
@@ -51,15 +53,27 @@ MultiViewPane::MultiViewPane(QObject *parent):
     onTranslatorChanged();
 }
 
-Tab *MultiViewPane::newViewControl() const
+void MultiViewPane::disableAllShortcuts()
 {
-    return TabbedPane::at(0);
+    TabbedPane::disableAllShortcuts();
+    _newViewControl->disableAllShortcuts();
+}
+
+void MultiViewPane::enableAllShortcuts()
+{
+    TabbedPane::enableAllShortcuts();
+    _newViewControl->enableAllShortcuts();
 }
 
 View *MultiViewPane::activeView() const
 {
     Tab *tab = activeTab();
-    return tab == newViewControl() ? NULL : (View *) tab;
+    return tab == _newViewControl ? NULL : (View *) tab;
+}
+
+NavigationPane *MultiViewPane::activePane() const
+{
+    return (NavigationPane *) TabbedPane::activePane();
 }
 
 void MultiViewPane::setActiveTab(Tab *tab, bool toast)
@@ -214,7 +228,7 @@ void MultiViewPane::removeBuffer(Buffer *buffer)
 
 void MultiViewPane::onActiveTabChanged(Tab *tab)
 {
-    if (tab != newViewControl() && tab != _lastActive) {
+    if (tab != _newViewControl && tab != _lastActive) {
         if (_lastActive) {
             _lastActive->onOutOfView();
         }
@@ -224,6 +238,6 @@ void MultiViewPane::onActiveTabChanged(Tab *tab)
 
 void MultiViewPane::onTranslatorChanged()
 {
-    newViewControl()->setTitle(tr("New"));
+    _newViewControl->setTitle(tr("New"));
     emit translatorChanged();
 }

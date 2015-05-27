@@ -1,12 +1,12 @@
 /*
- * FiletypeSettings.h
+ * FiletypeSettingsUI.h
  *
  *  Created on: May 21, 2015
  *      Author: lingnan
  */
 
-#ifndef FILETYPESETTINGS_H_
-#define FILETYPESETTINGS_H_
+#ifndef FILETYPESETTINGSUI_H_
+#define FILETYPESETTINGSUI_H_
 
 #include <bb/cascades/Container>
 
@@ -22,13 +22,13 @@ namespace bb {
 
 class Filetype;
 class RunProfileManager;
-class RunProfileSettings;
+class RunProfileSettingsUI;
 
-class FiletypeSettings : public bb::cascades::Container
+class FiletypeSettingsUI : public bb::cascades::Container
 {
     Q_OBJECT
 public:
-    FiletypeSettings(Filetype *filetype=NULL);
+    FiletypeSettingsUI(Filetype *filetype=NULL);
     void setFiletype(Filetype *);
     Q_SLOT void onTranslatorChanged();
 private:
@@ -41,7 +41,7 @@ private:
     bb::cascades::DropDown *_runProfileSelect;
     bb::cascades::Option *_noneRunProfileOption;
     bb::cascades::Option *_cmdRunProfileOption;
-    RunProfileSettings *_runProfileSettings;
+    RunProfileSettingsUI *_runProfileSettingsUI;
 
     void reloadHeader();
     Q_SLOT void onHighlightCheckedChanged(bool);
@@ -49,4 +49,4 @@ private:
     Q_SLOT void onRunProfileSelectionChanged(const QVariant);
 };
 
-#endif /* FILETYPESETTINGS_H_ */
+#endif /* FILETYPESETTINGSUI_H_ */

@@ -7,6 +7,9 @@
 
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Page>
+#include <bb/cascades/Menu>
+#include <bb/cascades/SettingsActionItem>
+#include <bb/cascades/HelpActionItem>
 #include <Helium.h>
 #include <MultiViewPane.h>
 #include <View.h>
@@ -17,18 +20,25 @@
 #include <FiletypeMapStorage.h>
 #include <Filetype.h>
 #include <CmdRunProfileManager.h>
+#include <GeneralSettingsStorage.h>
+#include <GeneralSettings.h>
+#include <SettingsPage.h>
 #include <Utility.h>
+
+using namespace bb::cascades;
 
 Helium *Helium::instance()
 {
-    return (Helium *) bb::cascades::Application::instance();
+    return (Helium *) Application::instance();
 }
 
 Helium::Helium(int &argc, char **argv):
-        bb::cascades::Application(argc, argv),
-        _filetypeMap((new FiletypeMapStorage("filetypes", this))->read())
+    Application(argc, argv),
+    _filetypeMap((new FiletypeMapStorage("filetypes", this))->read()),
+    _general((new GeneralSettingsStorage("general_settings", this))->read()),
+    _settingsPage(NULL)
 {
-    qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>();
+    qRegisterMetaType<ProgressIndicatorState::Type>();
     qRegisterMetaType<HighlightType>();
     qRegisterMetaType<BufferState>("BufferState&");
     qRegisterMetaType<Progress>("Progress&");
@@ -40,13 +50,40 @@ Helium::Helium(int &argc, char **argv):
     conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(reloadTranslator()));
 
-    MultiViewPane *rootPane = new MultiViewPane(this);
+    setScene(new MultiViewPane(this));
     conn(this, SIGNAL(translatorChanged()),
-         rootPane, SLOT(onTranslatorChanged()));
-    rootPane->addNewView(false);
-    setScene(rootPane);
+         scene(), SLOT(onTranslatorChanged()));
+    scene()->addNewView(false);
+
+    setMenu(bb::cascades::Menu::create()
+        .settings(SettingsActionItem::create()
+            .onTriggered(this, SLOT(showSettings())))
+        .help(HelpActionItem::create()
+            .onTriggered(this, SLOT(showHelp()))));
 }
 
+void Helium::showSettings()
+{
+    if (!_settingsPage) {
+        _settingsPage = new SettingsPage(_general, _filetypeMap, this);
+        conn(this, SIGNAL(translatorChanged()),
+            _settingsPage, SLOT(onTranslatorChanged()));
+    }
+    scene()->disableAllShortcuts();
+    _settingsPage->disconnect();
+    conn(_settingsPage, SIGNAL(exited()),
+        scene(), SLOT(enableAllShortcuts()));
+    conn(_settingsPage, SIGNAL(toPush(bb::cascades::Page*)),
+        scene()->activePane(), SLOT(push(bb::cascades::Page*)));
+    conn(_settingsPage, SIGNAL(toPop()),
+        scene()->activePane(), SLOT(pop()));
+    _settingsPage->setParent(NULL);
+    scene()->activePane()->push(_settingsPage);
+}
+
+void Helium::showHelp()
+{
+}
 void Helium::reloadTranslator()
 {
     QCoreApplication::instance()->removeTranslator(&_translator);
@@ -55,9 +92,4 @@ void Helium::reloadTranslator()
         QCoreApplication::instance()->installTranslator(&_translator);
         emit translatorChanged();
     }
-}
-
-FiletypeMap *Helium::filetypeMap()
-{
-    return _filetypeMap;
 }

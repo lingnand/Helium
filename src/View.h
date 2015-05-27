@@ -47,14 +47,12 @@ public:
     bb::cascades::Page *page() const { return _page; }
     bb::cascades::TextArea *textArea() const { return _textArea; }
     Buffer *buffer() const { return _buffer; }
-    bb::cascades::NavigationPane *content() const {
-        return (bb::cascades::NavigationPane *) Tab::content();
-    }
+    bb::cascades::NavigationPane *content() const { return _content; }
     MultiViewPane *parent() const {
         return (MultiViewPane *) QObject::parent();
     }
-    void detachPage();
-    void reattachPage();
+    void detachContent();
+    void reattachContent();
     void hideAllPageActions();
     bool active() const;
     Q_SLOT void setBuffer(Buffer* buffer);
@@ -93,6 +91,7 @@ private:
     FindMode *_findMode;
     void setMode(ViewMode *);
 
+    bb::cascades::NavigationPane *_content;
     bb::cascades::Page *_page;
     bb::cascades::KeyListener *_pageKeyListener;
     bb::cascades::TextArea *_textArea;

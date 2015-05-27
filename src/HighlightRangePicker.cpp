@@ -20,8 +20,12 @@ HighlightRangePicker::HighlightRangePicker()
     setPickerItemProvider(&_provider);
     conn(this, SIGNAL(selectedValueChanged(const QVariant&)),
         this, SLOT(onSelectedValueChanged(const QVariant&)));
-    select(0, 20);
     onTranslatorChanged();
+}
+
+void HighlightRangePicker::setHighlightRange(int range)
+{
+    select(0, range);
 }
 
 VisualNode *HighlightRangePicker::Provider::createItem(Picker *pickerList, int columnIndex)
@@ -55,7 +59,7 @@ QVariant HighlightRangePicker::Provider::value(Picker *picker,
 void HighlightRangePicker::onSelectedValueChanged(const QVariant &v)
 {
     bb::cascades::Picker::setDescription(v.toString());
-    emit highlightRangeChanged(v.toInt());
+    emit selectedHighlightRangeChanged(v.toInt());
 }
 
 void HighlightRangePicker::onTranslatorChanged()

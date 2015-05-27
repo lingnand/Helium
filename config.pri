@@ -302,28 +302,33 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfile.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.cpp) \
-        $$quote($$BASEDIR/src/CmdRunProfileSettings.cpp) \
+        $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.cpp) \
         $$quote($$BASEDIR/src/Defaults.cpp) \
         $$quote($$BASEDIR/src/FilePropertiesPage.cpp) \
         $$quote($$BASEDIR/src/Filetype.cpp) \
         $$quote($$BASEDIR/src/FiletypeMap.cpp) \
+        $$quote($$BASEDIR/src/FiletypeMapSettingsPage.cpp) \
         $$quote($$BASEDIR/src/FiletypeMapStorage.cpp) \
-        $$quote($$BASEDIR/src/FiletypeSettings.cpp) \
+        $$quote($$BASEDIR/src/FiletypeSettingsUI.cpp) \
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/GeneralSettings.cpp) \
+        $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
+        $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HighlightRangePicker.cpp) \
+        $$quote($$BASEDIR/src/HighlightType.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/NormalMode.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
+        $$quote($$BASEDIR/src/RepushablePage.cpp) \
         $$quote($$BASEDIR/src/RunProfile.cpp) \
         $$quote($$BASEDIR/src/RunProfileManager.cpp) \
-        $$quote($$BASEDIR/src/RunProfileSettings.cpp) \
+        $$quote($$BASEDIR/src/RunProfileSettingsUI.cpp) \
         $$quote($$BASEDIR/src/Segment.cpp) \
-        $$quote($$BASEDIR/src/Settings.cpp) \
+        $$quote($$BASEDIR/src/SettingsPage.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
@@ -402,29 +407,34 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/BufferWorker.h) \
         $$quote($$BASEDIR/src/CmdRunProfile.h) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.h) \
-        $$quote($$BASEDIR/src/CmdRunProfileSettings.h) \
+        $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.h) \
         $$quote($$BASEDIR/src/Defaults.h) \
         $$quote($$BASEDIR/src/FilePropertiesPage.h) \
         $$quote($$BASEDIR/src/Filetype.h) \
         $$quote($$BASEDIR/src/FiletypeMap.h) \
+        $$quote($$BASEDIR/src/FiletypeMapSettingsPage.h) \
         $$quote($$BASEDIR/src/FiletypeMapStorage.h) \
-        $$quote($$BASEDIR/src/FiletypeSettings.h) \
+        $$quote($$BASEDIR/src/FiletypeSettingsUI.h) \
         $$quote($$BASEDIR/src/FindMode.h) \
         $$quote($$BASEDIR/src/GeneralSettings.h) \
+        $$quote($$BASEDIR/src/GeneralSettingsPage.h) \
+        $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HighlightRangePicker.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
+        $$quote($$BASEDIR/src/HighlightType.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
+        $$quote($$BASEDIR/src/RepushablePage.h) \
         $$quote($$BASEDIR/src/RunProfile.h) \
         $$quote($$BASEDIR/src/RunProfileManager.h) \
-        $$quote($$BASEDIR/src/RunProfileSettings.h) \
+        $$quote($$BASEDIR/src/RunProfileSettingsUI.h) \
         $$quote($$BASEDIR/src/Segment.h) \
-        $$quote($$BASEDIR/src/Settings.h) \
+        $$quote($$BASEDIR/src/SettingsPage.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \

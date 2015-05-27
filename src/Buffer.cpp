@@ -12,6 +12,7 @@
 #include <Helium.h>
 #include <SignalBlocker.h>
 #include <FiletypeMap.h>
+#include <Filetype.h>
 #include <Utility.h>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
@@ -95,9 +96,7 @@ void Buffer::_setName(const QString &name, bool sethl, Progress &progress)
     if (name != _name) {
         _name = name;
         if (sethl)
-            setHighlightType(Helium::instance()->filetypeMap()
-                    ->filetypeForName(name)->highlightType()
-                , progress);
+            setHighlightType(Helium::instance()->filetypeMap()->highlightTypeForName(name), progress);
         emit nameChanged(name);
     }
 }
@@ -114,7 +113,7 @@ void Buffer::setFilepath(const QString &filepath, bool setHighlightType, Progres
 void Buffer::setFiletype(Filetype *filetype)
 {
     Progress progress;
-    setHighlightType(filetype->highlightType(), progress);
+    setHighlightType(HighlightType::fromFiletype(filetype), progress);
 }
 
 void Buffer::setHighlightType(const HighlightType &type, Progress &progress)

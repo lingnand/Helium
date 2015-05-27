@@ -13,7 +13,7 @@
 #include <QDebug>
 #include <HighlightStateData.h>
 #include <HtmlParser.h>
-#include <Filetype.h>
+#include <HighlightType.h>
 
 struct Range {
     int from;

@@ -1,5 +1,5 @@
 /*
- * FiletypeSettings.cpp
+ * FiletypeSettingsUI.cpp
  *
  *  Created on: May 21, 2015
  *      Author: lingnan
@@ -12,10 +12,10 @@
 #include <bb/cascades/Label>
 #include <bb/cascades/DropDown>
 #include <bb/cascades/SystemDefaults>
-#include <FiletypeSettings.h>
+#include <FiletypeSettingsUI.h>
 #include <Filetype.h>
 #include <CmdRunProfileManager.h>
-#include <RunProfileSettings.h>
+#include <RunProfileSettingsUI.h>
 #include <Segment.h>
 #include <Utility.h>
 #include <Defaults.h>
@@ -23,7 +23,7 @@
 
 using namespace bb::cascades;
 
-FiletypeSettings::FiletypeSettings(Filetype *filetype):
+FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
     _filetype(NULL),
     _header(Header::create()),
     _highlightToggleLabel(Label::create()
@@ -37,7 +37,7 @@ FiletypeSettings::FiletypeSettings(Filetype *filetype):
             .value(RunProfileManager::None)),
     _cmdRunProfileOption(Option::create()
             .value(RunProfileManager::Cmd)),
-    _runProfileSettings(NULL)
+    _runProfileSettingsUI(NULL)
 {
     conn(_highlightToggle, SIGNAL(checkedChanged(bool)),
         this, SLOT(onHighlightCheckedChanged(bool)));
@@ -60,7 +60,7 @@ FiletypeSettings::FiletypeSettings(Filetype *filetype):
     setFiletype(filetype);
 }
 
-void FiletypeSettings::setFiletype(Filetype *filetype)
+void FiletypeSettingsUI::setFiletype(Filetype *filetype)
 {
     if (filetype != _filetype) {
         if (_filetype) {
@@ -81,22 +81,23 @@ void FiletypeSettings::setFiletype(Filetype *filetype)
     }
 }
 
-void FiletypeSettings::onFiletypeRunProfileManagerChanged(RunProfileManager *change)
+void FiletypeSettingsUI::onFiletypeRunProfileManagerChanged(RunProfileManager *change)
 {
     SignalBlocker blocker(_runProfileSelect);
     _runProfileSelect->setSelectedOption(
             dynamic_cast<CmdRunProfileManager *>(change) ? _cmdRunProfileOption :
                     _noneRunProfileOption);
-    if (_runProfileSettings) {
-        remove(_runProfileSettings);
-        _runProfileSettings->deleteLater();
+    if (_runProfileSettingsUI) {
+        remove(_runProfileSettingsUI);
+        _runProfileSettingsUI->deleteLater();
+        _runProfileSettingsUI = NULL;
     }
     if (change) {
-        add(_runProfileSettings = RunProfileSettings::create(change));
+        add(_runProfileSettingsUI = RunProfileSettingsUI::create(change));
     }
 }
 
-void FiletypeSettings::reloadHeader()
+void FiletypeSettingsUI::reloadHeader()
 {
     QString filetypeName;
     if (_filetype)
@@ -107,14 +108,14 @@ void FiletypeSettings::reloadHeader()
     _header->setTitle(tr("%1 Settings").arg(filetypeName));
 }
 
-void FiletypeSettings::onHighlightCheckedChanged(bool checked)
+void FiletypeSettingsUI::onHighlightCheckedChanged(bool checked)
 {
     if (_filetype) {
         _filetype->setHighlightEnabled(checked);
     }
 }
 
-void FiletypeSettings::onRunProfileSelectionChanged(const QVariant v)
+void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant v)
 {
     if (_filetype) {
         switch (v.toInt()) {
@@ -128,7 +129,7 @@ void FiletypeSettings::onRunProfileSelectionChanged(const QVariant v)
     }
 }
 
-void FiletypeSettings::onTranslatorChanged()
+void FiletypeSettingsUI::onTranslatorChanged()
 {
     reloadHeader();
     _highlightToggleLabel->setText(tr("Enable highlight"));
@@ -138,7 +139,7 @@ void FiletypeSettings::onTranslatorChanged()
     _noneRunProfileOption->setDescription(tr("<No Run Profile>"));
     _cmdRunProfileOption->setText(tr("Run Command"));
     _cmdRunProfileOption->setDescription(tr("Pass a command to /bin/sh"));
-    if (_runProfileSettings) {
-        _runProfileSettings->onTranslatorChanged();
+    if (_runProfileSettingsUI) {
+        _runProfileSettingsUI->onTranslatorChanged();
     }
 }

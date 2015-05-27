@@ -21,6 +21,13 @@
 #include <bb/cascades/TabbedPane>
 #include <Buffer.h>
 
+namespace bb {
+    namespace cascades {
+        class NavigationPane;
+        class Shortcut;
+    }
+}
+
 class Buffer;
 class View;
 
@@ -31,6 +38,8 @@ public:
     MultiViewPane(QObject *parent=NULL);
     virtual ~MultiViewPane() {}
     View *activeView() const;
+    // the active pane should always be a navigation pane
+    bb::cascades::NavigationPane *activePane() const;
     Q_SLOT void setActiveTab(int, bool toast=false);
     Q_SLOT void setActiveTab(bb::cascades::Tab *, bool toast=false);
     Q_SLOT void setPrevTabActive(bool toast=true);
@@ -50,12 +59,14 @@ public:
     Q_SLOT void onTranslatorChanged();
     void hideViews();
     void restoreViews();
+    Q_SLOT void disableAllShortcuts();
+    Q_SLOT void enableAllShortcuts();
 Q_SIGNALS:
     void translatorChanged();
 private:
     // used for determining the correct list of tabs to cycle
     int _base;
-    bb::cascades::Tab *newViewControl() const;
+    bb::cascades::Tab *_newViewControl;
 
     QList<bb::cascades::Tab *> _save;
     View *_lastActive;

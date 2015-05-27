@@ -18,8 +18,9 @@ public:
     HighlightRangePicker();
     virtual ~HighlightRangePicker() {}
     Q_SLOT void onTranslatorChanged();
+    Q_SLOT void setHighlightRange(int);
 Q_SIGNALS:
-    void highlightRangeChanged(int);
+    void selectedHighlightRangeChanged(int);
 private:
     class Provider : public bb::cascades::PickerProvider {
     public:

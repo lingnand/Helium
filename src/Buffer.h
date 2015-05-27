@@ -31,7 +31,7 @@
 #include <BufferWorker.h>
 #include <HtmlBufferChangeParser.h>
 #include <BufferHistory.h>
-#include <Filetype.h>
+#include <HighlightType.h>
 
 class View;
 

@@ -170,6 +170,7 @@ FiletypeMap *FiletypeMapStorage::read()
             insertFiletype(filetypes[i]);
         }
     } else {
+        qDebug() << "Reading filetypes...";
         for (int i = 0; i < keys.size(); i++) {
             RunProfileManager *m = NULL;
             _settings.beginGroup(keys[i]);

@@ -4,6 +4,7 @@
 #include <srchilite/langmap.h>
 #include <BufferWorker.h>
 #include <FiletypeMap.h>
+#include <Filetype.h>
 #include <Utility.h>
 #include <Helium.h>
 
@@ -356,7 +357,7 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
     }
     if (autodetectFiletype) {
         _setHighlightType(Helium::instance()->filetypeMap()
-                ->filetypeForName(filename)->highlightType());
+                ->highlightTypeForName(filename));
     }
     _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "state filetype after highlight" << state.filetype();

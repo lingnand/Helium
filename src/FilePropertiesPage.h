@@ -22,7 +22,7 @@ namespace bb {
 }
 
 class Filetype;
-class FiletypeSettings;
+class FiletypeSettingsUI;
 class Segment;
 
 class FilePropertiesPage : public bb::cascades::Page
@@ -47,7 +47,7 @@ private:
     bb::cascades::Option *_noneFiletypeOption;
     bb::cascades::Label *_filetypeSelectHelp;
     bb::cascades::ActionItem *_backButton;
-    FiletypeSettings *_filetypeSettings;
+    FiletypeSettingsUI *_filetypeSettingsUI;
     Q_SLOT void onFiletypeSelectionChanged(const QVariant);
 };
 

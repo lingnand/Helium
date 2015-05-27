@@ -23,7 +23,7 @@
 #include <FindMode.h>
 #include <Filetype.h>
 #include <Utility.h>
-#include <Settings.h>
+#include <SettingsPage.h>
 
 using namespace bb::cascades;
 
@@ -80,7 +80,7 @@ View::View(Buffer *buffer):
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
             this, SLOT(updateTextAreaPartialHighlight()));
 
-    setContent(NavigationPane::create()
+    setContent(_content = NavigationPane::create()
         .add(_page = Page::create()
             .content(Container::create()
                 .add(_textArea)
@@ -96,11 +96,6 @@ View::View(Buffer *buffer):
 
     onTranslatorChanged();
     setMode(_normalMode = new NormalMode(this));
-
-    Settings *settings = new Settings;
-    conn(settings, SIGNAL(pageSelected(bb::cascades::Page*)),
-        content(), SLOT(push(bb::cascades::Page*)));
-    content()->push(settings);
 }
 
 void View::setMode(ViewMode *mode)
@@ -117,18 +112,15 @@ void View::setMode(ViewMode *mode)
 }
 
 // detachPage can only be called when at the main page
-void View::detachPage()
+void View::detachContent()
 {
-    Q_ASSERT(content()->top() == _page);
-    content()->pop();
-    _page->setParent(NULL);
+    _content->setParent(NULL);
 }
 
-void View::reattachPage()
+void View::reattachContent()
 {
-    Q_ASSERT(!content()->top());
-    _page->setParent(NULL);
-    content()->push(_page);
+    _content->setParent(NULL);
+    setContent(_content);
 }
 
 void View::hideAllPageActions()

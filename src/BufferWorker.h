@@ -8,7 +8,7 @@
 #include <HtmlBufferChangeParser.h>
 #include <HighlightStateData.h>
 #include <Replacement.h>
-#include <Filetype.h>
+#include <HighlightType.h>
 
 class View;
 

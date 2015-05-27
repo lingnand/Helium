@@ -1,14 +1,14 @@
 /*
- * CmdRunProfileSettings.h
+ * CmdRunProfileSettingsUI.h
  *
  *  Created on: May 24, 2015
  *      Author: lingnan
  */
 
-#ifndef CMDRUNPROFILESETTINGS_H_
-#define CMDRUNPROFILESETTINGS_H_
+#ifndef CMDRUNPROFILESETTINGSUI_H_
+#define CMDRUNPROFILESETTINGSUI_H_
 
-#include <RunProfileSettings.h>
+#include <RunProfileSettingsUI.h>
 
 namespace bb {
     namespace cascades {
@@ -20,12 +20,12 @@ namespace bb {
 
 class CmdRunProfileManager;
 
-class CmdRunProfileSettings : public RunProfileSettings
+class CmdRunProfileSettingsUI : public RunProfileSettingsUI
 {
     Q_OBJECT
 public:
-    CmdRunProfileSettings(CmdRunProfileManager *);
-    virtual ~CmdRunProfileSettings() {}
+    CmdRunProfileSettingsUI(CmdRunProfileManager *);
+    virtual ~CmdRunProfileSettingsUI() {}
     void onTranslatorChanged();
 private:
     bb::cascades::Header *_header;
@@ -35,4 +35,4 @@ private:
     Q_SLOT void onCmdChanged(const QString&);
 };
 
-#endif /* CMDRUNPROFILESETTINGS_H_ */
+#endif /* CMDRUNPROFILESETTINGSUI_H_ */

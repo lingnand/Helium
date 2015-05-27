@@ -6,6 +6,7 @@
  */
 
 #include <BufferState.h>
+#include <Filetype.h>
 #include <Helium.h>
 
 // BufferLine

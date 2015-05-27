@@ -28,7 +28,7 @@
     </message>
 </context>
 <context>
-    <name>CmdRunProfileSettings</name>
+    <name>CmdRunProfileSettingsUI</name>
     <message>
         <source>Command Settings</source>
         <translation type="unfinished"></translation>
@@ -75,7 +75,14 @@ These format specifiers will be replaced:
     </message>
 </context>
 <context>
-    <name>FiletypeSettings</name>
+    <name>FiletypeMapSettingsPage</name>
+    <message>
+        <source>Filetypes</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FiletypeSettingsUI</name>
     <message>
         <source>%1 Settings</source>
         <translation type="unfinished"></translation>
@@ -209,7 +216,7 @@ These format specifiers will be replaced:
     </message>
 </context>
 <context>
-    <name>GeneralSettings</name>
+    <name>GeneralSettingsPage</name>
     <message>
         <source>General</source>
         <translation type="unfinished"></translation>
@@ -281,7 +288,7 @@ These format specifiers will be replaced:
     </message>
 </context>
 <context>
-    <name>Settings</name>
+    <name>SettingsPage</name>
     <message>
         <source>General</source>
         <translation type="unfinished"></translation>

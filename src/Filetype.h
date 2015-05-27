@@ -8,26 +8,9 @@
 #ifndef FILETYPE_H_
 #define FILETYPE_H_
 
-class RunProfileManager;
-class Filetype;
+#include <HighlightType.h>
 
-struct HighlightType {
-    Filetype *filetype;
-    bool highlightEnabled;
-    HighlightType(Filetype *ft=NULL, bool highlight=false):
-        filetype(ft), highlightEnabled(highlight) {}
-    bool operator==(const HighlightType &other) const {
-        return filetype == other.filetype &&
-                highlightEnabled == other.highlightEnabled;
-    }
-    bool operator!=(const HighlightType &other) const {
-        return !operator==(other);
-    }
-    bool shouldHighlight() const {
-        return filetype && highlightEnabled;
-    }
-};
-Q_DECLARE_METATYPE(HighlightType)
+class RunProfileManager;
 
 class Filetype : public QObject
 {

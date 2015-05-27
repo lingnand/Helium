@@ -8,30 +8,17 @@
 #ifndef GENERALSETTINGS_H_
 #define GENERALSETTINGS_H_
 
-#include <bb/cascades/Page>
-
-namespace bb {
-    namespace cascades {
-        class TitleBar;
-        class Label;
-    }
-}
-
-class HighlightRangePicker;
-
-class GeneralSettings : public bb::cascades::Page
+class GeneralSettings : public QObject
 {
     Q_OBJECT
 public:
-    GeneralSettings();
-    virtual ~GeneralSettings() {}
-    Q_SLOT void onTranslatorChanged();
+    GeneralSettings(int highlightRange, QObject *parent=NULL);
+    int highlightRange() const { return _highlightRange; }
+    Q_SLOT void setHighlightRange(int);
 Q_SIGNALS:
     void highlightRangeChanged(int);
 private:
-    bb::cascades::TitleBar *_title;
-    bb::cascades::Label *_help;
-    HighlightRangePicker *_picker;
+    int _highlightRange;
 };
 
 #endif /* GENERALSETTINGS_H_ */
