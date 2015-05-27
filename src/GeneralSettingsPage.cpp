@@ -35,7 +35,9 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
 
     setContent(Segment::create().section()
         .add(Segment::create().subsection()
-            .add(_picker)));
+            .add(_picker))
+        .add(Segment::create().subsection()
+            .add(_help)));
 
     onTranslatorChanged();
 }

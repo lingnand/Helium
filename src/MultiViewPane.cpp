@@ -22,8 +22,10 @@
 #include <bb/cascades/Page>
 #include <bb/cascades/NavigationPane>
 #include <MultiViewPane.h>
+#include <GeneralSettings.h>
 #include <View.h>
 #include <Buffer.h>
+#include <Helium.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -143,6 +145,10 @@ void MultiViewPane::addNewView(bool toast)
 void MultiViewPane::insertView(int index, View *view)
 {
     conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
+    GeneralSettings *general = Helium::instance()->general();
+    view->setHighlightRangeLimit(general->highlightRange());
+    conn(general, SIGNAL(highlightRangeChanged(int)),
+        view, SLOT(setHighlightRangeLimit(int)));
     insert(index+_base, view);
 }
 
