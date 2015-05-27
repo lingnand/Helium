@@ -54,6 +54,7 @@ public:
     // the filepath of the buffer, empty if not yet bound
     const QString &filepath() const { return _filepath; }
     Filetype *filetype() { return state().filetype(); }
+    HighlightType highlightType() { return HighlightType::fromFiletype(filetype()); }
     Q_SLOT void setFiletype(Filetype *);
     const BufferState &state() const { return _states.current(); }
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);

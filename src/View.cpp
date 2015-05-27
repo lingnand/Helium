@@ -22,6 +22,7 @@
 #include <NormalMode.h>
 #include <FindMode.h>
 #include <Filetype.h>
+#include <HighlightType.h>
 #include <Utility.h>
 #include <SettingsPage.h>
 
@@ -357,7 +358,7 @@ Range View::partialHighlightRange(const BufferState &st, Range focus)
 
 void View::updateTextAreaPartialHighlight()
 {
-    if (!_buffer->filetype() || !_buffer->filetype()->highlightEnabled())
+    if (!_buffer->highlightType().shouldHighlight())
         return;
     SignalBlocker blocker(_textArea);
     int start = _textArea->editor()->selectionStart();
@@ -384,7 +385,7 @@ void View::updateTextAreaPartialHighlight()
 
 void View::onTextAreaCursorPositionChanged()
 {
-    if (!_buffer->filetype() || !_buffer->filetype()->highlightEnabled())
+    if (!_buffer->highlightType().shouldHighlight())
         return;
     if (!_partialHighlightUpdateTimer.isActive())
         _partialHighlightUpdateTimer.start();
