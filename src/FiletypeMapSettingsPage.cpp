@@ -19,11 +19,10 @@ using namespace bb::cascades;
 FiletypeMapSettingsPage::FiletypeMapSettingsPage(FiletypeMap *map, QObject *parent):
     RepushablePage(parent),
     _filetypes(map->filetypes()),
-    _title(TitleBar::create()),
     _filetypeSettingsUI(new FiletypeSettingsUI),
     _filetypeSettingsPage(new RepushablePage(this))
 {
-    setTitleBar(_title);
+    setTitleBar(TitleBar::create());
     for (int i = 0; i < _filetypes.size(); i++) {
         _model.append(_filetypes[i]->name());
     }
@@ -53,5 +52,5 @@ void FiletypeMapSettingsPage::onTriggered(QVariantList indexPath)
 
 void FiletypeMapSettingsPage::onTranslatorChanged()
 {
-    _title->setTitle(tr("Filetypes"));
+    titleBar()->setTitle(tr("Filetypes"));
 }

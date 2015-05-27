@@ -13,7 +13,6 @@
 
 namespace bb {
     namespace cascades {
-        class TitleBar;
         class Label;
     }
 }
@@ -28,7 +27,6 @@ public:
     GeneralSettingsPage(GeneralSettings *, QObject *parent=NULL);
     Q_SLOT void onTranslatorChanged();
 private:
-    bb::cascades::TitleBar *_title;
     bb::cascades::Label *_help;
     HighlightRangePicker *_picker;
     Q_SLOT void onHighlightRangeChanged(int);

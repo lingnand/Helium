@@ -14,7 +14,6 @@
 
 namespace bb {
     namespace cascades {
-        class TitleBar;
         class Page;
     }
 }
@@ -35,7 +34,6 @@ private:
     QList<Filetype *> _filetypes;
     FiletypeSettingsUI *_filetypeSettingsUI;
 
-    bb::cascades::TitleBar *_title;
     bb::cascades::QListDataModel<QString> _model;
     RepushablePage *_filetypeSettingsPage;
     Q_SLOT void onTriggered(QVariantList);

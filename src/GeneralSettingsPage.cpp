@@ -20,12 +20,11 @@ using namespace bb::cascades;
 
 GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObject *parent):
     RepushablePage(parent),
-    _title(TitleBar::create()),
     _picker(new HighlightRangePicker),
     _help(Label::create().multiline(true)
         .textStyle(Defaults::helpText()))
 {
-    setTitleBar(_title);
+    setTitleBar(TitleBar::create());
 
     onHighlightRangeChanged(generalSettings->highlightRange());
     conn(_picker, SIGNAL(selectedHighlightRangeChanged(int)),
@@ -50,7 +49,7 @@ void GeneralSettingsPage::onHighlightRangeChanged(int range)
 
 void GeneralSettingsPage::onTranslatorChanged()
 {
-    _title->setTitle(tr("General"));
+    titleBar()->setTitle(tr("General"));
     _picker->onTranslatorChanged();
     _help->setText(tr("Highlight range controls the number of lines to be highlighted on each side of the cursor. "
             "Adjusting this value down will improve performance and vice versa."));

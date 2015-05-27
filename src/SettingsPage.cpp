@@ -16,13 +16,12 @@ using namespace bb::cascades;
 
 SettingsPage::SettingsPage(GeneralSettings *generalSettings, FiletypeMap *filetypeMap, QObject *parent):
     RepushablePage(parent),
-    _title(TitleBar::create()),
     _generalSettings(generalSettings),
     _generalSettingsPage(NULL),
     _filetypeMap(filetypeMap),
     _filetypeMapSettingsPage(NULL)
 {
-    setTitleBar(_title);
+    setTitleBar(TitleBar::create());
     ListView *listView = ListView::create().dataModel(&_model);
     conn(listView, SIGNAL(triggered(QVariantList)),
         this, SLOT(onTriggered(QVariantList)));
@@ -61,7 +60,7 @@ void SettingsPage::onTriggered(QVariantList indexPath)
 
 void SettingsPage::onTranslatorChanged()
 {
-    _title->setTitle(tr("Settings"));
+    titleBar()->setTitle(tr("Settings"));
     _model.clear();
     _model.append(tr("General"));
     _model.append(tr("Appearance"));

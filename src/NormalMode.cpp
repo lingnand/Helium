@@ -17,6 +17,7 @@
 #include <bb/cascades/KeyEvent>
 #include <bb/cascades/TextFieldTitleBarKindProperties>
 #include <RunProfile.h>
+#include <WebRunProfile.h>
 #include <RunProfileManager.h>
 #include <NormalMode.h>
 #include <Utility.h>
@@ -244,8 +245,8 @@ void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
     if (old) {
         old->disconnect(this);
     }
+    onRunProfileManagerChanged(change ? change->runProfileManager() : NULL);
     if (change) {
-        onRunProfileManagerChanged(change->runProfileManager());
         conn(change, SIGNAL(runProfileManagerChanged(RunProfileManager*, RunProfileManager*)),
                 this, SLOT(onRunProfileManagerChanged(RunProfileManager*)));
     }
@@ -255,7 +256,8 @@ void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
 
 void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager)
 {
-    setRunProfile(runProfileManager ? runProfileManager->createRunProfile(view()) : NULL);
+    setRunProfile(new WebRunProfile(view()));
+//    setRunProfile(runProfileManager ? runProfileManager->createRunProfile(view()) : NULL);
 }
 
 void NormalMode::autoFocus()

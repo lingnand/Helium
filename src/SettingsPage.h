@@ -12,12 +12,6 @@
 #include <bb/cascades/QListDataModel>
 #include <RepushablePage.h>
 
-namespace bb {
-    namespace cascades {
-        class TitleBar;
-    }
-}
-
 class GeneralSettings;
 class GeneralSettingsPage;
 class FiletypeMap;
@@ -33,7 +27,6 @@ public:
 Q_SIGNALS:
     void toPush(bb::cascades::Page *);
 private:
-    bb::cascades::TitleBar *_title;
     bb::cascades::QListDataModel<QString> _model;
 
     GeneralSettings *_generalSettings;

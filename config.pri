@@ -332,6 +332,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
+        $$quote($$BASEDIR/src/WebRunProfile.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.cpp) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.cc) \
@@ -440,6 +441,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Utility.h) \
         $$quote($$BASEDIR/src/View.h) \
         $$quote($$BASEDIR/src/ViewMode.h) \
+        $$quote($$BASEDIR/src/WebRunProfile.h) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.h) \
         $$quote($$BASEDIR/src/srchilite/colormap.h) \
