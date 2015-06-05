@@ -20,11 +20,6 @@ RunProfile *CmdRunProfileManager::createRunProfile(View *view)
     return p;
 }
 
-const QString &CmdRunProfileManager::cmd() const
-{
-    return _cmd;
-}
-
 void CmdRunProfileManager::setCmd(const QString &cmd)
 {
     if (cmd != _cmd) {

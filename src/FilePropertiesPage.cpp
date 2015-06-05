@@ -41,7 +41,6 @@ FilePropertiesPage::FilePropertiesPage():
         .multiline(true)
         .textStyle(Defaults::helpText())),
     _filetypeSettingsUI(new FiletypeSettingsUI),
-    _titleBar(TitleBar::create()),
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(this, SIGNAL(backButtonTriggered())))
@@ -63,17 +62,17 @@ FilePropertiesPage::FilePropertiesPage():
     conn(_filetypeSelect, SIGNAL(selectedValueChanged(const QVariant)),
         this, SLOT(onFiletypeSelectionChanged(const QVariant)));
 
-    setTitleBar(_titleBar);
-    setContent(ScrollView::create(
-            _container = Segment::create().section()
-                .add(Segment::create().subsection().leftToRight()
-                    .add(_autodetectFiletypeToggleLabel)
-                    .add(_autodetectFiletypeToggle))
-                .add(Segment::create().subsection().add(_autodetectFiletypeToggleHelp))
-                .add(Divider::create())
-                .add(Segment::create().subsection().add(_filetypeSelect))
-                .add(Segment::create().subsection().add(_filetypeSelectHelp))
-                .add(Divider::create()))
+    setTitleBar(TitleBar::create());
+    setContent(ScrollView::create(Segment::create().section()
+            .add(Segment::create().subsection().leftToRight()
+                .add(_autodetectFiletypeToggleLabel)
+                .add(_autodetectFiletypeToggle))
+            .add(Segment::create().subsection().add(_autodetectFiletypeToggleHelp))
+            .add(Divider::create())
+            .add(Segment::create().subsection().add(_filetypeSelect))
+            .add(Segment::create().subsection().add(_filetypeSelectHelp))
+            .add(Divider::create())
+            .add(_filetypeSettingsUI))
         .scrollMode(ScrollMode::Vertical));
     setPaneProperties(NavigationPaneProperties::create()
         .backButton(_backButton));
@@ -95,10 +94,10 @@ void FilePropertiesPage::setFiletype(Filetype *filetype)
                 _filetypeSelect->setSelectedIndex(i);
             }
         }
-        _container->add(_filetypeSettingsUI);
+        _filetypeSettingsUI->setVisible(true);
     } else {
         _filetypeSelect->setSelectedIndex(0);
-        _container->remove(_filetypeSettingsUI);
+        _filetypeSettingsUI->setVisible(false);
     }
     _filetypeSettingsUI->setFiletype(filetype);
 }
@@ -110,7 +109,7 @@ void FilePropertiesPage::onFiletypeSelectionChanged(const QVariant v)
 
 void FilePropertiesPage::onTranslatorChanged()
 {
-    _titleBar->setTitle(tr("File Properties"));
+    titleBar()->setTitle(tr("File Properties"));
     _autodetectFiletypeToggleLabel->setText(tr("Autodetect filetype"));
     _autodetectFiletypeToggleHelp->setText(tr("Automatically change filetype based on filename"));
     _filetypeSelectHelp->setText(tr("The filetype for the current buffer. Each filetype uses a different set of highlight rules and comes with separate settings."));

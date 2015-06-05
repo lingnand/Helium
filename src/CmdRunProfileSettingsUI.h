@@ -32,7 +32,7 @@ private:
     bb::cascades::TextField *_field;
     bb::cascades::Label *_help;
     void reloadHeader();
-    Q_SLOT void onCmdChanged(const QString&);
+    Q_SLOT void onManagerCmdChanged(const QString&);
 };
 
 #endif /* CMDRUNPROFILESETTINGSUI_H_ */

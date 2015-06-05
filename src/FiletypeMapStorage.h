@@ -9,6 +9,7 @@
 #define FILETYPEMAPSTORAGE_H_
 
 #include <QSettings>
+#include <WebRunProfileManager.h>
 
 class Filetype;
 class FiletypeMap;
@@ -27,8 +28,10 @@ private:
     void insertFiletype(Filetype *);
     void connectFiletype(Filetype *);
     void connectCmdRunProfileManager(CmdRunProfileManager *);
+    void connectWebRunProfileManager(WebRunProfileManager *);
     Q_SLOT void onCmdRunProfileManagerCmdChanged(const QString &);
-    Q_SLOT void onFiletypeRunProfileManagerChanged(RunProfileManager *from, RunProfileManager *to);
+    Q_SLOT void onWebRunProfileManagerModeChanged(WebRunProfile::Mode);
+    Q_SLOT void onFiletypeRunProfileManagerChanged(RunProfileManager *change, RunProfileManager *old);
     Q_SLOT void onFiletypeHighlightEnabledChanged(bool);
 };
 

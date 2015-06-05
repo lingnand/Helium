@@ -111,6 +111,14 @@ These format specifiers will be replaced:
         <source>Pass a command to /bin/sh</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Web View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preview in web page</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FindMode</name>
@@ -354,6 +362,56 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>%1 new views inserted</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WebRunProfile</name>
+    <message>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rerun</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WebRunProfileSettingsUI</name>
+    <message>
+        <source>Mode Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Evaluation Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Html</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Javascript</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>text in buffer is used as html</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>text in buffer is injected as javascript into the page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The evaluation mode for the web view.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

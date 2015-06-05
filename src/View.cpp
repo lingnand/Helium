@@ -33,7 +33,7 @@ using namespace bb::cascades;
 #define HIGHLIGHT_RANGE_LIMIT 20
 #define USE_SMART_HIGHLIGHT_RANGE 0
 // totalResource = plainTextSize + c * diffLimit
-// we are now assumign c to be 5
+// we are now assuming c to be 5
 // we have (for playlist.c): plainTextSize = 42000, diffLimit = 15000
 // so totalResource = 42000 + 5 * 15000 = 117000
 #define DIFF_LIMIT(plainTextSize) ((118000 - plainTextSize) / 5)

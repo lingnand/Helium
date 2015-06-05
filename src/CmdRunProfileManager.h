@@ -10,13 +10,14 @@
 
 #include <RunProfileManager.h>
 
-class CmdRunProfileManager: public RunProfileManager
+class CmdRunProfileManager : public RunProfileManager
 {
     Q_OBJECT
 public:
     CmdRunProfileManager(const QString &cmd=QString());
+    virtual ~CmdRunProfileManager() {}
     RunProfile *createRunProfile(View *);
-    const QString &cmd() const;
+    const QString &cmd() const { return _cmd; }
     Q_SLOT void setCmd(const QString &cmd);
 Q_SIGNALS:
     void cmdChanged(const QString &cmd);

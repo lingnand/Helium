@@ -41,6 +41,7 @@ private:
     bb::cascades::DropDown *_runProfileSelect;
     bb::cascades::Option *_noneRunProfileOption;
     bb::cascades::Option *_cmdRunProfileOption;
+    bb::cascades::Option *_webRunProfileOption;
     RunProfileSettingsUI *_runProfileSettingsUI;
 
     void reloadHeader();

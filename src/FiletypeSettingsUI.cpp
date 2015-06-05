@@ -14,7 +14,7 @@
 #include <bb/cascades/SystemDefaults>
 #include <FiletypeSettingsUI.h>
 #include <Filetype.h>
-#include <CmdRunProfileManager.h>
+#include <RunProfileManager.h>
 #include <RunProfileSettingsUI.h>
 #include <Segment.h>
 #include <Utility.h>
@@ -37,6 +37,8 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
             .value(RunProfileManager::None)),
     _cmdRunProfileOption(Option::create()
             .value(RunProfileManager::Cmd)),
+    _webRunProfileOption(Option::create()
+            .value(RunProfileManager::Web)),
     _runProfileSettingsUI(NULL)
 {
     conn(_highlightToggle, SIGNAL(checkedChanged(bool)),
@@ -44,7 +46,8 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
 
     _runProfileSelect = DropDown::create()
         .add(_noneRunProfileOption)
-        .add(_cmdRunProfileOption);
+        .add(_cmdRunProfileOption)
+        .add(_webRunProfileOption);
     conn(_runProfileSelect, SIGNAL(selectedValueChanged(const QVariant)),
         this, SLOT(onRunProfileSelectionChanged(const QVariant)));
 
@@ -84,9 +87,14 @@ void FiletypeSettingsUI::setFiletype(Filetype *filetype)
 void FiletypeSettingsUI::onFiletypeRunProfileManagerChanged(RunProfileManager *change)
 {
     SignalBlocker blocker(_runProfileSelect);
-    _runProfileSelect->setSelectedOption(
-            dynamic_cast<CmdRunProfileManager *>(change) ? _cmdRunProfileOption :
-                    _noneRunProfileOption);
+    switch (RunProfileManager::type(change)) {
+        case RunProfileManager::Cmd:
+            _runProfileSelect->setSelectedOption(_cmdRunProfileOption); break;
+        case RunProfileManager::Web:
+            _runProfileSelect->setSelectedOption(_webRunProfileOption); break;
+        default:
+            _runProfileSelect->setSelectedOption(_noneRunProfileOption);
+    }
     if (_runProfileSettingsUI) {
         remove(_runProfileSettingsUI);
         _runProfileSettingsUI->deleteLater();
@@ -118,14 +126,8 @@ void FiletypeSettingsUI::onHighlightCheckedChanged(bool checked)
 void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant v)
 {
     if (_filetype) {
-        switch (v.toInt()) {
-            case RunProfileManager::None:
-                _filetype->setRunProfileManager(NULL);
-                break;
-            case RunProfileManager::Cmd:
-                _filetype->setRunProfileManager(new CmdRunProfileManager);
-                break;
-        }
+        _filetype->setRunProfileManager(
+                RunProfileManager::create((RunProfileManager::Type) v.toInt()));
     }
 }
 
@@ -139,6 +141,8 @@ void FiletypeSettingsUI::onTranslatorChanged()
     _noneRunProfileOption->setDescription(tr("<No Run Profile>"));
     _cmdRunProfileOption->setText(tr("Run Command"));
     _cmdRunProfileOption->setDescription(tr("Pass a command to /bin/sh"));
+    _webRunProfileOption->setText(tr("Web View"));
+    _webRunProfileOption->setDescription(tr("Preview in web page"));
     if (_runProfileSettingsUI) {
         _runProfileSettingsUI->onTranslatorChanged();
     }

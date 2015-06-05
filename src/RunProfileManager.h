@@ -16,7 +16,9 @@ class RunProfileManager : public QObject
 {
     Q_OBJECT
 public:
-    enum Type { None, Cmd };
+    enum Type { None, Cmd, Web };
+    static RunProfileManager *create(Type);
+    static Type type(RunProfileManager *);
     virtual ~RunProfileManager() {};
     Filetype *parent() const;
     virtual RunProfile *createRunProfile(View *) = 0;

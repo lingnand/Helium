@@ -22,19 +22,24 @@ class WebRunProfile : public RunProfile
 {
     Q_OBJECT
 public:
-    WebRunProfile(View *);
+    enum Mode { Html, Javascript };
+    WebRunProfile(View *, Mode);
     virtual ~WebRunProfile() {}
     void run();
-    bool runnable() const {
-        return true; // always runnable
-    }
+    bool runnable() const { return true; } // always runnable
+    Q_SLOT void setMode(WebRunProfile::Mode);
     void exit();
     Q_SLOT void onTranslatorChanged();
 private:
+    Mode _mode;
     bb::cascades::Page *_outputPage;
     bb::cascades::WebView *_webView;
+    bb::cascades::ActionItem *_backAction;
+    bb::cascades::ActionItem *_forwardAction;
+    bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;
-    Q_SLOT void onScrollViewLayoutFrameChanged(const QRectF&);
+    Q_SLOT void rerun();
+    Q_SLOT void onNavigationHistoryChanged();
 };
 
 #endif /* WEBRUNPROFILE_H_ */

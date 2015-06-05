@@ -73,17 +73,21 @@ void Helium::showSettings()
     _settingsPage->disconnect();
     conn(_settingsPage, SIGNAL(exited()),
         scene(), SLOT(enableAllShortcuts()));
+    NavigationPane *pane = scene()->activePane();
+    // pop to the base page
+    pane->navigateTo(pane->at(0));
     conn(_settingsPage, SIGNAL(toPush(bb::cascades::Page*)),
-        scene()->activePane(), SLOT(push(bb::cascades::Page*)));
+        pane, SLOT(push(bb::cascades::Page*)));
     conn(_settingsPage, SIGNAL(toPop()),
-        scene()->activePane(), SLOT(pop()));
+        pane, SLOT(pop()));
     _settingsPage->setParent(NULL);
-    scene()->activePane()->push(_settingsPage);
+    pane->push(_settingsPage);
 }
 
 void Helium::showHelp()
 {
 }
+
 void Helium::reloadTranslator()
 {
     QCoreApplication::instance()->removeTranslator(&_translator);

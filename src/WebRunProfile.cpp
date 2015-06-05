@@ -5,10 +5,8 @@
  *      Author: lingnan
  */
 
-#include <QRectF>
 #include <bb/cascades/WebView>
 #include <bb/cascades/ScrollView>
-#include <bb/cascades/LayoutUpdateHandler>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/NavigationPaneProperties>
 #include <bb/cascades/ActionItem>
@@ -26,12 +24,25 @@ using namespace bb::cascades;
 // TODO: add back and forward, reload actions?
 // TODO: make the action bar hideable (like in other apps)
 //       this can probably be used for CmdRunProfile as well
-WebRunProfile::WebRunProfile(View *view):
+WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     RunProfile(view),
+    _mode(mode),
     _webView(WebView::create()),
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(view->content(), SLOT(pop())))
+        .onTriggered(view->content(), SLOT(pop()))),
+    _backAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_backward.png"))
+        .addShortcut(Shortcut::create().key("p"))
+        .onTriggered(_webView, SLOT(goBack()))),
+    _forwardAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_forward.png"))
+        .addShortcut(Shortcut::create().key("n"))
+        .onTriggered(_webView, SLOT(goForward()))),
+    _rerunAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_reload.png"))
+        .addShortcut(Shortcut::create().key("r"))
+        .onTriggered(this, SLOT(rerun())))
 {
 //    _webView->saveImageAction()->setEnabled(false);
 //    _webView->shareImageAction()->setEnabled(false);
@@ -40,33 +51,60 @@ WebRunProfile::WebRunProfile(View *view):
         .scrollMode(ScrollMode::Both)
         .pinchToZoomEnabled(true)
         .content(_webView);
-    LayoutUpdateHandler::create(scrollView)
-        .onLayoutFrameChanged(this, SLOT(onScrollViewLayoutFrameChanged(const QRectF&)));
     conn(_webView, SIGNAL(minContentScaleChanged(float)),
         scrollView->scrollViewProperties(), SLOT(setMinContentScale(float)));
     conn(_webView, SIGNAL(maxContentScaleChanged(float)),
         scrollView->scrollViewProperties(), SLOT(setMaxContentScale(float)));
+    conn(_webView, SIGNAL(navigationHistoryChanged()),
+        this, SLOT(onNavigationHistoryChanged()));
     _outputPage = Page::create()
         .titleBar(TitleBar::create())
         .content(scrollView)
+        .actionBarVisibility(ChromeVisibility::Overlay)
+        .addAction(_backAction, ActionBarPlacement::OnBar)
+        .addAction(_rerunAction, ActionBarPlacement::Signature)
+        .addAction(_forwardAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
             .backButton(_backButton));
+    _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
     _outputPage->setParent(this);
 
+    onNavigationHistoryChanged();
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
-}
-
-void WebRunProfile::onScrollViewLayoutFrameChanged(const QRectF &rect)
-{
-    _webView->setPreferredHeight(rect.height());
 }
 
 void WebRunProfile::run()
 {
     _outputPage->setParent(NULL);
     view()->content()->push(_outputPage);
-    _webView->setHtml(view()->buffer()->state().plainText());
+    rerun();
+}
+
+void WebRunProfile::rerun()
+{
+    _webView->setHtml("");
+    switch (_mode) {
+        case WebRunProfile::Html:
+            _webView->setHtml(view()->buffer()->state().plainText());
+            break;
+        case WebRunProfile::Javascript:
+            _webView->evaluateJavaScript(view()->buffer()->state().plainText());
+            break;
+    }
+}
+
+void WebRunProfile::setMode(WebRunProfile::Mode mode)
+{
+    if (mode != _mode) {
+        _mode = mode;
+    }
+}
+
+void WebRunProfile::onNavigationHistoryChanged()
+{
+    _backAction->setEnabled(_webView->canGoBack());
+    _forwardAction->setEnabled(_webView->canGoForward());
 }
 
 void WebRunProfile::exit()
@@ -79,5 +117,8 @@ void WebRunProfile::exit()
 
 void WebRunProfile::onTranslatorChanged()
 {
-    _outputPage->titleBar()->setTitle("View Page");
+    _outputPage->titleBar()->setTitle(tr("View Page"));
+    _backAction->setTitle(tr("Back"));
+    _rerunAction->setTitle(tr("Rerun"));
+    _forwardAction->setTitle(tr("Forward"));
 }

@@ -30,7 +30,7 @@ CmdRunProfileSettingsUI::CmdRunProfileSettingsUI(CmdRunProfileManager *manager):
     conn(_field, SIGNAL(textChanging(const QString&)),
         manager, SLOT(setCmd(const QString&)));
     conn(manager, SIGNAL(cmdChanged(const QString&)),
-        this, SLOT(onCmdChanged(const QString&)));
+        this, SLOT(onManagerCmdChanged(const QString&)));
     add(_header);
     add(Segment::create().subsection().add(_field));
     add(Segment::create().subsection().add(_help));
@@ -38,7 +38,7 @@ CmdRunProfileSettingsUI::CmdRunProfileSettingsUI(CmdRunProfileManager *manager):
     onTranslatorChanged();
 }
 
-void CmdRunProfileSettingsUI::onCmdChanged(const QString &cmd)
+void CmdRunProfileSettingsUI::onManagerCmdChanged(const QString &cmd)
 {
     SignalBlocker blocker(_field);
     _field->setText(cmd);

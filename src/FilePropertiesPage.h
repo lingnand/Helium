@@ -12,7 +12,6 @@
 
 namespace bb {
     namespace cascades {
-        class TitleBar;
         class ToggleButton;
         class Label;
         class DropDown;
@@ -38,8 +37,6 @@ Q_SIGNALS:
     void filetypeSelectionChanged(Filetype *);
     void backButtonTriggered();
 private:
-    Segment *_container;
-    bb::cascades::TitleBar *_titleBar;
     bb::cascades::ToggleButton *_autodetectFiletypeToggle;
     bb::cascades::Label *_autodetectFiletypeToggleLabel;
     bb::cascades::Label *_autodetectFiletypeToggleHelp;

@@ -11,6 +11,7 @@
 #include <Filetype.h>
 #include <FiletypeMap.h>
 #include <CmdRunProfileManager.h>
+#include <WebRunProfileManager.h>
 #include <Utility.h>
 
 FiletypeMapStorage::FiletypeMapStorage(const QString &prefix, QObject *parent):
@@ -19,13 +20,13 @@ FiletypeMapStorage::FiletypeMapStorage(const QString &prefix, QObject *parent):
     _settings.beginGroup(prefix);
 }
 
-void FiletypeMapStorage::onFiletypeRunProfileManagerChanged(RunProfileManager *from, RunProfileManager *to)
+void FiletypeMapStorage::onFiletypeRunProfileManagerChanged(RunProfileManager *change, RunProfileManager *old)
 {
-    if (from) {
-        from->disconnect(this);
-        _settings.remove(from->parent()->name() + "/run_profile_manager");
+    if (old) {
+        old->disconnect(this);
+        _settings.remove(old->parent()->name() + "/run_profile_manager");
     }
-    insertRunProfileManager(to);
+    insertRunProfileManager(change);
 }
 
 void FiletypeMapStorage::insertRunProfileManager(RunProfileManager *manager)
@@ -38,6 +39,11 @@ void FiletypeMapStorage::insertRunProfileManager(RunProfileManager *manager)
             _settings.setValue("type", RunProfileManager::Cmd);
             _settings.setValue("cmd", cm->cmd());
             connectCmdRunProfileManager(cm);
+        } else if (WebRunProfileManager *wm = dynamic_cast<WebRunProfileManager *>(manager)) {
+            qDebug() << "WebRunProfileManager detected...";
+            _settings.setValue("type", RunProfileManager::Web);
+            _settings.setValue("mode", wm->mode());
+            connectWebRunProfileManager(wm);
         }
         _settings.endGroup();
     }
@@ -65,11 +71,24 @@ void FiletypeMapStorage::connectCmdRunProfileManager(CmdRunProfileManager *m)
             this, SLOT(onCmdRunProfileManagerCmdChanged(const QString&)));
 }
 
+void FiletypeMapStorage::connectWebRunProfileManager(WebRunProfileManager *m)
+{
+    conn(m, SIGNAL(modeChanged(WebRunProfile::Mode)),
+            this, SLOT(onWebRunProfileManagerModeChanged(WebRunProfile::Mode)));
+}
+
 void FiletypeMapStorage::onCmdRunProfileManagerCmdChanged(const QString &cmd)
 {
     CmdRunProfileManager *m = (CmdRunProfileManager *) sender();
     qDebug() << "Saving CmdRunProfileManager cmd into" << m->parent()->name();
     _settings.setValue(m->parent()->name()+"/run_profile_manager/cmd", cmd);
+}
+
+void FiletypeMapStorage::onWebRunProfileManagerModeChanged(WebRunProfile::Mode mode)
+{
+    WebRunProfileManager *m = (WebRunProfileManager *) sender();
+    qDebug() << "Saving WebRunProfileManager mode into" << m->parent()->name();
+    _settings.setValue(m->parent()->name()+"/run_profile_manager/mode", mode);
 }
 
 void FiletypeMapStorage::onFiletypeHighlightEnabledChanged(bool enabled)
@@ -113,11 +132,13 @@ FiletypeMap *FiletypeMapStorage::read()
             << new Filetype("haskell", true, NULL, this)
             << new Filetype("haskell_literate", true, NULL, this)
             << new Filetype("haxe", true, NULL, this)
-            << new Filetype("html", true, NULL, this)
+            << new Filetype("html", true,
+                    new WebRunProfileManager(WebRunProfile::Html), this)
             << new Filetype("islisp", true, NULL, this)
             << new Filetype("java", true, NULL, this)
             << new Filetype("javalog", true, NULL, this)
-            << new Filetype("javascript", true, NULL, this)
+            << new Filetype("javascript", true,
+                    new WebRunProfileManager(WebRunProfile::Javascript), this)
             << new Filetype("langdef", true, NULL, this)
             << new Filetype("latex", true, NULL, this)
             << new Filetype("ldap", true, NULL, this)
@@ -162,7 +183,8 @@ FiletypeMap *FiletypeMapStorage::read()
             << new Filetype("upc", true, NULL, this)
             << new Filetype("vala", true, NULL, this)
             << new Filetype("vbscript", true, NULL, this)
-            << new Filetype("xml", true, NULL, this)
+            << new Filetype("xml", true,
+                    new WebRunProfileManager(WebRunProfile::Html), this)
             << new Filetype("xorg", true, NULL, this);
         qDebug() << "Starting to insert filetypes into settings...";
         QList<Filetype *> filetypes = map->filetypes();
@@ -180,6 +202,13 @@ FiletypeMap *FiletypeMapStorage::read()
                     CmdRunProfileManager *cm = new CmdRunProfileManager(_settings.value("cmd").toString());
                     connectCmdRunProfileManager(cm);
                     m = cm;
+                    break;
+                }
+                case RunProfileManager::Web: {
+                    WebRunProfileManager *wm = new WebRunProfileManager(
+                            (WebRunProfile::Mode) _settings.value("mode").toInt());
+                    connectWebRunProfileManager(wm);
+                    m = wm;
                     break;
                 }
             }

@@ -256,8 +256,7 @@ void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
 
 void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager)
 {
-    setRunProfile(new WebRunProfile(view()));
-//    setRunProfile(runProfileManager ? runProfileManager->createRunProfile(view()) : NULL);
+    setRunProfile(runProfileManager ? runProfileManager->createRunProfile(view()) : NULL);
 }
 
 void NormalMode::autoFocus()
