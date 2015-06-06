@@ -22,6 +22,8 @@
 #include <CmdRunProfileManager.h>
 #include <GeneralSettingsStorage.h>
 #include <GeneralSettings.h>
+#include <AppearanceSettingsStorage.h>
+#include <AppearanceSettings.h>
 #include <SettingsPage.h>
 #include <Utility.h>
 
@@ -36,6 +38,7 @@ Helium::Helium(int &argc, char **argv):
     Application(argc, argv),
     _filetypeMap((new FiletypeMapStorage("filetypes", this))->read()),
     _general((new GeneralSettingsStorage("general_settings", this))->read()),
+    _appearance((new AppearanceSettingsStorage("appearance_settings", this))->read()),
     _settingsPage(NULL)
 {
     qRegisterMetaType<ProgressIndicatorState::Type>();
@@ -65,7 +68,7 @@ Helium::Helium(int &argc, char **argv):
 void Helium::showSettings()
 {
     if (!_settingsPage) {
-        _settingsPage = new SettingsPage(_general, _filetypeMap, this);
+        _settingsPage = new SettingsPage(_general, _appearance, _filetypeMap, this);
         conn(this, SIGNAL(translatorChanged()),
             _settingsPage, SLOT(onTranslatorChanged()));
     }

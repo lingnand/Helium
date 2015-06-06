@@ -296,6 +296,9 @@ config_pri_assets {
 
 config_pri_source_group1 {
     SOURCES += \
+        $$quote($$BASEDIR/src/AppearanceSettings.cpp) \
+        $$quote($$BASEDIR/src/AppearanceSettingsPage.cpp) \
+        $$quote($$BASEDIR/src/AppearanceSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/Buffer.cpp) \
         $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
@@ -404,6 +407,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/srchilite/wordtokenizer.cpp)
 
     HEADERS += \
+        $$quote($$BASEDIR/src/AppearanceSettings.h) \
+        $$quote($$BASEDIR/src/AppearanceSettingsPage.h) \
+        $$quote($$BASEDIR/src/AppearanceSettingsStorage.h) \
         $$quote($$BASEDIR/src/Buffer.h) \
         $$quote($$BASEDIR/src/BufferHistory.h) \
         $$quote($$BASEDIR/src/BufferState.h) \

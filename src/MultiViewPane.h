@@ -42,8 +42,8 @@ public:
     bb::cascades::NavigationPane *activePane() const;
     Q_SLOT void setActiveTab(int, bool toast=false);
     Q_SLOT void setActiveTab(bb::cascades::Tab *, bool toast=false);
-    Q_SLOT void setPrevTabActive(bool toast=true);
-    Q_SLOT void setNextTabActive(bool toast=true);
+    Q_SLOT void setPrevTabActive();
+    Q_SLOT void setNextTabActive();
     bb::cascades::Tab *at(int i) const; // the view at a given index
     int activeIndex(int offset=0) const; // the view with the given offset from the active one
     int indexOf(bb::cascades::Tab *) const; // give the index of the given view
@@ -72,6 +72,9 @@ private:
     View *_lastActive;
     // the list of buffers driving the views
     QList<Buffer *> _buffers;
+
+    // whether the user can goToPrev/NextTab
+    bool canTraverse();
 };
 
 #endif /* MULTIVIEWPANE_H_ */

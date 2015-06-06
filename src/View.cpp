@@ -17,6 +17,9 @@
 #include <bb/cascades/pickers/FilePicker>
 #include <View.h>
 #include <MultiViewPane.h>
+#include <Helium.h>
+#include <GeneralSettings.h>
+#include <AppearanceSettings.h>
 #include <Buffer.h>
 #include <SignalBlocker.h>
 #include <NormalMode.h>
@@ -30,7 +33,6 @@ using namespace bb::cascades;
 
 #define SCROLL_RANGE 25
 
-#define HIGHLIGHT_RANGE_LIMIT 20
 #define USE_SMART_HIGHLIGHT_RANGE 0
 // totalResource = plainTextSize + c * diffLimit
 // we are now assuming c to be 5
@@ -52,7 +54,6 @@ View::View(Buffer *buffer):
     _buffer(NULL),
     _fpicker(NULL),
     _highlightRange(0, 1),
-    _highlightRangeLimit(HIGHLIGHT_RANGE_LIMIT),
     _textArea(TextArea::create()
         .format(TextFormat::Html)
         .inputFlags(TextInputFlag::SpellCheckOff
@@ -71,6 +72,11 @@ View::View(Buffer *buffer):
     _pageKeyListener(KeyListener::create()
         .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
 {
+    GeneralSettings *general = Helium::instance()->general();
+    _highlightRangeLimit = general->highlightRange();
+    conn(general, SIGNAL(highlightRangeChanged(int)),
+        this, SLOT(setHighlightRangeLimit(int)));
+
     conn(_textArea->editor(), SIGNAL(cursorPositionChanged(int)),
         this, SLOT(onTextAreaCursorPositionChanged()));
     conn(_textArea, SIGNAL(textChanging(const QString)),
@@ -79,24 +85,37 @@ View::View(Buffer *buffer):
     // setup the timer for partial highlight update
     _partialHighlightUpdateTimer.setSingleShot(true);
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
-            this, SLOT(updateTextAreaPartialHighlight()));
+        this, SLOT(updateTextAreaPartialHighlight()));
 
-    setContent(_content = NavigationPane::create()
-        .add(_page = Page::create()
-            .content(Container::create()
-                .add(_textArea)
-                .add(_progressIndicator))
-    //        .actionBarVisibility(ChromeVisibility::Visible)
-    //        .actionBarVisibility(ChromeVisibility::Hidden)
-            .addShortcut(Shortcut::create().key("Enter")
-                .onTriggered(this, SLOT(autoFocus())))
-            // navigation
-            .addKeyListener(_pageKeyListener)));
+    _page = Page::create()
+        .content(Container::create()
+            .add(_textArea)
+            .add(_progressIndicator))
+//        .actionBarVisibility(ChromeVisibility::Visible)
+//        .actionBarVisibility(ChromeVisibility::Hidden)
+        .addShortcut(Shortcut::create().key("Enter")
+            .onTriggered(this, SLOT(autoFocus())))
+        // navigation
+        .addKeyListener(_pageKeyListener);
+
+    AppearanceSettings *appearance = Helium::instance()->appearance();
+    onHideActionBarChanged(appearance->hideActionBar());
+    conn(appearance, SIGNAL(hideActionBarChanged(bool)),
+        this, SLOT(onHideActionBarChanged(bool)));
+
+    setContent(_content = NavigationPane::create().add(_page));
 
     setBuffer(buffer);
 
     onTranslatorChanged();
     setMode(_normalMode = new NormalMode(this));
+}
+
+void View::onHideActionBarChanged(bool hide)
+{
+    _page->setActionBarVisibility(hide ?
+            ChromeVisibility::Hidden :
+            ChromeVisibility::Default);
 }
 
 void View::setMode(ViewMode *mode)

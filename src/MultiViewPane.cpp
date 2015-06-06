@@ -145,10 +145,6 @@ void MultiViewPane::addNewView(bool toast)
 void MultiViewPane::insertView(int index, View *view)
 {
     conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
-    GeneralSettings *general = Helium::instance()->general();
-    view->setHighlightRangeLimit(general->highlightRange());
-    conn(general, SIGNAL(highlightRangeChanged(int)),
-        view, SLOT(setHighlightRangeLimit(int)));
     insert(index+_base, view);
 }
 
@@ -186,18 +182,27 @@ void MultiViewPane::removeView(View *view, bool toast)
         setActiveTab(activateLater, toast);
 }
 
-void MultiViewPane::setPrevTabActive(bool toast)
+bool MultiViewPane::canTraverse()
 {
-    int i = activeIndex(-1);
-    if (i >= 0)
-        setActiveTab(i, toast);
+    if (count() == 1) {
+        Utility::toast(tr("Only one tab"));
+        return false;
+    }
+    return true;
 }
 
-void MultiViewPane::setNextTabActive(bool toast)
+void MultiViewPane::setPrevTabActive()
+{
+    int i = activeIndex(-1);
+    if (i >= 0 && canTraverse())
+        setActiveTab(i, true);
+}
+
+void MultiViewPane::setNextTabActive()
 {
     int i = activeIndex(1);
-    if (i >= 0)
-        setActiveTab(i, toast);
+    if (i >= 0 && canTraverse())
+        setActiveTab(i, true);
 }
 
 int MultiViewPane::activeIndex(int offset) const

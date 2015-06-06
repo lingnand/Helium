@@ -2,6 +2,21 @@
 <!DOCTYPE TS>
 <TS version="2.0">
 <context>
+    <name>AppearanceSettingsPage</name>
+    <message>
+        <source>Appearance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hide ActionBar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hide the ActionBar under the text areas. All the actions are still accessible via keyboard shortcuts.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BufferWorker</name>
     <message>
         <source>Error opening file</source>
@@ -24,6 +39,10 @@
     </message>
     <message>
         <source>Back to editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to run (Probably haven&apos;t saved)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -245,6 +264,10 @@ These format specifiers will be replaced:
     <name>MultiViewPane</name>
     <message>
         <source>New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only one tab</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

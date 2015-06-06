@@ -16,6 +16,7 @@
 class MultiViewPane;
 class FiletypeMap;
 class GeneralSettings;
+class AppearanceSettings;
 class SettingsPage;
 
 class Helium : public bb::cascades::Application
@@ -27,6 +28,7 @@ public:
     virtual ~Helium() {}
     FiletypeMap *filetypeMap() { return _filetypeMap; }
     GeneralSettings *general() { return _general; }
+    AppearanceSettings *appearance() { return _appearance; }
     Q_SLOT void reloadTranslator();
 Q_SIGNALS:
     void translatorChanged();
@@ -34,6 +36,7 @@ private:
     // settings
     FiletypeMap *_filetypeMap;
     GeneralSettings *_general;
+    AppearanceSettings *_appearance;
     SettingsPage *_settingsPage;
 
     QTranslator _translator;

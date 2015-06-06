@@ -72,6 +72,10 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
 
 void CmdRunProfile::run()
 {
+    if (!_runnable) {
+        Utility::toast(tr("Unable to run (Probably haven't saved)"));
+        return;
+    }
     _outputPage->setParent(NULL);
     view()->content()->push(_outputPage);
 }

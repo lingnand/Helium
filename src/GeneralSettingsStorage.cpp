@@ -14,7 +14,6 @@
 GeneralSettingsStorage::GeneralSettingsStorage(const QString &prefix, QObject *parent):
     QObject(parent)
 {
-    qDebug() << _settings.allKeys();
     _settings.beginGroup(prefix);
 }
 
@@ -27,7 +26,6 @@ GeneralSettings *GeneralSettingsStorage::read()
 {
     QStringList keys = _settings.childKeys();
     GeneralSettings *settings;
-    qDebug() << _settings.allKeys();
     if (keys.empty()) {
         qDebug() << "Populating the default general settings...";
         settings = new GeneralSettings(20, this);

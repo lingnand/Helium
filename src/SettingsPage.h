@@ -14,6 +14,8 @@
 
 class GeneralSettings;
 class GeneralSettingsPage;
+class AppearanceSettings;
+class AppearanceSettingsPage;
 class FiletypeMap;
 class FiletypeMapSettingsPage;
 
@@ -22,7 +24,7 @@ class SettingsPage : public RepushablePage
 {
     Q_OBJECT
 public:
-    SettingsPage(GeneralSettings *, FiletypeMap *, QObject *parent=NULL);
+    SettingsPage(GeneralSettings *, AppearanceSettings *, FiletypeMap *, QObject *parent=NULL);
     Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void toPush(bb::cascades::Page *);
@@ -31,6 +33,9 @@ private:
 
     GeneralSettings *_generalSettings;
     GeneralSettingsPage *_generalSettingsPage;
+
+    AppearanceSettings *_appearanceSettings;
+    AppearanceSettingsPage *_appearanceSettingsPage;
 
     FiletypeMap *_filetypeMap;
     FiletypeMapSettingsPage *_filetypeMapSettingsPage;

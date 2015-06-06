@@ -9,15 +9,18 @@
 #include <bb/cascades/TitleBar>
 #include <SettingsPage.h>
 #include <GeneralSettingsPage.h>
+#include <AppearanceSettingsPage.h>
 #include <FiletypeMapSettingsPage.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-SettingsPage::SettingsPage(GeneralSettings *generalSettings, FiletypeMap *filetypeMap, QObject *parent):
+SettingsPage::SettingsPage(GeneralSettings *generalSettings, AppearanceSettings *appearanceSettings, FiletypeMap *filetypeMap, QObject *parent):
     RepushablePage(parent),
     _generalSettings(generalSettings),
     _generalSettingsPage(NULL),
+    _appearanceSettings(appearanceSettings),
+    _appearanceSettingsPage(NULL),
     _filetypeMap(filetypeMap),
     _filetypeMapSettingsPage(NULL)
 {
@@ -42,7 +45,13 @@ void SettingsPage::onTriggered(QVariantList indexPath)
             emit toPush(_generalSettingsPage);
             break;
         case 1:
-            qDebug() << "Appearance setting page should be pushed";
+            if (!_appearanceSettingsPage) {
+                _appearanceSettingsPage = new AppearanceSettingsPage(_appearanceSettings, this);
+                conn(_appearanceSettingsPage, SIGNAL(toPop()),
+                    this, SIGNAL(toPop()));
+            }
+            _appearanceSettingsPage->setParent(NULL);
+            emit toPush(_appearanceSettingsPage);
             break;
         case 2:
             if (!_filetypeMapSettingsPage) {
@@ -65,4 +74,13 @@ void SettingsPage::onTranslatorChanged()
     _model.append(tr("General"));
     _model.append(tr("Appearance"));
     _model.append(tr("Filetypes"));
+    if (_generalSettingsPage) {
+        _generalSettingsPage->onTranslatorChanged();
+    }
+    if (_appearanceSettingsPage) {
+        _appearanceSettingsPage->onTranslatorChanged();
+    }
+    if (_filetypeMapSettingsPage) {
+        _filetypeMapSettingsPage->onTranslatorChanged();
+    }
 }

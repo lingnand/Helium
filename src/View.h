@@ -91,6 +91,9 @@ private:
     FindMode *_findMode;
     void setMode(ViewMode *);
 
+    /** settings **/
+    Q_SLOT void onHideActionBarChanged(bool);
+
     bb::cascades::NavigationPane *_content;
     bb::cascades::Page *_page;
     bb::cascades::KeyListener *_pageKeyListener;
