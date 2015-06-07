@@ -72,6 +72,7 @@ public:
     // wrappers over the linked buffer
     Q_SLOT void setAutodetectFiletype(bool);
     Q_SLOT void setFiletype(Filetype *);
+    Q_SLOT void setName(const QString &);
 Q_SIGNALS:
     void undo();
     void redo();

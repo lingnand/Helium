@@ -87,8 +87,8 @@ NormalMode::NormalMode(View *view):
     _titleField->setFocusPolicy(FocusPolicy::Touch);
     _titleField->setBackgroundVisible(true);
     _titleField->textStyle()->setBase(SystemDefaults::TextStyles::titleText());
-    conn(_titleField, SIGNAL(focusedChanged(bool)),
-        this, SLOT(onTitleFieldFocusChanged(bool)));
+    conn(_titleField, SIGNAL(textChanged(const QString &)),
+        view, SLOT(setName(const QString &)));
     conn(_titleField, SIGNAL(focusedChanged(bool)),
         view, SLOT(blockPageKeyListener(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
@@ -311,15 +311,6 @@ void NormalMode::onExit()
 void NormalMode::onBufferDirtyChanged(bool dirty)
 {
     _titleField->textStyle()->setFontStyle(dirty ? FontStyle::Italic : FontStyle::Normal);
-}
-
-void NormalMode::onTitleFieldFocusChanged(bool focus)
-{
-    if (!focus) {
-        // the user defocused the text field
-        // set the buffer name
-        view()->buffer()->setName(_titleField->text());
-    }
 }
 
 void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *)

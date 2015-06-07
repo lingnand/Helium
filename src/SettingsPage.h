@@ -26,8 +26,6 @@ class SettingsPage : public RepushablePage
 public:
     SettingsPage(GeneralSettings *, AppearanceSettings *, FiletypeMap *, QObject *parent=NULL);
     Q_SLOT void onTranslatorChanged();
-Q_SIGNALS:
-    void toPush(bb::cascades::Page *);
 private:
     bb::cascades::QListDataModel<QString> _model;
 

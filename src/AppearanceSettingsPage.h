@@ -29,7 +29,6 @@ private:
     bb::cascades::ToggleButton *_hideActionBarToggle;
     bb::cascades::Label *_hideActionBarToggleLabel;
     bb::cascades::Label *_hideActionBarHelp;
-    Q_SLOT void onHideActionBarChanged(bool);
 };
 
 #endif /* APPEARANCESETTINGSPAGE_H_ */

@@ -8,7 +8,6 @@
 #ifndef GENERALSETTINGSPAGE_H_
 #define GENERALSETTINGSPAGE_H_
 
-#include <bb/cascades/Page>
 #include <RepushablePage.h>
 
 namespace bb {
@@ -29,7 +28,6 @@ public:
 private:
     bb::cascades::Label *_help;
     HighlightRangePicker *_picker;
-    Q_SLOT void onHighlightRangeChanged(int);
 };
 
 #endif /* GENERALSETTINGSPAGE_H_ */

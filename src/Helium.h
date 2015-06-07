@@ -18,6 +18,8 @@ class FiletypeMap;
 class GeneralSettings;
 class AppearanceSettings;
 class SettingsPage;
+class HelpPage;
+class RepushablePage;
 
 class Helium : public bb::cascades::Application
 {
@@ -38,6 +40,7 @@ private:
     GeneralSettings *_general;
     AppearanceSettings *_appearance;
     SettingsPage *_settingsPage;
+    HelpPage *_helpPage;
 
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
@@ -47,6 +50,7 @@ private:
     }
     Q_SLOT void showSettings();
     Q_SLOT void showHelp();
+    void pushPage(RepushablePage *);
 };
 
 Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)

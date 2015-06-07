@@ -318,6 +318,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
+        $$quote($$BASEDIR/src/HelpPage.cpp) \
         $$quote($$BASEDIR/src/HighlightRangePicker.cpp) \
         $$quote($$BASEDIR/src/HighlightType.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
@@ -429,6 +430,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettingsPage.h) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
         $$quote($$BASEDIR/src/Helium.h) \
+        $$quote($$BASEDIR/src/HelpPage.h) \
         $$quote($$BASEDIR/src/HighlightRangePicker.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HighlightType.h) \

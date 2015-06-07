@@ -254,6 +254,21 @@ These format specifiers will be replaced:
     </message>
 </context>
 <context>
+    <name>HelpPage</name>
+    <message>
+        <source>Quick Start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keyboard Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run Profiles</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>HighlightRangePicker</name>
     <message>
         <source>Highlight Range</source>

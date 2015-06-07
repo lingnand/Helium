@@ -36,7 +36,6 @@ private:
     bb::cascades::DropDown *_modeSelect;
     bb::cascades::Option *_htmlOption;
     bb::cascades::Option *_javascriptOption;
-    void reloadHeader();
     Q_SLOT void onModeSelectionChanged(const QVariant);
     Q_SLOT void onManagerModeChanged(WebRunProfile::Mode);
 };

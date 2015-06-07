@@ -23,6 +23,7 @@ class RepushablePage : public bb::cascades::Page
 public:
     RepushablePage(QObject *parent=NULL);
 Q_SIGNALS:
+    void toPush(bb::cascades::Page *);
     void toPop();
     void exited();
 private:

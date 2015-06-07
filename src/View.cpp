@@ -259,8 +259,8 @@ void View::setBuffer(Buffer *buffer)
 void View::setHighlightRangeLimit(int limit)
 {
     if (limit != _highlightRangeLimit) {
-        qDebug() << "setting highlightRangeLimit to" << _highlightRangeLimit;
         _highlightRangeLimit = limit;
+        qDebug() << "setting highlightRangeLimit to" << _highlightRangeLimit;
         updateTextAreaPartialHighlight();
     }
 }
@@ -602,4 +602,9 @@ void View::setAutodetectFiletype(bool autodetect)
 void View::setFiletype(Filetype *filetype)
 {
     _buffer->setFiletype(filetype);
+}
+
+void View::setName(const QString &name)
+{
+    _buffer->setName(name);
 }

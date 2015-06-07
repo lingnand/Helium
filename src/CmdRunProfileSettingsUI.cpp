@@ -27,21 +27,15 @@ CmdRunProfileSettingsUI::CmdRunProfileSettingsUI(CmdRunProfileManager *manager):
 {
     _field->input()->setSubmitKey(SubmitKey::Done);
     _field->input()->setSubmitKeyFocusBehavior(SubmitKeyFocusBehavior::Lose);
-    conn(_field, SIGNAL(textChanging(const QString&)),
+    conn(_field, SIGNAL(textChanged(const QString&)),
         manager, SLOT(setCmd(const QString&)));
     conn(manager, SIGNAL(cmdChanged(const QString&)),
-        this, SLOT(onManagerCmdChanged(const QString&)));
+        _field, SLOT(setText(const QString&)));
     add(_header);
     add(Segment::create().subsection().add(_field));
     add(Segment::create().subsection().add(_help));
 
     onTranslatorChanged();
-}
-
-void CmdRunProfileSettingsUI::onManagerCmdChanged(const QString &cmd)
-{
-    SignalBlocker blocker(_field);
-    _field->setText(cmd);
 }
 
 void CmdRunProfileSettingsUI::onTranslatorChanged()

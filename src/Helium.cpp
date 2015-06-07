@@ -25,7 +25,9 @@
 #include <AppearanceSettingsStorage.h>
 #include <AppearanceSettings.h>
 #include <SettingsPage.h>
+#include <HelpPage.h>
 #include <Utility.h>
+#include <RepushablePage.h>
 
 using namespace bb::cascades;
 
@@ -39,7 +41,8 @@ Helium::Helium(int &argc, char **argv):
     _filetypeMap((new FiletypeMapStorage("filetypes", this))->read()),
     _general((new GeneralSettingsStorage("general_settings", this))->read()),
     _appearance((new AppearanceSettingsStorage("appearance_settings", this))->read()),
-    _settingsPage(NULL)
+    _settingsPage(NULL),
+    _helpPage(NULL)
 {
     qRegisterMetaType<ProgressIndicatorState::Type>();
     qRegisterMetaType<HighlightType>();
@@ -65,6 +68,23 @@ Helium::Helium(int &argc, char **argv):
             .onTriggered(this, SLOT(showHelp()))));
 }
 
+void Helium::pushPage(RepushablePage *page)
+{
+    scene()->disableAllShortcuts();
+    page->disconnect();
+    conn(page, SIGNAL(exited()),
+        scene(), SLOT(enableAllShortcuts()));
+    NavigationPane *pane = scene()->activePane();
+    // pop to the base page
+    pane->navigateTo(pane->at(0));
+    conn(page, SIGNAL(toPush(bb::cascades::Page*)),
+        pane, SLOT(push(bb::cascades::Page*)));
+    conn(page, SIGNAL(toPop()),
+        pane, SLOT(pop()));
+    page->setParent(NULL);
+    pane->push(page);
+}
+
 void Helium::showSettings()
 {
     if (!_settingsPage) {
@@ -72,23 +92,17 @@ void Helium::showSettings()
         conn(this, SIGNAL(translatorChanged()),
             _settingsPage, SLOT(onTranslatorChanged()));
     }
-    scene()->disableAllShortcuts();
-    _settingsPage->disconnect();
-    conn(_settingsPage, SIGNAL(exited()),
-        scene(), SLOT(enableAllShortcuts()));
-    NavigationPane *pane = scene()->activePane();
-    // pop to the base page
-    pane->navigateTo(pane->at(0));
-    conn(_settingsPage, SIGNAL(toPush(bb::cascades::Page*)),
-        pane, SLOT(push(bb::cascades::Page*)));
-    conn(_settingsPage, SIGNAL(toPop()),
-        pane, SLOT(pop()));
-    _settingsPage->setParent(NULL);
-    pane->push(_settingsPage);
+    pushPage(_settingsPage);
 }
 
 void Helium::showHelp()
 {
+    if (!_helpPage) {
+        _helpPage = new HelpPage(this);
+        conn(this, SIGNAL(translatorChanged()),
+            _helpPage, SLOT(onTranslatorChanged()));
+    }
+    pushPage(_helpPage);
 }
 
 void Helium::reloadTranslator()

@@ -12,12 +12,6 @@
 #include <bb/cascades/QListDataModel>
 #include <RepushablePage.h>
 
-namespace bb {
-    namespace cascades {
-        class Page;
-    }
-}
-
 class Filetype;
 class FiletypeMap;
 class FiletypeSettingsUI;
@@ -28,8 +22,6 @@ class FiletypeMapSettingsPage : public RepushablePage
 public:
     FiletypeMapSettingsPage(FiletypeMap *, QObject *parent=NULL);
     Q_SLOT void onTranslatorChanged();
-Q_SIGNALS:
-    void toPush(bb::cascades::Page *);
 private:
     QList<Filetype *> _filetypes;
     FiletypeSettingsUI *_filetypeSettingsUI;

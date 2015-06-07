@@ -31,8 +31,6 @@ private:
     bb::cascades::Header *_header;
     bb::cascades::TextField *_field;
     bb::cascades::Label *_help;
-    void reloadHeader();
-    Q_SLOT void onManagerCmdChanged(const QString&);
 };
 
 #endif /* CMDRUNPROFILESETTINGSUI_H_ */

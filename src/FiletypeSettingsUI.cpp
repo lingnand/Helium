@@ -68,6 +68,7 @@ void FiletypeSettingsUI::setFiletype(Filetype *filetype)
     if (filetype != _filetype) {
         if (_filetype) {
             _filetype->disconnect(this);
+            _filetype->disconnect(_highlightToggle);
         }
         _filetype = filetype;
         reloadHeader();
@@ -78,6 +79,8 @@ void FiletypeSettingsUI::setFiletype(Filetype *filetype)
                 _filetype->runProfileManager() :
                 NULL);
         if (_filetype) {
+            conn(_filetype, SIGNAL(highlightEnabledChanged(bool)),
+                _highlightToggle, SLOT(setChecked(bool)));
             conn(_filetype, SIGNAL(runProfileManagerChanged(RunProfileManager*, RunProfileManager*)),
                 this, SLOT(onFiletypeRunProfileManagerChanged(RunProfileManager*)));
         }

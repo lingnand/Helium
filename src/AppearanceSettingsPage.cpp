@@ -18,7 +18,6 @@
 #include <Segment.h>
 #include <Utility.h>
 #include <Defaults.h>
-#include <SignalBlocker.h>
 
 using namespace bb::cascades;
 
@@ -33,11 +32,11 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
 {
     setTitleBar(TitleBar::create());
 
-    onHideActionBarChanged(appearanceSettings->hideActionBar());
+    _hideActionBarToggle->setChecked(appearanceSettings->hideActionBar());
     conn(_hideActionBarToggle, SIGNAL(checkedChanged(bool)),
         appearanceSettings, SLOT(setHideActionBar(bool)));
     conn(appearanceSettings, SIGNAL(hideActionBarChanged(bool)),
-        this, SLOT(onHideActionBarChanged(bool)));
+        _hideActionBarToggle, SLOT(setChecked(bool)));
 
     setContent(Segment::create().section()
         .add(Segment::create().subsection().leftToRight()
@@ -46,12 +45,6 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
         .add(Segment::create().subsection().add(_hideActionBarHelp)));
 
     onTranslatorChanged();
-}
-
-void AppearanceSettingsPage::onHideActionBarChanged(bool hide)
-{
-    SignalBlocker blocker(_hideActionBarToggle);
-    _hideActionBarToggle->setChecked(hide);
 }
 
 void AppearanceSettingsPage::onTranslatorChanged()

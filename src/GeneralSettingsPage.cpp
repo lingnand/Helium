@@ -14,7 +14,6 @@
 #include <Segment.h>
 #include <Utility.h>
 #include <Defaults.h>
-#include <SignalBlocker.h>
 
 using namespace bb::cascades;
 
@@ -26,11 +25,11 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
 {
     setTitleBar(TitleBar::create());
 
-    onHighlightRangeChanged(generalSettings->highlightRange());
+    _picker->setHighlightRange(generalSettings->highlightRange());
     conn(_picker, SIGNAL(selectedHighlightRangeChanged(int)),
         generalSettings, SLOT(setHighlightRange(int)));
     conn(generalSettings, SIGNAL(highlightRangeChanged(int)),
-        this, SLOT(onHighlightRangeChanged(int)));
+        _picker, SLOT(setHighlightRange(int)));
 
     setContent(Segment::create().section()
         .add(Segment::create().subsection()
@@ -39,12 +38,6 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
             .add(_help)));
 
     onTranslatorChanged();
-}
-
-void GeneralSettingsPage::onHighlightRangeChanged(int range)
-{
-    SignalBlocker blocker(_picker);
-    _picker->setHighlightRange(range);
 }
 
 void GeneralSettingsPage::onTranslatorChanged()

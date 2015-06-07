@@ -69,7 +69,6 @@ private:
 
     Q_SLOT void onTextAreaModKey(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *listener);
-    Q_SLOT void onTitleFieldFocusChanged(bool focus);
     Q_SLOT void onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onBufferDirtyChanged(bool dirty);
     Q_SLOT void onBufferNameChanged(const QString &);
