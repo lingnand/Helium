@@ -51,8 +51,8 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
     _outputPage = Page::create()
         .titleBar(TitleBar::create())
         .content(_outputArea)
-        .addAction(_killAction, ActionBarPlacement::Signature)
-        .addAction(_rerunAction, ActionBarPlacement::OnBar)
+        .addAction(_rerunAction, ActionBarPlacement::Signature)
+        .addAction(_killAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
             .backButton(_backButton));
     // when not activated _outputPage is owned by this profile,
