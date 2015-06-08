@@ -289,10 +289,6 @@ These format specifiers will be replaced:
 <context>
     <name>NormalMode</name>
     <message>
-        <source>Enter the title</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Save</source>
         <translation type="unfinished">保存</translation>
     </message>
@@ -330,6 +326,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -398,10 +398,6 @@ These format specifiers will be replaced:
         <translation type="obsolete">查找</translation>
     </message>
     <message>
-        <source>Enter the content</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Filetype set to %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -419,6 +415,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>%1 new views inserted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

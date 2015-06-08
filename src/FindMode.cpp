@@ -7,12 +7,10 @@
 
 #include <bb/cascades/TextField>
 #include <bb/cascades/TextArea>
-#include <bb/cascades/StackLayout>
 #include <bb/cascades/StackLayoutProperties>
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/FreeFormTitleBarKindProperties>
 #include <bb/cascades/Button>
-#include <bb/cascades/Container>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/CheckBox>
@@ -29,7 +27,7 @@
 #include <SignalBlocker.h>
 #include <Filetype.h>
 #include <Utility.h>
-#include <Defaults.h>
+#include <Segment.h>
 
 using namespace bb::cascades;
 
@@ -98,9 +96,7 @@ FindMode::FindMode(View *view):
         view, SLOT(blockPageKeyListener(bool)));
     _findTitleBar = TitleBar::create(TitleBarKind::FreeForm)
         .kindProperties(FreeFormTitleBarKindProperties::create()
-            .content(Container::create()
-                .layout(StackLayout::create().orientation(LayoutOrientation::LeftToRight))
-                .left(Defaults::space()).right(Defaults::space())
+            .content(Segment::create().subsection().leftToRight()
                 .add(_findField)
                 .add(_replaceField)));
 

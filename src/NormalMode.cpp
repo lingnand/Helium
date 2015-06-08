@@ -150,15 +150,22 @@ void NormalMode::showProperties()
 {
     if (!_propertiesPage) {
         _propertiesPage = new FilePropertiesPage;
+        conn(view(), SIGNAL(translatorChanged()),
+                _propertiesPage, SLOT(onTranslatorChanged()));
+
         _propertiesPage->setFiletype(view()->buffer()->filetype());
+        conn(view(), SIGNAL(bufferFiletypeChanged(Filetype*, Filetype*)),
+                _propertiesPage, SLOT(setFiletype(Filetype*)));
+        conn(_propertiesPage, SIGNAL(filetypeSelectionChanged(Filetype *)),
+                view(), SLOT(setFiletype(Filetype *)));
+
         _propertiesPage->setAutodetectFiletypeChecked(
                 view()->buffer()->autodetectFiletype());
         conn(view(), SIGNAL(bufferAutodetectFiletypeChanged(bool)),
                 _propertiesPage, SLOT(setAutodetectFiletypeChecked(bool)));
         conn(_propertiesPage, SIGNAL(autodetectFiletypeCheckedChanged(bool)),
                 view(), SLOT(setAutodetectFiletype(bool)));
-        conn(_propertiesPage, SIGNAL(filetypeSelectionChanged(Filetype *)),
-                view(), SLOT(setFiletype(Filetype *)));
+
         conn(_propertiesPage, SIGNAL(backButtonTriggered()),
                 view()->content(), SLOT(pop()));
     }
@@ -250,8 +257,6 @@ void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
         conn(change, SIGNAL(runProfileManagerChanged(RunProfileManager*, RunProfileManager*)),
                 this, SLOT(onRunProfileManagerChanged(RunProfileManager*)));
     }
-    if (_propertiesPage)
-        _propertiesPage->setFiletype(change);
 }
 
 void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager)
@@ -341,7 +346,7 @@ void NormalMode::reloadRunnable()
 
 void NormalMode::onTranslatorChanged()
 {
-    _titleField->setHintText(tr("Enter the title"));
+    _titleField->setHintText(tr("Title"));
     _saveAction->setTitle(tr("Save"));
     _saveAsAction->setTitle(tr("Save As"));
     _openAction->setTitle(tr("Open"));
@@ -352,6 +357,4 @@ void NormalMode::onTranslatorChanged()
     _propertiesAction->setTitle(tr("Properties"));
     _cloneAction->setTitle(tr("Clone"));
     _closeAction->setTitle(tr("Close"));
-    if (_propertiesPage)
-        _propertiesPage->onTranslatorChanged();
 }

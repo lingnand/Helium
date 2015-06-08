@@ -73,6 +73,18 @@
     <!-- <copyright></copyright> -->
 
     <!--  Name of author which is used for signing. Must match the developer name of your development certificate. -->
+    <icon>
+       <image>icon_144x144.png</image>
+       <image>icon_110x110.png</image>
+       <image>icon_96x96.png</image>
+       <image>icon_90x90.png</image>
+    </icon>
+    <splashScreens>
+       <image>splash_1440x1440.png</image>
+       <image>splash_720x720.png</image>
+       <image>splash_720x1280.png</image>
+       <image>splash_768x1280.png</image>
+    </splashScreens>
     <authorId>gYAAgEwo-S63SGtk8c4hbsxlPhU</authorId>
     <author>LnStudio</author>
 
@@ -85,17 +97,21 @@
     </initialWindow>
 
     <!--  The icon for the application, which should be 114x114. -->
-    <icon>
-        <image>icon.png</image>
-    </icon>
 
-    <asset path="icon.png">icon.png</asset>
     <asset path="assets">assets</asset>
 
     <!-- Locale support -->
     <asset path="translations" dest="qm">
         <include name="*.qm"/>
     </asset>
+    <asset path="icon_144x144.png">icon_144x144.png</asset>
+    <asset path="splash_1440x1440.png">splash_1440x1440.png</asset>
+    <asset path="icon_110x110.png">icon_110x110.png</asset>
+    <asset path="icon_96x96.png">icon_96x96.png</asset>
+    <asset path="icon_90x90.png">icon_90x90.png</asset>
+    <asset path="splash_720x720.png">splash_720x720.png</asset>
+    <asset path="splash_720x1280.png">splash_720x1280.png</asset>
+    <asset path="splash_768x1280.png">splash_768x1280.png</asset>
 
     <!-- Request permission to execute native code.  Required for native applications. -->
     <permission system="true">run_native</permission>

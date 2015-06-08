@@ -464,7 +464,7 @@ void View::onProgressMessageDismissed(bb::system::SystemUiResult::Type)
 
 void View::onTranslatorChanged()
 {
-    _textArea->setHintText(tr("Enter the content"));
+    _textArea->setHintText(tr("Content"));
     emit translatorChanged();
 }
 
