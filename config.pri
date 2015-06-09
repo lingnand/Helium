@@ -5,13 +5,16 @@ device {
     CONFIG(debug, debug|release) {
         profile {
             INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lbb \
                 -lbbsystem
 
             LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
@@ -23,13 +26,16 @@ device {
                 config_pri_source_group1
         } else {
             INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lbb \
                 -lbbsystem
 
             LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
@@ -46,13 +52,16 @@ device {
     CONFIG(release, debug|release) {
         !profile {
             INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lbb \
                 -lbbsystem
 
             LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
@@ -69,11 +78,14 @@ device {
 simulator {
     CONFIG(debug, debug|release) {
         !profile {
-            INCLUDEPATH += $$quote(${QNX_TARGET}/usr/include/bb/system)
+            INCLUDEPATH += $$quote(${QNX_TARGET}/usr/include/bb) \
+                $$quote(${QNX_TARGET}/usr/include/bb/system)
 
-            DEPENDPATH += $$quote(${QNX_TARGET}/usr/include/bb/system)
+            DEPENDPATH += $$quote(${QNX_TARGET}/usr/include/bb) \
+                $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lbbcascadespickers \
+                -lbb \
                 -lbbsystem
 
             CONFIG += \
@@ -168,6 +180,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_clear.png) \
         $$quote($$BASEDIR/assets/images/ic_copy_link.png) \
         $$quote($$BASEDIR/assets/images/ic_edit.png) \
+        $$quote($$BASEDIR/assets/images/ic_email.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
         $$quote($$BASEDIR/assets/images/ic_open.png) \

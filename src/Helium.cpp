@@ -5,9 +5,12 @@
  *      Author: lingnan
  */
 
+#include <bb/ApplicationInfo>
+#include <bb/system/InvokeManager>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Page>
 #include <bb/cascades/Menu>
+#include <bb/cascades/ActionItem>
 #include <bb/cascades/SettingsActionItem>
 #include <bb/cascades/HelpActionItem>
 #include <Helium.h>
@@ -42,7 +45,10 @@ Helium::Helium(int &argc, char **argv):
     _general((new GeneralSettingsStorage("general_settings", this))->read()),
     _appearance((new AppearanceSettingsStorage("appearance_settings", this))->read()),
     _settingsPage(NULL),
-    _helpPage(NULL)
+    _helpPage(NULL),
+    _contactAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_email.png"))
+        .onTriggered(this, SLOT(onContactActionTriggered())))
 {
     qRegisterMetaType<ProgressIndicatorState::Type>();
     qRegisterMetaType<HighlightType>();
@@ -62,10 +68,23 @@ Helium::Helium(int &argc, char **argv):
     scene()->addNewView(false);
 
     setMenu(bb::cascades::Menu::create()
+        .help(HelpActionItem::create()
+            .onTriggered(this, SLOT(showHelp())))
         .settings(SettingsActionItem::create()
             .onTriggered(this, SLOT(showSettings())))
-        .help(HelpActionItem::create()
-            .onTriggered(this, SLOT(showHelp()))));
+        .addAction(_contactAction));
+}
+
+void Helium::onContactActionTriggered()
+{
+    bb::system::InvokeRequest request;
+    request.setTarget("sys.pim.uib.email.hybridcomposer");
+    request.setAction("bb.action.OPEN.bb.action.SENDEMAIL");
+    QUrl mailto("mailto:lingnan.d@gmail.com");
+    bb::ApplicationInfo info;
+    mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(info.version()));
+    request.setUri(mailto);
+    bb::system::InvokeManager().invoke(request);
 }
 
 void Helium::pushPage(RepushablePage *page)
@@ -105,12 +124,18 @@ void Helium::showHelp()
     pushPage(_helpPage);
 }
 
+void Helium::onTranslatorChanged()
+{
+    _contactAction->setTitle(tr("Contact"));
+    emit translatorChanged();
+}
+
 void Helium::reloadTranslator()
 {
     QCoreApplication::instance()->removeTranslator(&_translator);
     // Initiate, load and install the application translation files.
     if (_translator.load("Char_" + QLocale().name(), "app/native/qm")) {
         QCoreApplication::instance()->installTranslator(&_translator);
-        emit translatorChanged();
+        onTranslatorChanged();
     }
 }

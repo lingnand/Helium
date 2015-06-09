@@ -13,6 +13,12 @@
 #include <bb/cascades/LocaleHandler>
 #include <bb/cascades/ProgressIndicatorState>
 
+namespace bb {
+    namespace cascades {
+        class ActionItem;
+    }
+}
+
 class MultiViewPane;
 class FiletypeMap;
 class GeneralSettings;
@@ -35,12 +41,15 @@ public:
 Q_SIGNALS:
     void translatorChanged();
 private:
+    void onTranslatorChanged();
     // settings
     FiletypeMap *_filetypeMap;
     GeneralSettings *_general;
     AppearanceSettings *_appearance;
     SettingsPage *_settingsPage;
     HelpPage *_helpPage;
+    bb::cascades::ActionItem *_contactAction;
+    Q_SLOT void onContactActionTriggered();
 
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;

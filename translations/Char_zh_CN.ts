@@ -254,6 +254,17 @@ These format specifiers will be replaced:
     </message>
 </context>
 <context>
+    <name>Helium</name>
+    <message>
+        <source>RE: Support - Helium %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>HelpPage</name>
     <message>
         <source>Quick Start</source>
