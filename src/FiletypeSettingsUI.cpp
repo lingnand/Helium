@@ -48,8 +48,8 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
         .add(_noneRunProfileOption)
         .add(_cmdRunProfileOption)
         .add(_webRunProfileOption);
-    conn(_runProfileSelect, SIGNAL(selectedValueChanged(const QVariant)),
-        this, SLOT(onRunProfileSelectionChanged(const QVariant)));
+    conn(_runProfileSelect, SIGNAL(selectedValueChanged(const QVariant&)),
+        this, SLOT(onRunProfileSelectionChanged(const QVariant&)));
 
     add(_header);
     add(Segment::create().subsection().leftToRight()
@@ -126,7 +126,7 @@ void FiletypeSettingsUI::onHighlightCheckedChanged(bool checked)
     }
 }
 
-void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant v)
+void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant &v)
 {
     if (_filetype) {
         _filetype->setRunProfileManager(

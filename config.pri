@@ -97,6 +97,9 @@ simulator {
 
 config_pri_assets {
     OTHER_FILES += \
+        $$quote($$BASEDIR/assets/docs/keyboard_shortcuts.html) \
+        $$quote($$BASEDIR/assets/docs/quick_start.html) \
+        $$quote($$BASEDIR/assets/docs/run_profiles.html) \
         $$quote($$BASEDIR/assets/images/filetype/_blank.png) \
         $$quote($$BASEDIR/assets/images/filetype/ada.png) \
         $$quote($$BASEDIR/assets/images/filetype/applescript.png) \
@@ -346,6 +349,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/RunProfileSettingsUI.cpp) \
         $$quote($$BASEDIR/src/Segment.cpp) \
         $$quote($$BASEDIR/src/SettingsPage.cpp) \
+        $$quote($$BASEDIR/src/ShortcutHelp.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
@@ -459,6 +463,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/RunProfileSettingsUI.h) \
         $$quote($$BASEDIR/src/Segment.h) \
         $$quote($$BASEDIR/src/SettingsPage.h) \
+        $$quote($$BASEDIR/src/ShortcutHelp.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \
@@ -575,6 +580,9 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../assets/*.qml) \
         $$quote($$BASEDIR/../assets/*.js) \
         $$quote($$BASEDIR/../assets/*.qs) \
+        $$quote($$BASEDIR/../assets/docs/*.qml) \
+        $$quote($$BASEDIR/../assets/docs/*.js) \
+        $$quote($$BASEDIR/../assets/docs/*.qs) \
         $$quote($$BASEDIR/../assets/images/*.qml) \
         $$quote($$BASEDIR/../assets/images/*.js) \
         $$quote($$BASEDIR/../assets/images/*.qs) \

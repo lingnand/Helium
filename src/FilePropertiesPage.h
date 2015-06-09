@@ -45,7 +45,7 @@ private:
     bb::cascades::Label *_filetypeSelectHelp;
     bb::cascades::ActionItem *_backButton;
     FiletypeSettingsUI *_filetypeSettingsUI;
-    Q_SLOT void onFiletypeSelectionChanged(const QVariant);
+    Q_SLOT void onFiletypeSelectionChanged(const QVariant &);
 };
 
 #endif /* FILEPROPERTIESPAGE_H_ */

@@ -59,8 +59,8 @@ FilePropertiesPage::FilePropertiesPage():
             .text(f->name())
             .value(QVariant::fromValue(f)));
     }
-    conn(_filetypeSelect, SIGNAL(selectedValueChanged(const QVariant)),
-        this, SLOT(onFiletypeSelectionChanged(const QVariant)));
+    conn(_filetypeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
+        this, SLOT(onFiletypeSelectionChanged(const QVariant&)));
 
     setTitleBar(TitleBar::create());
     setContent(ScrollView::create(Segment::create().section()
@@ -102,7 +102,7 @@ void FilePropertiesPage::setFiletype(Filetype *filetype)
     _filetypeSettingsUI->setFiletype(filetype);
 }
 
-void FilePropertiesPage::onFiletypeSelectionChanged(const QVariant v)
+void FilePropertiesPage::onFiletypeSelectionChanged(const QVariant &v)
 {
     emit filetypeSelectionChanged(v.value<Filetype *>());
 }

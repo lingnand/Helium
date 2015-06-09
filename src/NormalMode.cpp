@@ -27,6 +27,7 @@
 #include <Filetype.h>
 #include <FilePropertiesPage.h>
 #include <MultiViewPane.h>
+#include <ShortcutHelp.h>
 
 using namespace bb::cascades;
 
@@ -180,6 +181,25 @@ void NormalMode::onTextAreaModKey(KeyEvent *event)
 void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener)
 {
     switch (event->keycap()) {
+        case KEYCODE_BACKSPACE: {
+            QList<ShortcutHelp> helps;
+            helps << ShortcutHelp::fromActionItem(_saveAction)
+                  << ShortcutHelp::fromActionItem(_undoAction)
+                  << ShortcutHelp::fromActionItem(_redoAction)
+                  << ShortcutHelp::fromActionItem(_openAction)
+                  << ShortcutHelp::fromActionItem(_findAction)
+                  << ShortcutHelp::fromActionItem(_runAction)
+                  << ShortcutHelp::fromActionItem(_cloneAction)
+                  << ShortcutHelp::fromActionItem(_closeAction)
+                  << ShortcutHelp("T", TAB_SYMBOL)
+                  << ShortcutHelp("D", tr("Delete line"))
+                  << ShortcutHelp("H", tr("Focus Title"))
+                  << ShortcutHelp("V", tr("Paste Clipboard"))
+                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
+                  << view()->parent()->shortcutHelps();
+            Utility::bigToast(ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+            break;
+        }
         case KEYCODE_T: // Tab
             view()->textArea()->editor()->insertPlainText("\t");
             break;
@@ -320,7 +340,27 @@ void NormalMode::onBufferDirtyChanged(bool dirty)
 
 void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *)
 {
-    Utility::handleBasicTextControlModifiedKey(_titleField->editor(), event);
+    switch (event->keycap()) {
+        case KEYCODE_BACKSPACE: {
+            QList<ShortcutHelp> helps;
+            helps << ShortcutHelp("V", tr("Paste Clipboard"))
+                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
+                  << view()->parent()->shortcutHelps();
+            Utility::bigToast(ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+            break;
+        }
+        case KEYCODE_C: // Create
+            view()->parent()->addNewView();
+            break;
+        case KEYCODE_Q:
+            view()->parent()->setPrevTabActive();
+            break;
+        case KEYCODE_W:
+            view()->parent()->setNextTabActive();
+            break;
+        default:
+            Utility::handleBasicTextControlModifiedKey(_titleField->editor(), event);
+    }
 }
 
 void NormalMode::reloadLocked()

@@ -15,6 +15,7 @@
 #include <bb/system/Clipboard>
 
 static bb::system::SystemToast *_toast = NULL;
+static bb::system::SystemToast *_bigToast = NULL;
 static bb::system::SystemDialog *_dialog = NULL;
 
 void Utility::toast(const QString &msg, const QString &label,
@@ -32,6 +33,16 @@ void Utility::toast(const QString &msg, const QString &label,
         conn(_toast, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
     }
     _toast->show();
+}
+
+void Utility::bigToast(const QString &msg)
+{
+    if (!_bigToast) {
+        _bigToast = new bb::system::SystemToast;
+        _bigToast->setPosition(bb::system::SystemUiPosition::MiddleCenter);
+    }
+    _bigToast->setBody(msg);
+    _bigToast->show();
 }
 
 void Utility::escapeHtml(QTextStream &input, QTextStream &output)

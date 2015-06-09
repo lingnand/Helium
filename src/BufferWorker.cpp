@@ -332,7 +332,6 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
     }
     QTextStream out(&file);
     writePlainText(state, out, progress);
-    file.close();
     emit stateSavedToFile(filename);
 }
 

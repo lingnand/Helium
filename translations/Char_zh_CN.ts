@@ -38,11 +38,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Back to editor</source>
+        <source>Unable to run (Probably haven&apos;t saved)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unable to run (Probably haven&apos;t saved)</source>
+        <source>Back to Editor</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -241,6 +241,14 @@ These format specifiers will be replaced:
         <source>Exact match</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Paste Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lose Focus</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneralSettingsPage</name>
@@ -296,6 +304,18 @@ These format specifiers will be replaced:
         <source>Only one tab</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Previous Tab Option</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next Tab Option</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NormalMode</name>
@@ -341,6 +361,22 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Focus Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Paste Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lose Focus</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -432,6 +468,34 @@ These format specifiers will be replaced:
         <source>Content</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Focus Editable Area</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scroll to Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scroll to Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One page down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One page up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One line up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One line down</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WebRunProfile</name>
@@ -449,6 +513,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Rerun</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Back to Editor</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

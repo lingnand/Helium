@@ -20,6 +20,7 @@
 #include <QList>
 #include <bb/cascades/TabbedPane>
 #include <Buffer.h>
+#include <ShortcutHelp.h>
 
 namespace bb {
     namespace cascades {
@@ -61,12 +62,14 @@ public:
     void restoreViews();
     Q_SLOT void disableAllShortcuts();
     Q_SLOT void enableAllShortcuts();
+    QList<ShortcutHelp> shortcutHelps();
 Q_SIGNALS:
     void translatorChanged();
 private:
     // used for determining the correct list of tabs to cycle
     int _base;
     bb::cascades::Tab *_newViewControl;
+    bb::cascades::Shortcut *_newViewShortcut;
 
     QList<bb::cascades::Tab *> _save;
     View *_lastActive;
@@ -75,6 +78,7 @@ private:
 
     // whether the user can goToPrev/NextTab
     bool canTraverse();
+    Q_SLOT void displayShortcuts();
 };
 
 #endif /* MULTIVIEWPANE_H_ */

@@ -6,6 +6,7 @@
  */
 
 #include <bb/cascades/WebView>
+#include <bb/cascades/WebSettings>
 #include <bb/cascades/ScrollView>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/NavigationPaneProperties>
@@ -47,6 +48,7 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
 //    _webView->saveImageAction()->setEnabled(false);
 //    _webView->shareImageAction()->setEnabled(false);
     _webView->openLinkInNewTabAction()->setEnabled(false);
+    _webView->settings()->setDefaultFontSize(25);
     ScrollView *scrollView = ScrollView::create()
         .scrollMode(ScrollMode::Both)
         .pinchToZoomEnabled(true)
@@ -118,6 +120,7 @@ void WebRunProfile::exit()
 void WebRunProfile::onTranslatorChanged()
 {
     _outputPage->titleBar()->setTitle(tr("View Page"));
+    _backButton->setTitle(tr("Back to Editor"));
     _backAction->setTitle(tr("Back"));
     _rerunAction->setTitle(tr("Rerun"));
     _forwardAction->setTitle(tr("Forward"));

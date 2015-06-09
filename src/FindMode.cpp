@@ -28,6 +28,7 @@
 #include <Filetype.h>
 #include <Utility.h>
 #include <Segment.h>
+#include <ShortcutHelp.h>
 
 using namespace bb::cascades;
 
@@ -183,17 +184,25 @@ void FindMode::onReplaceFieldModifiedKey(bb::cascades::KeyEvent *event)
 void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
 {
     switch (event->keycap()) {
+        case KEYCODE_BACKSPACE: {
+            QList<ShortcutHelp> helps;
+            helps << ShortcutHelp::fromActionItem(_goToFindFieldAction)
+                  << ShortcutHelp::fromActionItem(_replaceNextAction)
+                  << ShortcutHelp::fromActionItem(_replaceAllAction)
+                  << ShortcutHelp::fromActionItem(_findCancelAction)
+                  << ShortcutHelp::fromActionItem(_findCancelAction)
+                  << ShortcutHelp("T", TAB_SYMBOL)
+                  << ShortcutHelp("V", tr("Paste Clipboard"))
+                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
+                  << view()->parent()->shortcutHelps();
+            Utility::bigToast(ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+            break;
+        }
         case KEYCODE_T:
             editor->insertPlainText("\t");
             break;
         case KEYCODE_F:
             _findField->requestFocus();
-            break;
-        case KEYCODE_P:
-            findPrev();
-            break;
-        case KEYCODE_N:
-            findNext();
             break;
         case KEYCODE_R:
             replaceNext();

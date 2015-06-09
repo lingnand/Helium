@@ -1,0 +1,29 @@
+<h2 id="tabs-and-buffers">Tabs and Buffers</h2>
+<p>At any time Helium manages a list of <em>tabs</em> which are views into <em>buffers</em>. A tab is a frontend that interacts with a buffer, whereas a buffer represents the actual data being edited i.e. what you see in the text area; and also data being saved to/loaded from files.</p>
+<p>The distinction between <em>tabs</em> and <em>buffers</em> is necessary because Helium supports multiple tabs viewing the same buffer. This can be achieved in two ways:</p>
+<ul>
+<li>use the <strong>Clone</strong> action inside any tab - this spawns a new tab that shares the same buffer with the previous tab</li>
+<li>opening a file in a new tab which is already edited in another tab causes the new tab to share that existing buffer</li>
+</ul>
+<p>Changes in a buffer are synced across all tabs linked to it. Additionally, settings accessed and changed via any tab's <strong>Properties</strong> action apply to the same buffer.</p>
+<p>This means that you can for example:</p>
+<ul>
+<li>edit a long document in one tab and refer back to its early parts in another tab</li>
+<li>edit a script in one tab and run &amp; view its output in another</li>
+</ul>
+<p><em>Tips: a cloned tab shares the same working directory as the old one; so to open some other file in the same directory, you can clone the current tab and the Open action will navigate to that directory by default</em></p>
+<h2 id="opening-files">Opening files</h2>
+<p>Helium supports opening multiple files at once. Simply use the <strong>Open</strong> action in any tab, choose the files you desire to edit and select <strong>Done</strong>. If there are more than one file chosen, the additional files will be put into new tabs <em>just before</em> the current one.</p>
+<p>Each file is opened in a separate routine and progress is shown at the bottom of its respective tabs.</p>
+<h2 id="saving-files">Saving files</h2>
+<p>Saving is done asynchronously i.e. every time you trigger the <strong>Save</strong> action, Helium copies the content in the current buffer, and starts a background routine that saves it to disk. Progress is displayed at the bottom of the tab in an non-interruptive way - this means that you can continue editing the document without having to wait for it to finish.</p>
+<h2 id="highlight">Highlight</h2>
+<p>Helium uses efficient algorithms to highlight documents in real-time. However, due to limitations on the amount of highlighted text that can be put into a text area, Helium uses <em>partial highlight</em> instead to keep highlight to the necessary minimum (the range of text around the cursor). If you still encounter performance problems, you can</p>
+<ul>
+<li>turn off <strong>Enable Highlight</strong> for the given filetype, OR</li>
+<li>decrease the range of the partial highlight</li>
+</ul>
+<h2 id="filetype">Filetype</h2>
+<p>Each filetype defines its own set of highlight rules, as well as having its own settings for highlight and <em>run profiles</em>. These settings can be accessed via <strong>Properties</strong> inside any tab (which shows settings of the filetype currently associated with the given buffer); they can also be accessed inside <strong>Settings-Filetypes</strong>.</p>
+<h2 id="find-and-replace">Find and Replace</h2>
+<p>Helium supports full-regex find and replace. <em>To be continued</em></p>

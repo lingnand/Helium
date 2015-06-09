@@ -13,7 +13,7 @@
 namespace bb {
     namespace cascades {
         class Option;
-        class TextArea;
+        class WebView;
     }
 }
 class HelpPage : public RepushablePage
@@ -26,7 +26,8 @@ private:
     bb::cascades::Option *_quickStartOption;
     bb::cascades::Option *_keyboardShortcutsOption;
     bb::cascades::Option *_runProfileOption;
-    bb::cascades::TextArea *_textArea;
+    bb::cascades::WebView *_webView;
+    Q_SLOT void onTitleSelectionChanged(const QVariant &);
 };
 
 #endif /* HELPPAGE_H_ */

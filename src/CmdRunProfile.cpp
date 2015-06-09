@@ -180,5 +180,5 @@ void CmdRunProfile::onTranslatorChanged()
     _outputPage->titleBar()->setTitle(tr("Run"));
     _killAction->setTitle(tr("Kill"));
     _rerunAction->setTitle(tr("Rerun"));
-    _backButton->setTitle(tr("Back to editor"));
+    _backButton->setTitle(tr("Back to Editor"));
 }

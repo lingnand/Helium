@@ -32,20 +32,29 @@ using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(QObject *parent):
     TabbedPane(parent), _lastActive(NULL), _base(1),
+    _newViewShortcut(Shortcut::create().key("c")
+        .onTriggered(this, SLOT(addNewView()))),
     _newViewControl(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add.png"))
-        .addShortcut(Shortcut::create().key("c")
-                .onTriggered(this, SLOT(addNewView())))
         .onTriggered(this, SLOT(addNewView())))
 {
     setShowTabsOnActionBar(false);
-    addShortcut(Shortcut::create().key("q")
-            .onTriggered(this, SLOT(setPrevTabActive())));
-    addShortcut(Shortcut::create().key("w")
-            .onTriggered(this, SLOT(setNextTabActive())));
+    Shortcut *prev = Shortcut::create().key("q")
+        .onTriggered(this, SLOT(setPrevTabActive()));
+    Shortcut *next = Shortcut::create().key("w")
+        .onTriggered(this, SLOT(setNextTabActive()));
+    Shortcut *help = Shortcut::create().key("Backspace")
+        .onTriggered(this, SLOT(displayShortcuts()));
+    addShortcut(prev);
+    addShortcut(next);
+    addShortcut(help);
+    _newViewControl->addShortcut(_newViewShortcut);
 
-    // TODO: handle auto focus properly: focus on the textarea when the tab is switched to
-    // However, think about the case when you press enter+<switching between tabs> and you want to do it again on the next switched to tab
+    _newViewShortcut->setProperty("help", tr("New"));
+    prev->setProperty("help", tr("Previous Tab Option"));
+    next->setProperty("help", tr("Next Tab Option"));
+    help->setProperty("help", tr("Display Shortcuts"));
+
     add(_newViewControl);
 
     conn(this, SIGNAL(activeTabChanged(bb::cascades::Tab*)),
@@ -58,13 +67,13 @@ MultiViewPane::MultiViewPane(QObject *parent):
 void MultiViewPane::disableAllShortcuts()
 {
     TabbedPane::disableAllShortcuts();
-    _newViewControl->disableAllShortcuts();
+    _newViewShortcut->setEnabled(false);
 }
 
 void MultiViewPane::enableAllShortcuts()
 {
     TabbedPane::enableAllShortcuts();
-    _newViewControl->enableAllShortcuts();
+    _newViewShortcut->setEnabled(true);
 }
 
 View *MultiViewPane::activeView() const
@@ -102,6 +111,7 @@ Tab *MultiViewPane::at(int i) const
 void MultiViewPane::hideViews()
 {
     blockSignals(true);
+    _newViewShortcut->setEnabled(false);
     _base = 0;
     while (count() > 0) {
         Tab *tab = at(0);
@@ -121,6 +131,7 @@ void MultiViewPane::restoreViews()
     _save.clear();
     setActiveTab(_lastActive);
     _base = 1;
+    _newViewShortcut->setEnabled(true);
     blockSignals(false);
 }
 
@@ -251,4 +262,33 @@ void MultiViewPane::onTranslatorChanged()
 {
     _newViewControl->setTitle(tr("New"));
     emit translatorChanged();
+}
+
+QList<ShortcutHelp> MultiViewPane::shortcutHelps()
+{
+    QList<ShortcutHelp> helps;
+    helps.append(ShortcutHelp::fromShortcut(_newViewShortcut));
+    for (int i = 0; i < shortcutCount(); i++) {
+        helps.append(ShortcutHelp::fromShortcut(shortcutAt(i)));
+    }
+    return helps;
+}
+
+void MultiViewPane::displayShortcuts()
+{
+    QList<ShortcutHelp> helps;
+    Page *page = activePane()->top();
+    for (int i = 0; i < page->shortcutCount(); i++)
+        helps.append(ShortcutHelp::fromShortcut(page->shortcutAt(i)));
+    // ActionItems
+    for (int i = 0; i < page->actionCount(); i++)
+        helps.append(ShortcutHelp::fromActionItem(page->actionAt(i)));
+    // KeyListener
+    for (int i = 0; i < page->keyListenerCount(); i++)
+        helps.append(ShortcutHelp::fromKeyListener(page->keyListenerAt(i)));
+    // pane properties
+    helps.append(ShortcutHelp::fromPaneProperties(page->paneProperties()));
+    // from multiViewPane itself
+    helps.append(shortcutHelps());
+    Utility::bigToast(ShortcutHelp::showAll(helps));
 }

@@ -47,7 +47,7 @@ private:
     void reloadHeader();
     Q_SLOT void onHighlightCheckedChanged(bool);
     Q_SLOT void onFiletypeRunProfileManagerChanged(RunProfileManager *change);
-    Q_SLOT void onRunProfileSelectionChanged(const QVariant);
+    Q_SLOT void onRunProfileSelectionChanged(const QVariant &);
 };
 
 #endif /* FILETYPESETTINGSUI_H_ */

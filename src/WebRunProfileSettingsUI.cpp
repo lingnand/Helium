@@ -30,8 +30,8 @@ WebRunProfileSettingsUI::WebRunProfileSettingsUI(WebRunProfileManager *manager):
     _modeSelect = DropDown::create()
         .add(_htmlOption)
         .add(_javascriptOption);
-    conn(_modeSelect, SIGNAL(selectedValueChanged(const QVariant)),
-            this, SLOT(onModeSelectionChanged(const QVariant)));
+    conn(_modeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
+            this, SLOT(onModeSelectionChanged(const QVariant&)));
     onManagerModeChanged(manager->mode());
     conn(manager, SIGNAL(modeChanged(WebRunProfile::Mode)),
             this, SLOT(onManagerModeChanged(WebRunProfile::Mode)));
@@ -43,7 +43,7 @@ WebRunProfileSettingsUI::WebRunProfileSettingsUI(WebRunProfileManager *manager):
     onTranslatorChanged();
 }
 
-void WebRunProfileSettingsUI::onModeSelectionChanged(const QVariant v)
+void WebRunProfileSettingsUI::onModeSelectionChanged(const QVariant &v)
 {
     _manager->setMode((WebRunProfile::Mode) v.toInt());
 }
