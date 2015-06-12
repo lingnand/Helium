@@ -12,9 +12,15 @@ class GeneralSettings : public QObject
 {
     Q_OBJECT
 public:
-    GeneralSettings(int highlightRange, QObject *parent=NULL);
+    GeneralSettings(int highlightRange, QObject *parent=NULL):
+        QObject(parent), _highlightRange(highlightRange) {}
     int highlightRange() const { return _highlightRange; }
-    Q_SLOT void setHighlightRange(int);
+    Q_SLOT void setHighlightRange(int r) {
+        if (r != _highlightRange) {
+            _highlightRange = r;
+            emit highlightRangeChanged(_highlightRange);
+        }
+    }
 Q_SIGNALS:
     void highlightRangeChanged(int);
 private:

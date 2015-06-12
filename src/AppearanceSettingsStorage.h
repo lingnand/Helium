@@ -9,8 +9,8 @@
 #define APPEARANCESETTINGSSTORAGE_H_
 
 #include <QSettings>
-
-class AppearanceSettings;
+#include <bb/cascades/VisualStyle>
+#include <AppearanceSettings.h>
 
 class AppearanceSettingsStorage : public QObject
 {
@@ -21,6 +21,7 @@ public:
 private:
     QSettings _settings;
     Q_SLOT void onHideActionBarChanged(bool);
+    Q_SLOT void onThemeChanged(AppearanceSettings::Theme);
 };
 
 #endif /* APPEARANCESETTINGSSTORAGE_H_ */

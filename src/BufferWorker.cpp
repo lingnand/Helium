@@ -7,9 +7,10 @@
 #include <Filetype.h>
 #include <Utility.h>
 #include <Helium.h>
+#include <AppearanceSettings.h>
 
 BufferWorker::BufferWorker():
-    _sourceHighlight("default.style", "xhtml.outlang")
+    _sourceHighlight(Helium::instance()->appearance()->highlightStyleFile().toStdString(), "xhtml.outlang")
 {
 }
 
@@ -77,7 +78,7 @@ HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, 
         lineState.line.writePlainText(stream);
         stream << flush;
         _sourceHighlight.getHighlighter()->highlightParagraph(std::string(plainText.constData()));
-        lineState.highlightText = QString::fromUtf8(_sourceHighlight.getBuffer().str().c_str());
+        lineState.highlightText = QString::fromStdString(_sourceHighlight.getBuffer().str());
         state->currentState = _sourceHighlight.getHighlighter()->getCurrentState();
         lineState.endHighlightState = state;
     }

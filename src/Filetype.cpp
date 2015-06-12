@@ -23,7 +23,7 @@ Filetype::Filetype(const QString &name,
 
 std::string Filetype::langName() const
 {
-    return std::string(_name.toUtf8().constData()) + ".lang";
+    return _name.toStdString() + ".lang";
 }
 
 void Filetype::setHighlightEnabled(bool enabled)

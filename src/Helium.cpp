@@ -8,6 +8,7 @@
 #include <bb/ApplicationInfo>
 #include <bb/system/InvokeManager>
 #include <bb/cascades/NavigationPane>
+#include <bb/cascades/ThemeSupport>
 #include <bb/cascades/Page>
 #include <bb/cascades/Menu>
 #include <bb/cascades/ActionItem>
@@ -16,10 +17,7 @@
 #include <Helium.h>
 #include <MultiViewPane.h>
 #include <View.h>
-#include <Buffer.h>
-#include <BufferState.h>
 #include <StateChangeContext.h>
-#include <HtmlBufferChangeParser.h>
 #include <FiletypeMapStorage.h>
 #include <Filetype.h>
 #include <CmdRunProfileManager.h>
@@ -50,13 +48,9 @@ Helium::Helium(int &argc, char **argv):
         .imageSource(QUrl("asset:///images/ic_email.png"))
         .onTriggered(this, SLOT(onContactActionTriggered())))
 {
-    qRegisterMetaType<ProgressIndicatorState::Type>();
-    qRegisterMetaType<HighlightType>();
-    qRegisterMetaType<BufferState>("BufferState&");
-    qRegisterMetaType<Progress>("Progress&");
-    qRegisterMetaType<BufferStateChange>();
-    qRegisterMetaType<StateChangeContext>("StateChangeContext&");
-    qRegisterMetaType<ParserPosition>();
+    themeSupport()->setVisualStyle(_appearance->visualStyle());
+    conn(_appearance, SIGNAL(visualStyleChanged(bb::cascades::VisualStyle::Type)),
+        themeSupport(), SLOT(setVisualStyle(bb::cascades::VisualStyle::Type)));
 
     reloadTranslator();
     conn(&_localeHandler, SIGNAL(systemLanguageChanged()),

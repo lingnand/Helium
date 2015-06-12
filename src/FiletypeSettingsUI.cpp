@@ -140,7 +140,7 @@ void FiletypeSettingsUI::onTranslatorChanged()
     _highlightToggleLabel->setText(tr("Enable highlight"));
     _highlightToggleHelp->setText(tr("Highlight is automatically updated for a range of lines around the cursor"));
     _runProfileHeader->setTitle(tr("Run Profile"));
-    _runProfileSelect->setTitle("Run Profile");
+    _runProfileSelect->setTitle(tr("Run Profile"));
     _noneRunProfileOption->setDescription(tr("<No Run Profile>"));
     _cmdRunProfileOption->setText(tr("Run Command"));
     _cmdRunProfileOption->setDescription(tr("Pass a command to /bin/sh"));

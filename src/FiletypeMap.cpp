@@ -36,9 +36,9 @@ Filetype *FiletypeMap::filetype(const QString &filetypeName) const
 Filetype *FiletypeMap::filetypeForName(const QString &filename)
 {
     QMutexLocker lock(&_langMapMut);
-    return filetype(QString::fromUtf8(
+    return filetype(QString::fromStdString(
             srchilite::Instances::getLangMap()->getMappedFileNameFromFileName(
-                filename.toUtf8().constData()).c_str()));
+                filename.toStdString())));
 }
 
 QList<Filetype *> FiletypeMap::filetypes() const

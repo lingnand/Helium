@@ -15,6 +15,22 @@
         <source>Hide the ActionBar under the text areas. All the actions are still accessible via keyboard shortcuts.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bright</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Overall theme for Helium</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BufferWorker</name>

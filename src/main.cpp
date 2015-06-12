@@ -15,10 +15,28 @@
  */
 
 #include <Qt/qdeclarativedebug.h>
+#include <bb/cascades/ProgressIndicatorState>
 #include <Helium.h>
+#include <HighlightType.h>
+#include <BufferState.h>
+#include <BufferWorker.h>
+#include <StateChangeContext.h>
+#include <HtmlBufferChangeParser.h>
+
+Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
+    qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>();
+    qRegisterMetaType<HighlightType>();
+    qRegisterMetaType<BufferState>("BufferState&");
+    qRegisterMetaType<Progress>("Progress&");
+    qRegisterMetaType<BufferStateChange>();
+    qRegisterMetaType<StateChangeContext>("StateChangeContext&");
+    qRegisterMetaType<ParserPosition>();
+
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
+
     Helium app(argc, argv);
     // Enter the application main event loop.
     return Helium::exec();

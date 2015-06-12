@@ -312,7 +312,6 @@ config_pri_assets {
 
 config_pri_source_group1 {
     SOURCES += \
-        $$quote($$BASEDIR/src/AppearanceSettings.cpp) \
         $$quote($$BASEDIR/src/AppearanceSettingsPage.cpp) \
         $$quote($$BASEDIR/src/AppearanceSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/Buffer.cpp) \
@@ -330,7 +329,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FiletypeMapStorage.cpp) \
         $$quote($$BASEDIR/src/FiletypeSettingsUI.cpp) \
         $$quote($$BASEDIR/src/FindMode.cpp) \
-        $$quote($$BASEDIR/src/GeneralSettings.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \

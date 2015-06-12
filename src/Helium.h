@@ -11,7 +11,6 @@
 #include <QTranslator>
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
-#include <bb/cascades/ProgressIndicatorState>
 
 namespace bb {
     namespace cascades {
@@ -61,7 +60,5 @@ private:
     Q_SLOT void showHelp();
     void pushPage(RepushablePage *);
 };
-
-Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)
 
 #endif /* APPLICATION_H_ */
