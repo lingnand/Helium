@@ -71,7 +71,7 @@ QString ShortcutHelp::showAll(const QList<ShortcutHelp> &list, const QString &ke
     QString show;
     if (list.empty())
         return show;
-    show += list[0].show();
+    show += list[0].show(keyPrefix);
     for (int i = 1; i < list.size(); i++) {
         show += '\n';
         show += list[i].show(keyPrefix);
