@@ -119,7 +119,6 @@ private:
     QString _highlightStyleFile;
 
     void _setName(const QString &name, bool setHighlightType, Progress &);
-    void _setFiletype(Filetype *, Progress &);
     void setHighlightType(const HighlightType &, Progress &);
     void setFilepath(const QString &filepath, bool setHighlightType, Progress &);
     void traverse(bool (BufferHistory::*fn)());

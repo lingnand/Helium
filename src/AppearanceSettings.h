@@ -40,7 +40,7 @@ public:
                     visualStyle = bb::cascades::VisualStyle::Bright;
                     break;
                 case Dark:
-                    highlightStyle = "default.style";
+                    highlightStyle = "jellyx.style";
                     visualStyle = bb::cascades::VisualStyle::Dark;
                     break;
             }

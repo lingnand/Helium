@@ -25,8 +25,7 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
-    _locked(false), _dirty(false), _autodetectFiletype(true),
-    _highlightStyleFile(Helium::instance()->appearance()->highlightStyleFile())
+    _locked(false), _dirty(false), _autodetectFiletype(true)
 {
     AppearanceSettings *appearanceSettings = Helium::instance()->appearance();
     _highlightStyleFile = appearanceSettings->highlightStyleFile();
@@ -103,7 +102,8 @@ void Buffer::_setName(const QString &name, bool sethl, Progress &progress)
     if (name != _name) {
         _name = name;
         if (sethl)
-            _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(name), progress);
+            setHighlightType(HighlightType(_highlightStyleFile,
+                    Helium::instance()->filetypeMap()->filetypeForName(name)), progress);
         emit nameChanged(name);
     }
 }
@@ -120,24 +120,21 @@ void Buffer::setFilepath(const QString &filepath, bool setHighlightType, Progres
 void Buffer::setFiletype(Filetype *filetype)
 {
     Progress progress;
-    _setFiletype(filetype, progress);
-}
-
-void Buffer::_setFiletype(Filetype *filetype, Progress &progress)
-{
-    setHighlightType(HighlightType(highlightType().styleFile, filetype), progress);
-}
-
-void Buffer::setHighlightStyleFile(const QString &style)
-{
-    Progress progress;
-    setHighlightType(HighlightType(style, filetype()), progress);
+    setHighlightType(HighlightType(_highlightStyleFile, filetype), progress);
 }
 
 void Buffer::refreshFiletype()
 {
-    Progress progress;
-    setHighlightType(HighlightType(highlightType().styleFile, filetype()), progress);
+    setFiletype(filetype());
+}
+
+void Buffer::setHighlightStyleFile(const QString &style)
+{
+    if (style != _highlightStyleFile) {
+        _highlightStyleFile = style;
+        Progress progress;
+        setHighlightType(HighlightType(_highlightStyleFile, filetype()), progress);
+    }
 }
 
 void Buffer::setHighlightType(const HighlightType &type, Progress &progress)
