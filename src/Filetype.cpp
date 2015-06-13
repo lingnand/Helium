@@ -21,17 +21,11 @@ Filetype::Filetype(const QString &name,
     setRunProfileManager(runProfileManager);
 }
 
-std::string Filetype::langName() const
-{
-    return _name.toStdString() + ".lang";
-}
-
 void Filetype::setHighlightEnabled(bool enabled)
 {
     if (enabled != _highlightEnabled) {
         _highlightEnabled = enabled;
         emit highlightEnabledChanged(_highlightEnabled);
-        emit highlightTypeChanged(highlightType());
     }
 }
 

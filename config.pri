@@ -334,7 +334,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HelpPage.cpp) \
         $$quote($$BASEDIR/src/HighlightRangePicker.cpp) \
-        $$quote($$BASEDIR/src/HighlightType.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \

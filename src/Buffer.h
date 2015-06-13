@@ -54,8 +54,9 @@ public:
     // the filepath of the buffer, empty if not yet bound
     const QString &filepath() const { return _filepath; }
     Filetype *filetype() { return state().filetype(); }
-    HighlightType highlightType() { return HighlightType::fromFiletype(filetype()); }
+    HighlightType highlightType() { return state().highlightType(); }
     Q_SLOT void setFiletype(Filetype *);
+    Q_SLOT void setHighlightStyleFile(const QString &);
     const BufferState &state() const { return _states.current(); }
     Q_SLOT void parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition);
     Q_SLOT void parseReplacement(const Replacement &replace);
@@ -115,12 +116,15 @@ private:
     void setLocked(bool);
     void setDirty(bool);
 
+    QString _highlightStyleFile;
+
     void _setName(const QString &name, bool setHighlightType, Progress &);
+    void _setFiletype(Filetype *, Progress &);
     void setHighlightType(const HighlightType &, Progress &);
     void setFilepath(const QString &filepath, bool setHighlightType, Progress &);
     void traverse(bool (BufferHistory::*fn)());
     Q_SLOT void handleStateChangeResult(const StateChangeContext &, const BufferState &);
-    Q_SLOT void onHighlightTypeChanged(const HighlightType &);
+    Q_SLOT void refreshFiletype();
 };
 
 #endif /* BUFFER_H_ */

@@ -23,9 +23,6 @@ public:
     FiletypeMap &operator<<(Filetype *);
     Filetype *filetype(const QString &filetypeName) const;
     Filetype *filetypeForName(const QString &filename);
-    HighlightType highlightTypeForName(const QString &filename) {
-        return HighlightType::fromFiletype(filetypeForName(filename));
-    }
     QList<Filetype *> filetypes() const;
 private:
     class LangMapOpener : public QThread {

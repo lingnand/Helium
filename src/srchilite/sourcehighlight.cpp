@@ -12,7 +12,6 @@
 
 #include "sourcehighlight.h"
 #include "formattermanager.h"
-#include "textstyles.h"
 #include "preformatter.h"
 #include "parsestyles.h"
 #include "textstyleformatter.h"
@@ -35,15 +34,12 @@ using namespace std;
 
 namespace srchilite {
 
-SourceHighlight::SourceHighlight(const std::string &_styleFile, const std::string &_outputLang) :
-        dataDir(Settings::retrieveDataDir()), styleFile(_styleFile), output(buffer),
+SourceHighlight::SourceHighlight(const std::string &_outputLang) :
+        dataDir(Settings::retrieveDataDir()), output(buffer),
         formatterManager(0), preFormatter(0), langDefManager(Instances::getLangDefManager()),
             highlightEventListener(0), highlighter(0), tabSpaces(0) {
-    TextStylesPtr textStyles = parse_outlang_def(dataDir.c_str(),
+    textStyles = parse_outlang_def(dataDir.c_str(),
             _outputLang.c_str());
-
-    FormatterPtr defaultFormatter(new TextStyleFormatter("$text"));
-    formatterManager = new FormatterManager(defaultFormatter);
 
     if (tabSpaces) {
         preFormatter = new Untabifier(tabSpaces);
@@ -51,27 +47,6 @@ SourceHighlight::SourceHighlight(const std::string &_styleFile, const std::strin
                 textStyles->charTranslator)));
     } else {
         preFormatter = new PreFormatter(textStyles->charTranslator);
-    }
-
-    TextStyleFormatterFactory formatterFactory(textStyles, preFormatter, formatterManager);
-
-    std::string backgroundColor;
-    parseStyles(dataDir, styleFile, &formatterFactory, backgroundColor);
-
-    formatterFactory.addDefaultFormatter();
-
-    formatterCollection = formatterFactory.getFormatterCollection();
-
-    // set the preformatter in all the formatters
-    for (TextStyleFormatterCollection::const_iterator it =
-            formatterCollection.begin(); it != formatterCollection.end(); ++it) {
-        (*it)->setPreFormatter(preFormatter);
-    }
-
-    // wire up the output
-    for (TextStyleFormatterCollection::const_iterator it =
-            formatterCollection.begin(); it != formatterCollection.end(); ++it) {
-        (*it)->setBufferedOutput(&output);
     }
 }
 
@@ -84,6 +59,39 @@ SourceHighlight::~SourceHighlight() {
 
     if (preFormatter)
         delete preFormatter;
+}
+
+void SourceHighlight::setStyleFile(const std::string &_styleFile) {
+    if (_styleFile != styleFile) {
+        styleFile = _styleFile;
+        if (formatterManager) {
+            delete formatterManager;
+        }
+        formatterManager = new FormatterManager(FormatterPtr(new TextStyleFormatter("$text")));
+
+        TextStyleFormatterFactory formatterFactory(textStyles, preFormatter, formatterManager);
+
+        std::string backgroundColor;
+        parseStyles(dataDir, styleFile, &formatterFactory, backgroundColor);
+
+        formatterFactory.addDefaultFormatter();
+
+        formatterCollection = formatterFactory.getFormatterCollection();
+
+        // set the preformatter in all the formatters
+        for (TextStyleFormatterCollection::const_iterator it =
+                formatterCollection.begin(); it != formatterCollection.end(); ++it) {
+            (*it)->setPreFormatter(preFormatter);
+        }
+        // wire up the output
+        for (TextStyleFormatterCollection::const_iterator it =
+                formatterCollection.begin(); it != formatterCollection.end(); ++it) {
+            (*it)->setBufferedOutput(&output);
+        }
+        if (highlighter) {
+            highlighter->setFormatterManager(formatterManager);
+        }
+    }
 }
 
 void SourceHighlight::setInputLang(const std::string &_inputLang) {

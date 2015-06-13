@@ -8,16 +8,19 @@
 #ifndef HIGHLIGHTTYPE_H_
 #define HIGHLIGHTTYPE_H_
 
-class Filetype;
+#include <Filetype.h>
 
 struct HighlightType {
+    QString styleFile;
     Filetype *filetype;
     bool highlightEnabled;
-    static HighlightType fromFiletype(Filetype *ft);
-    HighlightType(Filetype *ft=NULL, bool highlight=false):
-        filetype(ft), highlightEnabled(highlight) {}
+    HighlightType(const QString &style, Filetype *ft, bool highlight):
+        styleFile(style), filetype(ft), highlightEnabled(highlight) {}
+    HighlightType(const QString &style=QString(), Filetype *ft=NULL):
+        styleFile(style), filetype(ft), highlightEnabled(ft ? ft->highlightEnabled() : false) {}
     bool operator==(const HighlightType &other) const {
-        return filetype == other.filetype &&
+        return styleFile == other.styleFile &&
+                filetype == other.filetype &&
                 highlightEnabled == other.highlightEnabled;
     }
     bool operator!=(const HighlightType &other) const {

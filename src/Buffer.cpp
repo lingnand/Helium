@@ -14,6 +14,7 @@
 #include <FiletypeMap.h>
 #include <Filetype.h>
 #include <Utility.h>
+#include <AppearanceSettings.h>
 
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
@@ -24,8 +25,14 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
-    _locked(false), _dirty(false), _autodetectFiletype(true)
+    _locked(false), _dirty(false), _autodetectFiletype(true),
+    _highlightStyleFile(Helium::instance()->appearance()->highlightStyleFile())
 {
+    AppearanceSettings *appearanceSettings = Helium::instance()->appearance();
+    _highlightStyleFile = appearanceSettings->highlightStyleFile();
+    conn(appearanceSettings, SIGNAL(highlightStyleFileChanged(const QString&)),
+        this, SLOT(setHighlightStyleFile(const QString&)));
+
     _worker.moveToThread(&_workerThread);
     conn(this, SIGNAL(workerSetHighlightType(StateChangeContext&, BufferState&, const HighlightType&, Progress&)),
          &_worker, SLOT(setHighlightType(StateChangeContext&, BufferState&, const HighlightType&, Progress&)));
@@ -96,7 +103,7 @@ void Buffer::_setName(const QString &name, bool sethl, Progress &progress)
     if (name != _name) {
         _name = name;
         if (sethl)
-            setHighlightType(Helium::instance()->filetypeMap()->highlightTypeForName(name), progress);
+            _setFiletype(Helium::instance()->filetypeMap()->filetypeForName(name), progress);
         emit nameChanged(name);
     }
 }
@@ -113,7 +120,24 @@ void Buffer::setFilepath(const QString &filepath, bool setHighlightType, Progres
 void Buffer::setFiletype(Filetype *filetype)
 {
     Progress progress;
-    setHighlightType(HighlightType::fromFiletype(filetype), progress);
+    _setFiletype(filetype, progress);
+}
+
+void Buffer::_setFiletype(Filetype *filetype, Progress &progress)
+{
+    setHighlightType(HighlightType(highlightType().styleFile, filetype), progress);
+}
+
+void Buffer::setHighlightStyleFile(const QString &style)
+{
+    Progress progress;
+    setHighlightType(HighlightType(style, filetype()), progress);
+}
+
+void Buffer::refreshFiletype()
+{
+    Progress progress;
+    setHighlightType(HighlightType(highlightType().styleFile, filetype()), progress);
 }
 
 void Buffer::setHighlightType(const HighlightType &type, Progress &progress)
@@ -152,19 +176,13 @@ void Buffer::handleStateChangeResult(const StateChangeContext &ctx, const Buffer
             oldFt->disconnect(this);
         }
         if (newFt) {
-            conn(newFt, SIGNAL(highlightTypeChanged(const HighlightType&)),
-                this, SLOT(onHighlightTypeChanged(const HighlightType&)));
+            conn(newFt, SIGNAL(highlightEnabledChanged(bool)),
+                this, SLOT(refreshFiletype()));
         }
         emit filetypeChanged(newFt, oldFt);
     }
     setLocked(false);
     emit stateChanged(ctx, newSt);
-}
-
-void Buffer::onHighlightTypeChanged(const HighlightType &type)
-{
-    Progress progress;
-    setHighlightType(type, progress);
 }
 
 BufferState &Buffer::modifyState()

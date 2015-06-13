@@ -8,8 +8,6 @@
 #ifndef FILETYPE_H_
 #define FILETYPE_H_
 
-#include <HighlightType.h>
-
 class RunProfileManager;
 
 class Filetype : public QObject
@@ -21,8 +19,6 @@ public:
             RunProfileManager *runProfileManager=NULL,
             QObject *parent=NULL);
     const QString &name() const { return _name; }
-    std::string langName() const; // for working with srchilite
-    HighlightType highlightType() { return HighlightType(this, _highlightEnabled); }
     RunProfileManager *runProfileManager() const { return _runProfileManager; }
     void setRunProfileManager(RunProfileManager *);
     bool highlightEnabled() const { return _highlightEnabled; }
@@ -30,7 +26,6 @@ public:
 Q_SIGNALS:
     void runProfileManagerChanged(RunProfileManager *change, RunProfileManager *old);
     void highlightEnabledChanged(bool);
-    void highlightTypeChanged(const HighlightType &);
 private:
     QString _name;
     bool _highlightEnabled;

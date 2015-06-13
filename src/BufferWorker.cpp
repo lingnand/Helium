@@ -10,7 +10,7 @@
 #include <AppearanceSettings.h>
 
 BufferWorker::BufferWorker():
-    _sourceHighlight(Helium::instance()->appearance()->highlightStyleFile().toStdString(), "xhtml.outlang")
+    _sourceHighlight("xhtml.outlang")
 {
 }
 
@@ -29,7 +29,8 @@ void BufferWorker::_setHighlightType(const HighlightType &type)
         _highlightType = type;
         qDebug() << "Setting filetype to:" << _highlightType.filetype;
         if (_highlightType.shouldHighlight()) {
-            _sourceHighlight.setInputLang(_highlightType.filetype->langName());
+            _sourceHighlight.setStyleFile(_highlightType.styleFile.toStdString());
+            _sourceHighlight.setInputLang(_highlightType.filetype->name().toStdString() + ".lang");
             _mainStateData = HighlightStateData::ptr(new HighlightStateData(
                 _sourceHighlight.getHighlighter()->getMainState(),
                 srchilite::HighlightStateStackPtr(new srchilite::HighlightStateStack())
@@ -356,8 +357,8 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
         state.append(BufferLineState(BufferLine() << input.readLine()));
     }
     if (autodetectFiletype) {
-        _setHighlightType(Helium::instance()->filetypeMap()
-                ->highlightTypeForName(filename));
+        _setHighlightType(HighlightType(Helium::instance()->appearance()->highlightStyleFile(),
+                Helium::instance()->filetypeMap()->filetypeForName(filename)));
     }
     _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "state filetype after highlight" << state.filetype();

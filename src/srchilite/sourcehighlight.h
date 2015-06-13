@@ -15,6 +15,7 @@
 #include "textstyleformattercollection.h"
 #include "sourcehighlighter.h"
 #include "bufferedoutput.h"
+#include "textstyles.h"
 
 namespace srchilite {
 
@@ -55,6 +56,9 @@ class SourceHighlight {
     /// the preformatter
     PreFormatter *preFormatter;
 
+    // the text styles
+    TextStylesPtr textStyles;
+
     /// all the formatters that are created
     TextStyleFormatterCollection formatterCollection;
 
@@ -78,16 +82,12 @@ class SourceHighlight {
     unsigned int tabSpaces;
 
 public:
-    SourceHighlight(const std::string &_styleFile, const std::string &_outputLang);
+    SourceHighlight(const std::string &_outputLang);
     ~SourceHighlight();
 
     void clearBuffer();
     const std::ostringstream &getBuffer() {
         return buffer;
-    }
-
-    void setStyleFile(const std::string &_styleFile) {
-        styleFile = _styleFile;
     }
 
     const TextStyleFormatterCollection &getFormatterCollection() const {
@@ -103,6 +103,8 @@ public:
     }
 
     void setInputLang(const std::string &inputLang);
+
+    void setStyleFile(const std::string &styleFile);
 
     SourceHighlighter *getHighlighter() const {
         return highlighter;
