@@ -15,7 +15,7 @@ class AppearanceSettings : public QObject
 {
     Q_OBJECT
 public:
-    enum Theme { Bright, Dark };
+    enum Theme { SummerFruit, JellyX, Tomorrow, TomorrowNight };
     AppearanceSettings(bool hideActionBar, Theme theme,
             const QString &fontFamily, bb::cascades::FontSize::Type fontSize,
             QObject *parent=NULL):
@@ -39,12 +39,20 @@ public:
             QString highlightStyle;
             bb::cascades::VisualStyle::Type visualStyle;
             switch (_theme) {
-                case Bright:
-                    highlightStyle = "default.style";
+                case SummerFruit:
+                    highlightStyle = "summerfruit.style";
                     visualStyle = bb::cascades::VisualStyle::Bright;
                     break;
-                case Dark:
+                case JellyX:
                     highlightStyle = "jellyx.style";
+                    visualStyle = bb::cascades::VisualStyle::Dark;
+                    break;
+                case Tomorrow:
+                    highlightStyle = "tomorrow.style";
+                    visualStyle = bb::cascades::VisualStyle::Bright;
+                    break;
+                case TomorrowNight:
+                    highlightStyle = "tomorrownight.style";
                     visualStyle = bb::cascades::VisualStyle::Dark;
                     break;
             }

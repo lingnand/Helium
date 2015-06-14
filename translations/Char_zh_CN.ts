@@ -20,14 +20,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Bright</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Dark</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Overall theme for Helium</source>
         <translation type="unfinished"></translation>
     </message>

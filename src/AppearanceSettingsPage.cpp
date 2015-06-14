@@ -33,10 +33,11 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
     _hideActionBarToggle(ToggleButton::create()),
     _hideActionBarHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
-    _brightThemeOption(Option::create()
-        .value(AppearanceSettings::Bright)),
-    _darkThemeOption(Option::create()
-        .value(AppearanceSettings::Dark)),
+    _themeSelect(DropDown::create()
+        .add("Summer Fruit", AppearanceSettings::SummerFruit)
+        .add("JellyX", AppearanceSettings::JellyX)
+        .add("Tomorrow", AppearanceSettings::Tomorrow)
+        .add("Tomorrow Night", AppearanceSettings::TomorrowNight)),
     _themeSelectHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
     _fontHeader(Header::create()),
@@ -55,9 +56,6 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
     conn(appearanceSettings, SIGNAL(hideActionBarChanged(bool)),
         _hideActionBarToggle, SLOT(setChecked(bool)));
 
-    _themeSelect = DropDown::create()
-        .add(_brightThemeOption)
-        .add(_darkThemeOption);
     onThemeChanged(appearanceSettings->theme());
     conn(_themeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
         this, SLOT(onThemeSelectionChanged(const QVariant&)));
@@ -123,11 +121,11 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
 
 void AppearanceSettingsPage::onThemeChanged(AppearanceSettings::Theme theme)
 {
-    switch (theme) {
-        case AppearanceSettings::Bright:
-            _themeSelect->setSelectedOption(_brightThemeOption); break;
-        case AppearanceSettings::Dark:
-            _themeSelect->setSelectedOption(_darkThemeOption); break;
+    for (int i = 0; i < _themeSelect->count(); i++) {
+        if (_themeSelect->at(i)->value().toInt() == theme) {
+            _themeSelect->setSelectedIndex(i);
+            return;
+        }
     }
 }
 
@@ -172,8 +170,6 @@ void AppearanceSettingsPage::onTranslatorChanged()
     _hideActionBarToggleLabel->setText(tr("Hide ActionBar"));
     _hideActionBarHelp->setText(tr("Hide the ActionBar under the text areas. All the actions are still accessible via keyboard shortcuts."));
     _themeSelect->setTitle(tr("Theme"));
-    _brightThemeOption->setText(tr("Bright"));
-    _darkThemeOption->setText(tr("Dark"));
     _themeSelectHelp->setText(tr("Overall theme for Helium"));
     _fontHeader->setTitle(tr("Font Settings"));
     _fontFamilySelect->setTitle(tr("Font Family"));

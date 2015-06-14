@@ -285,6 +285,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/spec.lang) \
         $$quote($$BASEDIR/assets/srchilite/sql.lang) \
         $$quote($$BASEDIR/assets/srchilite/style.lang) \
+        $$quote($$BASEDIR/assets/srchilite/summerfruit.style) \
         $$quote($$BASEDIR/assets/srchilite/symbols.lang) \
         $$quote($$BASEDIR/assets/srchilite/tcl.lang) \
         $$quote($$BASEDIR/assets/srchilite/texinfo.lang) \
@@ -301,6 +302,8 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/tml_macrosdelayed3.lang) \
         $$quote($$BASEDIR/assets/srchilite/tml_macrotokens.lang) \
         $$quote($$BASEDIR/assets/srchilite/todo.lang) \
+        $$quote($$BASEDIR/assets/srchilite/tomorrow.style) \
+        $$quote($$BASEDIR/assets/srchilite/tomorrownight.style) \
         $$quote($$BASEDIR/assets/srchilite/upc.lang) \
         $$quote($$BASEDIR/assets/srchilite/url.lang) \
         $$quote($$BASEDIR/assets/srchilite/vala.lang) \

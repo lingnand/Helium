@@ -1,0 +1,63 @@
+keyword "#DE935F" ; // for language keywords
+type "#F0C674" ; // for basic types
+usertype "#F0C674" ; // for user defined types
+string "#B5BD68" ; // for strings and chars
+regexp "#B5BD68" ; // for strings and chars
+specialchar "#C5C8C6" ; // for special chars, e.g., \n, \t, \\
+comment "#969896" noref; // for comments
+number "#DE935F" ; // for literal numbers
+preproc "#B294BB" ; // for preproc directives (e.g. #include, import)
+symbol "#8ABEB7" ; // for simbols (e.g. <, >, +)
+function "#81A2BE" ; // for function calls and declarations
+cbracket "#C5C8C6" ; // for block brackets (e.g. {, })
+todo "#F0C674" b ; // for TODO and FIXME
+code "#B5BD68" ; // for code snippets
+
+//Predefined variables and functions (for instance glsl)
+predef_var "#CC6666" ;
+predef_func "#81A2BE" ;
+
+// for OOP
+classname "#B294BB" ; // for class names, e.g., in Java and C++
+
+// Internet related
+url "#4271AE" u ;
+
+// other elements for ChangeLog and Log files
+date "#DE935F" b ;
+time, file "#DE935F" b ;
+ip, name "#CC6666" ;
+
+// for Prolog, Perl...
+variable "#CC6666" ;
+
+// explicit for Latex
+italics "#B294BB" i ;
+bold "#B294BB" b ;
+underline "#B294BB" u ;
+fixed "#B294BB" ;
+argument "#B294BB" ;
+optionalargument "#DE935F" ;
+math "#DE935F" ;
+bibtex "#DE935F" ;
+
+// for diffs
+oldfile "#DE935F" ;
+newfile "#B5BD68" ;
+difflines "#CC6666" ; 
+
+// for css
+selector "#DE935F" ;
+property "#CC6666" ;
+value "#B5BD68" ;
+
+// for file system
+path "#B5BD68" ;
+
+// for C (or other language) labels
+label "#B294BB" b ;
+
+// for errors
+error bg:"#CC6666" ;
+warning "#CC6666" ;
+

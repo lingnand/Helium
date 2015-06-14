@@ -44,7 +44,7 @@ AppearanceSettings *AppearanceSettingsStorage::read()
     AppearanceSettings *settings;
     if (keys.empty()) {
         qDebug() << "Populating the default appearance settings...";
-        settings = new AppearanceSettings(false, AppearanceSettings::Bright,
+        settings = new AppearanceSettings(false, AppearanceSettings::SummerFruit,
                 QString(), FontSize::Default,
                 this);
         onHideActionBarChanged(settings->hideActionBar());
