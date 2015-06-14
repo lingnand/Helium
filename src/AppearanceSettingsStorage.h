@@ -10,6 +10,7 @@
 
 #include <QSettings>
 #include <bb/cascades/VisualStyle>
+#include <bb/cascades/FontSize>
 #include <AppearanceSettings.h>
 
 class AppearanceSettingsStorage : public QObject
@@ -22,6 +23,8 @@ private:
     QSettings _settings;
     Q_SLOT void onHideActionBarChanged(bool);
     Q_SLOT void onThemeChanged(AppearanceSettings::Theme);
+    Q_SLOT void onFontFamilyChanged(const QString &);
+    Q_SLOT void onFontSizeChanged(bb::cascades::FontSize::Type);
 };
 
 #endif /* APPEARANCESETTINGSSTORAGE_H_ */

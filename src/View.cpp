@@ -117,6 +117,13 @@ View::View(Buffer *buffer):
     conn(appearance, SIGNAL(hideActionBarChanged(bool)),
         this, SLOT(onHideActionBarChanged(bool)));
 
+    _textArea->textStyle()->setFontFamily(appearance->fontFamily());
+    conn(appearance, SIGNAL(fontFamilyChanged(const QString&)),
+        _textArea->textStyle(), SLOT(setFontFamily(const QString&)));
+    _textArea->textStyle()->setFontSize(appearance->fontSize());
+    conn(appearance, SIGNAL(fontSizeChanged(bb::cascades::FontSize::Type)),
+        _textArea->textStyle(), SLOT(setFontSize(bb::cascades::FontSize::Type)));
+
     setContent(_content = NavigationPane::create().add(_page));
 
     setBuffer(buffer);

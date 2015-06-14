@@ -334,12 +334,12 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HelpPage.cpp) \
-        $$quote($$BASEDIR/src/HighlightRangePicker.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/NormalMode.cpp) \
+        $$quote($$BASEDIR/src/NumberPicker.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/RepushablePage.cpp) \
         $$quote($$BASEDIR/src/RunProfile.cpp) \
@@ -446,7 +446,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HelpPage.h) \
-        $$quote($$BASEDIR/src/HighlightRangePicker.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
         $$quote($$BASEDIR/src/HighlightType.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
@@ -454,6 +453,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
+        $$quote($$BASEDIR/src/NumberPicker.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
         $$quote($$BASEDIR/src/RepushablePage.h) \
         $$quote($$BASEDIR/src/RunProfile.h) \

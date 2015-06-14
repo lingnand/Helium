@@ -17,7 +17,7 @@ namespace bb {
 }
 
 class GeneralSettings;
-class HighlightRangePicker;
+class NumberPicker;
 
 class GeneralSettingsPage : public RepushablePage
 {
@@ -27,7 +27,7 @@ public:
     Q_SLOT void onTranslatorChanged();
 private:
     bb::cascades::Label *_help;
-    HighlightRangePicker *_picker;
+    NumberPicker *_picker;
 };
 
 #endif /* GENERALSETTINGSPAGE_H_ */

@@ -9,14 +9,18 @@
 #define APPEARANCESETTINGS_H_
 
 #include <bb/cascades/VisualStyle>
+#include <bb/cascades/FontSize>
 
 class AppearanceSettings : public QObject
 {
     Q_OBJECT
 public:
     enum Theme { Bright, Dark };
-    AppearanceSettings(bool hideActionBar, Theme theme, QObject *parent=NULL):
-        QObject(parent), _hideActionBar(hideActionBar), _theme((Theme) -1) {
+    AppearanceSettings(bool hideActionBar, Theme theme,
+            const QString &fontFamily, bb::cascades::FontSize::Type fontSize,
+            QObject *parent=NULL):
+        QObject(parent), _hideActionBar(hideActionBar), _theme((Theme) -1),
+        _fontFamily(fontFamily), _fontSize(fontSize) {
         setTheme(theme);
     }
     bool hideActionBar() const { return _hideActionBar; }
@@ -55,16 +59,34 @@ public:
             emit themeChanged(_theme);
         }
     }
+    QString fontFamily() const { return _fontFamily; }
+    void setFontFamily(const QString &f) {
+        if (f != _fontFamily) {
+            _fontFamily = f;
+            emit fontFamilyChanged(_fontFamily);
+        }
+    }
+    bb::cascades::FontSize::Type fontSize() const { return _fontSize; }
+    void setFontSize(bb::cascades::FontSize::Type s) {
+        if (s != _fontSize) {
+            _fontSize = s;
+            emit fontSizeChanged(_fontSize);
+        }
+    }
 Q_SIGNALS:
     void hideActionBarChanged(bool);
     void highlightStyleFileChanged(const QString &);
     void visualStyleChanged(bb::cascades::VisualStyle::Type);
     void themeChanged(AppearanceSettings::Theme);
+    void fontFamilyChanged(const QString &);
+    void fontSizeChanged(bb::cascades::FontSize::Type);
 private:
     bool _hideActionBar;
     Theme _theme;
     QString _highlightStyleFile;
     bb::cascades::VisualStyle::Type _visualStyle;
+    QString _fontFamily;
+    bb::cascades::FontSize::Type _fontSize;
 };
 
 #endif /* APPEARANCESETTINGS_H_ */

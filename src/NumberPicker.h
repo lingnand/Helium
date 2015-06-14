@@ -1,29 +1,30 @@
 /*
- * HighlightRangePicker.h
+ * NumberPicker.h
  *
- *  Created on: May 25, 2015
+ *  Created on: Jun 14, 2015
  *      Author: lingnan
  */
 
-#ifndef HIGHLIGHTRANGEPICKER_H_
-#define HIGHLIGHTRANGEPICKER_H_
+#ifndef NUMBERPICKER_H_
+#define NUMBERPICKER_H_
 
 #include <bb/cascades/Picker>
 #include <bb/cascades/PickerProvider>
 
-class HighlightRangePicker : public bb::cascades::Picker
+class NumberPicker : public bb::cascades::Picker
 {
     Q_OBJECT
 public:
-    HighlightRangePicker();
-    virtual ~HighlightRangePicker() {}
-    Q_SLOT void onTranslatorChanged();
-    Q_SLOT void setHighlightRange(int);
+    NumberPicker(int lowerBoundary, int upperBoundary);
+    virtual ~NumberPicker() {}
+    Q_SLOT void setSelectedNumber(int);
 Q_SIGNALS:
-    void selectedHighlightRangeChanged(int);
+    void selectedNumberChanged(int);
 private:
     class Provider : public bb::cascades::PickerProvider {
     public:
+        Provider(int lowerBoundary, int upperBoundary):
+            _lowerBoundary(lowerBoundary), _upperBoundary(upperBoundary) {}
         bb::cascades::VisualNode *createItem(bb::cascades::Picker *pickerList,
                 int columnIndex);
         void updateItem(bb::cascades::Picker *pickerList,
@@ -32,8 +33,11 @@ private:
         int columnCount() const;
         void range(int column, int* lowerBoundary, int* upperBoundary);
         QVariant value(bb::cascades::Picker *picker, const QList<int> &indices) const;
+    private:
+        int _lowerBoundary;
+        int _upperBoundary;
     } _provider;
     Q_SLOT void onSelectedValueChanged(const QVariant &);
 };
 
-#endif /* HIGHLIGHTRANGEPICKER_H_ */
+#endif /* NUMBERPICKER_H_ */

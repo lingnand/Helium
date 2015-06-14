@@ -31,6 +31,42 @@
         <source>Overall theme for Helium</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Font Family</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Font Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Font Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extra Small</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Small</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Large</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extra Large</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BufferWorker</name>
@@ -276,6 +312,10 @@ These format specifiers will be replaced:
         <source>Highlight range controls the number of lines to be highlighted on each side of the cursor. Adjusting this value down will improve performance and vice versa.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Highlight Range</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Helium</name>
@@ -300,13 +340,6 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Run Profiles</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>HighlightRangePicker</name>
-    <message>
-        <source>Highlight Range</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
