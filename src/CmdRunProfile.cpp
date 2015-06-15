@@ -10,12 +10,15 @@
 #include <bb/cascades/Page>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Shortcut>
-#include <bb/cascades/TextArea>
+#include <bb/cascades/Label>
+#include <bb/cascades/SystemDefaults>
+#include <bb/cascades/ScrollView>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/NavigationPaneProperties>
 #include <CmdRunProfile.h>
 #include <View.h>
 #include <Buffer.h>
+#include <Segment.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -34,10 +37,11 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view->content(), SLOT(pop()))),
-    _outputArea(TextArea::create()
+    _outputArea(Label::create().multiline(true)
         .format(TextFormat::Html)
         .contentFlags(TextContentFlag::ActiveTextOff)
-        .editable(false))
+        .textStyle(SystemDefaults::TextStyles::bodyText())
+        .preferredWidth(0))
 {
     conn(view->content(), SIGNAL(pushTransitionEnded(bb::cascades::Page*)),
         this, SLOT(onViewPagePushed(bb::cascades::Page*)));
@@ -50,7 +54,11 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
 
     _outputPage = Page::create()
         .titleBar(TitleBar::create())
-        .content(_outputArea)
+        .content(ScrollView::create()
+        .scrollMode(ScrollMode::Vertical)
+            .content(Segment::create()
+                .section().subsection()
+                .add(_outputArea)))
         .addAction(_rerunAction, ActionBarPlacement::Signature)
         .addAction(_killAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()

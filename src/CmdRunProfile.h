@@ -15,7 +15,7 @@ namespace bb {
     namespace cascades {
         class Page;
         class ActionItem;
-        class TextArea;
+        class Label;
     }
 }
 
@@ -42,7 +42,7 @@ private:
     QProcess _process;
 
     bb::cascades::Page *_outputPage;
-    bb::cascades::TextArea *_outputArea;
+    bb::cascades::Label *_outputArea;
     bb::cascades::ActionItem *_killAction;
     bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;

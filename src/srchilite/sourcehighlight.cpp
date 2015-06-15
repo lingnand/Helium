@@ -105,7 +105,7 @@ void SourceHighlight::setInputLang(const std::string &_inputLang) {
 
             highlighter = new SourceHighlighter(highlightState);
             highlighter->setFormatterManager(formatterManager);
-            highlighter->setOptimize(false);
+            highlighter->setOptimize(true);
             if (highlightEventListener)
                 highlighter->addListener(highlightEventListener);
         }
