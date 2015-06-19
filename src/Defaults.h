@@ -20,6 +20,7 @@ class Defaults
 {
 public:
     static bb::cascades::TextStyle helpText();
+    static bb::cascades::TextStyle hintText();
     static float space();
 };
 

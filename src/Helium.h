@@ -15,6 +15,7 @@
 namespace bb {
     namespace cascades {
         class ActionItem;
+        class SceneCover;
     }
 }
 
@@ -25,6 +26,7 @@ class AppearanceSettings;
 class SettingsPage;
 class HelpPage;
 class RepushablePage;
+class Segment;
 
 class Helium : public bb::cascades::Application
 {
@@ -36,6 +38,9 @@ public:
     FiletypeMap *filetypeMap() { return _filetypeMap; }
     GeneralSettings *general() { return _general; }
     AppearanceSettings *appearance() { return _appearance; }
+    MultiViewPane *scene() const {
+        return (MultiViewPane *) bb::cascades::Application::scene();
+    }
     Q_SLOT void reloadTranslator();
 Q_SIGNALS:
     void translatorChanged();
@@ -53,12 +58,14 @@ private:
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
 
-    MultiViewPane *scene() const {
-        return (MultiViewPane *) bb::cascades::Application::scene();
-    }
     Q_SLOT void showSettings();
     Q_SLOT void showHelp();
     void pushPage(RepushablePage *);
+
+    // scene cover
+    Segment *_coverContent;
+    bb::cascades::SceneCover *_cover;
+    Q_SLOT void onThumbnail();
 };
 
 #endif /* APPLICATION_H_ */

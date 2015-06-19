@@ -319,6 +319,10 @@ These format specifiers will be replaced:
         <source>Contact</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>No content</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HelpPage</name>

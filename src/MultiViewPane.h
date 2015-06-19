@@ -39,6 +39,8 @@ public:
     MultiViewPane(QObject *parent=NULL);
     virtual ~MultiViewPane() {}
     View *activeView() const;
+    // lastActiveView() is available even when views are hidden
+    View *lastActiveView() const { return _lastActive; }
     // the active pane should always be a navigation pane
     bb::cascades::NavigationPane *activePane() const;
     Q_SLOT void setActiveTab(int, bool toast=false);

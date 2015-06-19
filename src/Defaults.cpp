@@ -20,6 +20,14 @@ TextStyle Defaults::helpText()
     return style;
 }
 
+TextStyle Defaults::hintText()
+{
+    TextStyle style = SystemDefaults::TextStyles::bodyText();
+    style.setColor(Color::DarkGray);
+    style.setFontStyle(FontStyle::Italic);
+    return style;
+}
+
 float Defaults::space()
 {
     return 20;

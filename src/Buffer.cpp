@@ -231,7 +231,7 @@ void Buffer::parseReplacement(const Replacement &replace)
 
 void Buffer::parseReplacement(const QList<Replacement> &replaces)
 {
-    if (!replaces.empty() && !state().isEmpty()) {
+    if (!replaces.empty() && !state().empty()) {
         StateChangeContext ctx(++_requestId);
         BufferState &state = modifyState();
         Progress progress;

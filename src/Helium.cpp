@@ -14,6 +14,12 @@
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/SettingsActionItem>
 #include <bb/cascades/HelpActionItem>
+#include <bb/cascades/SceneCover>
+#include <bb/cascades/SystemDefaults>
+#include <bb/cascades/UIPalette>
+#include <bb/cascades/Label>
+#include <bb/cascades/TextArea>
+#include <Segment.h>
 #include <Helium.h>
 #include <MultiViewPane.h>
 #include <View.h>
@@ -29,6 +35,10 @@
 #include <HelpPage.h>
 #include <Utility.h>
 #include <RepushablePage.h>
+#include <Segment.h>
+#include <Defaults.h>
+
+#define SCENE_COVER_LINE_LIMIT 10
 
 using namespace bb::cascades;
 
@@ -46,7 +56,8 @@ Helium::Helium(int &argc, char **argv):
     _helpPage(NULL),
     _contactAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_email.png"))
-        .onTriggered(this, SLOT(onContactActionTriggered())))
+        .onTriggered(this, SLOT(onContactActionTriggered()))),
+    _coverContent(Segment::create().section().subsection())
 {
     themeSupport()->setVisualStyle(_appearance->visualStyle());
     conn(_appearance, SIGNAL(visualStyleChanged(bb::cascades::VisualStyle::Type)),
@@ -61,12 +72,54 @@ Helium::Helium(int &argc, char **argv):
          scene(), SLOT(onTranslatorChanged()));
     scene()->addNewView(false);
 
-    setMenu(bb::cascades::Menu::create()
+    setMenu(Menu::create()
         .help(HelpActionItem::create()
             .onTriggered(this, SLOT(showHelp())))
         .settings(SettingsActionItem::create()
             .onTriggered(this, SLOT(showSettings())))
         .addAction(_contactAction));
+
+    setCover(_cover = SceneCover::create().content(_coverContent));
+    if (isThumbnailed())
+        onThumbnail();
+    conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
+}
+
+void Helium::onThumbnail()
+{
+    View *view = scene()->lastActiveView();
+    _cover->setDescription(view->title());
+    _coverContent->removeAll();
+    _coverContent->setBackground(scene()->ui()->palette()->background());
+    const BufferState &state = view->buffer()->state();
+    // if buffer is empty then we can use a default label
+    if (state.empty()) {
+        _coverContent->add(Label::create().text(tr("No content"))
+            .textStyle(Defaults::hintText()));
+        return;
+    }
+    // get the texts around the cursorline
+    Range range(state.focus(view->textArea()->editor()->cursorPosition()).lineIndex);
+    range.from -= SCENE_COVER_LINE_LIMIT/2;
+    range.to += SCENE_COVER_LINE_LIMIT/2;
+    if (range.to > state.size()) {
+        range.from = qMax(state.size()-SCENE_COVER_LINE_LIMIT, 0);
+        range.to = state.size();
+    } else if (range.from < 0) {
+        range.from = 0;
+        range.to = qMin(SCENE_COVER_LINE_LIMIT, state.size());
+    }
+    if (state.highlightType().shouldHighlight()) {
+        for (int i = range.from; i < range.to; i++)
+            _coverContent->add(Label::create().format(TextFormat::Html)
+                    .topMargin(0).bottomMargin(0)
+                    .text(state.at(i).highlightText));
+    } else {
+        for (int i = range.from; i < range.to; i++)
+            _coverContent->add(Label::create()
+                    .topMargin(0).bottomMargin(0)
+                    .text(state.at(i).line.plainText()));
+    }
 }
 
 void Helium::onContactActionTriggered()

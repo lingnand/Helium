@@ -78,8 +78,7 @@ void MultiViewPane::enableAllShortcuts()
 
 View *MultiViewPane::activeView() const
 {
-    Tab *tab = activeTab();
-    return tab == _newViewControl ? NULL : (View *) tab;
+    return dynamic_cast<View *>(activeTab());
 }
 
 NavigationPane *MultiViewPane::activePane() const
@@ -250,11 +249,14 @@ void MultiViewPane::removeBuffer(Buffer *buffer)
 
 void MultiViewPane::onActiveTabChanged(Tab *tab)
 {
-    if (tab != _newViewControl && tab != _lastActive) {
-        if (_lastActive) {
-            _lastActive->onOutOfView();
+    if (View *v = dynamic_cast<View *>(tab)) {
+        if (v != _lastActive) {
+            if (_lastActive) {
+                _lastActive->onOutOfView();
+            }
+            View *old = _lastActive;
+            _lastActive = v;
         }
-        _lastActive = (View *) tab;
     }
 }
 
