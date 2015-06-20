@@ -13,6 +13,11 @@
 namespace bb {
     namespace cascades {
         class Label;
+        class DropDown;
+        class Option;
+        namespace pickers {
+            class FilePicker;
+        }
     }
 }
 
@@ -26,8 +31,18 @@ public:
     GeneralSettingsPage(GeneralSettings *, QObject *parent=NULL);
     Q_SLOT void onTranslatorChanged();
 private:
-    bb::cascades::Label *_help;
-    NumberPicker *_picker;
+    GeneralSettings *_settings;
+    NumberPicker *_highlightRangePicker;
+    bb::cascades::Label *_highlightRangeHelp;
+    bb::cascades::DropDown *_defaultOpenDirSelect;
+    bb::cascades::Option *_chooseDefaultOpenDirOption;
+    bb::cascades::Option *_currentDefaultOpenDirOption;
+    bb::cascades::Label *_defaultOpenDirHelp;
+    bb::cascades::pickers::FilePicker *_fpicker;
+    Q_SLOT void resetDefaultOpenDirSelection();
+    Q_SLOT void onChooseDefaultOpenDirSelectedChanged(bool);
+    Q_SLOT void onDefaultOpenDirSelected(const QStringList &);
+    Q_SLOT void onDefaultOpenDirectoryChanged(const QString &);
 };
 
 #endif /* GENERALSETTINGSPAGE_H_ */

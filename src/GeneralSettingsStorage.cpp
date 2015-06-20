@@ -22,21 +22,30 @@ void GeneralSettingsStorage::onHighlightRangeChanged(int range)
     _settings.setValue("highlight_range", range);
 }
 
+void GeneralSettingsStorage::onDefaultOpenDirectoryChanged(const QString &dir)
+{
+    _settings.setValue("default_open_directory", dir);
+}
+
 GeneralSettings *GeneralSettingsStorage::read()
 {
     QStringList keys = _settings.childKeys();
     GeneralSettings *settings;
     if (keys.empty()) {
         qDebug() << "Populating the default general settings...";
-        settings = new GeneralSettings(20, this);
+        settings = new GeneralSettings(20, "/accounts/1000/shared", this);
         onHighlightRangeChanged(settings->highlightRange());
+        onDefaultOpenDirectoryChanged(settings->defaultOpenDirectory());
     } else {
         qDebug() << "Reading general settings...";
         settings = new GeneralSettings(
                 _settings.value("highlight_range").toInt(),
+                _settings.value("default_open_directory").toString(),
                 this);
     }
     conn(settings, SIGNAL(highlightRangeChanged(int)),
             this, SLOT(onHighlightRangeChanged(int)));
+    conn(settings, SIGNAL(defaultOpenDirectoryChanged(const QString&)),
+            this, SLOT(onDefaultOpenDirectoryChanged(const QString&)));
     return settings;
 }

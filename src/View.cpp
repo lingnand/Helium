@@ -500,7 +500,7 @@ pickers::FilePicker *View::filePicker()
                 this, SLOT(onFileSelected(const QStringList&)));
     }
     if (_buffer->filepath().isEmpty()) {
-        _fpicker->setDirectories(QStringList("/accounts/1000/shared"));
+        _fpicker->setDirectories(QStringList(Helium::instance()->general()->defaultOpenDirectory()));
     } else {
         _fpicker->setDirectories(QStringList(QFileInfo(_buffer->filepath()).absolutePath()));
     }

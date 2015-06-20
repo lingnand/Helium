@@ -21,6 +21,7 @@ public:
 private:
     QSettings _settings;
     Q_SLOT void onHighlightRangeChanged(int);
+    Q_SLOT void onDefaultOpenDirectoryChanged(const QString &);
 };
 
 #endif /* GENERALSETTINGSSTORAGE_H_ */

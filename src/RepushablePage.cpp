@@ -9,6 +9,7 @@
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/NavigationPaneProperties>
 #include <bb/cascades/ActionItem>
+#include <bb/cascades/Shortcut>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -18,6 +19,7 @@ RepushablePage::RepushablePage(QObject *parent):
 {
     setPaneProperties(NavigationPaneProperties::create()
         .backButton(ActionItem::create()
+            .addShortcut(Shortcut::create().key("x"))
             .onTriggered(this, SLOT(pop()))));
 }
 

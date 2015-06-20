@@ -308,6 +308,18 @@ These format specifiers will be replaced:
         <source>Highlight Range</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Default Open Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;Choose a directory&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The default directory the Open command uses when no file has been opened in the current buffer before</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Helium</name>
