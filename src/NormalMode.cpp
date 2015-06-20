@@ -45,6 +45,7 @@ NormalMode::NormalMode(View *view):
         .onTriggered(view, SLOT(save()))),
     _saveAsAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_save_as.png"))
+        .addShortcut(Shortcut::create().key("l"))
         .onTriggered(view, SLOT(saveAs()))),
     _openAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_open.png"))
