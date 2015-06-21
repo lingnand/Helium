@@ -121,7 +121,6 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
     }
     // pull in the changes
     int bufferIndex = qMax(change.startIndex(), 0);
-    int changeIndex = -1;
     int offset = 0;
     HighlightStateData::ptr currentHighlightData;
     int beforeStartIndex = bufferIndex - 1;
@@ -134,7 +133,7 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
     for (int i = 0; i < change.size(); i++) {
         BufferLineState lineState(change[i].line);
         currentHighlightData = highlightLine(lineState, currentHighlightData);
-        changeIndex = change[i].index;
+        int changeIndex = change[i].index;
         if (changeIndex < 0) {
             // we need to insert this new line
             state.insert(bufferIndex, lineState);
@@ -151,8 +150,8 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
         bufferIndex++;
         emit progressChanged(progress.current+=progressInc);
     }
-    // if there is no merge edge then we can remove all the rest
-    if (changeIndex < 0) {
+    // if this change concludes the entire buffer then we can remove all the rest
+    if (change.atEnd()) {
         while (bufferIndex < state.size()) {
             state.removeLast();
         }

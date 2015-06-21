@@ -20,13 +20,16 @@ public:
     // the index of the first change
     int startIndex() const { return _startIndex; }
     bool delayable() const { return _delayable; }
-    BufferStateChange(): _startIndex(0), _delayable(true) { // assume delayable by default
+    bool atEnd() const { return _atEnd; }
+    BufferStateChange(): _startIndex(0), _delayable(true), _atEnd(false) { // assume delayable by default
         append(ChangedBufferLine());
     }
 private:
     int _startIndex;
     // whether this buffer change is delayable
     bool _delayable;
+    // whether this change concludes the entire buffer
+    bool _atEnd;
 };
 Q_DECLARE_METATYPE(BufferStateChange)
 

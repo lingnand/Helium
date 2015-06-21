@@ -36,10 +36,10 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(const QString &input
     assert(_cursorLine >= 0);
     _change._delayable = _change._delayable && delayableInStructure(_change, _cursorLine);
     // remove unneeded lines
-    // TODO: for more efficiency we could remove all the last lines that are in order
-    // (similar to detecting change in delayableInStructure)
-    while (_change.size() > _cursorLine+1 && _change.last().index > 0 && _change.last().index == _change[_change.size()-2].index+1) {
-        _change.removeLast();
+    if (!_change.atEnd()) {
+        while (_change.size() > _cursorLine+1 && _change.last().index > 0 && _change.last().index == _change[_change.size()-2].index+1) {
+            _change.removeLast();
+        }
     }
     qDebug() << ">>>>>> end parsing >>>>>>";
     _lastDelayable = _change._delayable;
@@ -103,7 +103,7 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
 }
 
 bool HtmlBufferChangeParser::stopParsing() { return _stopParsing; }
-void HtmlBufferChangeParser::reachedEnd() {}
+void HtmlBufferChangeParser::reachedEnd() { _change._atEnd = true; }
 
 QDebug operator<<(QDebug dbg, const ChangedBufferLine &line)
 {
@@ -114,6 +114,7 @@ QDebug operator<<(QDebug dbg, const ChangedBufferLine &line)
 QDebug operator<<(QDebug dbg, const BufferStateChange &change)
 {
     dbg.nospace() << "Change(delayable:" << change.delayable() <<
+            ", atEnd:" << change.atEnd() <<
             ", startIndex:" << change.startIndex() <<
             ", " << QList<ChangedBufferLine>(change) << ")";
     return dbg.space();
