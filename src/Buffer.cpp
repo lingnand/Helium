@@ -182,11 +182,11 @@ void Buffer::handleStateChangeResult(const StateChangeContext &ctx, const Buffer
     emit stateChanged(ctx, newSt);
 }
 
-BufferState &Buffer::modifyState()
+BufferState &Buffer::modifyState(bool forceCopy)
 {
     // save history state
     QDateTime current = QDateTime::currentDateTime();
-    if (current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
+    if (forceCopy || current >= _lastEdited.addSecs(SECONDS_TO_REGISTER_HISTORY)) {
         _states.copyCurrent();
     }
     _lastEdited = current;
@@ -231,7 +231,7 @@ void Buffer::parseReplacement(const QList<Replacement> &replaces)
 {
     if (!replaces.empty() && !state().empty()) {
         StateChangeContext ctx(++_requestId);
-        BufferState &state = modifyState();
+        BufferState &state = modifyState(true);
         Progress progress;
         if (replaces.size() > 20) { // put this into background
             setLocked(true);
@@ -251,7 +251,7 @@ void Buffer::killLine(View *source, int cursorPosition)
     qDebug() << "killing line with position:" << pos;
     if (pos.lineIndex >= 0 && !state()[pos.lineIndex].line.isEmpty()) {
         StateChangeContext ctx(++_requestId, source);
-        BufferState &state = modifyState();
+        BufferState &state = modifyState(true);
         state.setCursorPosition(cursorPosition - pos.linePosition);
         state[pos.lineIndex].line.clear();
         // blocking rehighlight (we assume the change is small)

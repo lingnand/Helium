@@ -112,7 +112,7 @@ private:
     BufferHistory _states;
     QDateTime _lastEdited;
 
-    BufferState &modifyState();
+    BufferState &modifyState(bool forceCopy=false);
     void setLocked(bool);
     void setDirty(bool);
 
