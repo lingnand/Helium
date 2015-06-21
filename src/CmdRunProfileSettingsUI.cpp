@@ -45,7 +45,8 @@ void CmdRunProfileSettingsUI::onTranslatorChanged()
         "The command to pass to /bin/sh\n"
         "\n"
         "These format specifiers will be replaced:\n"
-        "%1: the absolute path to the file\n"
-        "%2: the directory of the file\n"
-        "%3: the name of the file"));
+        "%path%: the absolute path to the file\n"
+        "%dir%: the directory of the file\n"
+        "%name%: the name of the file\n"
+        "%%: a literal %"));
 }

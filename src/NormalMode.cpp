@@ -253,7 +253,7 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
 void NormalMode::onBufferNameChanged(const QString &name)
 {
     if (!_titleField->isEnabled()) {
-        // TODO: hack to get around the problem of title field not grey
+        // NOTE: hack to get around the problem of title field not grey
         _titleField->setEnabled(true);
         _titleField->setText(name);
         _titleField->setEnabled(false);

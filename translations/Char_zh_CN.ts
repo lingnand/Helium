@@ -100,9 +100,10 @@
         <source>The command to pass to /bin/sh
 
 These format specifiers will be replaced:
-%1: the absolute path to the file
-%2: the directory of the file
-%3: the name of the file</source>
+%path%: the absolute path to the file
+%dir%: the directory of the file
+%name%: the name of the file
+%%: a literal %</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

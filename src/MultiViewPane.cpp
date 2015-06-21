@@ -97,7 +97,6 @@ void MultiViewPane::setActiveTab(int index, bool toast)
     if (active != tab) {
         TabbedPane::setActiveTab(tab);
         if (toast)
-            // TODO: maybe not include index when we are cycling between options
             Utility::toast(QString("%1/%2. %3").arg(index+1).arg(count()).arg(tab->title()));
     }
 }

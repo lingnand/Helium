@@ -99,6 +99,36 @@ void CmdRunProfile::exit()
     _outputPage->setParent(this);
 }
 
+QString formatCmd(const QString &format, const QString &path, const QString &dir, const QString &name)
+{
+    QString specifier;
+    QString output;
+    for (int i = 0; i < format.size(); i++) {
+        if (format[i] == '%') {
+            if (specifier == "%") {
+                output += '%';
+                specifier.clear();
+            } else if (specifier == "%path") {
+                output += path;
+                specifier.clear();
+            } else if (specifier == "%dir") {
+                output += dir;
+                specifier.clear();
+            } else if (specifier == "%name") {
+                output += name;
+                specifier.clear();
+            } else {
+                specifier = "%";
+            }
+        } else if (!specifier.isEmpty()) {
+            specifier += format[i];
+        } else {
+            output += format[i];
+        }
+    }
+    return output;
+}
+
 void CmdRunProfile::rerun()
 {
     // kill the process (if it's not already killed)
@@ -106,13 +136,8 @@ void CmdRunProfile::rerun()
     // clear the view first
     _outputArea->resetText();
     QFileInfo f(view()->buffer()->filepath());
-    QString fp = f.absoluteFilePath();
-    QString p = f.absolutePath();
-    QString fn = f.fileName();
-    // TODO: hack below
-    QString fcmd = ("%1%2%3"+_cmd).arg(fp, p, fn);
     QStringList args;
-    args << "-c" << fcmd.right(fcmd.size()-fp.size()-p.size()-fn.size());
+    args << "-c" << formatCmd(_cmd, f.absoluteFilePath(), f.absolutePath(), f.fileName());
     qDebug() << "Running command with args:" << args;
     _process.start("/bin/sh", args);
 }

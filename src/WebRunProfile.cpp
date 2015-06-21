@@ -20,11 +20,6 @@
 
 using namespace bb::cascades;
 
-// TODO: make the page title display the title of the webpage
-//       (alternatively, don't display any title at all), just show the full view
-// TODO: add back and forward, reload actions?
-// TODO: make the action bar hideable (like in other apps)
-//       this can probably be used for CmdRunProfile as well
 WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     RunProfile(view),
     _mode(mode),

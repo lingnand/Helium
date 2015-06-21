@@ -164,13 +164,13 @@ FiletypeMap *FiletypeMapStorage::read()
             << new Filetype("properties", true, NULL, this)
             << new Filetype("proto", true, NULL, this)
             << new Filetype("python", true,
-                    new CmdRunProfileManager("cd '%2'; /base/usr/bin/python3.2 '%3'"),
+                    new CmdRunProfileManager("cd '%dir%'; /base/usr/bin/python3.2 '%name%'"),
                     this)
             << new Filetype("ruby", true, NULL, this)
             << new Filetype("scala", true, NULL, this)
             << new Filetype("scheme", true, NULL, this)
             << new Filetype("sh", true,
-                    new CmdRunProfileManager("cd '%2'; /bin/sh '%3'"),
+                    new CmdRunProfileManager("cd '%dir%'; /bin/sh '%name%'"),
                     this)
             << new Filetype("slang", true, NULL, this)
             << new Filetype("sml", true, NULL, this)

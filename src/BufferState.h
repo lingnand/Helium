@@ -125,7 +125,6 @@ public:
     // NOTE: the cursorPosition is assumed to be based on plainText
     Position focus(int cursorPosition) const;
     QString plainText() const;
-    // TODO: int should be enough, shouldn't it?
     int plainTextSize() const;
     // beginIndex should always be smaller than endIndex
     // return: the parser position at the beginning of the highlight section

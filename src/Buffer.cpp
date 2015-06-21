@@ -194,8 +194,6 @@ BufferState &Buffer::modifyState()
     return _states.current();
 }
 
-// TODO: also tackle the case where the editor is moved, selection selected
-// in other words, in such situations you also need to rehighlight any delayed content
 void Buffer::parseChange(View *source, const QString &content, ParserPosition start, int cursorPosition)
 {
     StateChangeContext ctx(++_requestId, source);

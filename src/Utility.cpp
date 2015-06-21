@@ -98,8 +98,10 @@ void Utility::handleBasicTextControlModifiedKey(bb::cascades::TextEditor *editor
             break;
         }
         case KEYCODE_SPACE:
-            // TODO: this is kinda of a hack
-            ((bb::cascades::AbstractTextControl *) editor->parent())->loseFocus();
+            if (bb::cascades::AbstractTextControl *control =
+                    dynamic_cast<bb::cascades::AbstractTextControl *>(editor->parent())) {
+                control->loseFocus();
+            }
             break;
     }
 }
