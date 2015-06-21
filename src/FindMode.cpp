@@ -72,12 +72,10 @@ FindMode::FindMode(View *view):
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view, SLOT(setNormalMode()))),
-    _regexOption(Tab::create()
-        .onTriggered(this, SLOT(onRegexSelected()))),
-    _ignoreCaseOption(Tab::create()
-        .onTriggered(this, SLOT(onIgnoreCaseSelected()))),
-    _exactMatchOption(Tab::create()
-        .onTriggered(this, SLOT(onExactMatchSelected()))),
+    _regexOption(Tab::create()),
+    _ignoreCaseOption(Tab::create()),
+    _exactMatchOption(Tab::create()),
+    _lastActiveOption(_regexOption),
     _findBufferDirty(true)
 {
     // TODO: not only focus the replaceField, but also select the existing content of the replace field
@@ -137,6 +135,7 @@ void FindMode::onEnter()
     view()->parent()->add(_regexOption);
     view()->parent()->add(_ignoreCaseOption);
     view()->parent()->add(_exactMatchOption);
+    view()->parent()->setActiveTab(_lastActiveOption, true);
 
     view()->textArea()->setEditable(false);
 
@@ -147,6 +146,7 @@ void FindMode::onExit()
 {
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
 
+    _lastActiveOption = view()->parent()->activeTab();
     view()->parent()->setActivePane(NULL);
     view()->reattachContent();
     view()->parent()->restoreViews();
@@ -154,21 +154,6 @@ void FindMode::onExit()
     _findBuffer.clear();
     _findQuery.clear();
     _findBufferDirty = true;
-}
-
-void FindMode::onRegexSelected()
-{
-    qDebug() << "regex selected";
-}
-
-void FindMode::onIgnoreCaseSelected()
-{
-    qDebug() << "ignore case selected";
-}
-
-void FindMode::onExactMatchSelected()
-{
-    qDebug() << "exact match selected";
 }
 
 void FindMode::onFindFieldModifiedKey(bb::cascades::KeyEvent *event)
@@ -189,7 +174,6 @@ void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cas
             helps << ShortcutHelp::fromActionItem(_goToFindFieldAction)
                   << ShortcutHelp::fromActionItem(_replaceNextAction)
                   << ShortcutHelp::fromActionItem(_replaceAllAction)
-                  << ShortcutHelp::fromActionItem(_findCancelAction)
                   << ShortcutHelp::fromActionItem(_findCancelAction)
                   << ShortcutHelp("T", TAB_SYMBOL)
                   << ShortcutHelp("V", tr("Paste Clipboard"))
@@ -212,6 +196,12 @@ void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cas
             break;
         case KEYCODE_X:
             view()->setNormalMode();
+            break;
+        case KEYCODE_Q:
+            view()->parent()->setPrevTabActive();
+            break;
+        case KEYCODE_W:
+            view()->parent()->setNextTabActive();
             break;
         default:
             Utility::handleBasicTextControlModifiedKey(editor, event);
@@ -239,9 +229,16 @@ FindMode::FindQueryUpdateStatus FindMode::updateFindQuery(bool interactive)
         return Invalid;
     }
     FindQueryUpdateStatus status = Unchanged;
-    if (find != _findQuery) {
+    boost::wregex::flag_type flags = boost::wregex::normal;
+    Tab *active = view()->parent()->activeTab();
+    if (active == _ignoreCaseOption) {
+        flags = boost::wregex::icase;
+    } else if (active == _exactMatchOption) {
+        flags = boost::wregex::literal;
+    }
+    if (find != _findQuery || _findRegex.flags() != flags) {
         _findQuery = find;
-        _findRegex = boost::wregex(find.toStdWString());
+        _findRegex = boost::wregex(find.toStdWString(), flags);
         status = Changed;
     }
     if (_findBufferDirty) {
@@ -571,19 +568,19 @@ void FindMode::setLocked(bool locked)
 
 void FindMode::onTranslatorChanged()
 {
-    _findField->setHintText(tr("Find text"));
-    _replaceField->setHintText(tr("Replace with"));
+    _findField->setHintText(tr("Find Text"));
+    _replaceField->setHintText(tr("Replace With"));
     // actions
-    _goToFindFieldAction->setTitle(tr("Go to find field"));
-    _findPrevAction->setTitle(tr("Find previous"));
-    _findNextAction->setTitle(tr("Find next"));
-    _replaceNextAction->setTitle(tr("Replace next"));
-    _replaceAllAction->setTitle(tr("Replace all remaining"));
+    _goToFindFieldAction->setTitle(tr("Go to Find Field"));
+    _findPrevAction->setTitle(tr("Find Previous"));
+    _findNextAction->setTitle(tr("Find Next"));
+    _replaceNextAction->setTitle(tr("Replace Next"));
+    _replaceAllAction->setTitle(tr("Replace All Remaining"));
     _findCancelAction->setTitle(tr("Cancel"));
     _undoAction->setTitle(tr("Undo"));
     _redoAction->setTitle(tr("Redo"));
     // options
-    _regexOption->setTitle(tr("Regex"));
-    _ignoreCaseOption->setTitle(tr("Ignore case"));
-    _exactMatchOption->setTitle(tr("Exact match"));
+    _regexOption->setTitle(tr("Full Regex"));
+    _ignoreCaseOption->setTitle(tr("Ignore Case"));
+    _exactMatchOption->setTitle(tr("Exact Match"));
 }

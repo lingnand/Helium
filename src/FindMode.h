@@ -53,6 +53,7 @@ private:
     bb::cascades::Tab *_regexOption;
     bb::cascades::Tab *_ignoreCaseOption;
     bb::cascades::Tab *_exactMatchOption;
+    bb::cascades::Tab *_lastActiveOption;
 
     Q_SLOT void setLocked(bool);
 
@@ -85,9 +86,6 @@ private:
     Q_SLOT void replaceNext();
     Q_SLOT void replaceAll();
 
-    Q_SLOT void onRegexSelected();
-    Q_SLOT void onIgnoreCaseSelected();
-    Q_SLOT void onExactMatchSelected();
     Q_SLOT void onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onFindFieldModifiedKey(bb::cascades::KeyEvent *event);
     Q_SLOT void onReplaceFieldModifiedKey(bb::cascades::KeyEvent *event);

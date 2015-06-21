@@ -33,7 +33,7 @@ GeneralSettings *GeneralSettingsStorage::read()
     GeneralSettings *settings;
     if (keys.empty()) {
         qDebug() << "Populating the default general settings...";
-        settings = new GeneralSettings(20, "/accounts/1000/shared", this);
+        settings = new GeneralSettings(23, "/accounts/1000/shared", this);
         onHighlightRangeChanged(settings->highlightRange());
         onDefaultOpenDirectoryChanged(settings->defaultOpenDirectory());
     } else {

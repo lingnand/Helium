@@ -51,8 +51,8 @@ MultiViewPane::MultiViewPane(QObject *parent):
     _newViewControl->addShortcut(_newViewShortcut);
 
     _newViewShortcut->setProperty("help", tr("New"));
-    prev->setProperty("help", tr("Previous Tab Option"));
-    next->setProperty("help", tr("Next Tab Option"));
+    prev->setProperty("help", tr("Previous Tab/Option"));
+    next->setProperty("help", tr("Next Tab/Option"));
     help->setProperty("help", tr("Display Shortcuts"));
 
     add(_newViewControl);
@@ -93,12 +93,10 @@ void MultiViewPane::setActiveTab(Tab *tab, bool toast)
 
 void MultiViewPane::setActiveTab(int index, bool toast)
 {
-    Tab *active = activeTab(), *tab = at(index);
-    if (active != tab) {
-        TabbedPane::setActiveTab(tab);
-        if (toast)
-            Utility::toast(QString("%1/%2. %3").arg(index+1).arg(count()).arg(tab->title()));
-    }
+    Tab *tab = at(index);
+    TabbedPane::setActiveTab(tab);
+    if (toast)
+        Utility::toast(QString("%1/%2. %3").arg(index+1).arg(count()).arg(tab->title()));
 }
 
 Tab *MultiViewPane::at(int i) const
@@ -191,26 +189,17 @@ void MultiViewPane::removeView(View *view, bool toast)
         setActiveTab(activateLater, toast);
 }
 
-bool MultiViewPane::canTraverse()
-{
-    if (count() == 1) {
-        Utility::toast(tr("Only one tab"));
-        return false;
-    }
-    return true;
-}
-
 void MultiViewPane::setPrevTabActive()
 {
     int i = activeIndex(-1);
-    if (i >= 0 && canTraverse())
+    if (i >= 0)
         setActiveTab(i, true);
 }
 
 void MultiViewPane::setNextTabActive()
 {
     int i = activeIndex(1);
-    if (i >= 0 && canTraverse())
+    if (i >= 0)
         setActiveTab(i, true);
 }
 

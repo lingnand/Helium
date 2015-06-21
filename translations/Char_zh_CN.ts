@@ -187,31 +187,7 @@ These format specifiers will be replaced:
 <context>
     <name>FindMode</name>
     <message>
-        <source>Find text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Go to find field</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Find previous</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Find next</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Replace next</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Replace all remaining</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -271,27 +247,51 @@ These format specifiers will be replaced:
         </translation>
     </message>
     <message>
-        <source>Replace with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Regex</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ignore case</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Exact match</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Paste Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Lose Focus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Find Text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace With</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go to Find Field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Find Previous</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Find Next</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace Next</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace All Remaining</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Full Regex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ignore Case</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exact Match</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -359,19 +359,15 @@ These format specifiers will be replaced:
         <translation>新建</translation>
     </message>
     <message>
-        <source>Only one tab</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Display Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Previous Tab Option</source>
+        <source>Previous Tab/Option</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Next Tab Option</source>
+        <source>Next Tab/Option</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
