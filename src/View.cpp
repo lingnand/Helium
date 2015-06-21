@@ -562,7 +562,7 @@ void View::onFileSelected(const QStringList &files)
             int index = parent()->indexOf(this), i = 0;
             Buffer *b;
             for (; i < files.size()-1; i++) {
-                b = parent() -> bufferForFilepath(files[i]);
+                b = parent()->bufferForFilepath(files[i]);
                 if (!b) {
                     b = parent()->newBuffer();
                     b->load(files[i]);
@@ -574,7 +574,7 @@ void View::onFileSelected(const QStringList &files)
                 Utility::toast(tr("%1 new views inserted").arg(i));
             }
             if (files[i] != _buffer->filepath()) {
-                b =parent()->bufferForFilepath(files[i]);
+                b = parent()->bufferForFilepath(files[i]);
                 if (b) {
                     setBuffer(b);
                 } else {

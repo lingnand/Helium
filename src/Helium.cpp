@@ -70,7 +70,6 @@ Helium::Helium(int &argc, char **argv):
     setScene(new MultiViewPane(this));
     conn(this, SIGNAL(translatorChanged()),
          scene(), SLOT(onTranslatorChanged()));
-    scene()->addNewView(false);
 
     setMenu(Menu::create()
         .help(HelpActionItem::create()
@@ -80,14 +79,43 @@ Helium::Helium(int &argc, char **argv):
         .addAction(_contactAction));
 
     setCover(_cover = SceneCover::create().content(_coverContent));
-    if (isThumbnailed())
-        onThumbnail();
     conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
+
+    // set up invocation
+    conn(&_invokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
+        this, SLOT(onInvoked(const bb::system::InvokeRequest&)));
+    switch (_invokeManager.startupMode()) {
+        case bb::system::ApplicationStartupMode::InvokeApplication:
+            break; // do not add a view as we are about to add one
+        default:
+            scene()->addNewView(false);
+    }
+}
+
+void Helium::onInvoked(const bb::system::InvokeRequest &request)
+{
+    // first we should notify the scene to recover from non-view mode
+    // TODO: make this less hacky
+    View *lastActive = scene()->lastActiveView();
+    if (lastActive) {
+        lastActive->setNormalMode();
+    }
+    QString filepath = request.uri().toLocalFile();
+    Buffer *buffer = scene()->bufferForFilepath(filepath);
+    if (!buffer) {
+        buffer = scene()->newBuffer();
+        buffer->load(filepath);
+    }
+    View *v = new View(buffer);
+    scene()->insertView(scene()->count(), v);
+    scene()->setActiveTab(v);
 }
 
 void Helium::onThumbnail()
 {
     View *view = scene()->lastActiveView();
+    if (!view)
+        return;
     _cover->setDescription(view->title());
     _coverContent->removeAll();
     _coverContent->setBackground(scene()->ui()->palette()->background());
@@ -131,7 +159,7 @@ void Helium::onContactActionTriggered()
     bb::ApplicationInfo info;
     mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(info.version()));
     request.setUri(mailto);
-    bb::system::InvokeManager().invoke(request);
+    _invokeManager.invoke(request);
 }
 
 void Helium::pushPage(RepushablePage *page)

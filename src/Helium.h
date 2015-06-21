@@ -9,6 +9,7 @@
 #define APPLICATION_H_
 
 #include <QTranslator>
+#include <bb/system/InvokeManager>
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 
@@ -45,6 +46,10 @@ public:
 Q_SIGNALS:
     void translatorChanged();
 private:
+    // invocation
+    bb::system::InvokeManager _invokeManager;
+    Q_SLOT void onInvoked(const bb::system::InvokeRequest &);
+
     void onTranslatorChanged();
     // settings
     FiletypeMap *_filetypeMap;

@@ -26,7 +26,7 @@
 
     <!-- A universally unique application identifier. Must be unique across all BlackBerry 10 applications.
          Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-    <id>com.lnstudio.Char</id>
+    <id>com.lnstudio.Helium</id>
     <configuration name="Device-Debug">
        <platformArchitecture>armle-v7</platformArchitecture>
        <asset path="arm/o.le-v7-g/Char" entry="true" type="Qnx/Elf">Char</asset>
@@ -119,4 +119,22 @@
     <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib"/>
     <env var="CASCADES_THEME" value="default"/>
 
+    <!-- Invocation framework -->
+    <invoke-target id="com.lnstudio.Helium.view">
+        <invoke-target-type>application</invoke-target-type>
+        <invoke-target-name>Helium</invoke-target-name>
+        <filter>
+            <action>bb.action.VIEW</action>
+            <action>bb.action.OPEN</action>
+            <mime-type>text/plain</mime-type>
+            <property var="uris" value="file://"/>
+        </filter>
+        <filter>
+            <action>bb.action.VIEW</action>
+            <action>bb.action.OPEN</action>
+            <mime-type>*</mime-type>
+            <property var="uris" value="file://"/>
+            <property var="exts" value="java,moc,cpp,c,C,cc,coffee,coffeescript,cs,csharp,h,hh,H,hpp,javascript,js,prolog,pl,perl,pm,php3,php4,php5,php,ctp,protobuf,proto,python,py,ruby,rb,flex,lex,l,ll,bison,yacc,y,yy,changelog,lua,ml,caml,mli,sml,sig,syslog,log,pas,pascal,f,fortran,free-fortran,fixed-fortran,html,htm,tex,latex,cls,sty,dtx,lgt,logtalk,diff,patch,lang,langdef,outlang,style,ps,eps,postscript,kcfg,ui,kdevelop,rc,docbook,kidl,xml,xhtml,bash,sh,csh,ksh,tcsh,shell,tcl,tk,sql,bib,makefile,am,in,css,m4,ac,autoconf,sl,slsh,slang,properties,desktop,ini,conf,lsm,spec,haxe,hx,ldap,ldif,glsl,xorg,scala,ada,adb,pc,pkgconfig,oz,texinfo,texi,hs,lhs,haskell,manifest,mf,asm,s,r,applescript,scpt,vbscript,vbs,awk,bat,batch,clipper,prg,cbl,cobol,dmd,d,errors,erl,erlang,vala,lisp,el,islisp,scm,scheme,po,pot,opa,javalog,upc,tml,lilypond,ly"/>
+        </filter>
+    </invoke-target>
 </qnx>

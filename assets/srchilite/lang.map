@@ -119,7 +119,6 @@ oz = oz
 texinfo = texinfo
 texi = texinfo
 hs = haskell
-hs = haskell
 lhs = haskell_literate
 haskell = haskell
 manifest = manifest
