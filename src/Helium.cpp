@@ -108,7 +108,7 @@ void Helium::onInvoked(const bb::system::InvokeRequest &request)
     }
     View *v = new View(buffer);
     scene()->insertView(scene()->count(), v);
-    scene()->setActiveTab(v);
+    scene()->setActiveTab(v, true);
 }
 
 void Helium::onThumbnail()
