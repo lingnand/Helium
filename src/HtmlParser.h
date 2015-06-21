@@ -33,8 +33,6 @@ protected:
     // parse character begins from BOF
     virtual void parseCharacter(const QChar &ch, int charCount) = 0;
     virtual void parseTag(const QString &name, const QString &attributeName, const QString &attributeValue) = 0;
-    // this starts from the first character
-    virtual void parseHtmlCharacter(const QChar &ch) = 0;
     virtual void reachedEnd() = 0;
 };
 

@@ -43,7 +43,6 @@ private:
     BufferStateChange _change;
     void parseCharacter(const QChar &ch, int charCount);
     void parseTag(const QString &name, const QString &attributeName, const QString &attributeValue);
-    void parseHtmlCharacter(const QChar &ch);
     bool stopParsing();
     void reachedEnd();
 };

@@ -107,7 +107,6 @@ void HtmlParser::parse(const QString &input, ParserPosition position)
             break;
         }
         ch = input[position.htmlCount++];
-        parseHtmlCharacter(ch);
     }
 }
 

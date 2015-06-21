@@ -38,7 +38,7 @@ BufferStateChange HtmlBufferChangeParser::parseBufferChange(const QString &input
     // remove unneeded lines
     // TODO: for more efficiency we could remove all the last lines that are in order
     // (similar to detecting change in delayableInStructure)
-    while (_change.size() > 1 && _change.last().index > 0 && _change.last().index == _change[_change.size()-2].index+1) {
+    while (_change.size() > _cursorLine+1 && _change.last().index > 0 && _change.last().index == _change[_change.size()-2].index+1) {
         _change.removeLast();
     }
     qDebug() << ">>>>>> end parsing >>>>>>";
@@ -102,7 +102,6 @@ void HtmlBufferChangeParser::parseTag(const QString &name, const QString &attrib
     }
 }
 
-void HtmlBufferChangeParser::parseHtmlCharacter(const QChar &) {}
 bool HtmlBufferChangeParser::stopParsing() { return _stopParsing; }
 void HtmlBufferChangeParser::reachedEnd() {}
 
