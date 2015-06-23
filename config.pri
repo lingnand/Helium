@@ -184,15 +184,20 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_copy_link.png) \
         $$quote($$BASEDIR/assets/images/ic_edit.png) \
         $$quote($$BASEDIR/assets/images/ic_email.png) \
+        $$quote($$BASEDIR/assets/images/ic_exact_match.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
+        $$quote($$BASEDIR/assets/images/ic_ignore_case.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
         $$quote($$BASEDIR/assets/images/ic_open.png) \
         $$quote($$BASEDIR/assets/images/ic_play.png) \
         $$quote($$BASEDIR/assets/images/ic_previous.png) \
         $$quote($$BASEDIR/assets/images/ic_properties.png) \
         $$quote($$BASEDIR/assets/images/ic_redo.png) \
+        $$quote($$BASEDIR/assets/images/ic_regex.png) \
         $$quote($$BASEDIR/assets/images/ic_reload.png) \
         $$quote($$BASEDIR/assets/images/ic_rename.png) \
+        $$quote($$BASEDIR/assets/images/ic_replace.png) \
+        $$quote($$BASEDIR/assets/images/ic_replace_all.png) \
         $$quote($$BASEDIR/assets/images/ic_save.png) \
         $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \

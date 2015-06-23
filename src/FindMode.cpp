@@ -53,11 +53,11 @@ FindMode::FindMode(View *view):
         .addShortcut(Shortcut::create().key("n"))
         .onTriggered(this, SLOT(findNext()))),
     _replaceNextAction(ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_rename.png"))
+        .imageSource(QUrl("asset:///images/ic_replace.png"))
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(replaceNext()))),
     _replaceAllAction(ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_rename.png"))
+        .imageSource(QUrl("asset:///images/ic_replace_all.png"))
         .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(replaceAll()))),
     _undoAction(ActionItem::create()
@@ -72,9 +72,12 @@ FindMode::FindMode(View *view):
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view, SLOT(setNormalMode()))),
-    _regexOption(Tab::create()),
-    _ignoreCaseOption(Tab::create()),
-    _exactMatchOption(Tab::create()),
+    _regexOption(Tab::create()
+        .imageSource(QUrl("asset:///images/ic_regex.png"))),
+    _ignoreCaseOption(Tab::create()
+        .imageSource(QUrl("asset:///images/ic_ignore_case.png"))),
+    _exactMatchOption(Tab::create()
+        .imageSource(QUrl("asset:///images/ic_exact_match.png"))),
     _lastActiveOption(_regexOption),
     _findBufferDirty(true)
 {
