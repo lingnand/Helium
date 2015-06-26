@@ -192,11 +192,11 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
         // fast forward until reaching the replace start
         while (true) {
             qDebug() << "charCount:" << charCount << "stateIndex:" << stateIndex;
-            qDebug() << "current:" << current;
             qDebug() << "before:" << before;
+            qDebug() << "current:" << current;
             qDebug() << "after:" << after;
             if (charCount + current->line.size() < rep.selection.start) {
-                qDebug() << "skippinng the current line";
+                qDebug() << "skipping the current line";
                 charCount += current->line.size() + 1;
             } else {
                 qDebug() << "splitting the current line";
@@ -213,8 +213,8 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
                 before->endHighlightState = current->endHighlightState;
                 current = before;
                 before = NULL;
-                qDebug() << "current:" << current;
                 qDebug() << "before:" << before;
+                qDebug() << "current:" << current;
             }
             if (after) {
                 qDebug() << "resetting oldHighlightState";
@@ -249,21 +249,21 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
             }
         }
         qDebug() << "finished insertion";
-        qDebug() << "current:" << current;
         qDebug() << "before:" << before;
+        qDebug() << "current:" << current;
         qDebug() << "after:" << after;
         qDebug() << "shifting forward, pointing before to current, current to after";
         before = current;
         current = after;
         after = NULL;
-        qDebug() << "current:" << current;
         qDebug() << "before:" << before;
+        qDebug() << "current:" << current;
         qDebug() << "eating away the length of the original selection...";
         qDebug() << "stateIndex:" << stateIndex;
         // eat away the length of the replacement
         while (charCount + current->line.size() < rep.selection.end) {
             qDebug() << "charCount:" << charCount;
-            qDebug() << "skippinng the current line";
+            qDebug() << "skipping the current line";
             charCount += current->line.size() + 1;
             temp = state[stateIndex+1];
             qDebug() << "detaching from index:" << stateIndex+1 << "line:" << temp;
@@ -276,13 +276,15 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
         // split again to remove the replaced part
         temp = BufferLineState(current->line.split(rep.selection.end - charCount), current->endHighlightState);
         qDebug() << "splitting again to remove the final part of the selection, split:" << temp;
+        qDebug() << "updating the charCount to match the end of selection";
+        charCount = rep.selection.end;
         qDebug() << "pointing current to split";
         current = &temp;
         emit progressChanged(progress.current+=progressInc);
     }
     qDebug() << "finished all the replacements";
-    qDebug() << "current:" << current;
     qDebug() << "before:" << before;
+    qDebug() << "current:" << current;
     qDebug() << "appending current to the end of before";
     before->line.append(current->line);
     qDebug() << "appended current to before";
