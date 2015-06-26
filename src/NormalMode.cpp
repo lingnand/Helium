@@ -387,6 +387,7 @@ void NormalMode::reloadRunnable()
 
 void NormalMode::onTranslatorChanged()
 {
+    _titleBar->setTitle(tr("Editor"));
     _titleField->setHintText(tr("Title"));
     _saveAction->setTitle(tr("Save"));
     _saveAsAction->setTitle(tr("Save As"));

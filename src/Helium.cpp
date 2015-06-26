@@ -94,7 +94,12 @@ Helium::Helium(int &argc, char **argv):
 
 void Helium::onInvoked(const bb::system::InvokeRequest &request)
 {
-    // first we should notify the scene to recover from non-view mode
+    // pop any views on the stack
+    NavigationPane *pane = scene()->activePane();
+    if (pane) {
+        pane->navigateTo(pane->at(0));
+    }
+    // notify the scene to recover from non-view mode
     // TODO: make this less hacky
     View *lastActive = scene()->lastActiveView();
     if (lastActive) {

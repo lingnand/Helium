@@ -571,6 +571,7 @@ void FindMode::setLocked(bool locked)
 
 void FindMode::onTranslatorChanged()
 {
+    _findTitleBar->setTitle(tr("Find"));
     _findField->setHintText(tr("Find Text"));
     _replaceField->setHintText(tr("Replace With"));
     // actions

@@ -24,9 +24,6 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     RunProfile(view),
     _mode(mode),
     _webView(WebView::create()),
-    _backButton(ActionItem::create()
-        .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(view->content(), SLOT(pop()))),
     _backAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_backward.png"))
         .addShortcut(Shortcut::create().key("p"))
@@ -62,7 +59,9 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
         .addAction(_rerunAction, ActionBarPlacement::Signature)
         .addAction(_forwardAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
-            .backButton(_backButton));
+            .backButton(ActionItem::create()
+                .addShortcut(Shortcut::create().key("x"))
+                .onTriggered(view->content(), SLOT(pop()))));
     _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
     _outputPage->setParent(this);
 
@@ -115,7 +114,6 @@ void WebRunProfile::exit()
 void WebRunProfile::onTranslatorChanged()
 {
     _outputPage->titleBar()->setTitle(tr("View Page"));
-    _backButton->setTitle(tr("Back to Editor"));
     _backAction->setTitle(tr("Back"));
     _rerunAction->setTitle(tr("Rerun"));
     _forwardAction->setTitle(tr("Forward"));

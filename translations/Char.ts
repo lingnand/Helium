@@ -85,10 +85,6 @@
         <source>Unable to run (Probably haven&apos;t saved)</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Back to Editor</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>CmdRunProfileSettingsUI</name>
@@ -294,6 +290,10 @@ These format specifiers will be replaced:
         <source>Exact Match</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Find</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneralSettingsPage</name>
@@ -340,15 +340,35 @@ These format specifiers will be replaced:
 <context>
     <name>HelpPage</name>
     <message>
-        <source>Quick Start</source>
+        <source>Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Keyboard Shortcuts</source>
+        <source>Tabs &amp; Buffers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Run Profiles</source>
+        <source>More</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Management</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Highlight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filetype</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Find &amp; Replace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To be continued</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -431,6 +451,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Lose Focus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Editor</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -548,10 +572,6 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Rerun</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Back to Editor</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -34,9 +34,6 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         .imageSource(QUrl("asset:///images/ic_reload.png"))
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(rerun()))),
-    _backButton(ActionItem::create()
-        .addShortcut(Shortcut::create().key("x"))
-        .onTriggered(view->content(), SLOT(pop()))),
     _outputArea(Label::create().multiline(true)
         .format(TextFormat::Html)
         .contentFlags(TextContentFlag::ActiveTextOff)
@@ -59,10 +56,14 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
                 .content(Segment::create()
                     .section().subsection()
                     .add(_outputArea)))
+        .actionBarVisibility(ChromeVisibility::Overlay)
         .addAction(_rerunAction, ActionBarPlacement::Signature)
         .addAction(_killAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
-            .backButton(_backButton));
+            .backButton(ActionItem::create()
+                .addShortcut(Shortcut::create().key("x"))
+                .onTriggered(view->content(), SLOT(pop()))));
+    _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
     // when not activated _outputPage is owned by this profile,
     // so when the profile is replaced its associated view elements
     // are removed gracefully
@@ -213,5 +214,4 @@ void CmdRunProfile::onTranslatorChanged()
     _outputPage->titleBar()->setTitle(tr("Run"));
     _killAction->setTitle(tr("Kill"));
     _rerunAction->setTitle(tr("Rerun"));
-    _backButton->setTitle(tr("Back to Editor"));
 }
