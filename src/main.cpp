@@ -24,6 +24,7 @@
 #include <HtmlBufferChangeParser.h>
 
 Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)
+Q_DECLARE_METATYPE(QList<Replacement>)
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
@@ -33,6 +34,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     qRegisterMetaType<Progress>("Progress&");
     qRegisterMetaType<BufferStateChange>();
     qRegisterMetaType<StateChangeContext>("StateChangeContext&");
+    qRegisterMetaType<QList<Replacement> >();
     qRegisterMetaType<ParserPosition>();
 
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));

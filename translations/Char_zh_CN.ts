@@ -294,6 +294,10 @@ These format specifiers will be replaced:
         <source>Find</source>
         <translation type="unfinished">查找</translation>
     </message>
+    <message>
+        <source>Invalid regular expression!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneralSettingsPage</name>

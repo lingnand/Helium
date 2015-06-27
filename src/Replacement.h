@@ -24,10 +24,9 @@ struct TextSelection {
 struct Replacement {
     TextSelection selection;
     QString replacement;
-    Replacement(TextSelection _selection, QString _replacement):
+    Replacement(const TextSelection &_selection, const QString &_replacement):
         selection(_selection), replacement(_replacement) {}
 };
-
 QDebug operator<<(QDebug dbg, const TextSelection &selection);
 QDebug operator<<(QDebug dbg, const Replacement &replacement);
 

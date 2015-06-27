@@ -239,9 +239,17 @@ FindMode::FindQueryUpdateStatus FindMode::updateFindQuery(bool interactive)
     } else if (active == _exactMatchOption) {
         flags = boost::wregex::literal;
     }
-    if (find != _findQuery || _findRegex.flags() != flags) {
+    if (find != _findQuery || _findRegex.empty() || _findRegex.flags() != flags) {
         _findQuery = find;
-        _findRegex = boost::wregex(find.toStdWString(), flags);
+        try {
+            _findRegex = boost::wregex(find.toStdWString(), flags);
+        } catch (const boost::regex_error &e) {
+            qWarning() << "REGEX_ERROR" << e.what();
+            if (interactive)
+                Utility::toast(tr("Invalid regular expression!"));
+            _findRegex = boost::wregex();
+            return Invalid;
+        }
         status = Changed;
     }
     if (_findBufferDirty) {
@@ -516,30 +524,37 @@ void FindMode::replaceAll()
         findNextWithOptions(false, Unchanged);
     }
     _replaces.clear();
-    int i = 0;
-    int index;
+    int i = 0, index;
+    int cursor = view()->textArea()->editor()->cursorPosition();
+    bool beforeBof = cursor == 0 ||
+            _bofIndex >= 0 && _bofIndex < _findHits.size() && cursor <= _findHits[_bofIndex].selection.start;
     // now take from the replaceIndex to bofIndex - 1
     for (; i < _findHits.size(); i++) {
         index = (replaceIndex + i) % _findHits.size();
-//        qDebug() << "adding index" << index << "to the first replaces queue";
-        if (index == _bofIndex) {
+        if (!beforeBof && index == _bofIndex) {
             break;
         }
+//        qDebug() << "adding index" << index << "to the first replaces queue";
         _replaces.append(Replacement(_findHits[index].selection,
                 QString::fromStdWString(_findHits[index].match.format(replacement))));
     }
     // do the actual replaces
     view()->buffer()->parseReplacement(_replaces);
     _numberOfReplacesTillBottom = _replaces.size();
+    // mark the buffer as dirty
+    _findBufferDirty = true;
     _replaces.clear();
+    if (beforeBof) {
+        // there is no need to start from top again because we are already at top
+        onReplaceFromTopDialogFinished(bb::system::SystemUiResult::ConfirmButtonSelection);
+        return;
+    }
     for (; i < _findHits.size(); i++) {
         index = (replaceIndex + i) % _findHits.size();
 //        qDebug() << "adding index" << index << "to the second replaces queue";
         _replaces.append(Replacement(_findHits[index].selection,
                 QString::fromStdWString(_findHits[index].match.format(replacement))));
     }
-    // mark the buffer as dirty
-    _findBufferDirty = true;
     Utility::dialog(tr("Yes"), tr("No"), tr("End of file reached"),
             tr("%n occurrence(s) replaced. Do you want to continue from the beginning?", "", _numberOfReplacesTillBottom),
             this, SLOT(onReplaceFromTopDialogFinished(bb::system::SystemUiResult::Type)));
