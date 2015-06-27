@@ -291,7 +291,6 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
     qDebug() << "before:" << before;
     before->endHighlightState = current->endHighlightState;
     qDebug() << "final state:" << state;
-    before->endHighlightState = current->endHighlightState;
     qDebug() << "continuing to highlight";
     qDebug() << "pointing current to before";
     _highlight(state, stateIndex, highlightState, oldHighlightState, progress);
