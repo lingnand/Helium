@@ -28,22 +28,22 @@ private:
     bb::cascades::Label *_tabsAndBuffersDesc;
     bb::cascades::Header *_fileManagement;
     bb::cascades::Label *_fileManagementDesc;
+    bb::cascades::Header *_keyboardShortcuts;
+    bb::cascades::Label *_keyboardShortcutsDesc;
     bb::cascades::Header *_highlight;
     bb::cascades::Label *_highlightDesc;
-    bb::cascades::Header *_filetype;
-    bb::cascades::Label *_filetypeDesc;
     bb::cascades::Header *_findAndReplace;
     bb::cascades::Label *_findAndReplaceDesc;
+    bb::cascades::Header *_filetype;
+    bb::cascades::Label *_filetypeDesc;
+    bb::cascades::Header *_runProfile;
+    bb::cascades::Label *_runProfileDesc;
     struct ContentPage : public RepushablePage {
         bb::cascades::Label *contentLabel;
         ContentPage(QObject *parent=NULL);
     } *_contentPage;
 
     Q_SLOT void onTabsAndBuffersHeaderClicked();
-    Q_SLOT void onFileManagementHeaderClicked();
-    Q_SLOT void onHighlightHeaderClicked();
-    Q_SLOT void onFiletypeHeaderClicked();
-    Q_SLOT void onFindAndReplaceHeaderClicked();
     void loadPage(const QString &title, const QString &content);
 };
 

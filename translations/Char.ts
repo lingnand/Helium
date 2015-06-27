@@ -372,7 +372,43 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>To be continued</source>
+        <source>At any time Helium manages a list of &lt;em&gt;tabs&lt;/em&gt; which are views into &lt;em&gt;buffers&lt;/em&gt;. A tab is a frontend that interacts with a buffer, whereas a buffer represents the actual data being edited i.e. what you see in the text area; and also data being saved to/loaded from files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;The distinction between &lt;em&gt;tabs&lt;/em&gt; and &lt;em&gt;buffers&lt;/em&gt; is necessary because Helium supports multiple tabs viewing the same buffer. This can be achieved in two ways:&lt;/p&gt;&lt;br/&gt;  %1 use the &lt;strong&gt;Clone&lt;/strong&gt; action inside any tab - this spawns a new tab that shares the same buffer with the previous tab&lt;br/&gt;  %1 opening a file in a new tab which is already edited in another tab causes the new tab to share that existing buffer&lt;br/&gt;&lt;br/&gt;&lt;p&gt;Changes in a buffer are synced across all tabs linked to it. Additionally, settings accessed and changed via any tab&apos;s &lt;strong&gt;Properties&lt;/strong&gt; action apply to the same buffer. This means that you can for example:&lt;/p&gt;&lt;br/&gt;  %1 edit a long document in one tab and refer back to its early parts in another tab&lt;br/&gt;  %1 edit a script in one tab and run &amp;amp; view its output in another&lt;br/&gt;&lt;br/&gt;&lt;p&gt;&lt;em&gt;Tips: a cloned tab shares the same working directory as the old one; so to open some other file in the same directory, you can clone the current tab and the Open action will navigate to that directory by default&lt;/em&gt;&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p style=&apos;margin-bottom:2em&apos;&gt;Helium supports opening multiple files at once. Simply use the &lt;strong&gt;Open&lt;/strong&gt; action in any tab, choose the files you desire to edit and select &lt;strong&gt;Done&lt;/strong&gt;. If there are more than one file chosen, the additional files will be put into new tabs &lt;em&gt;just before&lt;/em&gt; the current one.&lt;/p&gt;Saving is done asynchronously i.e. every time you trigger the &lt;strong&gt;Save&lt;/strong&gt; action, Helium copies the content in the current buffer, and starts a background routine that saves it to disk. Progress is displayed at the bottom of the tab in an non-interruptive way - this means that you can continue editing the document without having to wait for it to finish.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Helium uses efficient algorithms to highlight documents in real-time. However, due to limitations on the amount of highlighted text that can be put into a text area, Helium uses &lt;em&gt;partial highlight&lt;/em&gt; instead to keep highlight to the necessary minimum (the range of text around the cursor). If you still encounter performance problems, you can&lt;/p&gt;  %1 turn off &lt;strong&gt;Enable Highlight&lt;/strong&gt; for the given filetype, OR&lt;br/&gt;  %1 decrease the range of partial highlight in &lt;strong&gt;General Settings&lt;/strong&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Each filetype defines its own set of highlight rules, as well as having its own settings for highlight and &lt;em&gt;run profiles&lt;/em&gt;. These settings can be accessed via &lt;strong&gt;Properties&lt;/strong&gt; inside any tab (which shows settings of the filetype currently associated with the given buffer); they can also be accessed inside &lt;strong&gt;Settings-Filetypes&lt;/strong&gt;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Use the &lt;strong&gt;Find&lt;/strong&gt; action to enter &lt;em&gt;Find Mode&lt;/em&gt;. Helium supports regex find and replace with three different styles (accessed as tab options or via keyboard shortcuts)&lt;/p&gt;  %1 &lt;strong&gt;Full Regex&lt;/strong&gt;: see &lt;a href=&apos;http://perldoc.perl.org/perlre.html#Regular-Expressions&apos;&gt;http://perldoc.perl.org/perlre.html#Regular-Expressions&lt;/a&gt; for Perl-style regular expressions&lt;br/&gt;  %1 &lt;strong&gt;Ignore Case&lt;/strong&gt;: similar to &lt;em&gt;Full Regex&lt;/em&gt; but ignore the case for letters&lt;br/&gt;  %1 &lt;strong&gt;Exact Match&lt;/strong&gt;: all characters are taken literally&lt;br/&gt;Replacments support capturing groups as well, e.g. replacing &lt;span style=&apos;color:orange&apos;&gt;([^a-z]*)$&lt;/span&gt; with &lt;span style=&apos;color:orange&apos;&gt;\n\1&lt;/span&gt; will put non-algebraic characters at the end of each line into a new line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keyboard Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Helium supports a wide range of keyboard shortcuts from the normal ones to the ones triggered directly while editing text via modifiers (press the shortcut key while holding %3). At any time you can view the full list of shortcuts by pressing:&lt;/p&gt;  %1 %2 when nothing is in focus&lt;br/&gt;  %1 %3 %2 when inside a text field or text area</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;&lt;em&gt;Run profiles&lt;/em&gt; can be configured for each filetype inside &lt;strong&gt;Properties&lt;/strong&gt; or &lt;strong&gt;Settings-Filetypes&lt;/strong&gt;. When editing a file of a filetype with an available run profile, you can use the &lt;strong&gt;Run&lt;/strong&gt; action to run the current content. By default,  the following filetypes already have their run profiles defined:&lt;/p&gt;  %1 &lt;em&gt;python, shell, html, javascript&lt;/em&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
