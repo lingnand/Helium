@@ -14,6 +14,7 @@ device {
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lbbplatformbbm \
                 -lbb \
                 -lbbsystem
 
@@ -35,6 +36,7 @@ device {
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lbbplatformbbm \
                 -lbb \
                 -lbbsystem
 
@@ -61,6 +63,7 @@ device {
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lbbplatformbbm \
                 -lbb \
                 -lbbsystem
 
@@ -85,6 +88,7 @@ simulator {
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lbbcascadespickers \
+                -lbbplatformbbm \
                 -lbb \
                 -lbbsystem
 
@@ -97,9 +101,6 @@ simulator {
 
 config_pri_assets {
     OTHER_FILES += \
-        $$quote($$BASEDIR/assets/docs/keyboard_shortcuts.html) \
-        $$quote($$BASEDIR/assets/docs/quick_start.html) \
-        $$quote($$BASEDIR/assets/docs/run_profiles.html) \
         $$quote($$BASEDIR/assets/images/filetype/_blank.png) \
         $$quote($$BASEDIR/assets/images/filetype/ada.png) \
         $$quote($$BASEDIR/assets/images/filetype/applescript.png) \
@@ -179,6 +180,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/xorg.png) \
         $$quote($$BASEDIR/assets/images/ic_add.png) \
         $$quote($$BASEDIR/assets/images/ic_backward.png) \
+        $$quote($$BASEDIR/assets/images/ic_bbm.png) \
         $$quote($$BASEDIR/assets/images/ic_cancel.png) \
         $$quote($$BASEDIR/assets/images/ic_clear.png) \
         $$quote($$BASEDIR/assets/images/ic_copy_link.png) \
@@ -186,6 +188,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_email.png) \
         $$quote($$BASEDIR/assets/images/ic_exact_match.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
+        $$quote($$BASEDIR/assets/images/ic_helium.png) \
         $$quote($$BASEDIR/assets/images/ic_ignore_case.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
         $$quote($$BASEDIR/assets/images/ic_open.png) \
@@ -201,6 +204,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_save.png) \
         $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \
+        $$quote($$BASEDIR/assets/images/ic_share.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
         $$quote($$BASEDIR/assets/images/ic_view_details.png) \
         $$quote($$BASEDIR/assets/srchilite/ada.lang) \
@@ -586,9 +590,6 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../assets/*.qml) \
         $$quote($$BASEDIR/../assets/*.js) \
         $$quote($$BASEDIR/../assets/*.qs) \
-        $$quote($$BASEDIR/../assets/docs/*.qml) \
-        $$quote($$BASEDIR/../assets/docs/*.js) \
-        $$quote($$BASEDIR/../assets/docs/*.qs) \
         $$quote($$BASEDIR/../assets/images/*.qml) \
         $$quote($$BASEDIR/../assets/images/*.js) \
         $$quote($$BASEDIR/../assets/images/*.qs) \

@@ -340,6 +340,62 @@ These format specifiers will be replaced:
         <source>No content</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Invite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Share</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Post BBM personal message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter personal message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I love the wizardry of syntax highlight!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Welcome</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Thanks for purchasing Helium!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Leave feedback</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Never ask again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Like Helium?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If yes, help spread the word!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HelpPage</name>

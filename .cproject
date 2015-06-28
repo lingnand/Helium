@@ -39,6 +39,7 @@
 									<listOptionValue builtIn="false" value="bbsystem"/>
 									<listOptionValue builtIn="false" value="bbcascadespickers"/>
 									<listOptionValue builtIn="false" value="bb"/>
+									<listOptionValue builtIn="false" value="bbplatformbbm"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.163516899" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/opt/bbndk/lib_10_3_0_698/boost/lib"/>
@@ -92,6 +93,7 @@
 									<listOptionValue builtIn="false" value="bbsystem"/>
 									<listOptionValue builtIn="false" value="bbcascadespickers"/>
 									<listOptionValue builtIn="false" value="bb"/>
+									<listOptionValue builtIn="false" value="bbplatformbbm"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.1972911630" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/opt/bbndk/lib_10_3_0_698/boost/lib"/>
@@ -145,6 +147,7 @@
 									<listOptionValue builtIn="false" value="bbsystem"/>
 									<listOptionValue builtIn="false" value="bbcascadespickers"/>
 									<listOptionValue builtIn="false" value="bb"/>
+									<listOptionValue builtIn="false" value="bbplatformbbm"/>
 								</option>
 								<option id="com.qnx.qcc.option.linker.libraryPaths.1936792499" name="Library Paths (-L)" superClass="com.qnx.qcc.option.linker.libraryPaths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/opt/bbndk/lib_10_3_0_698/boost/lib"/>
@@ -196,6 +199,7 @@
 									<listOptionValue builtIn="false" value="bbsystem"/>
 									<listOptionValue builtIn="false" value="bbcascadespickers"/>
 									<listOptionValue builtIn="false" value="bb"/>
+									<listOptionValue builtIn="false" value="bbplatformbbm"/>
 								</option>
 							</tool>
 							<tool id="com.qnx.qcc.tool.archiver.638329154" name="QCC Archiver" superClass="com.qnx.qcc.tool.archiver"/>

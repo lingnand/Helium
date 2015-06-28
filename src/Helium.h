@@ -10,8 +10,10 @@
 
 #include <QTranslator>
 #include <bb/system/InvokeManager>
+#include <bb/system/SystemUiResult>
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
+#include <bb/platform/bbm/Context>
 
 namespace bb {
     namespace cascades {
@@ -28,6 +30,7 @@ class SettingsPage;
 class HelpPage;
 class RepushablePage;
 class Segment;
+class View;
 
 class Helium : public bb::cascades::Application
 {
@@ -58,7 +61,7 @@ private:
     SettingsPage *_settingsPage;
     HelpPage *_helpPage;
     bb::cascades::ActionItem *_contactAction;
-    Q_SLOT void onContactActionTriggered();
+    Q_SLOT void contact();
 
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
@@ -71,6 +74,16 @@ private:
     Segment *_coverContent;
     bb::cascades::SceneCover *_cover;
     Q_SLOT void onThumbnail();
+
+    Q_SLOT void onSupportDialogConfirmed(bb::system::SystemUiResult::Type);
+    // bbm
+    bb::platform::bbm::Context _bbmContext;
+    Q_SLOT void onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type);
+    bb::cascades::ActionItem *_inviteToDownloadAction;
+    Q_SLOT void inviteToDownload();
+    bb::cascades::ActionItem *_shareAction;
+    Q_SLOT void sharePersonalMessage();
+    Q_SLOT void onPersonalMessageConfirmed(bb::system::SystemUiResult::Type, const QString &);
 };
 
 #endif /* APPLICATION_H_ */

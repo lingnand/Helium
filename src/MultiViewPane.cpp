@@ -244,6 +244,7 @@ void MultiViewPane::onActiveTabChanged(Tab *tab)
             }
             View *old = _lastActive;
             _lastActive = v;
+            emit activeViewChanged(_lastActive);
         }
     }
 }

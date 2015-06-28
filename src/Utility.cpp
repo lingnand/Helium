@@ -11,38 +11,81 @@
 #include <bb/cascades/KeyEvent>
 #include <bb/system/SystemToast>
 #include <bb/system/SystemDialog>
+#include <bb/system/SystemPrompt>
 #include <bb/system/SystemUiPosition>
 #include <bb/system/Clipboard>
 
-static bb::system::SystemToast *_toast = NULL;
-static bb::system::SystemToast *_bigToast = NULL;
-static bb::system::SystemDialog *_dialog = NULL;
+static Utility *utility = NULL;
 
-void Utility::toast(const QString &msg, const QString &label,
-        const QObject *receiver, const char *method)
+Utility::Utility():
+    _toast(NULL), _bigToast(NULL), _dialog(NULL), _prompt(NULL)
+{
+}
+
+bb::system::SystemToast *Utility::toast()
 {
     if (!_toast) {
         _toast = new bb::system::SystemToast;
         _toast->setPosition(bb::system::SystemUiPosition::BottomCenter);
-        _toast->button()->setLabel(label);
     } else {
         _toast->disconnect();
     }
-    _toast->setBody(msg);
-    if (receiver && method) {
-        conn(_toast, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
-    }
-    _toast->show();
+    return _toast;
 }
 
-void Utility::bigToast(const QString &msg)
+bb::system::SystemToast *Utility::bigToast()
 {
     if (!_bigToast) {
         _bigToast = new bb::system::SystemToast;
         _bigToast->setPosition(bb::system::SystemUiPosition::MiddleCenter);
     }
-    _bigToast->setBody(msg);
-    _bigToast->show();
+    return _bigToast;
+}
+
+bb::system::SystemDialog *Utility::dialog()
+{
+    if (!_dialog) {
+        _dialog = new bb::system::SystemDialog;
+    } else {
+        _dialog->disconnect();
+    }
+    return _dialog;
+}
+
+bb::system::SystemPrompt *Utility::prompt()
+{
+    if (!_prompt) {
+        _prompt = new bb::system::SystemPrompt;
+        conn(_prompt, SIGNAL(finished(bb::system::SystemUiResult::Type)),
+            this, SLOT(onPromptFinished(bb::system::SystemUiResult::Type)));
+    }
+    disconnect(SIGNAL(promptFinished(bb::system::SystemUiResult::Type, const QString&)));
+    return _prompt;
+}
+
+void Utility::toast(const QString &msg, const QString &label,
+        const QObject *receiver, const char *method)
+{
+    if (!utility) {
+        utility = new Utility;
+    }
+    bb::system::SystemToast *toast = utility->toast();
+    toast->button()->setLabel(label);
+    toast->setBody(msg);
+    if (receiver && method) {
+        conn(toast, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
+    }
+    toast->show();
+}
+
+void Utility::bigToast(const QString &msg)
+{
+    if (!utility) {
+        utility = new Utility;
+    }
+    bb::system::SystemToast *toast = utility->bigToast();
+    toast->setBody(msg);
+    toast->show();
 }
 
 void Utility::escapeHtml(QTextStream &input, QTextStream &output)
@@ -64,7 +107,7 @@ void Utility::dialog(const QString &confirm,
         const QString &title, const QString &body,
         const QObject *receiver, const char *method)
 {
-    Utility::dialog(confirm, QString(),
+    Utility::dialog(confirm, QString(), QString(),
             title, body,
             receiver, method);
 }
@@ -73,19 +116,53 @@ void Utility::dialog(const QString &confirm, const QString &cancel,
         const QString &title, const QString &body,
         const QObject *receiver, const char *method)
 {
-    if (!_dialog) {
-        _dialog = new bb::system::SystemDialog;
-    } else {
-        _dialog->disconnect();
+    Utility::dialog(confirm, cancel, QString(),
+            title, body,
+            receiver, method);
+}
+
+void Utility::dialog(const QString &confirm, const QString &cancel, const QString &custom,
+        const QString &title, const QString &body,
+        const QObject *receiver, const char *method)
+{
+    if (!utility) {
+        utility = new Utility;
     }
-    _dialog->confirmButton()->setLabel(confirm);
-    _dialog->cancelButton()->setLabel(cancel);
-    _dialog->setTitle(title);
-    _dialog->setBody(body);
+    bb::system::SystemDialog *dialog = utility->dialog();
+    dialog->confirmButton()->setLabel(confirm);
+    dialog->cancelButton()->setLabel(cancel);
+    dialog->customButton()->setLabel(custom);
+    dialog->setTitle(title);
+    dialog->setBody(body);
     if (receiver && method) {
-        conn(_dialog, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
+        conn(dialog, SIGNAL(finished(bb::system::SystemUiResult::Type)), receiver, method);
     }
-    _dialog->show();
+    dialog->show();
+}
+
+void Utility::prompt(const QString &confirm, const QString &cancel,
+        const QString &title,
+        const QString &defaultText, const QString &emptyText,
+        const QObject *receiver, const char *method)
+{
+    if (!utility) {
+        utility = new Utility;
+    }
+    bb::system::SystemPrompt *prompt = utility->prompt();
+    prompt->confirmButton()->setLabel(confirm);
+    prompt->cancelButton()->setLabel(cancel);
+    prompt->setTitle(title);
+    prompt->inputField()->setDefaultText(defaultText);
+    prompt->inputField()->setEmptyText(emptyText);
+    if (receiver && method) {
+        conn(utility, SIGNAL(promptFinished(bb::system::SystemUiResult::Type, const QString&)), receiver, method);
+    }
+    prompt->show();
+}
+
+void Utility::onPromptFinished(bb::system::SystemUiResult::Type type)
+{
+    emit promptFinished(type, _prompt->inputFieldTextEntry());
 }
 
 void Utility::handleBasicTextControlModifiedKey(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)

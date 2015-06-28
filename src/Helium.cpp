@@ -19,6 +19,8 @@
 #include <bb/cascades/UIPalette>
 #include <bb/cascades/Label>
 #include <bb/cascades/TextArea>
+#include <bb/platform/bbm/MessageService>
+#include <bb/platform/bbm/UserProfile>
 #include <Segment.h>
 #include <Helium.h>
 #include <MultiViewPane.h>
@@ -40,6 +42,8 @@
 
 #define SCENE_COVER_LINE_LIMIT 10
 
+#define PROFILE_BOX_ICON_ID_HELIUM 2
+
 using namespace bb::cascades;
 
 Helium *Helium::instance()
@@ -56,8 +60,16 @@ Helium::Helium(int &argc, char **argv):
     _helpPage(NULL),
     _contactAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_email.png"))
-        .onTriggered(this, SLOT(onContactActionTriggered()))),
-    _coverContent(Segment::create().section().subsection())
+        .onTriggered(this, SLOT(contact()))),
+    _coverContent(Segment::create().section().subsection()),
+    // bbm
+    _inviteToDownloadAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_bbm.png"))
+        .onTriggered(this, SLOT(inviteToDownload()))),
+    _shareAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_share.png"))
+        .onTriggered(this, SLOT(sharePersonalMessage()))),
+    _bbmContext(QUuid("0dc2bb7b-f557-425f-bc15-58fc504fa7d6"))
 {
     themeSupport()->setVisualStyle(_appearance->visualStyle());
     conn(_appearance, SIGNAL(visualStyleChanged(bb::cascades::VisualStyle::Type)),
@@ -76,10 +88,16 @@ Helium::Helium(int &argc, char **argv):
             .onTriggered(this, SLOT(showHelp())))
         .settings(SettingsActionItem::create()
             .onTriggered(this, SLOT(showSettings())))
-        .addAction(_contactAction));
+        .addAction(_contactAction)
+        .addAction(_inviteToDownloadAction)
+        .addAction(_shareAction));
 
     setCover(_cover = SceneCover::create().content(_coverContent));
     conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
+
+    // bbm
+    conn(&_bbmContext, SIGNAL(registrationStateUpdated(bb::platform::bbm::RegistrationState::Type)),
+        this, SLOT(onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type)));
 
     // set up invocation
     conn(&_invokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
@@ -89,6 +107,62 @@ Helium::Helium(int &argc, char **argv):
             break; // do not add a view as we are about to add one
         default:
             scene()->addNewView(false);
+    }
+
+   if (general()->numberOfTimesLaunched() == 1) {
+       Utility::dialog(tr("Show Help"),
+               tr("Welcome"), tr("Thanks for purchasing Helium!"),
+               this, SLOT(showHelp()));
+   }
+}
+
+void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type state)
+{
+    switch (state) {
+        case bb::platform::bbm::RegistrationState::Unregistered:
+            // request registration if necessary
+            _bbmContext.requestRegisterApplication();
+            break;
+        case bb::platform::bbm::RegistrationState::Allowed:
+            if (general()->numberOfTimesLaunched() >= 3 && !general()->hasConfirmedSupport()) {
+                Utility::dialog(tr("Leave feedback"), tr("Never ask again"), tr("Share"),
+                        tr("Like Helium?"),
+                        tr("If yes, help spread the word!"),
+                        this, SLOT(onSupportDialogConfirmed(bb::system::SystemUiResult::Type)));
+            }
+            break;
+    }
+}
+
+void Helium::onSupportDialogConfirmed(bb::system::SystemUiResult::Type type)
+{
+    general()->confirmSupport();
+    switch (type) {
+    case bb::system::SystemUiResult::ConfirmButtonSelection:
+        // TODO: go to app world's page
+        break;
+    case bb::system::SystemUiResult::CustomButtonSelection:
+        sharePersonalMessage(); break;
+    }
+}
+
+void Helium::inviteToDownload()
+{
+    bb::platform::bbm::MessageService(&_bbmContext).sendDownloadInvitation();
+}
+
+void Helium::sharePersonalMessage()
+{
+    Utility::prompt(tr("OK"), tr("Cancel"),
+            tr("Post BBM personal message"),
+            tr("I love the wizardry of syntax highlight!"), tr("Enter personal message"),
+            this, SLOT(onPersonalMessageConfirmed(bb::system::SystemUiResult::Type, const QString&)));
+}
+
+void Helium::onPersonalMessageConfirmed(bb::system::SystemUiResult::Type type, const QString &message)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        bb::platform::bbm::UserProfile(&_bbmContext).requestUpdatePersonalMessage(message);
     }
 }
 
@@ -155,14 +229,13 @@ void Helium::onThumbnail()
     }
 }
 
-void Helium::onContactActionTriggered()
+void Helium::contact()
 {
     bb::system::InvokeRequest request;
     request.setTarget("sys.pim.uib.email.hybridcomposer");
     request.setAction("bb.action.OPEN.bb.action.SENDEMAIL");
     QUrl mailto("mailto:lingnan.d@gmail.com");
-    bb::ApplicationInfo info;
-    mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(info.version()));
+    mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(bb::ApplicationInfo().version()));
     request.setUri(mailto);
     _invokeManager.invoke(request);
 }
@@ -207,6 +280,8 @@ void Helium::showHelp()
 void Helium::onTranslatorChanged()
 {
     _contactAction->setTitle(tr("Contact"));
+    _inviteToDownloadAction->setTitle(tr("Invite"));
+    _shareAction->setTitle(tr("Share"));
     emit translatorChanged();
 }
 

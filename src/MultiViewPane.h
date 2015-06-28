@@ -67,6 +67,7 @@ public:
     QList<ShortcutHelp> shortcutHelps();
 Q_SIGNALS:
     void translatorChanged();
+    void activeViewChanged(View *);
 private:
     // used for determining the correct list of tabs to cycle
     int _base;
