@@ -341,27 +341,11 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Invite</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Share</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Post BBM personal message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enter personal message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -381,10 +365,6 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Leave feedback</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Never ask again</source>
         <translation type="unfinished"></translation>
     </message>
@@ -394,6 +374,34 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>If yes, help spread the word!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Share BBM status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Post BBM status message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This will be visible to your BBM contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter status message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invite to Download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Share BBM Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rate it</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

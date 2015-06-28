@@ -125,9 +125,8 @@ void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Ty
             break;
         case bb::platform::bbm::RegistrationState::Allowed:
             if (general()->numberOfTimesLaunched() >= 3 && !general()->hasConfirmedSupport()) {
-                Utility::dialog(tr("Leave feedback"), tr("Never ask again"), tr("Share"),
-                        tr("Like Helium?"),
-                        tr("If yes, help spread the word!"),
+                Utility::dialog(tr("Rate it"), tr("Never ask again"), tr("Share BBM status"),
+                        tr("Like Helium?"), tr("If yes, help spread the word!"),
                         this, SLOT(onSupportDialogConfirmed(bb::system::SystemUiResult::Type)));
             }
             break;
@@ -154,8 +153,8 @@ void Helium::inviteToDownload()
 void Helium::sharePersonalMessage()
 {
     Utility::prompt(tr("OK"), tr("Cancel"),
-            tr("Post BBM personal message"),
-            tr("I love the wizardry of syntax highlight!"), tr("Enter personal message"),
+            tr("Post BBM status message"), tr("This will be visible to your BBM contacts"),
+            tr("I love the wizardry of syntax highlight!"), tr("Enter status message"),
             this, SLOT(onPersonalMessageConfirmed(bb::system::SystemUiResult::Type, const QString&)));
 }
 
@@ -280,8 +279,8 @@ void Helium::showHelp()
 void Helium::onTranslatorChanged()
 {
     _contactAction->setTitle(tr("Contact"));
-    _inviteToDownloadAction->setTitle(tr("Invite"));
-    _shareAction->setTitle(tr("Share"));
+    _inviteToDownloadAction->setTitle(tr("Invite to Download"));
+    _shareAction->setTitle(tr("Share BBM Status"));
     emit translatorChanged();
 }
 

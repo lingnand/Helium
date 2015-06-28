@@ -141,7 +141,7 @@ void Utility::dialog(const QString &confirm, const QString &cancel, const QStrin
 }
 
 void Utility::prompt(const QString &confirm, const QString &cancel,
-        const QString &title,
+        const QString &title, const QString &body,
         const QString &defaultText, const QString &emptyText,
         const QObject *receiver, const char *method)
 {
@@ -152,6 +152,7 @@ void Utility::prompt(const QString &confirm, const QString &cancel,
     prompt->confirmButton()->setLabel(confirm);
     prompt->cancelButton()->setLabel(cancel);
     prompt->setTitle(title);
+    prompt->setBody(body);
     prompt->inputField()->setDefaultText(defaultText);
     prompt->inputField()->setEmptyText(emptyText);
     if (receiver && method) {

@@ -54,7 +54,7 @@ public:
             const QString &title, const QString &body,
             const QObject *receiver=NULL, const char *method=NULL);
     static void prompt(const QString &confirm, const QString &cancel,
-        const QString &title,
+        const QString &title, const QString &body,
         const QString &defaultText, const QString &emptyText,
         const QObject *receiver=NULL, const char *method=NULL);
     static void handleBasicTextControlModifiedKey(bb::cascades::TextEditor *, bb::cascades::KeyEvent *);
