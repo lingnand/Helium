@@ -91,7 +91,7 @@ FindMode::FindMode(View *view):
         view, SLOT(blockPageKeyListener(bool)));
     _replaceField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyReleased(this, SLOT(onReplaceFieldModifiedKey(bb::cascades::KeyEvent*)))
-        .onModKeyPressedAndReleased(this, SLOT(findNext()))
+        .onModKeyPressedAndReleased(this, SLOT(onReplaceFieldModKeyPressedAndReleased()))
         .onTextFieldInputModeChanged(_replaceField, SLOT(setInputMode(bb::cascades::TextFieldInputMode::Type)))
         .modOffOn(_replaceField, SIGNAL(focusedChanged(bool))));
     conn(_replaceField, SIGNAL(focusedChanged(bool)),
@@ -167,6 +167,12 @@ void FindMode::onFindFieldModifiedKey(bb::cascades::KeyEvent *event)
 void FindMode::onReplaceFieldModifiedKey(bb::cascades::KeyEvent *event)
 {
     onFindFieldsModifiedKey(_replaceField->editor(), event);
+}
+
+void FindMode::onReplaceFieldModKeyPressedAndReleased()
+{
+    _replaceField->loseFocus();
+    findNext();
 }
 
 void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
