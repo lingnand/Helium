@@ -308,7 +308,7 @@ void Buffer::load(const QString &filepath)
     setLocked(true);
     // clear all the existing states
     _states.clear();
-    StateChangeContext ctx(++_requestId);
+    StateChangeContext ctx(++_requestId, NULL, true, true);
     emit workerLoadStateFromFile(ctx, filepath, _autodetectFiletype, progress);
     setDirty(false);
 }

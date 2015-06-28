@@ -464,7 +464,13 @@ void View::onBufferStateChanged(const StateChangeContext &ctx, const BufferState
         qDebug() << highlightedHtml;
 
         _textArea->setText(highlightedHtml);
-        _textArea->editor()->setCursorPosition(pos);
+        if (pos != _textArea->editor()->cursorPosition()) {
+            _textArea->editor()->setCursorPosition(pos);
+            if (!_textArea->isFocused()) { // scroll to the position
+                _textArea->requestFocus();
+                _textArea->loseFocus();
+            }
+        }
     }
 }
 
