@@ -123,7 +123,7 @@ void HelpPage::onTranslatorChanged()
     _tabsAndBuffers->setSubtitle(tr("More"));
     _tabsAndBuffersDesc->setText(tr("At any time Helium manages a list of <em>tabs</em> which are views into <em>buffers</em>. A tab is a frontend that interacts with a buffer, whereas a buffer represents the actual data being edited i.e. what you see in the text area; and also data being saved to/loaded from files."));
     _fileManagement->setTitle(tr("File Management"));
-    _fileManagementDesc->setText(tr("<p style='margin-bottom:2em'>Helium supports opening multiple files at once. Simply use the <strong>Open</strong> action in any tab, choose the files you desire to edit and select <strong>Done</strong>. If there are more than one file chosen, the additional files will be put into new tabs <em>just before</em> the current one.</p>"
+    _fileManagementDesc->setText(tr("<p>Helium supports opening multiple files at once. Simply use the <strong>Open</strong> action in any tab, choose the files you desire to edit and select <strong>Done</strong>. If there are more than one file chosen, the additional files will be put into new tabs <em>just before</em> the current one.</p>"
         "Saving is done asynchronously i.e. every time you trigger the <strong>Save</strong> action, Helium copies the content in the current buffer, and starts a background routine that saves it to disk. Progress is displayed at the bottom of the tab in an non-interruptive way - this means that you can continue editing the document without having to wait for it to finish."));
     _keyboardShortcuts->setTitle(tr("Keyboard Shortcuts"));
     _keyboardShortcutsDesc->setText(tr("<p>Helium supports a wide range of keyboard shortcuts from the normal ones to the ones triggered directly while editing text via modifiers (press the shortcut key while holding %3). At any time you can view the full list of shortcuts by pressing:</p>"
@@ -140,7 +140,7 @@ void HelpPage::onTranslatorChanged()
         "  %1 <strong>Full Regex</strong>: see <a href='http://perldoc.perl.org/perlre.html#Regular-Expressions'>http://perldoc.perl.org/perlre.html#Regular-Expressions</a> for Perl-style regular expressions<br/>"
         "  %1 <strong>Ignore Case</strong>: similar to <em>Full Regex</em> but ignore the case for letters<br/>"
         "  %1 <strong>Exact Match</strong>: all characters are taken literally<br/>"
-        "Replacments support capturing groups as well, e.g. replacing <span style='color:orange'>([^a-z]*)$</span> with <span style='color:orange'>\\n\\1</span> will put non-algebraic characters at the end of each line into a new line"
+        "Replacments support capturing groups as well, e.g. replacing <span style='color:orange'>([^a-z]*)$</span> with <span style='color:orange'>\\n\\1</span> will put non-alphabetic characters at the end of each line into a new line."
         ).arg(BULLET_SYMBOL));
     _filetype->setTitle(tr("Filetype"));
     _filetypeDesc->setText(tr("Each filetype defines its own set of highlight rules, as well as having its own settings for highlight and <em>run profiles</em>. These settings can be accessed via <strong>Properties</strong> inside any tab (which shows settings of the filetype currently associated with the given buffer); they can also be accessed inside <strong>Settings-Filetypes</strong>."));
