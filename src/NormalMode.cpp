@@ -288,7 +288,7 @@ void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager
 void NormalMode::autoFocus()
 {
     // focus title text only when the text area is empty
-    if (view()->buffer()->state().empty())
+    if (view()->buffer()->state().empty() && _titleField->isEnabled())
         _titleField->requestFocus();
     else
         view()->textArea()->requestFocus();
