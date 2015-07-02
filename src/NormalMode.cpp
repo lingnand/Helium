@@ -176,7 +176,7 @@ void NormalMode::showProperties()
 
 void NormalMode::onTextAreaModKey(KeyEvent *event)
 {
-    view()->textArea()->editor()->insertPlainText(event->unicode());
+    view()->textArea()->editor()->insertPlainText("\n");
 }
 
 void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener)
