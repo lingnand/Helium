@@ -43,6 +43,8 @@
 #define SCENE_COVER_LINE_LIMIT 10
 
 #define PROFILE_BOX_ICON_ID_HELIUM 2
+#define BBM_UUID "0dc2bb7b-f557-425f-bc15-58fc504fa7d6"
+#define APPWORLD_URI "appworld://content/59963952"
 
 using namespace bb::cascades;
 
@@ -69,7 +71,7 @@ Helium::Helium(int &argc, char **argv):
     _shareAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_share.png"))
         .onTriggered(this, SLOT(sharePersonalMessage()))),
-    _bbmContext(QUuid("0dc2bb7b-f557-425f-bc15-58fc504fa7d6"))
+    _bbmContext(QUuid(BBM_UUID))
 {
     themeSupport()->setVisualStyle(_appearance->visualStyle());
     conn(_appearance, SIGNAL(visualStyleChanged(bb::cascades::VisualStyle::Type)),
@@ -137,9 +139,14 @@ void Helium::onSupportDialogConfirmed(bb::system::SystemUiResult::Type type)
 {
     general()->confirmSupport();
     switch (type) {
-    case bb::system::SystemUiResult::ConfirmButtonSelection:
-        // TODO: go to app world's page
+    case bb::system::SystemUiResult::ConfirmButtonSelection: {
+        bb::system::InvokeRequest request;
+        request.setTarget("sys.appworld");
+        request.setAction("bb.action.OPEN");
+        request.setUri(QUrl(APPWORLD_URI));
+        _invokeManager.invoke(request);
         break;
+    }
     case bb::system::SystemUiResult::CustomButtonSelection:
         sharePersonalMessage(); break;
     }
