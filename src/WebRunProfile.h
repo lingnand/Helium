@@ -37,6 +37,7 @@ private:
     bb::cascades::ActionItem *_backAction;
     bb::cascades::ActionItem *_forwardAction;
     bb::cascades::ActionItem *_rerunAction;
+    bb::cascades::ActionItem *_backButton;
     Q_SLOT void rerun();
     Q_SLOT void onNavigationHistoryChanged();
 };

@@ -16,6 +16,7 @@ namespace bb {
         class Label;
         class DropDown;
         class Option;
+        class ActionItem;
     }
 }
 
@@ -42,6 +43,7 @@ private:
     bb::cascades::DropDown *_filetypeSelect;
     bb::cascades::Option *_noneFiletypeOption;
     bb::cascades::Label *_filetypeSelectHelp;
+    bb::cascades::ActionItem *_backButton;
     FiletypeSettingsUI *_filetypeSettingsUI;
     Q_SLOT void onFiletypeSelectionChanged(const QVariant &);
 };

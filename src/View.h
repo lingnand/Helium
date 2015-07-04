@@ -23,6 +23,7 @@ namespace bb {
         class ProgressIndicator;
         class KeyEvent;
         class KeyListener;
+        class Shortcut;
         namespace pickers {
             class FilePicker;
         }
@@ -100,6 +101,7 @@ private:
     bb::cascades::KeyListener *_pageKeyListener;
     bb::cascades::TextArea *_textArea;
     bb::cascades::ProgressIndicator *_progressIndicator;
+    bb::cascades::Shortcut *_focusShortcut;
 
     /** file related **/
     bb::cascades::pickers::FilePicker *_fpicker;

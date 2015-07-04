@@ -85,6 +85,10 @@
         <source>Unable to run (Probably haven&apos;t saved)</source>
         <translation>無法運行（可能未保存）</translation>
     </message>
+    <message>
+        <source>Back</source>
+        <translation>返回</translation>
+    </message>
 </context>
 <context>
     <name>CmdRunProfileSettingsUI</name>
@@ -134,6 +138,10 @@ These format specifiers will be replaced:
     <message>
         <source>&lt;No Filetype&gt;</source>
         <translation>「未知」</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>返回</translation>
     </message>
 </context>
 <context>
@@ -666,11 +674,7 @@ These format specifiers will be replaced:
     <name>WebRunProfile</name>
     <message>
         <source>Back</source>
-        <translation>後退</translation>
-    </message>
-    <message>
-        <source>Forward</source>
-        <translation>前進</translation>
+        <translation>返回</translation>
     </message>
     <message>
         <source>View Page</source>
@@ -679,6 +683,14 @@ These format specifiers will be replaced:
     <message>
         <source>Rerun</source>
         <translation>重運行</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>後退</translation>
+    </message>
+    <message>
+        <source>Go Forward</source>
+        <translation>前進</translation>
     </message>
 </context>
 <context>

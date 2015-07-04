@@ -35,7 +35,10 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     _rerunAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_reload.png"))
         .addShortcut(Shortcut::create().key("r"))
-        .onTriggered(this, SLOT(rerun())))
+        .onTriggered(this, SLOT(rerun()))),
+    _backButton(ActionItem::create()
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(view->content(), SLOT(pop())))
 {
 //    _webView->saveImageAction()->setEnabled(false);
 //    _webView->shareImageAction()->setEnabled(false);
@@ -59,9 +62,7 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
         .addAction(_rerunAction, ActionBarPlacement::Signature)
         .addAction(_forwardAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
-            .backButton(ActionItem::create()
-                .addShortcut(Shortcut::create().key("x"))
-                .onTriggered(view->content(), SLOT(pop()))));
+            .backButton(_backButton));
     _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
     _outputPage->setParent(this);
 
@@ -114,7 +115,8 @@ void WebRunProfile::exit()
 void WebRunProfile::onTranslatorChanged()
 {
     _outputPage->titleBar()->setTitle(tr("View Page"));
-    _backAction->setTitle(tr("Back"));
+    _backAction->setTitle(tr("Go Back"));
     _rerunAction->setTitle(tr("Rerun"));
-    _forwardAction->setTitle(tr("Forward"));
+    _forwardAction->setTitle(tr("Go Forward"));
+    _backButton->setTitle(tr("Back"));
 }

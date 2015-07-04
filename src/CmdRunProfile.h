@@ -45,6 +45,7 @@ private:
     bb::cascades::Label *_outputArea;
     bb::cascades::ActionItem *_killAction;
     bb::cascades::ActionItem *_rerunAction;
+    bb::cascades::ActionItem *_backButton;
 
     Q_SLOT void onNewStandardOutput();
     Q_SLOT void onNewStandardError();

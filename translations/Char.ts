@@ -85,6 +85,10 @@
         <source>Unable to run (Probably haven&apos;t saved)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CmdRunProfileSettingsUI</name>
@@ -127,6 +131,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>&lt;No Filetype&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -659,19 +667,23 @@ These format specifiers will be replaced:
 <context>
     <name>WebRunProfile</name>
     <message>
-        <source>Back</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Forward</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>View Page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Rerun</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go Forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

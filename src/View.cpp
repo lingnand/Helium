@@ -71,7 +71,9 @@ View::View(Buffer *buffer):
         .vertical(VerticalAlignment::Bottom)
         .topMargin(0)),
     _pageKeyListener(KeyListener::create()
-        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
+        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *)))),
+    _focusShortcut(Shortcut::create().key("Enter")
+        .onTriggered(this, SLOT(autoFocus())))
 {
     GeneralSettings *general = Helium::instance()->general();
     _highlightRangeLimit = general->highlightRange();
@@ -88,27 +90,13 @@ View::View(Buffer *buffer):
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
         this, SLOT(updateTextAreaPartialHighlight()));
 
-    // initialize the pageKeyListener
-    QVariantList helps;
-    helps << QVariant::fromValue(ShortcutHelp("T", tr("Scroll to Top")))
-          << QVariant::fromValue(ShortcutHelp("B", tr("Scroll to Bottom")))
-          << QVariant::fromValue(ShortcutHelp(SPACE_SYMBOL, tr("One page down")))
-          << QVariant::fromValue(ShortcutHelp(QString("%1 %2").arg(SHIFT_SYMBOL, SPACE_SYMBOL), tr("One page up")))
-          << QVariant::fromValue(ShortcutHelp("U", tr("One page up")))
-          << QVariant::fromValue(ShortcutHelp("J", tr("One line up")))
-          << QVariant::fromValue(ShortcutHelp("K", tr("One line down")));
-    _pageKeyListener->setProperty("shortcut_helps", helps);
-
-    Shortcut *focus = Shortcut::create().key("Enter")
-        .onTriggered(this, SLOT(autoFocus()));
-    focus->setProperty("help", tr("Focus Editable Area"));
     _page = Page::create()
         .content(Container::create()
             .add(_textArea)
             .add(_progressIndicator))
 //        .actionBarVisibility(ChromeVisibility::Visible)
 //        .actionBarVisibility(ChromeVisibility::Hidden)
-        .addShortcut(focus)
+        .addShortcut(_focusShortcut)
         // navigation
         .addKeyListener(_pageKeyListener);
 
@@ -491,7 +479,19 @@ void View::onProgressMessageDismissed(bb::system::SystemUiResult::Type)
 
 void View::onTranslatorChanged()
 {
+    reloadTitle();
     _textArea->setHintText(tr("Content"));
+    _focusShortcut->setProperty("help", tr("Focus Editable Area"));
+    // initialize the pageKeyListener
+    QVariantList helps;
+    helps << QVariant::fromValue(ShortcutHelp("T", tr("Scroll to Top")))
+          << QVariant::fromValue(ShortcutHelp("B", tr("Scroll to Bottom")))
+          << QVariant::fromValue(ShortcutHelp(SPACE_SYMBOL, tr("One page down")))
+          << QVariant::fromValue(ShortcutHelp(QString("%1 %2").arg(SHIFT_SYMBOL, SPACE_SYMBOL), tr("One page up")))
+          << QVariant::fromValue(ShortcutHelp("U", tr("One page up")))
+          << QVariant::fromValue(ShortcutHelp("J", tr("One line up")))
+          << QVariant::fromValue(ShortcutHelp("K", tr("One line down")));
+    _pageKeyListener->setProperty("shortcut_helps", helps);
     emit translatorChanged();
 }
 

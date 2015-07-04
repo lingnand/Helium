@@ -40,7 +40,10 @@ FilePropertiesPage::FilePropertiesPage():
     _filetypeSelectHelp(Label::create()
         .multiline(true)
         .textStyle(Defaults::helpText())),
-    _filetypeSettingsUI(new FiletypeSettingsUI)
+    _filetypeSettingsUI(new FiletypeSettingsUI),
+    _backButton(ActionItem::create()
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SIGNAL(backButtonTriggered())))
 {
     _autodetectFiletypeToggle->setChecked(true);
     conn(_autodetectFiletypeToggle, SIGNAL(checkedChanged(bool)),
@@ -72,9 +75,7 @@ FilePropertiesPage::FilePropertiesPage():
             .add(_filetypeSettingsUI))
         .scrollMode(ScrollMode::Vertical));
     setPaneProperties(NavigationPaneProperties::create()
-        .backButton(ActionItem::create()
-            .addShortcut(Shortcut::create().key("x"))
-            .onTriggered(this, SIGNAL(backButtonTriggered()))));
+        .backButton(_backButton));
     onTranslatorChanged();
 }
 
@@ -114,5 +115,6 @@ void FilePropertiesPage::onTranslatorChanged()
     _filetypeSelectHelp->setText(tr("The filetype for the current buffer. Each filetype uses a different set of highlight rules and comes with separate settings."));
     _filetypeSelect->setTitle(tr("Filetype"));
     _noneFiletypeOption->setDescription(tr("<No Filetype>"));
+    _backButton->setTitle(tr("Back"));
     _filetypeSettingsUI->onTranslatorChanged();
 }

@@ -73,6 +73,9 @@ private:
     int _base;
     bb::cascades::Tab *_newViewControl;
     bb::cascades::Shortcut *_newViewShortcut;
+    bb::cascades::Shortcut *_prevTabShortcut;
+    bb::cascades::Shortcut *_nextTabShortcut;
+    bb::cascades::Shortcut *_helpShortcut;
 
     QList<bb::cascades::Tab *> _save;
     View *_lastActive;

@@ -36,24 +36,19 @@ MultiViewPane::MultiViewPane(QObject *parent):
         .onTriggered(this, SLOT(addNewView()))),
     _newViewControl(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add.png"))
-        .onTriggered(this, SLOT(addNewView())))
+        .onTriggered(this, SLOT(addNewView()))),
+    _prevTabShortcut(Shortcut::create().key("q")
+        .onTriggered(this, SLOT(setPrevTabActive()))),
+    _nextTabShortcut(Shortcut::create().key("w")
+        .onTriggered(this, SLOT(setNextTabActive()))),
+    _helpShortcut(Shortcut::create().key("Backspace")
+        .onTriggered(this, SLOT(displayShortcuts())))
 {
     setShowTabsOnActionBar(false);
-    Shortcut *prev = Shortcut::create().key("q")
-        .onTriggered(this, SLOT(setPrevTabActive()));
-    Shortcut *next = Shortcut::create().key("w")
-        .onTriggered(this, SLOT(setNextTabActive()));
-    Shortcut *help = Shortcut::create().key("Backspace")
-        .onTriggered(this, SLOT(displayShortcuts()));
-    addShortcut(prev);
-    addShortcut(next);
-    addShortcut(help);
+    addShortcut(_prevTabShortcut);
+    addShortcut(_nextTabShortcut);
+    addShortcut(_helpShortcut);
     _newViewControl->addShortcut(_newViewShortcut);
-
-    _newViewShortcut->setProperty("help", tr("New"));
-    prev->setProperty("help", tr("Previous Tab/Option"));
-    next->setProperty("help", tr("Next Tab/Option"));
-    help->setProperty("help", tr("Display Shortcuts"));
 
     add(_newViewControl);
 
@@ -252,6 +247,10 @@ void MultiViewPane::onActiveTabChanged(Tab *tab)
 void MultiViewPane::onTranslatorChanged()
 {
     _newViewControl->setTitle(tr("New"));
+    _newViewShortcut->setProperty("help", tr("New"));
+    _prevTabShortcut->setProperty("help", tr("Previous Tab/Option"));
+    _nextTabShortcut->setProperty("help", tr("Next Tab/Option"));
+    _helpShortcut->setProperty("help", tr("Display Shortcuts"));
     emit translatorChanged();
 }
 
