@@ -269,6 +269,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/m4.lang) \
         $$quote($$BASEDIR/assets/srchilite/makefile.lang) \
         $$quote($$BASEDIR/assets/srchilite/manifest.lang) \
+        $$quote($$BASEDIR/assets/srchilite/markdown.lang) \
         $$quote($$BASEDIR/assets/srchilite/nohilite.lang) \
         $$quote($$BASEDIR/assets/srchilite/number.lang) \
         $$quote($$BASEDIR/assets/srchilite/opa.lang) \

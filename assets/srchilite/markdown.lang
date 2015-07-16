@@ -1,0 +1,72 @@
+symbol = '\\[-\\`*_{}[\]()#+.!]' # escaped symbol
+function = '^[-=]+$' # h1, h2 headers
+symbol = '^(\s*[-*_]){3,}\s*$' # rule
+
+function start '^#{1,6}' # atx headers
+comment start '^>' # quote
+keyword = '^\s*[-*+]\s' # unordered list
+keyword = '^\s*[0-9]+\.\s' # ordered list
+code start '^\s{4}|\t' # code block
+keyword = '^\s*[~:]\s' # definition list
+
+code = '``.+``'
+code = '`.+`'
+bold = '\*\*.+\*\*' 
+bold = '__.+__' 
+italics = '\*.+\*' 
+italics = '_.+_' 
+underline = '~~.+~~'
+state keyword = '~(?=([^\s~]|\\ )+~)' begin # subscript
+  keyword = '~' exit
+  underline = '[^~]*'
+end
+state keyword = '\^(?=([^\s^]|\\ )+\^)' begin # superscript
+  keyword = "^" exit
+  underline = '[^^]*'
+end
+environment variable = '\[-?(?=@.+\])' begin # citation
+  variable = "]" exit
+  keyword = "@"
+end
+state type = '(\*\[|\[\^)(?=.+\]:)' begin # abbreviation/footnote
+  state type = "]:" begin
+    comment = '.*$' exit 2
+  end
+  keyword = '[^\]]*'
+end
+state type = '\[\^(?=.+\])' begin # footnote
+  type = "]" exit
+  keyword = '[^\]]*'
+end
+environment keyword = '!?\[.+\]' begin # reference text/label
+  state keyword = "(" begin # reference url
+    keyword = ")" exit 2
+    include "url.lang"
+    variable delim "\"" "\"" escape "\\" # title
+  end
+  state keyword = ":" begin # definition
+    include "url.lang"
+    variable delim "\"" "\"" escape "\\" exit 2 # title
+    variable delim "'" "'" escape "\\" exit 2 # title
+    variable delim "(" ")" escape "\\" exit 2 # title
+    normal = '(?=[^\s\z])' exit 2
+  end
+  normal = '(?=.)' exit
+end
+
+# latex \begin{..} \end{..}
+state keyword = '^\s*\\begin' begin
+  state keyword = '^\s*\\end' begin
+    normal = '\z' exit 2
+    include "latex.lang"
+  end
+  include "latex.lang"
+end
+
+math delim "$$" "$$" multiline
+math = '$[^\\]$'
+
+include "url.lang"
+include "html.lang"
+
+error = '(  |\\)$' # linebreak

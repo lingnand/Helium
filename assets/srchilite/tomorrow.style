@@ -21,7 +21,7 @@ predef_func "#4271AE" ;
 classname "#8959A8" ; // for class names, e.g., in Java and C++
 
 // Internet related
-url "#4271AE" u ;
+url "#6A5ACD" u ;
 
 // other elements for ChangeLog and Log files
 date "#F5871F" b ;
@@ -58,6 +58,6 @@ path "#718c00" ;
 label "#8959A8" b ;
 
 // for errors
-error "#C82829" ;
+error bg:"#FF0000" ;
 warning "#8959A8" ;
 
