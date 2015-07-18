@@ -40,26 +40,13 @@ void AppearanceSettingsStorage::onFontSizeChanged(FontSize::Type fontSize)
 
 AppearanceSettings *AppearanceSettingsStorage::read()
 {
-    QStringList keys = _settings.childKeys();
-    AppearanceSettings *settings;
-    if (keys.empty()) {
-        qDebug() << "Populating the default appearance settings...";
-        settings = new AppearanceSettings(false, AppearanceSettings::SummerFruit,
-                QString(), FontSize::Default,
-                this);
-        onHideActionBarChanged(settings->hideActionBar());
-        onThemeChanged(settings->theme());
-        onFontFamilyChanged(settings->fontFamily());
-        onFontSizeChanged(settings->fontSize());
-    } else {
-        qDebug() << "Reading appearance settings...";
-        settings = new AppearanceSettings(
-                _settings.value("hide_actionbar").toBool(),
-                (AppearanceSettings::Theme) _settings.value("theme").toInt(),
-                _settings.value("font_family").toString(),
-                (FontSize::Type) _settings.value("font_size").toInt(),
-                this);
-    }
+    qDebug() << "Reading appearance settings...";
+    AppearanceSettings *settings = new AppearanceSettings(
+        _settings.value("hide_actionbar", false).toBool(),
+        (AppearanceSettings::Theme) _settings.value("theme", AppearanceSettings::SummerFruit).toInt(),
+        _settings.value("font_family", QString()).toString(),
+        (FontSize::Type) _settings.value("font_size", FontSize::Default).toInt(),
+        this);
     conn(settings, SIGNAL(hideActionBarChanged(bool)),
             this, SLOT(onHideActionBarChanged(bool)));
     conn(settings, SIGNAL(themeChanged(AppearanceSettings::Theme)),
