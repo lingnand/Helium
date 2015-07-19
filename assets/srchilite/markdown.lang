@@ -6,7 +6,7 @@ function start '^#{1,6}' # atx headers
 comment start '^>' # quote
 keyword = '^\s*[-*+]\s' # unordered list
 keyword = '^\s*[0-9]+\.\s' # ordered list
-code start '^\s{4}|\t' # code block
+code start '^(\s{4}|\t)' # code block
 keyword = '^\s*[~:]\s' # definition list
 
 code delim '^`{3,}' '^`{3,}.*$' # fenced code
