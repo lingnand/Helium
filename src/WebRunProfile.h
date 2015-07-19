@@ -8,6 +8,7 @@
 #ifndef WEBRUNPROFILE_H_
 #define WEBRUNPROFILE_H_
 
+#include <QTemporaryFile>
 #include <RunProfile.h>
 
 namespace bb {
@@ -18,13 +19,17 @@ namespace bb {
     }
 }
 
+class hoedown_renderer;
+class hoedown_document;
+class hoedown_buffer;
+
 class WebRunProfile : public RunProfile
 {
     Q_OBJECT
 public:
-    enum Mode { Html, Javascript };
+    enum Mode { Html, Javascript, Markdown };
     WebRunProfile(View *, Mode);
-    virtual ~WebRunProfile() {}
+    virtual ~WebRunProfile();
     void run();
     bool runnable() const { return true; } // always runnable
     Q_SLOT void setMode(WebRunProfile::Mode);
@@ -38,6 +43,11 @@ private:
     bb::cascades::ActionItem *_forwardAction;
     bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;
+    QTemporaryFile _temp;
+    // hoedown stuff
+    hoedown_renderer *_hoedown_renderer;
+    hoedown_document *_hoedown_document;
+    hoedown_buffer *_hoedown_buffer;
     Q_SLOT void rerun();
     Q_SLOT void onNavigationHistoryChanged();
 };

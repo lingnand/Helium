@@ -126,6 +126,7 @@ public:
     Position focus(int cursorPosition) const;
     QString plainText() const;
     int plainTextSize() const;
+    void writePlainText(QTextStream &output) const;
     // beginIndex should always be smaller than endIndex
     // return: the parser position at the beginning of the highlight section
     ParserPosition writeHighlightedHtml(QTextStream &output, const Range &) const;

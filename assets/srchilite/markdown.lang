@@ -9,13 +9,15 @@ keyword = '^\s*[0-9]+\.\s' # ordered list
 code start '^\s{4}|\t' # code block
 keyword = '^\s*[~:]\s' # definition list
 
+code delim '^`{3,}' '^`{3,}.*$' # fenced code
 code = '``.+?``'
 code = '`.+?`'
 bold = '\*\*.+?\*\*'
 bold = '__.+?__'
 italics = '\*.+?\*'
 italics = '_.+?_'
-underline = '~~.+?~~'
+code delim '^~{3,}' '^~{3,}.*$' # fenced code
+underline = '~~.+?~~' # strikeout
 state keyword = '~(?=([^\s~]|\\ )+~)' begin # subscript
   keyword = '~' exit
   underline = '[^~]*'

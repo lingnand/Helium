@@ -24,12 +24,15 @@ WebRunProfileSettingsUI::WebRunProfileSettingsUI(WebRunProfileManager *manager):
         .value(WebRunProfile::Html)),
     _javascriptOption(Option::create()
         .value(WebRunProfile::Javascript)),
+    _markdownOption(Option::create()
+        .value(WebRunProfile::Markdown)),
     _help(Label::create()
         .textStyle(Defaults::helpText()))
 {
     _modeSelect = DropDown::create()
         .add(_htmlOption)
-        .add(_javascriptOption);
+        .add(_javascriptOption)
+        .add(_markdownOption);
     conn(_modeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
             this, SLOT(onModeSelectionChanged(const QVariant&)));
     onManagerModeChanged(manager->mode());
@@ -58,6 +61,9 @@ void WebRunProfileSettingsUI::onManagerModeChanged(WebRunProfile::Mode mode)
         case WebRunProfile::Javascript:
             _modeSelect->setSelectedOption(_javascriptOption);
             break;
+        case WebRunProfile::Markdown:
+            _modeSelect->setSelectedOption(_markdownOption);
+            break;
     }
 }
 
@@ -69,5 +75,7 @@ void WebRunProfileSettingsUI::onTranslatorChanged()
     _htmlOption->setDescription(tr("text in buffer is used as html"));
     _javascriptOption->setText(tr("Javascript"));
     _javascriptOption->setDescription(tr("text in buffer is injected as javascript into the page"));
+    _markdownOption->setText(tr("Markdown"));
+    _markdownOption->setDescription(tr("text in buffer is converted from markdown to html"));
     _help->setText(tr("The evaluation mode for the web view."));
 }

@@ -205,7 +205,7 @@ FiletypeMap *FiletypeMapStorage::read()
         << new Filetype("xml", true,
                 new WebRunProfileManager(WebRunProfile::Html), this)
         << new Filetype("markdown", true,
-                new WebRunProfileManager(WebRunProfile::Html), this);
+                new WebRunProfileManager(WebRunProfile::Markdown), this);
 //            << new Filetype("xorg", true, NULL, this);
     for (int i = 0; i < defaults.size(); i++) {
         Filetype *filetype = defaults[i];

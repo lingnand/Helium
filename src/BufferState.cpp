@@ -209,6 +209,17 @@ int BufferState::plainTextSize() const
     return total;
 }
 
+void BufferState::writePlainText(QTextStream &output) const
+{
+    if (!empty()) {
+        at(0).line.writePlainText(output);
+        for (int i = 1; i < size(); i++) {
+            output << '\n';
+            at(i).line.writePlainText(output);
+        }
+    }
+}
+
 ParserPosition BufferState::writeHighlightedHtml(QTextStream &output, const Range &range) const
 {
     return writeHighlightedHtml(output, range.from, range.to);

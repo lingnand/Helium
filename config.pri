@@ -207,6 +207,188 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_share.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
         $$quote($$BASEDIR/assets/images/ic_view_details.png) \
+        $$quote($$BASEDIR/assets/mathjax/MathJax.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/CHTML-preview.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/FontWarnings.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/HTML-CSS/handle-floats.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/HelpDialog.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/MatchWebFonts.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/MathEvents.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/MathMenu.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/MathZoom.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/Safe.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/AMScd.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/AMSmath.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/AMSsymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/HTML.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/action.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/autobold.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/autoload-all.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/bbox.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/begingroup.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/boldsymbol.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/cancel.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/color.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/enclose.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/extpfeil.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/mathchoice.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/mediawiki-texvc.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/mhchem.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/newcommand.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/noErrors.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/noUndefined.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/unicode.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/TeX/verb.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/jsMath2jax.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/tex2jax.js) \
+        $$quote($$BASEDIR/assets/mathjax/extensions/toMathML.js) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_AMS-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Bold.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Fraktur-Bold.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Fraktur-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Bold.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Italic.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Math-BoldItalic.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Math-Italic.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Math-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_SansSerif-Bold.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_SansSerif-Italic.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_SansSerif-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Script-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size1-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size2-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size3-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Typewriter-Regular.woff) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/jax.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/Arrows.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/CombDiactForSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/Dingbats.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/GeneralPunctuation.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/GeometricShapes.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/GreekAndCoptic.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/Latin1Supplement.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/LetterlikeSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/MathOperators.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/MiscMathSymbolsA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/MiscMathSymbolsB.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/MiscSymbolsAndArrows.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/MiscTechnical.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/SpacingModLetters.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/SuppMathOperators.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/SupplementalArrowsA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/element/mml/optable/SupplementalArrowsB.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/input/TeX/config.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/input/TeX/jax.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/CommonHTML/config.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/CommonHTML/jax.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/annotation-xml.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/maction.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/menclose.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/mglyph.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/mmultiscripts.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/ms.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/mtable.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/autoload/multiline.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/config.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/Arrows.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/BBBold.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/BoxDrawing.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/Dingbats.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/EnclosedAlphanum.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/GeneralPunctuation.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/GeometricShapes.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/GreekAndCoptic.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/Latin1Supplement.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/LatinExtendedA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/LetterlikeSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/MathOperators.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/MiscMathSymbolsB.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/MiscSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/MiscTechnical.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/PUA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/SpacingModLetters.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/SuppMathOperators.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Bold/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/PUA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/PUA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Bold/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/BoldItalic/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Italic/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/Arrows.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/CombDiactForSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/GeneralPunctuation.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/GeometricShapes.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/Latin1Supplement.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/LatinExtendedA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/LatinExtendedB.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/LetterlikeSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/MathOperators.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/MiscMathSymbolsA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/MiscSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/MiscTechnical.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/SpacingModLetters.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/SuppMathOperators.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/SupplementalArrowsA.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/GeneralPunctuation.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/Latin1Supplement.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/LetterlikeSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/GeometricShapes.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/MiscSymbols.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/SpacingModLetters.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/BoldItalic/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/Italic/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/Regular/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/Regular/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/BasicLatin.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/CombDiacritMarks.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/Other.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/Regular/AMS.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/Regular/Bold.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/Regular/Main.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/fontdata-extra.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/fonts/TeX/fontdata.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/imageFonts.js) \
+        $$quote($$BASEDIR/assets/mathjax/jax/output/HTML-CSS/jax.js) \
         $$quote($$BASEDIR/assets/srchilite/ada.lang) \
         $$quote($$BASEDIR/assets/srchilite/applescript.lang) \
         $$quote($$BASEDIR/assets/srchilite/asm.lang) \
@@ -367,6 +549,15 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/WebRunProfile.cpp) \
         $$quote($$BASEDIR/src/WebRunProfileManager.cpp) \
         $$quote($$BASEDIR/src/WebRunProfileSettingsUI.cpp) \
+        $$quote($$BASEDIR/src/hoedown/autolink.c) \
+        $$quote($$BASEDIR/src/hoedown/buffer.c) \
+        $$quote($$BASEDIR/src/hoedown/document.c) \
+        $$quote($$BASEDIR/src/hoedown/escape.c) \
+        $$quote($$BASEDIR/src/hoedown/html.c) \
+        $$quote($$BASEDIR/src/hoedown/html_blocks.c) \
+        $$quote($$BASEDIR/src/hoedown/html_smartypants.c) \
+        $$quote($$BASEDIR/src/hoedown/stack.c) \
+        $$quote($$BASEDIR/src/hoedown/version.c) \
         $$quote($$BASEDIR/src/main.cpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.cpp) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.cc) \
@@ -483,6 +674,13 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/WebRunProfile.h) \
         $$quote($$BASEDIR/src/WebRunProfileManager.h) \
         $$quote($$BASEDIR/src/WebRunProfileSettingsUI.h) \
+        $$quote($$BASEDIR/src/hoedown/autolink.h) \
+        $$quote($$BASEDIR/src/hoedown/buffer.h) \
+        $$quote($$BASEDIR/src/hoedown/document.h) \
+        $$quote($$BASEDIR/src/hoedown/escape.h) \
+        $$quote($$BASEDIR/src/hoedown/html.h) \
+        $$quote($$BASEDIR/src/hoedown/stack.h) \
+        $$quote($$BASEDIR/src/hoedown/version.h) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.h) \
         $$quote($$BASEDIR/src/srchilite/colormap.h) \
@@ -569,7 +767,8 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/srchilite/wordtokenizer.h)
 }
 
-INCLUDEPATH += $$quote($$BASEDIR/src/srchilite) \
+INCLUDEPATH += $$quote($$BASEDIR/src/hoedown) \
+    $$quote($$BASEDIR/src/srchilite) \
     $$quote($$BASEDIR/src)
 
 CONFIG += precompile_header
@@ -583,6 +782,11 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../src/*.cc) \
         $$quote($$BASEDIR/../src/*.cpp) \
         $$quote($$BASEDIR/../src/*.cxx) \
+        $$quote($$BASEDIR/../src/hoedown/*.c) \
+        $$quote($$BASEDIR/../src/hoedown/*.c++) \
+        $$quote($$BASEDIR/../src/hoedown/*.cc) \
+        $$quote($$BASEDIR/../src/hoedown/*.cpp) \
+        $$quote($$BASEDIR/../src/hoedown/*.cxx) \
         $$quote($$BASEDIR/../src/srchilite/*.c) \
         $$quote($$BASEDIR/../src/srchilite/*.c++) \
         $$quote($$BASEDIR/../src/srchilite/*.cc) \
@@ -597,6 +801,186 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../assets/images/filetype/*.qml) \
         $$quote($$BASEDIR/../assets/images/filetype/*.js) \
         $$quote($$BASEDIR/../assets/images/filetype/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/HTML-CSS/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/HTML-CSS/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/HTML-CSS/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/TeX/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/TeX/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/extensions/TeX/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/TeX/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/TeX/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/TeX/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/TeX/woff/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/TeX/woff/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/fonts/HTML-CSS/TeX/woff/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/mml/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/mml/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/mml/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/mml/optable/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/mml/optable/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/element/mml/optable/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/input/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/input/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/input/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/input/TeX/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/input/TeX/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/input/TeX/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/CommonHTML/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/CommonHTML/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/CommonHTML/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/autoload/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/autoload/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/autoload/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/AMS/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Bold/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Bold/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Bold/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Caligraphic/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Bold/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Fraktur/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Bold/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Bold/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Bold/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/BoldItalic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/BoldItalic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/BoldItalic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Italic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Italic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Italic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Greek/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Bold/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Italic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Main/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/BoldItalic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/BoldItalic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/BoldItalic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/Italic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/Italic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Math/Italic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Bold/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Italic/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/SansSerif/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Script/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size1/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size2/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size3/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Size4/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/Typewriter/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinChrome/Regular/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/*.qs) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/Regular/*.qml) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/Regular/*.js) \
+        $$quote($$BASEDIR/../assets/mathjax/jax/output/HTML-CSS/fonts/TeX/WinIE6/Regular/*.qs) \
         $$quote($$BASEDIR/../assets/srchilite/*.qml) \
         $$quote($$BASEDIR/../assets/srchilite/*.js) \
         $$quote($$BASEDIR/../assets/srchilite/*.qs)
