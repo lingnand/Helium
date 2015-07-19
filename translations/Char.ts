@@ -686,6 +686,10 @@ These format specifiers will be replaced:
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Failed to store output. Please try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WebRunProfileSettingsUI</name>
@@ -715,6 +719,14 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>The evaluation mode for the web view.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Markdown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>text in buffer is converted from markdown to html</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

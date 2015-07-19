@@ -692,6 +692,10 @@ These format specifiers will be replaced:
         <source>Go Forward</source>
         <translation>前进</translation>
     </message>
+    <message>
+        <source>Failed to store output. Please try again.</source>
+        <translation>输出失败。请重新尝试。</translation>
+    </message>
 </context>
 <context>
     <name>WebRunProfileSettingsUI</name>
@@ -722,6 +726,14 @@ These format specifiers will be replaced:
     <message>
         <source>The evaluation mode for the web view.</source>
         <translation>网页视图的解读模式</translation>
+    </message>
+    <message>
+        <source>Markdown</source>
+        <translation>Markdown</translation>
+    </message>
+    <message>
+        <source>text in buffer is converted from markdown to html</source>
+        <translation>缓冲区内容将以markdown的格式被转换成html</translation>
     </message>
 </context>
 </TS>
