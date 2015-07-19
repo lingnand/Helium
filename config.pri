@@ -148,6 +148,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/m4.png) \
         $$quote($$BASEDIR/assets/images/filetype/makefile.png) \
         $$quote($$BASEDIR/assets/images/filetype/manifest.png) \
+        $$quote($$BASEDIR/assets/images/filetype/markdown.png) \
         $$quote($$BASEDIR/assets/images/filetype/opa.png) \
         $$quote($$BASEDIR/assets/images/filetype/outlang.png) \
         $$quote($$BASEDIR/assets/images/filetype/oz.png) \
