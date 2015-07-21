@@ -76,7 +76,11 @@ void HtmlBufferChangeParser::parseCharacter(const QChar &ch, int charCount)
         //    we need to delay highlighting if we know a given character IS going to bring up prediction
         //    - in this case, we assume all white space characters can
         //    TODO: devise a strategy to reliably tell if there is prediction prompt
-        _change._delayable =  _change._delayable && !shouldChangeLine && (ch.isLetterOrNumber() || (ch.isSpace() && !_lastDelayable));
+        _change._delayable =  _change._delayable &&
+                !shouldChangeLine &&
+                (ch.isLetterOrNumber() ||
+                    ch == '-' || ch == '_' || // these two are considered as part of word as well
+                    (ch.isSpace() && !_lastDelayable));
     }
 }
 
