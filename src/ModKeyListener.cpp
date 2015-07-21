@@ -60,6 +60,9 @@ void ModKeyListener::onKeyEvent(bb::cascades::KeyEvent *event)
 {
     if (!_enabled)
         return;
+    // don't handle any cases for these modifiers
+    if (event->isAltPressed() || event->isCtrlPressed() || event->isShiftPressed())
+        return;
     if (event->isPressed()) {
         if (event->keycap() == _modKeycap) {
             if (_modPressed) {
