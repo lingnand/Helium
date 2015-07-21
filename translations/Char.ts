@@ -408,6 +408,14 @@ These format specifiers will be replaced:
         <source>Rate it</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Failed to send download invites: maybe you haven&apos;t granted Helium BBM permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to update status message: maybe you haven&apos;t granted Helium BBM permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HelpPage</name>

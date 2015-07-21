@@ -414,6 +414,14 @@ These format specifiers will be replaced:
         <source>Rate it</source>
         <translation>评价</translation>
     </message>
+    <message>
+        <source>Failed to send download invites: maybe you haven&apos;t granted Helium BBM permissions</source>
+        <translation>无法发送邀请：您可能未授予BBM相关权限</translation>
+    </message>
+    <message>
+        <source>Failed to update status message: maybe you haven&apos;t granted Helium BBM permissions</source>
+        <translation>无法更新状态：您可能未授予BBM相关权限</translation>
+    </message>
 </context>
 <context>
     <name>HelpPage</name>
