@@ -154,7 +154,9 @@ void Helium::onSupportDialogConfirmed(bb::system::SystemUiResult::Type type)
 
 void Helium::inviteToDownload()
 {
-    bb::platform::bbm::MessageService(&_bbmContext).sendDownloadInvitation();
+    if (!bb::platform::bbm::MessageService(&_bbmContext).sendDownloadInvitation()) {
+        Utility::toast(tr("Failed to send download invites: maybe you haven't granted Helium BBM permissions."));
+    }
 }
 
 void Helium::sharePersonalMessage()
@@ -168,7 +170,9 @@ void Helium::sharePersonalMessage()
 void Helium::onPersonalMessageConfirmed(bb::system::SystemUiResult::Type type, const QString &message)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        bb::platform::bbm::UserProfile(&_bbmContext).requestUpdatePersonalMessage(message);
+        if (!bb::platform::bbm::UserProfile(&_bbmContext).requestUpdatePersonalMessage(message)) {
+            Utility::toast(tr("Failed to update status message: maybe you haven't granted Helium BBM permissions."));
+        }
     }
 }
 
