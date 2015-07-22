@@ -7,6 +7,7 @@
 
 #include <bb/cascades/ListView>
 #include <bb/cascades/TitleBar>
+#include <bb/cascades/ScrollView>
 #include <bb/cascades/Page>
 #include <FiletypeMapSettingsPage.h>
 #include <FiletypeSettingsUI.h>
@@ -32,7 +33,8 @@ FiletypeMapSettingsPage::FiletypeMapSettingsPage(FiletypeMap *map, QObject *pare
     setContent(listView);
 
     _filetypeSettingsPage->setTitleBar(TitleBar::create());
-    _filetypeSettingsPage->setContent(_filetypeSettingsUI);
+    _filetypeSettingsPage->setContent(ScrollView::create(_filetypeSettingsUI)
+        .scrollMode(ScrollMode::Vertical));
     conn(_filetypeSettingsPage, SIGNAL(toPop()),
         this, SIGNAL(toPop()));
 

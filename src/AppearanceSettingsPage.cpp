@@ -16,6 +16,7 @@
 #include <bb/cascades/Label>
 #include <bb/cascades/DropDown>
 #include <bb/cascades/Divider>
+#include <bb/cascades/ScrollView>
 #include <AppearanceSettingsPage.h>
 #include <Segment.h>
 #include <Utility.h>
@@ -104,17 +105,18 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
     conn(appearanceSettings, SIGNAL(fontSizeChanged(bb::cascades::FontSize::Type)),
         this, SLOT(onFontSizeChanged(bb::cascades::FontSize::Type)));
 
-    setContent(Segment::create().section()
-        .add(Segment::create().subsection().leftToRight()
-            .add(_hideActionBarToggleLabel)
-            .add(_hideActionBarToggle))
-        .add(Segment::create().subsection().add(_hideActionBarHelp))
-        .add(Divider::create())
-        .add(Segment::create().subsection().add(_themeSelect))
-        .add(Segment::create().subsection().add(_themeSelectHelp))
-        .add(_fontHeader)
-        .add(Segment::create().subsection().add(_fontFamilySelect))
-        .add(Segment::create().subsection().add(_fontSizeSelect)));
+    setContent(ScrollView::create(Segment::create().section()
+            .add(Segment::create().subsection().leftToRight()
+                .add(_hideActionBarToggleLabel)
+                .add(_hideActionBarToggle))
+            .add(Segment::create().subsection().add(_hideActionBarHelp))
+            .add(Divider::create())
+            .add(Segment::create().subsection().add(_themeSelect))
+            .add(Segment::create().subsection().add(_themeSelectHelp))
+            .add(_fontHeader)
+            .add(Segment::create().subsection().add(_fontFamilySelect))
+            .add(Segment::create().subsection().add(_fontSizeSelect)))
+        .scrollMode(ScrollMode::Vertical));
 
     onTranslatorChanged();
 }

@@ -47,9 +47,7 @@ HelpPage::HelpPage(QObject *parent):
 {
     setTitleBar(TitleBar::create());
 
-    setContent(ScrollView::create()
-        .scrollMode(ScrollMode::Vertical)
-        .content(Segment::create().section()
+    setContent(ScrollView::create(Segment::create().section()
             .add(_tabsAndBuffers)
             .add(Segment::create().subsection().add(_tabsAndBuffersDesc))
             .add(_fileManagement)
@@ -63,7 +61,8 @@ HelpPage::HelpPage(QObject *parent):
             .add(_filetype)
             .add(Segment::create().subsection().add(_filetypeDesc))
             .add(_runProfile)
-            .add(Segment::create().subsection().add(_runProfileDesc))));
+            .add(Segment::create().subsection().add(_runProfileDesc)))
+        .scrollMode(ScrollMode::Vertical));
     setActionBarVisibility(ChromeVisibility::Overlay);
     setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
 
@@ -76,10 +75,9 @@ HelpPage::ContentPage::ContentPage(QObject *parent):
         .textStyle(SystemDefaults::TextStyles::bodyText()))
 {
     setTitleBar(TitleBar::create());
-    setContent(ScrollView::create()
-        .scrollMode(ScrollMode::Vertical)
-        .content(Segment::create().section().subsection()
-            .add(contentLabel)));
+    setContent(ScrollView::create(Segment::create().section().subsection()
+            .add(contentLabel))
+        .scrollMode(ScrollMode::Vertical));
     setActionBarVisibility(ChromeVisibility::Overlay);
     setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
 }

@@ -47,10 +47,9 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
 //    _webView->shareImageAction()->setEnabled(false);
     _webView->openLinkInNewTabAction()->setEnabled(false);
     _webView->settings()->setDefaultFontSize(25);
-    ScrollView *scrollView = ScrollView::create()
+    ScrollView *scrollView = ScrollView::create(_webView)
         .scrollMode(ScrollMode::Both)
-        .pinchToZoomEnabled(true)
-        .content(_webView);
+        .pinchToZoomEnabled(true);
     conn(_webView, SIGNAL(minContentScaleChanged(float)),
         scrollView->scrollViewProperties(), SLOT(setMinContentScale(float)));
     conn(_webView, SIGNAL(maxContentScaleChanged(float)),

@@ -11,6 +11,7 @@
 #include <bb/cascades/DropDown>
 #include <bb/cascades/Option>
 #include <bb/cascades/Divider>
+#include <bb/cascades/ScrollView>
 #include <bb/cascades/pickers/FilePicker>
 #include <GeneralSettingsPage.h>
 #include <GeneralSettings.h>
@@ -50,12 +51,13 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
     conn(_settings, SIGNAL(defaultOpenDirectoryChanged(const QString&)),
         this, SLOT(onDefaultOpenDirectoryChanged(const QString&)));
 
-    setContent(Segment::create().section()
-        .add(Segment::create().subsection().add(_highlightRangePicker))
-        .add(Segment::create().subsection().add(_highlightRangeHelp))
-        .add(Segment::create().subsection().add(Divider::create()))
-        .add(Segment::create().subsection().add(_defaultOpenDirSelect))
-        .add(Segment::create().subsection().add(_defaultOpenDirHelp)));
+    setContent(ScrollView::create(Segment::create().section()
+            .add(Segment::create().subsection().add(_highlightRangePicker))
+            .add(Segment::create().subsection().add(_highlightRangeHelp))
+            .add(Segment::create().subsection().add(Divider::create()))
+            .add(Segment::create().subsection().add(_defaultOpenDirSelect))
+            .add(Segment::create().subsection().add(_defaultOpenDirHelp)))
+        .scrollMode(ScrollMode::Vertical));
 
     onTranslatorChanged();
 }
