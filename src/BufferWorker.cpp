@@ -323,8 +323,9 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
 {
     QFile file(filename);
     qDebug() << "preparing to write to" << filename;
+    emit progressChanged(progress.current+=(progress.cap-progress.current)*0.10);
     bool success = file.open(QIODevice::WriteOnly | QIODevice::Text);
-    progress.current+=(progress.cap-progress.current)*0.25;
+    progress.current += (progress.cap-progress.current)*0.25;
     if (success) {
         emit progressChanged(progress.current);
     } else {
@@ -342,7 +343,7 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
     QFile file(filename);
     qDebug() << "preparing to open" << filename;
     bool success = file.open(QIODevice::ReadOnly | QIODevice::Text);
-    progress.current+=(progress.cap-progress.current)*0.25;
+    progress.current += (progress.cap-progress.current)*0.25;
     if (success) {
         emit progressChanged(progress.current);
     } else {
