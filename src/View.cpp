@@ -336,8 +336,9 @@ void View::killCurrentLine()
 void View::onTextAreaTextChanged(const QString& text)
 {
     qDebug() << "## parsing change from text area";
-//    qDebug() << "lines from the highlightStart:" <<
-//            text.right(text.size() - _highlightStart.htmlCount + 1).left(100);
+    qDebug() << text;
+    qDebug() << "## lines from the highlightStart:" <<
+            text.right(text.size() - _highlightStart.htmlCount + 1).left(100);
     _buffer->parseChange(this, text, _highlightStart, _textArea->editor()->cursorPosition());
 }
 

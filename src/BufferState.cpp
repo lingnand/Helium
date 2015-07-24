@@ -55,9 +55,12 @@ BufferLine BufferLine::split(int position)
         if (spTransfer == '&') {
             _5size--;
             split._5size++;
-        } else { // '<'
+        } else if (spTransfer == '<') {
             _4size--;
             split._4size++;
+        } else { // '>'
+            _1size--;
+            split._1size++;
         }
         position--;
     }
@@ -75,6 +78,9 @@ void BufferLine::append(const QChar &c)
     } else if (c == '<') {
         _specialChars.append(c);
         _4size++;
+    } else if (c == '>') {
+        _specialChars.append(c);
+        _1size++;
     } else {
         _preTextSegments.last().append(c);
         _1size++;
@@ -134,8 +140,10 @@ void BufferLine::writePreText(QTextStream &output) const
             break;
         if (_specialChars[i] == '&')
             output << "&amp;";
-        else // (_specialChars[i] == '<')
+        else if (_specialChars[i] == '<')
             output << "&lt;";
+        else // '>'
+            output << "&gt;";
     }
 }
 
