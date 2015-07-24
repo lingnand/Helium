@@ -110,7 +110,7 @@ void FilePropertiesPage::onFiletypeSelectionChanged(const QVariant &v)
 void FilePropertiesPage::onTranslatorChanged()
 {
     titleBar()->setTitle(tr("File Properties"));
-    _autodetectFiletypeToggleLabel->setText(tr("Autodetect filetype"));
+    _autodetectFiletypeToggleLabel->setText(tr("Autodetect Filetype"));
     _autodetectFiletypeToggleHelp->setText(tr("Automatically change filetype based on filename"));
     _filetypeSelectHelp->setText(tr("The filetype for the current buffer. Each filetype uses a different set of highlight rules and comes with separate settings."));
     _filetypeSelect->setTitle(tr("Filetype"));

@@ -137,7 +137,7 @@ void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant &v)
 void FiletypeSettingsUI::onTranslatorChanged()
 {
     reloadHeader();
-    _highlightToggleLabel->setText(tr("Enable highlight"));
+    _highlightToggleLabel->setText(tr("Enable Highlight"));
     _highlightToggleHelp->setText(tr("Highlight is automatically updated for a range of lines around the cursor"));
     _runProfileHeader->setTitle(tr("Run Profile"));
     _runProfileSelect->setTitle(tr("Run Profile"));

@@ -120,10 +120,6 @@ These format specifiers will be replaced:
         <translation>文件屬性</translation>
     </message>
     <message>
-        <source>Autodetect filetype</source>
-        <translation>自動檢測文件類型</translation>
-    </message>
-    <message>
         <source>Automatically change filetype based on filename</source>
         <translation>自動根據文件名切換文件類型</translation>
     </message>
@@ -143,6 +139,10 @@ These format specifiers will be replaced:
         <source>Back</source>
         <translation>返回</translation>
     </message>
+    <message>
+        <source>Autodetect Filetype</source>
+        <translation>自動檢測文件類型</translation>
+    </message>
 </context>
 <context>
     <name>FiletypeMapSettingsPage</name>
@@ -156,10 +156,6 @@ These format specifiers will be replaced:
     <message>
         <source>%1 Settings</source>
         <translation>%1設定</translation>
-    </message>
-    <message>
-        <source>Enable highlight</source>
-        <translation>啓用語法高亮</translation>
     </message>
     <message>
         <source>Highlight is automatically updated for a range of lines around the cursor</source>
@@ -188,6 +184,10 @@ These format specifiers will be replaced:
     <message>
         <source>Preview in web page</source>
         <translation>預覽所編輯網頁</translation>
+    </message>
+    <message>
+        <source>Enable Highlight</source>
+        <translation>啓用語法高亮</translation>
     </message>
 </context>
 <context>

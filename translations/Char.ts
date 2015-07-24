@@ -114,10 +114,6 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Autodetect filetype</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Automatically change filetype based on filename</source>
         <translation type="unfinished"></translation>
     </message>
@@ -137,6 +133,10 @@ These format specifiers will be replaced:
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Autodetect Filetype</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FiletypeMapSettingsPage</name>
@@ -149,10 +149,6 @@ These format specifiers will be replaced:
     <name>FiletypeSettingsUI</name>
     <message>
         <source>%1 Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable highlight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -181,6 +177,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Preview in web page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Highlight</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
