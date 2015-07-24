@@ -395,6 +395,7 @@ void View::updateTextAreaPartialHighlight()
     int endLine = start == end ? startLine : _buffer->state().focus(end).lineIndex;
     // this is the case where we've just moved cursor to another place
     Range newRange = partialHighlightRange(_buffer->state(), Range(startLine, endLine));
+    // TODO: fix the bug where a last delayed update is not pulled in when cursor moves
     if (newRange != _highlightRange) {
         qDebug() << "## updating new partial highlight view from" << _highlightRange << "to" << newRange;
         _highlightRange = newRange;
