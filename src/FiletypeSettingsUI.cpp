@@ -11,6 +11,7 @@
 #include <bb/cascades/StackLayoutProperties>
 #include <bb/cascades/Label>
 #include <bb/cascades/DropDown>
+#include <bb/cascades/Divider>
 #include <bb/cascades/SystemDefaults>
 #include <FiletypeSettingsUI.h>
 #include <Filetype.h>
@@ -32,6 +33,18 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
     _highlightToggle(ToggleButton::create()),
     _highlightToggleHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
+    _tabSpaceConversionToggleLabel(Label::create()
+        .layoutProperties(StackLayoutProperties::create().spaceQuota(1))
+        .textStyle(SystemDefaults::TextStyles::primaryText())),
+    _tabSpaceConversionToggle(ToggleButton::create()),
+    _tabSpaceConversionToggleHelp(Label::create().multiline(true)
+        .textStyle(Defaults::helpText())),
+    _numberOfSpacesForTabSelect(DropDown::create()
+        .add("2", 2)
+        .add("4", 4)
+        .add("8", 8)),
+    _numberOfSpacesForTabHelp(Label::create().multiline(true)
+        .textStyle(Defaults::helpText())),
     _runProfileHeader(Header::create()),
     _noneRunProfileOption(Option::create()
             .value(RunProfileManager::None)),
@@ -41,8 +54,10 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
             .value(RunProfileManager::Web)),
     _runProfileSettingsUI(NULL)
 {
-    conn(_highlightToggle, SIGNAL(checkedChanged(bool)),
-        this, SLOT(onHighlightCheckedChanged(bool)));
+    _numberOfSpacesForTabSelect->setEnabled(
+            _tabSpaceConversionToggle->isChecked());
+    conn(_tabSpaceConversionToggle, SIGNAL(checkedChanged(bool)),
+        _numberOfSpacesForTabSelect, SLOT(setEnabled(bool)));
 
     _runProfileSelect = DropDown::create()
         .add(_noneRunProfileOption)
@@ -51,11 +66,21 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
     conn(_runProfileSelect, SIGNAL(selectedValueChanged(const QVariant&)),
         this, SLOT(onRunProfileSelectionChanged(const QVariant&)));
 
+    conn(_numberOfSpacesForTabSelect, SIGNAL(selectedValueChanged(const QVariant&)),
+        this, SLOT(onNumberOfSpacesForTabSelectionChanged(const QVariant &)));
+
     add(_header);
     add(Segment::create().subsection().leftToRight()
         .add(_highlightToggleLabel)
         .add(_highlightToggle));
     add(Segment::create().subsection().add(_highlightToggleHelp));
+    add(Divider::create());
+    add(Segment::create().subsection().leftToRight()
+        .add(_tabSpaceConversionToggleLabel)
+        .add(_tabSpaceConversionToggle));
+    add(Segment::create().subsection().add(_tabSpaceConversionToggleHelp));
+    add(Segment::create().subsection().add(_numberOfSpacesForTabSelect));
+    add(Segment::create().subsection().add(_numberOfSpacesForTabHelp));
     add(_runProfileHeader);
     add(Segment::create().subsection().add(_runProfileSelect));
 
@@ -69,18 +94,35 @@ void FiletypeSettingsUI::setFiletype(Filetype *filetype)
         if (_filetype) {
             _filetype->disconnect(this);
             _filetype->disconnect(_highlightToggle);
+            _filetype->disconnect(_tabSpaceConversionToggle);
+            _highlightToggle->disconnect(_filetype);
+            _tabSpaceConversionToggle->disconnect(_filetype);
         }
         _filetype = filetype;
         reloadHeader();
         _highlightToggle->setChecked(_filetype ?
                 _filetype->highlightEnabled() :
                 false);
+        _tabSpaceConversionToggle->setChecked(_filetype ?
+                _filetype->tabSpaceConversionEnabled() :
+                false);
+        onFiletypeNumberOfSpacesForTabChanged(_filetype ?
+                _filetype->numberOfSpacesForTab() :
+                0);
         onFiletypeRunProfileManagerChanged(_filetype ?
                 _filetype->runProfileManager() :
                 NULL);
         if (_filetype) {
             conn(_filetype, SIGNAL(highlightEnabledChanged(bool)),
                 _highlightToggle, SLOT(setChecked(bool)));
+            conn(_highlightToggle, SIGNAL(checkedChanged(bool)),
+                _filetype, SLOT(setHighlightEnabled(bool)));
+            conn(_filetype, SIGNAL(tabSpaceConversionEnabledChanged(bool)),
+                _tabSpaceConversionToggle, SLOT(setChecked(bool)));
+            conn(_tabSpaceConversionToggle, SIGNAL(checkedChanged(bool)),
+                _filetype, SLOT(setTabSpaceConversionEnabled(bool)));
+            conn(_filetype, SIGNAL(numberOfSpacesForTabChanged(int)),
+                this, SLOT(onFiletypeNumberOfSpacesForTabChanged(int)));
             conn(_filetype, SIGNAL(runProfileManagerChanged(RunProfileManager*, RunProfileManager*)),
                 this, SLOT(onFiletypeRunProfileManagerChanged(RunProfileManager*)));
         }
@@ -90,13 +132,12 @@ void FiletypeSettingsUI::setFiletype(Filetype *filetype)
 void FiletypeSettingsUI::onFiletypeRunProfileManagerChanged(RunProfileManager *change)
 {
     SignalBlocker blocker(_runProfileSelect);
-    switch (RunProfileManager::type(change)) {
-        case RunProfileManager::Cmd:
-            _runProfileSelect->setSelectedOption(_cmdRunProfileOption); break;
-        case RunProfileManager::Web:
-            _runProfileSelect->setSelectedOption(_webRunProfileOption); break;
-        default:
-            _runProfileSelect->setSelectedOption(_noneRunProfileOption);
+    RunProfileManager::Type type = RunProfileManager::type(change);
+    for (int i = 0; i < _runProfileSelect->count(); i++) {
+        if (_runProfileSelect->at(i)->value().toInt() == type) {
+            _runProfileSelect->setSelectedIndex(i);
+            break;
+        }
     }
     if (_runProfileSettingsUI) {
         remove(_runProfileSettingsUI);
@@ -106,6 +147,19 @@ void FiletypeSettingsUI::onFiletypeRunProfileManagerChanged(RunProfileManager *c
     if (change) {
         add(_runProfileSettingsUI = RunProfileSettingsUI::create(change));
     }
+}
+
+void FiletypeSettingsUI::onFiletypeNumberOfSpacesForTabChanged(int number)
+{
+    SignalBlocker blocker(_numberOfSpacesForTabSelect);
+    for (int i = 0; i < _numberOfSpacesForTabSelect->count(); i++) {
+        if (_numberOfSpacesForTabSelect->at(i)->value().toInt() == number) {
+            _numberOfSpacesForTabSelect->setSelectedIndex(i);
+            return;
+        }
+    }
+    // default
+    _numberOfSpacesForTabSelect->setSelectedIndex(4);
 }
 
 void FiletypeSettingsUI::reloadHeader()
@@ -119,13 +173,6 @@ void FiletypeSettingsUI::reloadHeader()
     _header->setTitle(tr("%1 Settings").arg(filetypeName));
 }
 
-void FiletypeSettingsUI::onHighlightCheckedChanged(bool checked)
-{
-    if (_filetype) {
-        _filetype->setHighlightEnabled(checked);
-    }
-}
-
 void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant &v)
 {
     if (_filetype) {
@@ -134,11 +181,22 @@ void FiletypeSettingsUI::onRunProfileSelectionChanged(const QVariant &v)
     }
 }
 
+void FiletypeSettingsUI::onNumberOfSpacesForTabSelectionChanged(const QVariant &v)
+{
+    if (_filetype) {
+        _filetype->setNumberOfSpacesForTab(v.toInt());
+    }
+}
+
 void FiletypeSettingsUI::onTranslatorChanged()
 {
     reloadHeader();
     _highlightToggleLabel->setText(tr("Enable Highlight"));
     _highlightToggleHelp->setText(tr("Highlight is automatically updated for a range of lines around the cursor"));
+    _tabSpaceConversionToggleLabel->setText(tr("Enable Tab-Space Conversion"));
+    _tabSpaceConversionToggleHelp->setText(tr("Space indent will be displayed as tabs in the buffer on file load; the same tabs will be converted to spaces on file save"));
+    _numberOfSpacesForTabSelect->setTitle(tr("Number of Spaces Per Tab"));
+    _numberOfSpacesForTabHelp->setText(tr("The number of spaces for each tab on conversion"));
     _runProfileHeader->setTitle(tr("Run Profile"));
     _runProfileSelect->setTitle(tr("Run Profile"));
     _noneRunProfileOption->setDescription(tr("<No Run Profile>"));

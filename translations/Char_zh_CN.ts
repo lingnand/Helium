@@ -189,6 +189,22 @@ These format specifiers will be replaced:
         <source>Enable Highlight</source>
         <translation>启用语法高亮</translation>
     </message>
+    <message>
+        <source>Enable Tab-Space Conversion</source>
+        <translation>使用「跳格-空格」转换</translation>
+    </message>
+    <message>
+        <source>Space indent will be displayed as tabs in the buffer on file load; the same tabs will be converted to spaces on file save</source>
+        <translation>读取文件时，将行首空格转换为跳格缩进；保存文件时，将跳格缩进转换为行首空格</translation>
+    </message>
+    <message>
+        <source>The number of spaces for each tab on conversion</source>
+        <translation>每个跳格所将转换为的空格数</translation>
+    </message>
+    <message>
+        <source>Number of Spaces Per Tab</source>
+        <translation>空格数</translation>
+    </message>
 </context>
 <context>
     <name>FindMode</name>

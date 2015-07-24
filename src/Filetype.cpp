@@ -11,11 +11,15 @@
 
 Filetype::Filetype(const QString &name,
         bool highlightEnabled,
+        bool tabSpaceConversionEnabled,
+        int numberOfSpacesForTab,
         RunProfileManager *runProfileManager,
         QObject *parent):
     QObject(parent),
     _name(name),
     _highlightEnabled(highlightEnabled),
+    _tabSpaceConversionEnabled(tabSpaceConversionEnabled),
+    _numberOfSpacesForTab(numberOfSpacesForTab),
     _runProfileManager(NULL)
 {
     setRunProfileManager(runProfileManager);
@@ -26,6 +30,22 @@ void Filetype::setHighlightEnabled(bool enabled)
     if (enabled != _highlightEnabled) {
         _highlightEnabled = enabled;
         emit highlightEnabledChanged(_highlightEnabled);
+    }
+}
+
+void Filetype::setTabSpaceConversionEnabled(bool enabled)
+{
+    if (enabled != _tabSpaceConversionEnabled) {
+        _tabSpaceConversionEnabled = enabled;
+        emit tabSpaceConversionEnabledChanged(_tabSpaceConversionEnabled);
+    }
+}
+
+void Filetype::setNumberOfSpacesForTab(int number)
+{
+    if (number != _numberOfSpacesForTab) {
+        _numberOfSpacesForTab = number;
+        emit numberOfSpacesForTabChanged(_numberOfSpacesForTab);
     }
 }
 

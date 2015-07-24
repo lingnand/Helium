@@ -33,6 +33,8 @@ private:
     Q_SLOT void onWebRunProfileManagerModeChanged(WebRunProfile::Mode);
     Q_SLOT void onFiletypeRunProfileManagerChanged(RunProfileManager *change, RunProfileManager *old);
     Q_SLOT void onFiletypeHighlightEnabledChanged(bool);
+    Q_SLOT void onFiletypeTabSpaceConversionEnabledChanged(bool);
+    Q_SLOT void onFiletypeNumberOfSpacesForTabChanged(int);
 };
 
 

@@ -183,6 +183,22 @@ These format specifiers will be replaced:
         <source>Enable Highlight</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Enable Tab-Space Conversion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Space indent will be displayed as tabs in the buffer on file load; the same tabs will be converted to spaces on file save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The number of spaces for each tab on conversion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Number of Spaces Per Tab</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FindMode</name>

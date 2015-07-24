@@ -54,7 +54,7 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
     setContent(ScrollView::create(Segment::create().section()
             .add(Segment::create().subsection().add(_highlightRangePicker))
             .add(Segment::create().subsection().add(_highlightRangeHelp))
-            .add(Segment::create().subsection().add(Divider::create()))
+            .add(Divider::create())
             .add(Segment::create().subsection().add(_defaultOpenDirSelect))
             .add(Segment::create().subsection().add(_defaultOpenDirHelp)))
         .scrollMode(ScrollMode::Vertical));

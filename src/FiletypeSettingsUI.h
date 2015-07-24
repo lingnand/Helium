@@ -37,6 +37,11 @@ private:
     bb::cascades::ToggleButton *_highlightToggle;
     bb::cascades::Label *_highlightToggleLabel;
     bb::cascades::Label *_highlightToggleHelp;
+    bb::cascades::ToggleButton *_tabSpaceConversionToggle;
+    bb::cascades::Label *_tabSpaceConversionToggleLabel;
+    bb::cascades::Label *_tabSpaceConversionToggleHelp;
+    bb::cascades::DropDown *_numberOfSpacesForTabSelect;
+    bb::cascades::Label *_numberOfSpacesForTabHelp;
     bb::cascades::Header *_runProfileHeader;
     bb::cascades::DropDown *_runProfileSelect;
     bb::cascades::Option *_noneRunProfileOption;
@@ -45,8 +50,9 @@ private:
     RunProfileSettingsUI *_runProfileSettingsUI;
 
     void reloadHeader();
-    Q_SLOT void onHighlightCheckedChanged(bool);
+    Q_SLOT void onFiletypeNumberOfSpacesForTabChanged(int);
     Q_SLOT void onFiletypeRunProfileManagerChanged(RunProfileManager *change);
+    Q_SLOT void onNumberOfSpacesForTabSelectionChanged(const QVariant &);
     Q_SLOT void onRunProfileSelectionChanged(const QVariant &);
 };
 
