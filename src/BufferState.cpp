@@ -70,6 +70,9 @@ BufferLine BufferLine::split(int position)
 
 void BufferLine::append(const QChar &c)
 {
+    if (!c.isPrint()) {
+        return; // XXX: ignore non-printable characters for now
+    }
     if (_preTextSegments.size() == _specialChars.size())
         _preTextSegments.append("");
     if (c == '&') {
