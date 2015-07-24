@@ -52,7 +52,6 @@ private:
     srchilite::SourceHighlight _sourceHighlight;
 
     void _setHighlightType(const HighlightType &highlightType);
-    void writePlainText(const BufferState &state, QTextStream &output, Progress &);
     BufferStateChange _parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition);
     void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &progress);
     HighlightStateData::ptr highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState);

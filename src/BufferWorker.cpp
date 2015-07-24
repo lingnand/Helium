@@ -304,19 +304,20 @@ void BufferWorker::rehighlight(StateChangeContext &ctx, BufferState &state, int 
     emit stateRehighlighted(ctx, state);
 }
 
-void BufferWorker::writePlainText(const BufferState &state, QTextStream &output, Progress &progress)
+void writeLineWithTabToSpaceConversion(const BufferLine &line, QTextStream &output, int numberOfSpacesForTab)
 {
-    if (!state.empty()) {
-        float progressInc = (progress.cap-progress.current) / qMax(state.size(), 1);
-        state[0].line.writePlainText(output);
-        emit progressChanged(progress.current+=progressInc);
-        for (int i = 1; i < state.size(); i++) {
-            output << '\n';
-            state[i].line.writePlainText(output);
-            emit progressChanged(progress.current+=progressInc);
+    QString raw = line.plainText();
+    int i = 0;
+    for (; i < raw.size(); i++) {
+        if (raw[i] != '\t')
+            break;
+        for (int j = 0; j < numberOfSpacesForTab; j++) {
+            output << ' ';
         }
     }
-    emit progressChanged(progress.current=progress.cap);
+    for (; i < raw.size(); i++) {
+        output << raw[i];
+    }
 }
 
 void BufferWorker::saveStateToFile(const BufferState &state, const QString &filename, Progress &progress)
@@ -333,8 +334,31 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
                 bb::cascades::ProgressIndicatorState::Error, tr("Error opening file"));
         return;
     }
-    QTextStream out(&file);
-    writePlainText(state, out, progress);
+    if (!state.empty()) {
+        QTextStream out(&file);
+        float progressInc = (progress.cap-progress.current) / qMax(state.size(), 1);
+        if (_highlightType.filetype &&
+                _highlightType.filetype->tabSpaceConversionEnabled()) {
+            int n = _highlightType.filetype->numberOfSpacesForTab();
+            qDebug() << "converting each tab to" << n << "spaces";
+            writeLineWithTabToSpaceConversion(state[0].line, out, n);
+            emit progressChanged(progress.current+=progressInc);
+            for (int i = 1; i < state.size(); i++) {
+                out << '\n';
+                writeLineWithTabToSpaceConversion(state[i].line, out, n);
+                emit progressChanged(progress.current+=progressInc);
+            }
+        } else {
+            state[0].line.writePlainText(out);
+            emit progressChanged(progress.current+=progressInc);
+            for (int i = 1; i < state.size(); i++) {
+                out << '\n';
+                state[i].line.writePlainText(out);
+                emit progressChanged(progress.current+=progressInc);
+            }
+        }
+    }
+    emit progressChanged(progress.current=progress.cap);
     emit stateSavedToFile(filename);
 }
 
@@ -351,15 +375,53 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
                 bb::cascades::ProgressIndicatorState::Error, tr("Error opening file"));
         return;
     }
-    QTextStream input(&file);
-    // build the initial state
-    BufferState state;
-    while (!input.atEnd()) {
-        state.append(BufferLineState(BufferLine() << input.readLine()));
-    }
     if (autodetectFiletype) {
         _setHighlightType(HighlightType(Helium::instance()->appearance()->highlightStyleFile(),
                 Helium::instance()->filetypeMap()->filetypeForName(filename)));
+    }
+    QTextStream input(&file);
+    // build the initial state
+    BufferState state;
+    if (_highlightType.filetype &&
+            _highlightType.filetype->tabSpaceConversionEnabled()) {
+        Q_ASSERT(_highlightType.filetype->numberOfSpacesForTab() > 0);
+        int limit = _highlightType.filetype->numberOfSpacesForTab() - 1;
+        qDebug() << "converting" << limit+1 << "spaces to tabs...";
+        while (!input.atEnd()) {
+            QString raw = input.readLine();
+            BufferLine line;
+            int i = 0, nSpaces = 0;
+            for (; i < raw.size(); i++) {
+                QChar ch = raw[i];
+                if (ch == ' ') {
+                    if (nSpaces == limit) {
+                        line << '\t';
+                        nSpaces = 0;
+                    } else {
+                        nSpaces++;
+                    }
+                    continue;
+                }
+                if (nSpaces != 0) {
+                    break;
+                }
+                if (ch == '\t') {
+                    line << ch;
+                    continue;
+                }
+                break;
+            }
+            for (int j = 0; j < nSpaces; j++) {
+                line << ' ';
+            }
+            for (; i < raw.size(); i++) {
+                line << raw[i];
+            }
+            state.append(BufferLineState(line));
+        }
+    } else {
+        while (!input.atEnd())
+            state.append(BufferLineState(BufferLine() << input.readLine()));
     }
     _highlight(state, 0, _mainStateData, HighlightStateData::ptr(), progress);
     qDebug() << "state filetype after highlight" << state.filetype();
