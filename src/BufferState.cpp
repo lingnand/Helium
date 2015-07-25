@@ -70,23 +70,54 @@ BufferLine BufferLine::split(int position)
 
 void BufferLine::append(const QChar &c)
 {
-    if (!c.isPrint()) {
-        return; // XXX: ignore non-printable characters for now
-    }
-    if (_preTextSegments.size() == _specialChars.size())
-        _preTextSegments.append("");
-    if (c == '&') {
-        _specialChars.append(c);
-        _5size++;
-    } else if (c == '<') {
-        _specialChars.append(c);
-        _4size++;
-    } else if (c == '>') {
-        _specialChars.append(c);
-        _1size++;
-    } else {
-        _preTextSegments.last().append(c);
-        _1size++;
+    switch (c.unicode()) {
+        // handle exceptions in Cc
+        case 0x0001:
+        case 0x0002:
+        case 0x0003:
+        case 0x0004:
+        case 0x0005:
+        case 0x0006:
+        case 0x0007:
+        case 0x0008:
+        case 0x000b:
+        case 0x000c:
+        case 0x000e:
+        case 0x000f:
+        case 0x0010:
+        case 0x0011:
+        case 0x0012:
+        case 0x0013:
+        case 0x0014:
+        case 0x0015:
+        case 0x0016:
+        case 0x0017:
+        case 0x0018:
+        case 0x0019:
+        case 0x001a:
+        case 0x001b:
+        case 0x001c:
+        case 0x001d:
+        case 0x001e:
+        case 0x001f:
+            return;
+        default:
+            // check if the character is one of these values
+            if (_preTextSegments.size() == _specialChars.size())
+                _preTextSegments.append("");
+            if (c == '&') {
+                _specialChars.append(c);
+                _5size++;
+            } else if (c == '<') {
+                _specialChars.append(c);
+                _4size++;
+            } else if (c == '>') {
+                _specialChars.append(c);
+                _1size++;
+            } else {
+                _preTextSegments.last().append(c);
+                _1size++;
+            }
     }
 }
 
