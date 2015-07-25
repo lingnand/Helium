@@ -31,7 +31,7 @@
 using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(QObject *parent):
-    TabbedPane(parent), _lastActive(NULL), _base(1),
+    TabbedPane(parent), _lastActive(NULL), _base(3),
     _newViewShortcut(Shortcut::create().key("c")
         .onTriggered(this, SLOT(addNewView()))),
     _newViewControl(Tab::create()
@@ -50,6 +50,12 @@ MultiViewPane::MultiViewPane(QObject *parent):
     addShortcut(_helpShortcut);
     _newViewControl->addShortcut(_newViewShortcut);
 
+    add(Tab::create().imageSource(QUrl("asset:///images/ic_select.png"))
+            .title("sdcard/dev")
+            .onTriggered(this, SLOT(onProjectTriggered())));
+    add(Tab::create().imageSource(QUrl("asset:///images/ic_selected.png"))
+            .title("Dropbox/main")
+            .onTriggered(this, SLOT(onProjectTriggered())));
     add(_newViewControl);
 
     conn(this, SIGNAL(activeTabChanged(bb::cascades::Tab*)),
@@ -57,6 +63,30 @@ MultiViewPane::MultiViewPane(QObject *parent):
 
     // load text
     onTranslatorChanged();
+}
+
+void MultiViewPane::onProjectTriggered()
+{
+    Tab *src = (Tab *) sender();
+    src->setImageSource(QUrl("asset:///images/ic_selected.png"));
+    for (int i = 0; i < _base-1; i++) {
+        Tab *t = TabbedPane::at(i);
+        if (t != src) {
+            t->setImageSource(QUrl("asset:///images/ic_select.png"));
+        }
+    }
+    conn(this, SIGNAL(sidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)),
+        this, SLOT(activateLastActive(bb::cascades::SidebarVisualState::Type)));
+}
+
+void MultiViewPane::activateLastActive(SidebarVisualState::Type type)
+{
+    if (type == SidebarVisualState::Hidden) {
+        setActiveTab(_lastActive, false);
+        setSidebarState(SidebarState::VisibleFull);
+        disconn(this, SIGNAL(sidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)),
+        this, SLOT(activateLastActive(bb::cascades::SidebarVisualState::Type)));
+    }
 }
 
 void MultiViewPane::disableAllShortcuts()
@@ -232,14 +262,14 @@ void MultiViewPane::removeBuffer(Buffer *buffer)
 
 void MultiViewPane::onActiveTabChanged(Tab *tab)
 {
+    qDebug() << "active tab changed" << tab;
     if (View *v = dynamic_cast<View *>(tab)) {
         if (v != _lastActive) {
             if (_lastActive) {
                 _lastActive->onOutOfView();
             }
-            View *old = _lastActive;
+            qDebug() << "setting last active" << v;
             _lastActive = v;
-            emit activeViewChanged(_lastActive);
         }
     }
 }

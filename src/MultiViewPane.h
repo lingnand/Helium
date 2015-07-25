@@ -67,7 +67,6 @@ public:
     QList<ShortcutHelp> shortcutHelps();
 Q_SIGNALS:
     void translatorChanged();
-    void activeViewChanged(View *);
 private:
     // used for determining the correct list of tabs to cycle
     int _base;
@@ -85,6 +84,8 @@ private:
     // whether the user can goToPrev/NextTab
     bool canTraverse();
     Q_SLOT void displayShortcuts();
+    Q_SLOT void onProjectTriggered();
+    Q_SLOT void activateLastActive(bb::cascades::SidebarVisualState::Type);
 };
 
 #endif /* MULTIVIEWPANE_H_ */
