@@ -41,7 +41,8 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view->content(), SLOT(pop()))),
-    _hoedown_renderer(NULL), _hoedown_document(NULL), _hoedown_buffer(NULL)
+    _hoedown_renderer(NULL), _hoedown_document(NULL), _hoedown_buffer(NULL),
+    _temp(NULL)
 {
 //    _webView->saveImageAction()->setEnabled(false);
 //    _webView->shareImageAction()->setEnabled(false);
@@ -71,6 +72,10 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     onNavigationHistoryChanged();
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
+
+    onBufferFilepathChanged(view->buffer()->filepath());
+    conn(view, SIGNAL(bufferFilepathChanged(const QString&)),
+            this, SLOT(onBufferFilepathChanged(const QString&)))
 }
 
 WebRunProfile::~WebRunProfile()
@@ -90,16 +95,31 @@ void WebRunProfile::run()
     rerun();
 }
 
+void WebRunProfile::onBufferFilepathChanged(const QString &filepath)
+{
+    QString dir;
+    if (filepath.isEmpty()) {
+        dir = QDir::tempPath();
+    } else {
+        dir = QFileInfo(filepath).absolutePath();
+    }
+    qDebug() << "WEB RUN PROFILE: creating tempfile in" << dir;
+    if (_temp)
+        // delete the old temporary file
+        _temp->deleteLater();
+    _temp = new QTemporaryFile(dir+"/.helium.web_run_profile.XXXXXX", this);
+}
+
 void WebRunProfile::rerun()
 {
-    if (!_temp.open()) {
+    if (!_temp->open()) {
         Utility::toast(tr("Failed to store output. Please try again."));
         return;
     }
-    _temp.resize(0);
+    _temp->resize(0);
     switch (_mode) {
         case WebRunProfile::Html: {
-            QTextStream out(&_temp);
+            QTextStream out(_temp);
             view()->buffer()->state().writePlainText(out);
             out.flush();
             break;
@@ -129,7 +149,7 @@ void WebRunProfile::rerun()
             QByteArray text = view()->buffer()->state().plainText().toUtf8();
             hoedown_document_render(_hoedown_document, _hoedown_buffer,
                     (const uint8_t *) text.constData(), text.size());
-            QTextStream out(&_temp);
+            QTextStream out(_temp);
             out << "<html>";
             out << "<head>";
             out << "<meta charset='UTF-8'>";
@@ -159,9 +179,13 @@ void WebRunProfile::rerun()
             break;
         }
     }
-    _temp.close();
-    _webView->loadFile(_temp.fileName());
-    _webView->reload();
+    _temp->close();
+    QUrl toLoad = QUrl::fromLocalFile(_temp->fileName());
+    if (toLoad != _webView->url()) {
+        _webView->setUrl(toLoad);
+    } else {
+        _webView->reload();
+    }
 }
 
 void WebRunProfile::setMode(WebRunProfile::Mode mode)
