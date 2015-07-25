@@ -70,10 +70,6 @@
 <context>
     <name>CmdRunProfile</name>
     <message>
-        <source>Kill</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Rerun</source>
         <translation type="unfinished"></translation>
     </message>
@@ -87,6 +83,14 @@
     </message>
     <message>
         <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Terminate (SIGTERM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Kill (SIGKILL)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

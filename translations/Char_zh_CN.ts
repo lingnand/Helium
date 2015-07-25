@@ -70,10 +70,6 @@
 <context>
     <name>CmdRunProfile</name>
     <message>
-        <source>Kill</source>
-        <translation>中止</translation>
-    </message>
-    <message>
         <source>Rerun</source>
         <translation>重运行</translation>
     </message>
@@ -88,6 +84,14 @@
     <message>
         <source>Back</source>
         <translation>返回</translation>
+    </message>
+    <message>
+        <source>Terminate (SIGTERM)</source>
+        <translation>退出（SIGTERM）</translation>
+    </message>
+    <message>
+        <source>Kill (SIGKILL)</source>
+        <translation>终止（SIGKILL）</translation>
     </message>
 </context>
 <context>

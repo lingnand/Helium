@@ -26,6 +26,10 @@ using namespace bb::cascades;
 CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
     RunProfile(view), _cmd(cmd),
     _runnable(false),
+    _terminateAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_clear.png"))
+        .addShortcut(Shortcut::create().key("t"))
+        .onTriggered(&_process, SLOT(terminate()))),
     _killAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("k"))
@@ -60,6 +64,7 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
             .scrollMode(ScrollMode::Vertical))
         .actionBarVisibility(ChromeVisibility::Overlay)
         .addAction(_rerunAction, ActionBarPlacement::Signature)
+        .addAction(_terminateAction, ActionBarPlacement::OnBar)
         .addAction(_killAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
             .backButton(_backButton));
@@ -132,8 +137,6 @@ QString formatCmd(const QString &format, const QString &path, const QString &dir
 
 void CmdRunProfile::rerun()
 {
-    // kill the process (if it's not already killed)
-    _process.kill();
     // clear the view first
     _outputArea->resetText();
     QFileInfo f(view()->buffer()->filepath());
@@ -168,7 +171,9 @@ void CmdRunProfile::recalcRunnable()
 void CmdRunProfile::onProcessStateChanged(QProcess::ProcessState state)
 {
     recalcRunnable();
+    _terminateAction->setEnabled(state == QProcess::Running);
     _killAction->setEnabled(state != QProcess::NotRunning);
+    _rerunAction->setEnabled(state == QProcess::NotRunning);
 }
 
 void CmdRunProfile::onNewStandardOutput()
@@ -212,7 +217,8 @@ void CmdRunProfile::onViewPagePopped(Page *page)
 void CmdRunProfile::onTranslatorChanged()
 {
     _outputPage->titleBar()->setTitle(tr("Run"));
-    _killAction->setTitle(tr("Kill"));
+    _terminateAction->setTitle(tr("Terminate (SIGTERM)"));
+    _killAction->setTitle(tr("Kill (SIGKILL)"));
     _rerunAction->setTitle(tr("Rerun"));
     _backButton->setTitle(tr("Back"));
 }
