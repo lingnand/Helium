@@ -23,7 +23,6 @@ QList<ShortcutHelp> ShortcutHelp::fromShortcut(AbstractShortcut *shortcut)
                 key = BACKSPACE_SYMBOL;
             } else if (key == "ENTER") {
                 key = RETURN_SYMBOL;
-                qDebug() << "echoing return symbol" << key;
             } else if (key == "SPACE") {
                 key = SPACE_SYMBOL;
             }

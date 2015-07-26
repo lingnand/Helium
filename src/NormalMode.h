@@ -56,6 +56,7 @@ private:
     bb::cascades::ActionItem *_propertiesAction;
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_closeAction;
+    bb::cascades::ActionItem *_closeProjectAction;
     bb::cascades::ActionItem *_propertiesBackButton;
 
     Q_SLOT void reloadLocked();

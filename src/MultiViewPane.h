@@ -19,6 +19,7 @@
 
 #include <QList>
 #include <bb/cascades/TabbedPane>
+#include <bb/system/SystemUiResult>
 #include <Buffer.h>
 #include <ShortcutHelp.h>
 
@@ -26,11 +27,15 @@ namespace bb {
     namespace cascades {
         class NavigationPane;
         class Shortcut;
+        namespace pickers {
+            class FilePicker;
+        }
     }
 }
 
 class Buffer;
 class View;
+class Project;
 
 class MultiViewPane : public bb::cascades::TabbedPane
 {
@@ -38,54 +43,69 @@ class MultiViewPane : public bb::cascades::TabbedPane
 public:
     MultiViewPane(QObject *parent=NULL);
     virtual ~MultiViewPane() {}
-    View *activeView() const;
-    // lastActiveView() is available even when views are hidden
-    View *lastActiveView() const { return _lastActive; }
-    // the active pane should always be a navigation pane
-    bb::cascades::NavigationPane *activePane() const;
-    Q_SLOT void setActiveTab(int, bool toast=false);
-    Q_SLOT void setActiveTab(bb::cascades::Tab *, bool toast=false);
+    Project *activeProject() const { return _activeProject; }
+    bb::cascades::NavigationPane *activePane() const {
+        return (bb::cascades::NavigationPane *) TabbedPane::activePane();
+    }
+    // focus to the current view and hide all other tabs
+    void zoomIntoView();
+    void zoomOutOfView();
+    void setActiveTabWithToast(bb::cascades::Tab *, bool toast);
     Q_SLOT void setPrevTabActive();
     Q_SLOT void setNextTabActive();
-    bb::cascades::Tab *at(int i) const; // the view at a given index
-    int activeIndex(int offset=0) const; // the view with the given offset from the active one
-    int indexOf(bb::cascades::Tab *) const; // give the index of the given view
-    int count() const; // number of views
-    void cloneActive(bool toast=true); // clone the current
-    void removeView(View *, bool toast=true);
-    Q_SLOT void addNewView(bool toast=true);
-    void insertView(int index, View *view);
-    Buffer *newBuffer();
-    Buffer *bufferForFilepath(const QString &filepath);
-    void removeBuffer(Buffer *buffer);
-    Q_SLOT void onActiveTabChanged(bb::cascades::Tab *);
-    Q_SLOT void onTranslatorChanged();
-    void hideViews();
-    void restoreViews();
     Q_SLOT void disableAllShortcuts();
     Q_SLOT void enableAllShortcuts();
-    QList<ShortcutHelp> shortcutHelps();
+    bb::cascades::Shortcut *newViewShortcut() const { return _newViewShortcut; }
+    bb::cascades::Shortcut *prevTabShortcut() const { return _prevTabShortcut; }
+    bb::cascades::Shortcut *nextTabShortcut() const { return _nextTabShortcut; }
+    Q_SLOT void onTranslatorChanged();
+    Q_SLOT void removeActiveProject();
 Q_SIGNALS:
     void translatorChanged();
 private:
-    // used for determining the correct list of tabs to cycle
-    int _base;
+    bb::cascades::Tab *_newProjectControl;
+    bb::cascades::Shortcut *_newProjectShortcut;
     bb::cascades::Tab *_newViewControl;
     bb::cascades::Shortcut *_newViewShortcut;
     bb::cascades::Shortcut *_prevTabShortcut;
     bb::cascades::Shortcut *_nextTabShortcut;
+    bb::cascades::Shortcut *_nextProjectShortcut;
+    bb::cascades::Shortcut *_changeProjectPathShortcut;
     bb::cascades::Shortcut *_helpShortcut;
+    bb::cascades::pickers::FilePicker *_fpicker;
+    bb::cascades::pickers::FilePicker *filePicker(const QString &directory,
+            QObject *target,
+            const char *onFileSelected, const char *onCancelled=NULL);
 
-    QList<bb::cascades::Tab *> _save;
-    View *_lastActive;
-    // the list of buffers driving the views
-    QList<Buffer *> _buffers;
+    bool _zoomed;
+    bool _reopenSidebar;
 
-    // whether the user can goToPrev/NextTab
-    bool canTraverse();
-    Q_SLOT void displayShortcuts();
+    QList<Project *> _projects;
+    Project *_activeProject;
+    void insertProject(int, Project *);
+    void setActiveProject(Project *, bool toast);
+    Q_SLOT void setNextProjectActive();
+    Q_SLOT void addNewProjectAndSetActive();
+    // monitoring for the current project
+    Q_SLOT void onProjectViewInserted(int, View *);
+    Q_SLOT void onProjectViewRemoved(View *);
+    Q_SLOT void onProjectActiveViewChanged(View *, bool triggeredFromSidebar);
+    Q_SLOT void onNewProjectPathSelected(const QStringList &);
+    // relay to current project
+    Q_SLOT void addNewView();
+
+    void setActiveTabIndex(int, bool toast);
+    void setActiveTabWithOffset(int, bool toast);
+    Q_SLOT void changeProjectPath();
     Q_SLOT void onProjectTriggered();
-    Q_SLOT void activateLastActive(bb::cascades::SidebarVisualState::Type);
+    Q_SLOT void onProjectPathSelected(const QStringList &);
+    Q_SLOT void resetProjectActiveView(bool toast=false);
+
+    Q_SLOT void onSidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type);
+    Q_SLOT void onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type);
+    Q_SLOT void displayShortcuts();
+
+    void removeAt(int);
 };
 
 #endif /* MULTIVIEWPANE_H_ */

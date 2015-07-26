@@ -63,11 +63,11 @@ FindMode::FindMode(View *view):
     _undoAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_undo.png"))
         .addShortcut(Shortcut::create().key("z"))
-        .onTriggered(view, SIGNAL(undo()))),
+        .onTriggered(view, SLOT(undo()))),
     _redoAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_redo.png"))
         .addShortcut(Shortcut::create().key("y"))
-        .onTriggered(view, SIGNAL(redo()))),
+        .onTriggered(view, SLOT(redo()))),
     _findCancelAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("x"))
@@ -132,13 +132,11 @@ void FindMode::onEnter()
     view()->page()->setTitleBar(_findTitleBar);
 
     // replace the tabs
-    view()->parent()->hideViews();
-    view()->detachContent();
-    view()->parent()->setActivePane(view()->content());
+    view()->parent()->zoomIntoView();
     view()->parent()->add(_regexOption);
     view()->parent()->add(_ignoreCaseOption);
     view()->parent()->add(_exactMatchOption);
-    view()->parent()->setActiveTab(_lastActiveOption, true);
+    view()->parent()->setActiveTabWithToast(_lastActiveOption, true);
 
     view()->textArea()->setEditable(false);
 
@@ -150,9 +148,7 @@ void FindMode::onExit()
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(setLocked(bool)));
 
     _lastActiveOption = view()->parent()->activeTab();
-    view()->parent()->setActivePane(NULL);
-    view()->reattachContent();
-    view()->parent()->restoreViews();
+    view()->parent()->zoomOutOfView();
 
     _findBuffer.clear();
     _findQuery.clear();
@@ -187,8 +183,9 @@ void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cas
                   << ShortcutHelp("T", TAB_SYMBOL)
                   << ShortcutHelp("V", tr("Paste Clipboard"))
                   << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
-                  << view()->parent()->shortcutHelps();
-            Utility::bigToast(ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut())
+                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut());
+            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
             break;
         }
         case KEYCODE_T:

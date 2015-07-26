@@ -27,6 +27,7 @@
 #include <Filetype.h>
 #include <FilePropertiesPage.h>
 #include <MultiViewPane.h>
+#include <Project.h>
 #include <ShortcutHelp.h>
 
 using namespace bb::cascades;
@@ -54,11 +55,11 @@ NormalMode::NormalMode(View *view):
     _undoAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_undo.png"))
         .addShortcut(Shortcut::create().key("z"))
-        .onTriggered(view, SIGNAL(undo()))),
+        .onTriggered(view, SLOT(undo()))),
     _redoAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_redo.png"))
         .addShortcut(Shortcut::create().key("y"))
-        .onTriggered(view, SIGNAL(redo()))),
+        .onTriggered(view, SLOT(redo()))),
     _findAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_search.png"))
         .addShortcut(Shortcut::create().key("f"))
@@ -79,6 +80,10 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_clear.png"))
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view, SLOT(close()))),
+    _closeProjectAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_delete.png"))
+        .addShortcut(Shortcut::create().key("b")) // blot
+        .onTriggered(view, SLOT(closeProject()))),
     _propertiesPage(NULL),
     _lastFocused(false)
 {
@@ -174,7 +179,7 @@ void NormalMode::showProperties()
     view()->content()->push(_propertiesPage);
 }
 
-void NormalMode::onTextAreaModKey(KeyEvent *event)
+void NormalMode::onTextAreaModKey(KeyEvent *)
 {
     view()->textArea()->editor()->insertPlainText("\n");
 }
@@ -197,8 +202,10 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
                   << ShortcutHelp("H", tr("Focus Title"))
                   << ShortcutHelp("V", tr("Paste Clipboard"))
                   << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
-                  << view()->parent()->shortcutHelps();
-            Utility::bigToast(ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+                  << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut())
+                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut())
+                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut());
+            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
             break;
         }
         case KEYCODE_T: // Tab
@@ -237,7 +244,7 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
             view()->clone();
             break;
         case KEYCODE_C: // Create
-            view()->parent()->addNewView();
+            view()->parent()->activeProject()->addNewViewAndSetActive();
             break;
         case KEYCODE_Q:
             view()->parent()->setPrevTabActive();
@@ -314,6 +321,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_propertiesAction);
     view()->page()->addAction(_cloneAction);
     view()->page()->addAction(_closeAction);
+    view()->page()->addAction(_closeProjectAction);
     view()->page()->setTitleBar(_titleBar);
 
     view()->textArea()->setEditable(true);
@@ -346,12 +354,14 @@ void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyLi
             QList<ShortcutHelp> helps;
             helps << ShortcutHelp("V", tr("Paste Clipboard"))
                   << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
-                  << view()->parent()->shortcutHelps();
-            Utility::bigToast(ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+                  << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut())
+                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut())
+                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut());
+            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
             break;
         }
         case KEYCODE_C: // Create
-            view()->parent()->addNewView();
+            view()->parent()->activeProject()->addNewViewAndSetActive();
             break;
         case KEYCODE_Q:
             view()->parent()->setPrevTabActive();
@@ -377,6 +387,7 @@ void NormalMode::reloadLocked()
     _findAction->setEnabled(!locked);
     _cloneAction->setEnabled(!locked);
     _closeAction->setEnabled(!locked);
+    _closeProjectAction->setEnabled(!locked);
     reloadRunnable();
 }
 
@@ -399,4 +410,5 @@ void NormalMode::onTranslatorChanged()
     _propertiesAction->setTitle(tr("Properties"));
     _cloneAction->setTitle(tr("Clone"));
     _closeAction->setTitle(tr("Close"));
+    _closeProjectAction->setTitle(tr("Close Project"));
 }

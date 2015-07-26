@@ -14,6 +14,7 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 #include <bb/platform/bbm/Context>
+#include <BufferStore.h>
 
 namespace bb {
     namespace cascades {
@@ -42,6 +43,7 @@ public:
     FiletypeMap *filetypeMap() { return _filetypeMap; }
     GeneralSettings *general() { return _general; }
     AppearanceSettings *appearance() { return _appearance; }
+    BufferStore *buffers() { return &_buffers; }
     MultiViewPane *scene() const {
         return (MultiViewPane *) bb::cascades::Application::scene();
     }
@@ -49,6 +51,9 @@ public:
 Q_SIGNALS:
     void translatorChanged();
 private:
+    // buffers
+    BufferStore _buffers;
+
     // invocation
     bb::system::InvokeManager _invokeManager;
     Q_SLOT void onInvoked(const bb::system::InvokeRequest &);
@@ -58,8 +63,10 @@ private:
     FiletypeMap *_filetypeMap;
     GeneralSettings *_general;
     AppearanceSettings *_appearance;
+
     SettingsPage *_settingsPage;
     HelpPage *_helpPage;
+
     bb::cascades::ActionItem *_contactAction;
     Q_SLOT void contact();
 

@@ -36,6 +36,7 @@ class ViewMode;
 class NormalMode;
 class FindMode;
 class Filetype;
+class Project;
 
 class View : public bb::cascades::Tab
 {
@@ -43,8 +44,8 @@ class View : public bb::cascades::Tab
 public:
     static int highlightRangeLimit;
 
-    View(Buffer *buffer=NULL);
-    virtual ~View() {}
+    View(Project *project, Buffer *buffer=NULL);
+    virtual ~View();
     bb::cascades::Page *page() const { return _page; }
     bb::cascades::TextArea *textArea() const { return _textArea; }
     Buffer *buffer() const { return _buffer; }
@@ -52,10 +53,10 @@ public:
     MultiViewPane *parent() const {
         return (MultiViewPane *) QObject::parent();
     }
-    void detachContent();
+    bb::cascades::NavigationPane *detachContent();
     void reattachContent();
     void hideAllPageActions();
-    bool active() const;
+    bool unsafeToRemove() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void setHighlightRangeLimit(int limit);
     Q_SLOT void setNormalMode();
@@ -68,15 +69,16 @@ public:
     Q_SLOT void killCurrentLine();
     Q_SLOT void clone();
     Q_SLOT void close();
+    Q_SLOT void closeProject();
     Q_SLOT void onOutOfView();
     Q_SLOT void onTranslatorChanged();
+    Q_SLOT void undo();
+    Q_SLOT void redo();
     // wrappers over the linked buffer
     Q_SLOT void setAutodetectFiletype(bool);
     Q_SLOT void setFiletype(Filetype *);
     Q_SLOT void setName(const QString &);
 Q_SIGNALS:
-    void undo();
-    void redo();
     void hasUndosChanged(bool);
     void hasRedosChanged(bool);
     void translatorChanged();
@@ -87,6 +89,9 @@ Q_SIGNALS:
     void bufferLockedChanged(bool);
     void bufferAutodetectFiletypeChanged(bool);
 private:
+    /** project **/
+    Project *_project;
+
     /** mode **/
     ViewMode *_mode;
     NormalMode *_normalMode;

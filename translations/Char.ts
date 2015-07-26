@@ -322,6 +322,14 @@ These format specifiers will be replaced:
         <source>Invalid regular expression!</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Dismiss</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneralSettingsPage</name>
@@ -526,6 +534,46 @@ These format specifiers will be replaced:
         <source>Next Tab/Option</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>New Project</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next Project</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Change Project Path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unsaved change detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>These files have unsaved changes:
+
+%1
+
+Do you want to continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NormalMode</name>
@@ -591,6 +639,18 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close Project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

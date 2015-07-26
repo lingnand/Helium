@@ -180,14 +180,18 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/xml.png) \
         $$quote($$BASEDIR/assets/images/filetype/xorg.png) \
         $$quote($$BASEDIR/assets/images/ic_add.png) \
+        $$quote($$BASEDIR/assets/images/ic_add_folder.png) \
         $$quote($$BASEDIR/assets/images/ic_backward.png) \
         $$quote($$BASEDIR/assets/images/ic_bbm.png) \
         $$quote($$BASEDIR/assets/images/ic_cancel.png) \
         $$quote($$BASEDIR/assets/images/ic_clear.png) \
         $$quote($$BASEDIR/assets/images/ic_copy_link.png) \
+        $$quote($$BASEDIR/assets/images/ic_delete.png) \
         $$quote($$BASEDIR/assets/images/ic_edit.png) \
         $$quote($$BASEDIR/assets/images/ic_email.png) \
         $$quote($$BASEDIR/assets/images/ic_exact_match.png) \
+        $$quote($$BASEDIR/assets/images/ic_folder_selected.png) \
+        $$quote($$BASEDIR/assets/images/ic_folder_unselected.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_helium.png) \
         $$quote($$BASEDIR/assets/images/ic_ignore_case.png) \
@@ -205,11 +209,8 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_save.png) \
         $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \
-        $$quote($$BASEDIR/assets/images/ic_select.png) \
-        $$quote($$BASEDIR/assets/images/ic_selected.png) \
         $$quote($$BASEDIR/assets/images/ic_share.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
-        $$quote($$BASEDIR/assets/images/ic_view_details.png) \
         $$quote($$BASEDIR/assets/mathjax/MathJax.js) \
         $$quote($$BASEDIR/assets/mathjax/extensions/CHTML-preview.js) \
         $$quote($$BASEDIR/assets/mathjax/extensions/FontWarnings.js) \
@@ -516,6 +517,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Buffer.cpp) \
         $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
+        $$quote($$BASEDIR/src/BufferStore.cpp) \
         $$quote($$BASEDIR/src/BufferWorker.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfile.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.cpp) \
@@ -538,6 +540,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/NormalMode.cpp) \
         $$quote($$BASEDIR/src/NumberPicker.cpp) \
+        $$quote($$BASEDIR/src/Project.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/RepushablePage.cpp) \
         $$quote($$BASEDIR/src/RunProfile.cpp) \
@@ -636,6 +639,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Buffer.h) \
         $$quote($$BASEDIR/src/BufferHistory.h) \
         $$quote($$BASEDIR/src/BufferState.h) \
+        $$quote($$BASEDIR/src/BufferStore.h) \
         $$quote($$BASEDIR/src/BufferWorker.h) \
         $$quote($$BASEDIR/src/CmdRunProfile.h) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.h) \
@@ -661,6 +665,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
         $$quote($$BASEDIR/src/NumberPicker.h) \
+        $$quote($$BASEDIR/src/Project.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
         $$quote($$BASEDIR/src/RepushablePage.h) \
         $$quote($$BASEDIR/src/RunProfile.h) \

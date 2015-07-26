@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-#include <QSignalMapper>
 #include <bb/cascades/Application>
 #include <bb/cascades/TabbedPane>
 #include <bb/cascades/Tab>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/Page>
 #include <bb/cascades/NavigationPane>
+#include <bb/cascades/pickers/FilePicker>
 #include <MultiViewPane.h>
 #include <GeneralSettings.h>
 #include <View.h>
 #include <Buffer.h>
+#include <Project.h>
 #include <Helium.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(QObject *parent):
-    TabbedPane(parent), _lastActive(NULL), _base(3),
+    TabbedPane(parent),
+    _newProjectShortcut(Shortcut::create().key("m")
+        .onTriggered(this, SLOT(addNewProjectAndSetActive()))),
+    _newProjectControl(Tab::create()
+        .imageSource(QUrl("asset:///images/ic_add_folder.png"))
+        .onTriggered(this, SLOT(addNewProjectAndSetActive()))),
     _newViewShortcut(Shortcut::create().key("c")
         .onTriggered(this, SLOT(addNewView()))),
     _newViewControl(Tab::create()
@@ -41,25 +47,35 @@ MultiViewPane::MultiViewPane(QObject *parent):
         .onTriggered(this, SLOT(setPrevTabActive()))),
     _nextTabShortcut(Shortcut::create().key("w")
         .onTriggered(this, SLOT(setNextTabActive()))),
+    _nextProjectShortcut(Shortcut::create().key("n")
+        .onTriggered(this, SLOT(setNextProjectActive()))),
+    _changeProjectPathShortcut(Shortcut::create().key("o")
+        .onTriggered(this, SLOT(changeProjectPath()))),
     _helpShortcut(Shortcut::create().key("Backspace")
-        .onTriggered(this, SLOT(displayShortcuts())))
+        .onTriggered(this, SLOT(displayShortcuts()))),
+    _activeProject(NULL),
+    _fpicker(NULL), _zoomed(false), _reopenSidebar(false)
 {
     setShowTabsOnActionBar(false);
     addShortcut(_prevTabShortcut);
     addShortcut(_nextTabShortcut);
+    // project management
+    addShortcut(_nextProjectShortcut);
+    addShortcut(_changeProjectPathShortcut);
     addShortcut(_helpShortcut);
+    _newProjectControl->addShortcut(_newProjectShortcut);
     _newViewControl->addShortcut(_newViewShortcut);
 
-    add(Tab::create().imageSource(QUrl("asset:///images/ic_select.png"))
-            .title("sdcard/dev")
-            .onTriggered(this, SLOT(onProjectTriggered())));
-    add(Tab::create().imageSource(QUrl("asset:///images/ic_selected.png"))
-            .title("Dropbox/main")
-            .onTriggered(this, SLOT(onProjectTriggered())));
+    // set up the controls
+    add(_newProjectControl);
     add(_newViewControl);
 
-    conn(this, SIGNAL(activeTabChanged(bb::cascades::Tab*)),
-            this, SLOT(onActiveTabChanged(bb::cascades::Tab*)));
+    Project *p = new Project("/accounts/1000/removable/sdcard");
+    insertProject(0, p);
+    setActiveProject(p, false);
+
+    conn(this, SIGNAL(sidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)),
+        this, SLOT(onSidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)));
 
     // load text
     onTranslatorChanged();
@@ -67,26 +83,39 @@ MultiViewPane::MultiViewPane(QObject *parent):
 
 void MultiViewPane::onProjectTriggered()
 {
-    Tab *src = (Tab *) sender();
-    src->setImageSource(QUrl("asset:///images/ic_selected.png"));
-    for (int i = 0; i < _base-1; i++) {
-        Tab *t = TabbedPane::at(i);
-        if (t != src) {
-            t->setImageSource(QUrl("asset:///images/ic_select.png"));
-        }
+    Project *src = (Project *) sender();
+    if (_activeProject == src)
+        changeProjectPath();
+    else {
+        setActiveProject(src, false);
+        _reopenSidebar = true;
     }
-    conn(this, SIGNAL(sidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)),
-        this, SLOT(activateLastActive(bb::cascades::SidebarVisualState::Type)));
 }
 
-void MultiViewPane::activateLastActive(SidebarVisualState::Type type)
+void MultiViewPane::changeProjectPath()
 {
-    if (type == SidebarVisualState::Hidden) {
-        setActiveTab(_lastActive, false);
-        setSidebarState(SidebarState::VisibleFull);
-        disconn(this, SIGNAL(sidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)),
-        this, SLOT(activateLastActive(bb::cascades::SidebarVisualState::Type)));
-    }
+    filePicker(_activeProject->path(), this,
+            SLOT(onProjectPathSelected(const QStringList&)),
+            SLOT(resetProjectActiveView()))->open();
+}
+
+void MultiViewPane::onProjectPathSelected(const QStringList &list)
+{
+    _activeProject->setPath(list[0]);
+    resetProjectActiveView(true);
+}
+
+void MultiViewPane::resetProjectActiveView(bool toast)
+{
+    setActiveTab(_activeProject->activeView());
+    if (toast)
+        Utility::toast(QString("[%1/%2. %3]\n%4/%5. %6")
+                .arg(_projects.indexOf(_activeProject)+1)
+                .arg(_projects.size())
+                .arg(_activeProject->title())
+                .arg(_activeProject->activeViewIndex()+1)
+                .arg(_activeProject->size())
+                .arg(_activeProject->activeView()->title()));
 }
 
 void MultiViewPane::disableAllShortcuts()
@@ -101,197 +130,233 @@ void MultiViewPane::enableAllShortcuts()
     _newViewShortcut->setEnabled(true);
 }
 
-View *MultiViewPane::activeView() const
+void MultiViewPane::setActiveProject(Project *p, bool toast)
 {
-    return dynamic_cast<View *>(activeTab());
+    if (p != _activeProject) {
+        if (_activeProject) {
+            _activeProject->unselect();
+            disconn(_activeProject, SIGNAL(viewInserted(int, View*)),
+                this, SLOT(onProjectViewInserted(int, View*)));
+            disconn(_activeProject, SIGNAL(viewRemoved(View*)),
+                this, SLOT(onProjectViewRemoved(View*)));
+            disconn(_activeProject, SIGNAL(activeViewChanged(View*, bool)),
+                this, SLOT(onProjectActiveViewChanged(View*, bool)));
+            for (int i = 0; i < _activeProject->size(); i++)
+                remove(_activeProject->at(i));
+        }
+        _activeProject = p;
+        _activeProject->select();
+        for (int i = 0; i < _activeProject->size(); i++)
+            add(_activeProject->at(i));
+        resetProjectActiveView(toast);
+        conn(_activeProject, SIGNAL(viewInserted(int, View*)),
+            this, SLOT(onProjectViewInserted(int, View*)));
+        conn(_activeProject, SIGNAL(viewRemoved(View*)),
+            this, SLOT(onProjectViewRemoved(View*)));
+        conn(_activeProject, SIGNAL(activeViewChanged(View*, bool)),
+            this, SLOT(onProjectActiveViewChanged(View*, bool)));
+    }
 }
 
-NavigationPane *MultiViewPane::activePane() const
+void MultiViewPane::setNextProjectActive()
 {
-    return (NavigationPane *) TabbedPane::activePane();
+    if (_projects.size() < 2)
+        resetProjectActiveView(true);
+    else
+        setActiveProject(
+                _projects[PMOD(_projects.indexOf(_activeProject)+1, _projects.size())],
+                true);
 }
 
-void MultiViewPane::setActiveTab(Tab *tab, bool toast)
+void MultiViewPane::insertProject(int index, Project *project)
 {
-    setActiveTab(indexOf(tab), toast);
+    _projects.insert(index, project);
+    insert(1+index, project);
+    conn(this, SIGNAL(translatorChanged()),
+        project, SIGNAL(translatorChanged()));
+    conn(project, SIGNAL(triggered()),
+        this, SLOT(onProjectTriggered()));
 }
 
-void MultiViewPane::setActiveTab(int index, bool toast)
+void MultiViewPane::removeActiveProject()
+{
+    QStringList files;
+    for (int i = 0; i < _activeProject->size(); i++) {
+        if (_activeProject->at(i)->unsafeToRemove())
+            files.append(QString("\t%1").arg(_activeProject->at(i)->title()));
+    }
+    if (!files.empty()) {
+        Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
+                tr("These files have unsaved changes:\n"
+                "\n%1\n\n"
+                "Do you want to continue?").arg(files.join("\n")),
+                this, SLOT(onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type)));
+    } else {
+        removeAt(_projects.indexOf(_activeProject));
+    }
+}
+
+void MultiViewPane::onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        removeAt(_projects.indexOf(_activeProject));
+    }
+}
+
+void MultiViewPane::removeAt(int index)
+{
+    Project *project = _projects[index];
+    _projects.removeAt(index);
+    remove(project);
+    project->deleteLater();
+    if (project == _activeProject) {
+        if (_projects.isEmpty()) {
+            insertProject(0, new Project(project->path()));
+        }
+        setActiveProject(_projects[qMin(index, _projects.size()-1)], true);
+    }
+}
+
+pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
+            QObject *target,
+            const char *onFileSelected, const char *onCancelled)
+{
+    if (!_fpicker) {
+        _fpicker = new pickers::FilePicker(this);
+        _fpicker->setMode(pickers::FilePickerMode::SaverMultiple);
+    }
+    _fpicker->setDirectories(QStringList(directory));
+    _fpicker->disconnect();
+    conn(_fpicker, SIGNAL(fileSelected(const QStringList&)), target, onFileSelected);
+    if (onCancelled) {
+        conn(_fpicker, SIGNAL(canceled()), target, onCancelled);
+    }
+    return _fpicker;
+}
+
+void MultiViewPane::addNewProjectAndSetActive()
+{
+    filePicker(_activeProject->path(), this,
+            SLOT(onNewProjectPathSelected(const QStringList&)),
+            SLOT(resetProjectActiveView()))->open();
+}
+
+void MultiViewPane::onNewProjectPathSelected(const QStringList &list)
+{
+    int i = _projects.size();
+    Project *p = new Project(list[0]);
+    insertProject(i, p);
+    setActiveProject(p, true);
+}
+
+void MultiViewPane::onProjectViewInserted(int index, View *view)
+{
+    insert(2+_projects.size()+index, view);
+}
+
+void MultiViewPane::onProjectViewRemoved(View *view)
+{
+    remove(view);
+}
+
+void MultiViewPane::onProjectActiveViewChanged(View *, bool triggeredFromSidebar)
+{
+    resetProjectActiveView(!triggeredFromSidebar);
+}
+
+void MultiViewPane::zoomIntoView()
+{
+    if (!_zoomed) {
+        _zoomed = true;
+        while (count() > 0)
+            remove(at(0));
+        // set the active pane to use the current one
+        setActivePane(_activeProject->activeView()->detachContent());
+    }
+}
+
+void MultiViewPane::zoomOutOfView()
+{
+    if (_zoomed) {
+        _zoomed = false;
+        while (count() > 0)
+            remove(at(0));
+        // add the controls
+        setActivePane(NULL);
+        _activeProject->activeView()->reattachContent();
+        add(_newProjectControl);
+        for (int i = 0; i < _projects.size(); i++)
+            add(_projects[i]);
+        // add views
+        add(_newViewControl);
+        // add the views in the projects back
+        for (int i = 0; i < _activeProject->size(); i++)
+            add(_activeProject->at(i));
+        resetProjectActiveView();
+    }
+}
+
+void MultiViewPane::addNewView()
+{
+    _activeProject->addNewViewAndSetActive();
+}
+
+void MultiViewPane::setActiveTabWithToast(Tab *tab, bool toast)
+{
+    setActiveTabIndex(indexOf(tab), toast);
+}
+
+void MultiViewPane::setActiveTabIndex(int index, bool toast)
 {
     Tab *tab = at(index);
-    TabbedPane::setActiveTab(tab);
+    setActiveTab(tab);
     if (toast)
-        Utility::toast(QString("%1/%2. %3").arg(index+1).arg(count()).arg(tab->title()));
+        Utility::toast(QString("%1/%2. %3")
+                .arg(index+1).arg(count()).arg(tab->title()));
 }
 
-Tab *MultiViewPane::at(int i) const
+void MultiViewPane::setActiveTabWithOffset(int offset, bool toast)
 {
-    return TabbedPane::at(i+_base);
-}
-
-void MultiViewPane::hideViews()
-{
-    blockSignals(true);
-    _newViewShortcut->setEnabled(false);
-    _base = 0;
-    while (count() > 0) {
-        Tab *tab = at(0);
-        _save.append(tab);
-        remove(tab);
-    }
-}
-
-void MultiViewPane::restoreViews()
-{
-    while (count() > 0) {
-        remove(at(0));
-    }
-    for (int i = 0; i < _save.size(); i++) {
-        add(_save[i]);
-    }
-    _save.clear();
-    setActiveTab(_lastActive);
-    _base = 1;
-    _newViewShortcut->setEnabled(true);
-    blockSignals(false);
-}
-
-int MultiViewPane::indexOf(Tab *tab) const
-{
-    return TabbedPane::indexOf(tab) - _base;
-}
-
-int MultiViewPane::count() const
-{
-    return TabbedPane::count() - _base;
-}
-
-void MultiViewPane::addNewView(bool toast)
-{
-    int i = count();
-    View *v = new View(newBuffer());
-    insertView(i, v);
-    setActiveTab(i, toast);
-}
-
-void MultiViewPane::insertView(int index, View *view)
-{
-    conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
-    insert(index+_base, view);
-}
-
-void MultiViewPane::cloneActive(bool toast)
-{
-    int i = activeIndex()+1;
-    insertView(i, new View(activeView()->buffer()));
-    setActiveTab(i, toast);
-}
-
-void MultiViewPane::removeView(View *view, bool toast)
-{
-    Tab *activateLater = NULL;
-    if (view == activeView()) {
-        if (count() == 1) {
-            // better to create a new view
-            View *v = new View(newBuffer());
-            insertView(1, v);
-            activateLater = v;
-        } else {
-            // activate the view before it (or after it if it's the first one)
-            int ai = activeIndex();
-            if (ai == 0) {
-                ai = 1;
-            } else {
-                ai--;
-            }
-            activateLater = at(ai);
-        }
-    }
-    view->setBuffer(NULL);
-    remove(view);
-    view->deleteLater();
-    if (activateLater)
-        setActiveTab(activateLater, toast);
+    if (_zoomed)
+        setActiveTabIndex(PMOD(indexOf(activeTab())+offset, count()), toast);
+    else if (_activeProject->size() < 2) // refresh display
+        resetProjectActiveView(true);
+    else
+        _activeProject->setActiveViewIndex(
+                PMOD(_activeProject->activeViewIndex()+offset,
+                        _activeProject->size()));
 }
 
 void MultiViewPane::setPrevTabActive()
 {
-    int i = activeIndex(-1);
-    if (i >= 0)
-        setActiveTab(i, true);
+    setActiveTabWithOffset(-1, true);
 }
 
 void MultiViewPane::setNextTabActive()
 {
-    int i = activeIndex(1);
-    if (i >= 0)
-        setActiveTab(i, true);
+    setActiveTabWithOffset(1, true);
 }
 
-int MultiViewPane::activeIndex(int offset) const
+void MultiViewPane::onSidebarVisualStateChanged(SidebarVisualState::Type type)
 {
-    int i = indexOf(activeTab());
-    if (count() == 0 || i < 0)
-        return -1;
-    return PMOD(i+offset, count());
-}
-
-Buffer *MultiViewPane::newBuffer()
-{
-    Buffer *b = new Buffer(100, this);
-    _buffers.append(b);
-    return b;
-}
-
-Buffer *MultiViewPane::bufferForFilepath(const QString &filepath)
-{
-    for (int i = 0; i < _buffers.size(); i++) {
-        if (_buffers[i]->filepath() == filepath) {
-            return _buffers[i];
-        }
-    }
-    return NULL;
-}
-
-void MultiViewPane::removeBuffer(Buffer *buffer)
-{
-    if (_buffers.removeOne(buffer)) {
-        buffer->deleteLater();
-    }
-}
-
-void MultiViewPane::onActiveTabChanged(Tab *tab)
-{
-    qDebug() << "active tab changed" << tab;
-    if (View *v = dynamic_cast<View *>(tab)) {
-        if (v != _lastActive) {
-            if (_lastActive) {
-                _lastActive->onOutOfView();
-            }
-            qDebug() << "setting last active" << v;
-            _lastActive = v;
-        }
+    if (type == SidebarVisualState::Hidden && _reopenSidebar) {
+        _reopenSidebar = false;
+        setSidebarState(SidebarState::VisibleFull);
     }
 }
 
 void MultiViewPane::onTranslatorChanged()
 {
+    _newProjectControl->setTitle(tr("New Project"));
     _newViewControl->setTitle(tr("New"));
+    _newProjectShortcut->setProperty("help", tr("New Project"));
     _newViewShortcut->setProperty("help", tr("New"));
     _prevTabShortcut->setProperty("help", tr("Previous Tab/Option"));
     _nextTabShortcut->setProperty("help", tr("Next Tab/Option"));
+    _nextProjectShortcut->setProperty("help", tr("Next Project"));
+    _changeProjectPathShortcut->setProperty("help", tr("Change Project Path"));
     _helpShortcut->setProperty("help", tr("Display Shortcuts"));
     emit translatorChanged();
-}
-
-QList<ShortcutHelp> MultiViewPane::shortcutHelps()
-{
-    QList<ShortcutHelp> helps;
-    helps.append(ShortcutHelp::fromShortcut(_newViewShortcut));
-    for (int i = 0; i < shortcutCount(); i++) {
-        helps.append(ShortcutHelp::fromShortcut(shortcutAt(i)));
-    }
-    return helps;
 }
 
 void MultiViewPane::displayShortcuts()
@@ -309,6 +374,9 @@ void MultiViewPane::displayShortcuts()
     // pane properties
     helps.append(ShortcutHelp::fromPaneProperties(page->paneProperties()));
     // from multiViewPane itself
-    helps.append(shortcutHelps());
-    Utility::bigToast(ShortcutHelp::showAll(helps));
+    helps.append(ShortcutHelp::fromShortcut(_newProjectShortcut));
+    helps.append(ShortcutHelp::fromShortcut(_newViewShortcut));
+    for (int i = 0; i < shortcutCount(); i++)
+        helps.append(ShortcutHelp::fromShortcut(shortcutAt(i)));
+    Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps));
 }

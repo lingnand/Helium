@@ -38,6 +38,7 @@
 #include <Utility.h>
 #include <RepushablePage.h>
 #include <Segment.h>
+#include <Project.h>
 #include <Defaults.h>
 
 #define SCENE_COVER_LINE_LIMIT 10
@@ -104,12 +105,13 @@ Helium::Helium(int &argc, char **argv):
     // set up invocation
     conn(&_invokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
         this, SLOT(onInvoked(const bb::system::InvokeRequest&)));
-    switch (_invokeManager.startupMode()) {
-        case bb::system::ApplicationStartupMode::InvokeApplication:
-            break; // do not add a view as we are about to add one
-        default:
-            scene()->addNewView(false);
-    }
+    // TODO: to fix (don't insert a new view on invocation startup)
+//    switch (_invokeManager.startupMode()) {
+//        case bb::system::ApplicationStartupMode::InvokeApplication:
+//            break; // do not add a view as we are about to add one
+//        default:
+//            scene()->addNewView(false);
+//    }
 
    if (general()->numberOfTimesLaunched() == 1) {
        Utility::dialog(tr("Show Help"),
@@ -185,24 +187,22 @@ void Helium::onInvoked(const bb::system::InvokeRequest &request)
     }
     // notify the scene to recover from non-view mode
     // TODO: make this less hacky
-    View *lastActive = scene()->lastActiveView();
-    if (lastActive) {
-        lastActive->setNormalMode();
-    }
+    Project *p = scene()->activeProject();
+    p->activeView()->setNormalMode();
     QString filepath = request.uri().toLocalFile();
-    Buffer *buffer = scene()->bufferForFilepath(filepath);
+    Buffer *buffer = _buffers.bufferForFilepath(filepath);
     if (!buffer) {
-        buffer = scene()->newBuffer();
+        buffer = _buffers.newBuffer();
         buffer->load(filepath);
     }
-    View *v = new View(buffer);
-    scene()->insertView(scene()->count(), v);
-    scene()->setActiveTab(v, true);
+    int i = p->size();
+    p->insertNewView(i, buffer);
+    p->setActiveViewIndex(i);
 }
 
 void Helium::onThumbnail()
 {
-    View *view = scene()->lastActiveView();
+    View *view = scene()->activeProject()->activeView();
     if (!view)
         return;
     _cover->setDescription(view->title());

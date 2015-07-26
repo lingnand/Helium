@@ -28,6 +28,8 @@
 #include <HighlightType.h>
 #include <Utility.h>
 #include <SettingsPage.h>
+#include <Project.h>
+#include <BufferStore.h>
 #include <ShortcutHelp.h>
 
 using namespace bb::cascades;
@@ -50,9 +52,9 @@ using namespace bb::cascades;
 // TODO: it would be good if you can modulize the undo/redo functionality
 // and then attach it to each textfield/area like what you did with the modkeylistener!
 // that would be awesome...
-View::View(Buffer *buffer):
+View::View(Project *project, Buffer *buffer):
     _mode(NULL), _findMode(NULL),
-    _buffer(NULL),
+    _project(project), _buffer(NULL),
     _fpicker(NULL),
     _highlightRange(0, 1),
     _textArea(TextArea::create()
@@ -120,6 +122,11 @@ View::View(Buffer *buffer):
     setMode(_normalMode = new NormalMode(this));
 }
 
+View::~View()
+{
+    setBuffer(NULL); // this will erase the buffer if necessary
+}
+
 void View::onHideActionBarChanged(bool hide)
 {
     _page->setActionBarVisibility(hide ?
@@ -141,9 +148,10 @@ void View::setMode(ViewMode *mode)
 }
 
 // detachPage can only be called when at the main page
-void View::detachContent()
+bb::cascades::NavigationPane *View::detachContent()
 {
     _content->setParent(NULL);
+    return _content;
 }
 
 void View::reattachContent()
@@ -159,9 +167,9 @@ void View::hideAllPageActions()
     }
 }
 
-bool View::active() const
+bool View::unsafeToRemove() const
 {
-    return parent() && parent()->activeTab() == this;
+    return _buffer->views().size() == 1 && _buffer->dirty();
 }
 
 void View::onOutOfView()
@@ -203,10 +211,10 @@ void View::setBuffer(Buffer *buffer)
         if (_buffer) {
             _buffer->detachView(this);
             _buffer->disconnect(this);
-            disconnect(_buffer);
             // remove the buffer if it no longer has other views attached
             if (_buffer->views().empty())
-                parent()->removeBuffer(_buffer);
+                // XXX: this doesn't look quite right
+                Helium::instance()->buffers()->remove(_buffer);
         }
         _buffer = buffer;
         if (_buffer) {
@@ -252,12 +260,10 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(autodetectFiletypeChanged(bool)),
                 this, SIGNAL(bufferAutodetectFiletypeChanged(bool)));
 
-            conn(this, SIGNAL(undo()), _buffer, SLOT(undo()));
             emit hasUndosChanged(_buffer->hasUndo());
             conn(_buffer, SIGNAL(hasUndosChanged(bool)),
                 this, SIGNAL(hasUndosChanged(bool)));
 
-            conn(this, SIGNAL(redo()), _buffer, SLOT(redo()));
             emit hasRedosChanged(_buffer->hasRedo());
             conn(_buffer, SIGNAL(hasRedosChanged(bool)),
                 this, SIGNAL(hasRedosChanged(bool)));
@@ -425,7 +431,7 @@ void View::onBufferFiletypeChanged(Filetype *change, Filetype *old)
 {
     if (change) {
         setImageSource(QUrl("asset:///images/filetype/"+change->name()+".png"));
-        if (active())
+        if (parent() && parent()->activeTab() == this)
             Utility::toast(tr("Filetype set to %1").arg(change->name()));
     } else {
         setImageSource(QUrl("asset:///images/filetype/_blank.png"));
@@ -507,11 +513,7 @@ pickers::FilePicker *View::filePicker()
         conn(_fpicker, SIGNAL(fileSelected(const QStringList&)),
                 this, SLOT(onFileSelected(const QStringList&)));
     }
-    if (_buffer->filepath().isEmpty()) {
-        _fpicker->setDirectories(QStringList(Helium::instance()->general()->defaultOpenDirectory()));
-    } else {
-        _fpicker->setDirectories(QStringList(QFileInfo(_buffer->filepath()).absolutePath()));
-    }
+    _fpicker->setDirectories(QStringList(_project->path()));
     return _fpicker;
 }
 
@@ -540,7 +542,7 @@ void View::onBufferSavedToFile(const QString &)
 
 void View::open()
 {
-    if  (_buffer->views().size() == 1 && _buffer->dirty()) {
+    if  (unsafeToRemove()) {
         Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
                 tr("Do you want to continue?"),
                 this, SLOT(onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type)));
@@ -567,28 +569,29 @@ void View::onFileSelected(const QStringList &files)
 {
     switch (filePicker()->mode()) {
         case pickers::FilePickerMode::PickerMultiple: {
-            int index = parent()->indexOf(this), i = 0;
+            int index = _project->indexOf(this), i = 0;
+            BufferStore *buffers = Helium::instance()->buffers();
             Buffer *b;
             for (; i < files.size()-1; i++) {
-                b = parent()->bufferForFilepath(files[i]);
+                b = buffers->bufferForFilepath(files[i]);
                 if (!b) {
-                    b = parent()->newBuffer();
+                    b = buffers->newBuffer();
                     b->load(files[i]);
                 }
-                parent()->insertView(index+i, new View(b));
+                _project->insertNewView(index+i, b);
             }
             qDebug() << i << "views inserted during opening";
             if (i > 0) {
                 Utility::toast(tr("%1 new views inserted").arg(i));
             }
             if (files[i] != _buffer->filepath()) {
-                b = parent()->bufferForFilepath(files[i]);
+                b = buffers->bufferForFilepath(files[i]);
                 if (b) {
                     setBuffer(b);
                 } else {
                     if (_buffer->views().size() != 1) {
                         // not only bound to this view!
-                        setBuffer(parent()->newBuffer());
+                        setBuffer(buffers->newBuffer());
                     }
                     _buffer->load(files[i]);
                 }
@@ -603,24 +606,30 @@ void View::onFileSelected(const QStringList &files)
 
 void View::clone()
 {
-    parent()->cloneActive();
+    _project->cloneView(this);
 }
 
 void View::close()
 {
-    if  (_buffer->views().size() == 1 && _buffer->dirty()) {
+    if  (unsafeToRemove()) {
         Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
                 tr("Do you want to continue?"),
                 this, SLOT(onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type)));
     } else {
-        parent()->removeView(this);
+        _project->removeView(this);
     }
+}
+
+void View::closeProject()
+{
+    Q_ASSERT(_project == parent()->activeProject());
+    parent()->removeActiveProject();
 }
 
 void View::onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        parent()->removeView(this);
+        _project->removeView(this);
     }
 }
 
@@ -636,4 +645,14 @@ void View::setFiletype(Filetype *filetype)
 void View::setName(const QString &name)
 {
     _buffer->setName(name);
+}
+
+void View::undo()
+{
+    _buffer->undo();
+}
+
+void View::redo()
+{
+    _buffer->redo();
 }
