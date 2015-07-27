@@ -33,7 +33,7 @@ using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(QObject *parent):
     TabbedPane(parent),
-    _newProjectShortcut(Shortcut::create().key("m")
+    _newProjectShortcut(Shortcut::create().key("i")
         .onTriggered(this, SLOT(addNewProjectAndSetActive()))),
     _newProjectControl(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add_folder.png"))
@@ -121,12 +121,14 @@ void MultiViewPane::resetProjectActiveView(bool toast)
 void MultiViewPane::disableAllShortcuts()
 {
     TabbedPane::disableAllShortcuts();
+    _newProjectShortcut->setEnabled(false);
     _newViewShortcut->setEnabled(false);
 }
 
 void MultiViewPane::enableAllShortcuts()
 {
     TabbedPane::enableAllShortcuts();
+    _newProjectShortcut->setEnabled(false);
     _newViewShortcut->setEnabled(true);
 }
 

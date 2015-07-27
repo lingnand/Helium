@@ -82,7 +82,7 @@ NormalMode::NormalMode(View *view):
         .onTriggered(view, SLOT(close()))),
     _closeProjectAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_delete.png"))
-        .addShortcut(Shortcut::create().key("b")) // blot
+        .addShortcut(Shortcut::create().key("m"))
         .onTriggered(view, SLOT(closeProject()))),
     _propertiesPage(NULL),
     _lastFocused(false)
