@@ -82,7 +82,7 @@ NormalMode::NormalMode(View *view):
         .onTriggered(view, SLOT(close()))),
     _closeProjectAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_delete.png"))
-        .addShortcut(Shortcut::create().key("m"))
+        .addShortcut(Shortcut::create().key("Backspace"))
         .onTriggered(view, SLOT(closeProject()))),
     _propertiesPage(NULL),
     _lastFocused(false)
@@ -189,23 +189,25 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
     switch (event->keycap()) {
         case KEYCODE_BACKSPACE: {
             QList<ShortcutHelp> helps;
-            helps << ShortcutHelp::fromActionItem(_saveAction)
-                  << ShortcutHelp::fromActionItem(_undoAction)
-                  << ShortcutHelp::fromActionItem(_redoAction)
-                  << ShortcutHelp::fromActionItem(_openAction)
-                  << ShortcutHelp::fromActionItem(_findAction)
-                  << ShortcutHelp::fromActionItem(_runAction)
-                  << ShortcutHelp::fromActionItem(_cloneAction)
-                  << ShortcutHelp::fromActionItem(_closeAction)
-                  << ShortcutHelp("T", TAB_SYMBOL)
-                  << ShortcutHelp("D", tr("Delete line"))
-                  << ShortcutHelp("H", tr("Focus Title"))
-                  << ShortcutHelp("V", tr("Paste Clipboard"))
-                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
-                  << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut())
-                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut())
-                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut());
-            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+            QString prefix(RETURN_SYMBOL);
+            helps << ShortcutHelp::fromActionItem(_saveAction, prefix)
+                  << ShortcutHelp::fromActionItem(_undoAction, prefix)
+                  << ShortcutHelp::fromActionItem(_redoAction, prefix)
+                  << ShortcutHelp::fromActionItem(_openAction, prefix)
+                  << ShortcutHelp::fromActionItem(_findAction, prefix)
+                  << ShortcutHelp::fromActionItem(_runAction, prefix)
+                  << ShortcutHelp::fromActionItem(_cloneAction, prefix)
+                  << ShortcutHelp::fromActionItem(_closeAction, prefix)
+                  << ShortcutHelp("T", TAB_SYMBOL, prefix)
+                  << ShortcutHelp("D", tr("Delete line"), prefix)
+                  << ShortcutHelp("H", tr("Focus Title"), prefix)
+                  << ShortcutHelp("V", tr("Paste Clipboard"), prefix)
+                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut(), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut(), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut(), prefix)
+                  << ShortcutHelp(BACKSPACE_SYMBOL, tr("Display Shortcuts"), prefix);
+            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps));
             break;
         }
         case KEYCODE_T: // Tab
@@ -244,7 +246,7 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
             view()->clone();
             break;
         case KEYCODE_C: // Create
-            view()->parent()->activeProject()->addNewViewAndSetActive();
+            view()->parent()->createEmptyView();
             break;
         case KEYCODE_Q:
             view()->parent()->setPrevTabActive();
@@ -352,16 +354,18 @@ void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyLi
     switch (event->keycap()) {
         case KEYCODE_BACKSPACE: {
             QList<ShortcutHelp> helps;
-            helps << ShortcutHelp("V", tr("Paste Clipboard"))
-                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
-                  << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut())
-                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut())
-                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut());
-            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+            QString prefix(RETURN_SYMBOL);
+            helps << ShortcutHelp("V", tr("Paste Clipboard"), prefix)
+                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut(), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut(), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut(), prefix)
+                  << ShortcutHelp(BACKSPACE_SYMBOL, tr("Display Shortcuts"), prefix);
+            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps));
             break;
         }
         case KEYCODE_C: // Create
-            view()->parent()->activeProject()->addNewViewAndSetActive();
+            view()->parent()->createEmptyView();
             break;
         case KEYCODE_Q:
             view()->parent()->setPrevTabActive();

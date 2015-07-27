@@ -29,7 +29,6 @@
 #include <Utility.h>
 #include <SettingsPage.h>
 #include <Project.h>
-#include <BufferStore.h>
 #include <ShortcutHelp.h>
 
 using namespace bb::cascades;
@@ -73,9 +72,7 @@ View::View(Project *project, Buffer *buffer):
         .vertical(VerticalAlignment::Bottom)
         .topMargin(0)),
     _pageKeyListener(KeyListener::create()
-        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *)))),
-    _focusShortcut(Shortcut::create().key("Enter")
-        .onTriggered(this, SLOT(autoFocus())))
+        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
 {
     GeneralSettings *general = Helium::instance()->general();
     _highlightRangeLimit = general->highlightRange();
@@ -98,7 +95,6 @@ View::View(Project *project, Buffer *buffer):
             .add(_progressIndicator))
 //        .actionBarVisibility(ChromeVisibility::Visible)
 //        .actionBarVisibility(ChromeVisibility::Hidden)
-        .addShortcut(_focusShortcut)
         // navigation
         .addKeyListener(_pageKeyListener);
 
@@ -169,7 +165,13 @@ void View::hideAllPageActions()
 
 bool View::unsafeToRemove() const
 {
-    return _buffer->views().size() == 1 && _buffer->dirty();
+    return _buffer->views().size() == 1 &&
+            (_buffer->dirty() || !_buffer->name().isEmpty() && _buffer->filepath().isEmpty());
+}
+
+bool View::untouched() const
+{
+    return !_buffer->dirty() && _buffer->state().isEmpty() && _buffer->name().isEmpty();
 }
 
 void View::onOutOfView()
@@ -197,7 +199,7 @@ void View::setFindMode()
 
 void View::reloadTitle()
 {
-    QString namefmt = _buffer->dirty() ? "%1*" : "%1";
+    QString namefmt = unsafeToRemove() ? "%1*" : "%1";
     if (_buffer->name().isEmpty()) {
         Tab::setTitle(namefmt.arg(tr("No Name")));
     } else {
@@ -213,8 +215,7 @@ void View::setBuffer(Buffer *buffer)
             _buffer->disconnect(this);
             // remove the buffer if it no longer has other views attached
             if (_buffer->views().empty())
-                // XXX: this doesn't look quite right
-                Helium::instance()->buffers()->remove(_buffer);
+                _buffer->deleteLater();
         }
         _buffer = buffer;
         if (_buffer) {
@@ -489,7 +490,6 @@ void View::onTranslatorChanged()
 {
     reloadTitle();
     _textArea->setHintText(tr("Content"));
-    _focusShortcut->setProperty("help", tr("Focus Editable Area"));
     // initialize the pageKeyListener
     QVariantList helps;
     helps << QVariant::fromValue(ShortcutHelp("T", tr("Scroll to Top")))
@@ -542,24 +542,6 @@ void View::onBufferSavedToFile(const QString &)
 
 void View::open()
 {
-    if  (unsafeToRemove()) {
-        Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
-                tr("Do you want to continue?"),
-                this, SLOT(onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type)));
-    } else {
-        pickFileToOpen();
-    }
-}
-
-void View::onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type type)
-{
-    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        pickFileToOpen();
-    }
-}
-
-void View::pickFileToOpen()
-{
     filePicker()->setMode(pickers::FilePickerMode::PickerMultiple);
     filePicker()->setTitle(tr("Open"));
     filePicker()->open();
@@ -568,39 +550,10 @@ void View::pickFileToOpen()
 void View::onFileSelected(const QStringList &files)
 {
     switch (filePicker()->mode()) {
-        case pickers::FilePickerMode::PickerMultiple: {
-            int index = _project->indexOf(this), i = 0;
-            BufferStore *buffers = Helium::instance()->buffers();
-            Buffer *b;
-            for (; i < files.size()-1; i++) {
-                b = buffers->bufferForFilepath(files[i]);
-                if (!b) {
-                    b = buffers->newBuffer();
-                    b->load(files[i]);
-                }
-                _project->insertNewView(index+i, b);
-            }
-            qDebug() << i << "views inserted during opening";
-            if (i > 0) {
-                Utility::toast(tr("%1 new views inserted").arg(i));
-            }
-            if (files[i] != _buffer->filepath()) {
-                b = buffers->bufferForFilepath(files[i]);
-                if (b) {
-                    setBuffer(b);
-                } else {
-                    if (_buffer->views().size() != 1) {
-                        // not only bound to this view!
-                        setBuffer(buffers->newBuffer());
-                    }
-                    _buffer->load(files[i]);
-                }
-            }
-            break;
-        }
+        case pickers::FilePickerMode::PickerMultiple:
+            _project->openFilesAt(_project->indexOf(this), files); break;
         case pickers::FilePickerMode::Saver:
-            _buffer->save(files[0]);
-            break;
+            _buffer->save(files[0]); break;
     }
 }
 
@@ -622,8 +575,11 @@ void View::close()
 
 void View::closeProject()
 {
-    Q_ASSERT(_project == parent()->activeProject());
-    parent()->removeActiveProject();
+    // XXX: hack to make it work
+    if (!parent()->enterKeyPressedOnTopScope()) {
+        Q_ASSERT(_project == parent()->activeProject());
+        parent()->removeActiveProject();
+    }
 }
 
 void View::onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type type)

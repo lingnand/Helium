@@ -328,6 +328,22 @@ These format specifiers will be replaced:
         <source>Invalid regular expression!</source>
         <translation>正則表達式錯誤！</translation>
     </message>
+    <message>
+        <source>Dismiss</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation>快捷鍵</translation>
+    </message>
+    <message>
+        <source>Go to Replace Field</source>
+        <translation>聚焦替換文本框</translation>
+    </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation>顯示快捷鍵</translation>
+    </message>
 </context>
 <context>
     <name>GeneralSettingsPage</name>
@@ -532,6 +548,58 @@ These format specifiers will be replaced:
         <source>Next Tab/Option</source>
         <translation>下一個標籤/選項</translation>
     </message>
+    <message>
+        <source>New Project</source>
+        <translation>新項目</translation>
+    </message>
+    <message>
+        <source>Next Project</source>
+        <translation>下一個項目</translation>
+    </message>
+    <message>
+        <source>Change Project Path</source>
+        <translation>更改項目路徑</translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation>快捷鍵</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>是</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>否</translation>
+    </message>
+    <message>
+        <source>Unsaved change detected</source>
+        <translation>發現未保存內容</translation>
+    </message>
+    <message>
+        <source>These files have unsaved changes:
+
+%1
+
+Do you want to continue?</source>
+        <translation>以下文件未保存：
+
+%1
+
+您真的要繼續麼？</translation>
+    </message>
+    <message>
+        <source>Select Project Folder</source>
+        <translation>選擇項目路徑</translation>
+    </message>
+    <message>
+        <source>Focus Editable Area</source>
+        <translation>聚焦文本框</translation>
+    </message>
 </context>
 <context>
     <name>NormalMode</name>
@@ -599,6 +667,22 @@ These format specifiers will be replaced:
         <source>Editor</source>
         <translation>編輯器</translation>
     </message>
+    <message>
+        <source>Dismiss</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation>快捷鍵</translation>
+    </message>
+    <message>
+        <source>Close Project</source>
+        <translation>關閉項目</translation>
+    </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation>顯示快捷鍵</translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -662,16 +746,8 @@ These format specifiers will be replaced:
         <translation>您真的要繼續麼？</translation>
     </message>
     <message>
-        <source>%1 new views inserted</source>
-        <translation>插入了%1個新標籤頁</translation>
-    </message>
-    <message>
         <source>Content</source>
         <translation>內容</translation>
-    </message>
-    <message>
-        <source>Focus Editable Area</source>
-        <translation>聚焦文本框</translation>
     </message>
     <message>
         <source>Scroll to Top</source>

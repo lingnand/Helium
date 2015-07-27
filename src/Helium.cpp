@@ -40,6 +40,7 @@
 #include <Segment.h>
 #include <Project.h>
 #include <Defaults.h>
+#include <BufferStore.h>
 
 #define SCENE_COVER_LINE_LIMIT 10
 
@@ -56,6 +57,7 @@ Helium *Helium::instance()
 
 Helium::Helium(int &argc, char **argv):
     Application(argc, argv),
+    _buffers(new BufferStore(this)),
     _filetypeMap((new FiletypeMapStorage("filetypes", this))->read()),
     _general((new GeneralSettingsStorage("general_settings", this))->read()),
     _appearance((new AppearanceSettingsStorage("appearance_settings", this))->read()),
@@ -105,13 +107,6 @@ Helium::Helium(int &argc, char **argv):
     // set up invocation
     conn(&_invokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
         this, SLOT(onInvoked(const bb::system::InvokeRequest&)));
-    // TODO: to fix (don't insert a new view on invocation startup)
-//    switch (_invokeManager.startupMode()) {
-//        case bb::system::ApplicationStartupMode::InvokeApplication:
-//            break; // do not add a view as we are about to add one
-//        default:
-//            scene()->addNewView(false);
-//    }
 
    if (general()->numberOfTimesLaunched() == 1) {
        Utility::dialog(tr("Show Help"),
@@ -189,15 +184,7 @@ void Helium::onInvoked(const bb::system::InvokeRequest &request)
     // TODO: make this less hacky
     Project *p = scene()->activeProject();
     p->activeView()->setNormalMode();
-    QString filepath = request.uri().toLocalFile();
-    Buffer *buffer = _buffers.bufferForFilepath(filepath);
-    if (!buffer) {
-        buffer = _buffers.newBuffer();
-        buffer->load(filepath);
-    }
-    int i = p->size();
-    p->insertNewView(i, buffer);
-    p->setActiveViewIndex(i);
+    p->openFilesAt(p->activeViewIndex(), QStringList(request.uri().toLocalFile()));
 }
 
 void Helium::onThumbnail()

@@ -28,11 +28,11 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     _webView(WebView::create()),
     _backAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_backward.png"))
-        .addShortcut(Shortcut::create().key("p"))
+        .addShortcut(Shortcut::create().key("b"))
         .onTriggered(_webView, SLOT(goBack()))),
     _forwardAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_forward.png"))
-        .addShortcut(Shortcut::create().key("n"))
+        .addShortcut(Shortcut::create().key("f"))
         .onTriggered(_webView, SLOT(goForward()))),
     _rerunAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_reload.png"))

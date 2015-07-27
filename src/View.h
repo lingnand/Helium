@@ -23,7 +23,6 @@ namespace bb {
         class ProgressIndicator;
         class KeyEvent;
         class KeyListener;
-        class Shortcut;
         namespace pickers {
             class FilePicker;
         }
@@ -57,6 +56,7 @@ public:
     void reattachContent();
     void hideAllPageActions();
     bool unsafeToRemove() const;
+    bool untouched() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void setHighlightRangeLimit(int limit);
     Q_SLOT void setNormalMode();
@@ -78,6 +78,7 @@ public:
     Q_SLOT void setAutodetectFiletype(bool);
     Q_SLOT void setFiletype(Filetype *);
     Q_SLOT void setName(const QString &);
+    Q_SLOT void autoFocus();
 Q_SIGNALS:
     void hasUndosChanged(bool);
     void hasRedosChanged(bool);
@@ -106,12 +107,10 @@ private:
     bb::cascades::KeyListener *_pageKeyListener;
     bb::cascades::TextArea *_textArea;
     bb::cascades::ProgressIndicator *_progressIndicator;
-    bb::cascades::Shortcut *_focusShortcut;
 
     /** file related **/
     bb::cascades::pickers::FilePicker *_fpicker;
     bb::cascades::pickers::FilePicker *filePicker();
-    void pickFileToOpen();
     Q_SLOT void onFileSelected(const QStringList &files);
 
     /** navigation **/
@@ -137,9 +136,7 @@ private:
     Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
     Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);
     Q_SLOT void onBufferSavedToFile(const QString &filename);
-    Q_SLOT void onUnsavedChangeDialogFinishedWhenOpening(bb::system::SystemUiResult::Type);
     Q_SLOT void onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type);
-    Q_SLOT void autoFocus();
 };
 
 #endif /* VIEW_H_ */

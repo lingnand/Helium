@@ -10,16 +10,14 @@
 
 class Buffer;
 
-class BufferStore
+class BufferStore : public QObject
 {
+    Q_OBJECT
 public:
-    BufferStore();
-    virtual ~BufferStore();
+    BufferStore(QObject *parent=NULL);
+    virtual ~BufferStore() {}
     Buffer *newBuffer();
     Buffer *bufferForFilepath(const QString &filepath);
-    void remove(Buffer *);
-private:
-    QList<Buffer *> _buffers;
 };
 
 #endif /* BUFFERSTORE_H_ */

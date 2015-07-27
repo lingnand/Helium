@@ -330,6 +330,14 @@ These format specifiers will be replaced:
         <source>Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Go to Replace Field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneralSettingsPage</name>
@@ -523,10 +531,6 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Display Shortcuts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Previous Tab/Option</source>
         <translation type="unfinished"></translation>
     </message>
@@ -572,6 +576,18 @@ These format specifiers will be replaced:
 %1
 
 Do you want to continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select Project Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Focus Editable Area</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -653,6 +669,10 @@ Do you want to continue?</source>
         <source>Close Project</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -716,15 +736,7 @@ Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1 new views inserted</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Content</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Focus Editable Area</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

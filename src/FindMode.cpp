@@ -28,7 +28,6 @@
 #include <Filetype.h>
 #include <Utility.h>
 #include <Segment.h>
-#include <ShortcutHelp.h>
 
 using namespace bb::cascades;
 
@@ -157,12 +156,14 @@ void FindMode::onExit()
 
 void FindMode::onFindFieldModifiedKey(bb::cascades::KeyEvent *event)
 {
-    onFindFieldsModifiedKey(_findField->editor(), event);
+    onFindFieldsModifiedKey(_findField->editor(),
+            ShortcutHelp(RETURN_SYMBOL, tr("Go to Replace Field")), event);
 }
 
 void FindMode::onReplaceFieldModifiedKey(bb::cascades::KeyEvent *event)
 {
-    onFindFieldsModifiedKey(_replaceField->editor(), event);
+    onFindFieldsModifiedKey(_replaceField->editor(),
+            ShortcutHelp(RETURN_SYMBOL, tr("Find Next")), event);
 }
 
 void FindMode::onReplaceFieldModKeyPressedAndReleased()
@@ -171,21 +172,26 @@ void FindMode::onReplaceFieldModKeyPressedAndReleased()
     findNext();
 }
 
-void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor, bb::cascades::KeyEvent *event)
+void FindMode::onFindFieldsModifiedKey(bb::cascades::TextEditor *editor,
+        ShortcutHelp enterKeyHelp, bb::cascades::KeyEvent *event)
 {
     switch (event->keycap()) {
         case KEYCODE_BACKSPACE: {
             QList<ShortcutHelp> helps;
-            helps << ShortcutHelp::fromActionItem(_goToFindFieldAction)
-                  << ShortcutHelp::fromActionItem(_replaceNextAction)
-                  << ShortcutHelp::fromActionItem(_replaceAllAction)
-                  << ShortcutHelp::fromActionItem(_findCancelAction)
-                  << ShortcutHelp("T", TAB_SYMBOL)
-                  << ShortcutHelp("V", tr("Paste Clipboard"))
-                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"))
-                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut())
-                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut());
-            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps, QString(RETURN_SYMBOL) + " "));
+            QString prefix(RETURN_SYMBOL);
+            prefix += ' ';
+            helps << enterKeyHelp
+                  << ShortcutHelp::fromActionItem(_goToFindFieldAction, prefix)
+                  << ShortcutHelp::fromActionItem(_replaceNextAction, prefix)
+                  << ShortcutHelp::fromActionItem(_replaceAllAction, prefix)
+                  << ShortcutHelp::fromActionItem(_findCancelAction, prefix)
+                  << ShortcutHelp("T", TAB_SYMBOL, prefix)
+                  << ShortcutHelp("V", tr("Paste Clipboard"), prefix)
+                  << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->prevTabShortcut(), prefix)
+                  << ShortcutHelp::fromShortcut(view()->parent()->nextTabShortcut(), prefix)
+                  << ShortcutHelp(BACKSPACE_SYMBOL, tr("Display Shortcuts"), prefix);
+            Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps));
             break;
         }
         case KEYCODE_T:

@@ -20,6 +20,7 @@
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/Page>
 #include <bb/cascades/NavigationPane>
+#include <bb/cascades/KeyEvent>
 #include <bb/cascades/pickers/FilePicker>
 #include <MultiViewPane.h>
 #include <GeneralSettings.h>
@@ -28,21 +29,22 @@
 #include <Project.h>
 #include <Helium.h>
 #include <Utility.h>
+#include <ModKeyListener.h>
 
 using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(QObject *parent):
     TabbedPane(parent),
-    _newProjectShortcut(Shortcut::create().key("i")
-        .onTriggered(this, SLOT(addNewProjectAndSetActive()))),
+    _newProjectShortcut(Shortcut::create().key("m")
+        .onTriggered(this, SLOT(createProject()))),
     _newProjectControl(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add_folder.png"))
-        .onTriggered(this, SLOT(addNewProjectAndSetActive()))),
+        .onTriggered(this, SLOT(createProject()))),
     _newViewShortcut(Shortcut::create().key("c")
-        .onTriggered(this, SLOT(addNewView()))),
+        .onTriggered(this, SLOT(createEmptyView()))),
     _newViewControl(Tab::create()
         .imageSource(QUrl("asset:///images/ic_add.png"))
-        .onTriggered(this, SLOT(addNewView()))),
+        .onTriggered(this, SLOT(createEmptyView()))),
     _prevTabShortcut(Shortcut::create().key("q")
         .onTriggered(this, SLOT(setPrevTabActive()))),
     _nextTabShortcut(Shortcut::create().key("w")
@@ -51,20 +53,23 @@ MultiViewPane::MultiViewPane(QObject *parent):
         .onTriggered(this, SLOT(setNextProjectActive()))),
     _changeProjectPathShortcut(Shortcut::create().key("o")
         .onTriggered(this, SLOT(changeProjectPath()))),
-    _helpShortcut(Shortcut::create().key("Backspace")
-        .onTriggered(this, SLOT(displayShortcuts()))),
     _activeProject(NULL),
-    _fpicker(NULL), _zoomed(false), _reopenSidebar(false)
+    _fpicker(NULL), _zoomed(false), _reopenSidebar(false),
+    _enterKeyPressedOnTopScope(false)
 {
     setShowTabsOnActionBar(false);
+    addShortcut(_newViewShortcut);
     addShortcut(_prevTabShortcut);
     addShortcut(_nextTabShortcut);
     // project management
+    addShortcut(_newProjectShortcut);
     addShortcut(_nextProjectShortcut);
     addShortcut(_changeProjectPathShortcut);
-    addShortcut(_helpShortcut);
-    _newProjectControl->addShortcut(_newProjectShortcut);
-    _newViewControl->addShortcut(_newViewShortcut);
+    addShortcut(Shortcut::create().key("Enter")
+        .onTriggered(this, SLOT(flagEnterKeyOnTopScope())));
+    addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
+        .onModifiedKeyReleased(this, SLOT(onModifiedKey(bb::cascades::KeyEvent*)))
+        .onModKeyPressedAndReleased(this, SLOT(onModKey(bb::cascades::KeyEvent*))));
 
     // set up the controls
     add(_newProjectControl);
@@ -79,6 +84,32 @@ MultiViewPane::MultiViewPane(QObject *parent):
 
     // load text
     onTranslatorChanged();
+}
+
+void MultiViewPane::onModifiedKey(bb::cascades::KeyEvent *event)
+{
+    if (_enterKeyPressedOnTopScope) {
+        _enterKeyPressedOnTopScope = false;
+        if (event->keycap() == KEYCODE_BACKSPACE) {
+            displayShortcuts();
+        }
+    }
+}
+
+void MultiViewPane::onModKey(bb::cascades::KeyEvent *)
+{
+    if (_enterKeyPressedOnTopScope) {
+        _enterKeyPressedOnTopScope = false;
+        // XXX: the only scenario where we know to require a
+        // custom triggering is here...
+        if (View *v = dynamic_cast<View *>(activeTab()))
+            v->autoFocus();
+    }
+}
+
+void MultiViewPane::flagEnterKeyOnTopScope()
+{
+    _enterKeyPressedOnTopScope = true;
 }
 
 void MultiViewPane::onProjectTriggered()
@@ -107,29 +138,23 @@ void MultiViewPane::onProjectPathSelected(const QStringList &list)
 
 void MultiViewPane::resetProjectActiveView(bool toast)
 {
-    setActiveTab(_activeProject->activeView());
+    setProjectActiveView(_activeProject,
+            _activeProject->activeViewIndex(),
+            _activeProject->activeView(), toast);
+}
+
+void MultiViewPane::setProjectActiveView(Project *project,
+        int viewIndex, View *view, bool toast)
+{
+    setActiveTab(view);
     if (toast)
         Utility::toast(QString("[%1/%2. %3]\n%4/%5. %6")
-                .arg(_projects.indexOf(_activeProject)+1)
+                .arg(_projects.indexOf(project)+1)
                 .arg(_projects.size())
-                .arg(_activeProject->title())
-                .arg(_activeProject->activeViewIndex()+1)
-                .arg(_activeProject->size())
-                .arg(_activeProject->activeView()->title()));
-}
-
-void MultiViewPane::disableAllShortcuts()
-{
-    TabbedPane::disableAllShortcuts();
-    _newProjectShortcut->setEnabled(false);
-    _newViewShortcut->setEnabled(false);
-}
-
-void MultiViewPane::enableAllShortcuts()
-{
-    TabbedPane::enableAllShortcuts();
-    _newProjectShortcut->setEnabled(false);
-    _newViewShortcut->setEnabled(true);
+                .arg(project->title())
+                .arg(viewIndex+1)
+                .arg(project->size())
+                .arg(view->title()));
 }
 
 void MultiViewPane::setActiveProject(Project *p, bool toast)
@@ -141,8 +166,8 @@ void MultiViewPane::setActiveProject(Project *p, bool toast)
                 this, SLOT(onProjectViewInserted(int, View*)));
             disconn(_activeProject, SIGNAL(viewRemoved(View*)),
                 this, SLOT(onProjectViewRemoved(View*)));
-            disconn(_activeProject, SIGNAL(activeViewChanged(View*, bool)),
-                this, SLOT(onProjectActiveViewChanged(View*, bool)));
+            disconn(_activeProject, SIGNAL(activeViewChanged(int, View*, bool)),
+                this, SLOT(onProjectActiveViewChanged(int, View*, bool)));
             for (int i = 0; i < _activeProject->size(); i++)
                 remove(_activeProject->at(i));
         }
@@ -155,8 +180,8 @@ void MultiViewPane::setActiveProject(Project *p, bool toast)
             this, SLOT(onProjectViewInserted(int, View*)));
         conn(_activeProject, SIGNAL(viewRemoved(View*)),
             this, SLOT(onProjectViewRemoved(View*)));
-        conn(_activeProject, SIGNAL(activeViewChanged(View*, bool)),
-            this, SLOT(onProjectActiveViewChanged(View*, bool)));
+        conn(_activeProject, SIGNAL(activeViewChanged(int, View*, bool)),
+            this, SLOT(onProjectActiveViewChanged(int, View*, bool)));
     }
 }
 
@@ -215,7 +240,7 @@ void MultiViewPane::removeAt(int index)
         if (_projects.isEmpty()) {
             insertProject(0, new Project(project->path()));
         }
-        setActiveProject(_projects[qMin(index, _projects.size()-1)], true);
+        setActiveProject(_projects[qMax(index-1, 0)], true);
     }
 }
 
@@ -227,6 +252,7 @@ pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
         _fpicker = new pickers::FilePicker(this);
         _fpicker->setMode(pickers::FilePickerMode::SaverMultiple);
     }
+    _fpicker->setTitle(tr("Select Project Folder"));
     _fpicker->setDirectories(QStringList(directory));
     _fpicker->disconnect();
     conn(_fpicker, SIGNAL(fileSelected(const QStringList&)), target, onFileSelected);
@@ -236,7 +262,7 @@ pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
     return _fpicker;
 }
 
-void MultiViewPane::addNewProjectAndSetActive()
+void MultiViewPane::createProject()
 {
     filePicker(_activeProject->path(), this,
             SLOT(onNewProjectPathSelected(const QStringList&)),
@@ -245,9 +271,8 @@ void MultiViewPane::addNewProjectAndSetActive()
 
 void MultiViewPane::onNewProjectPathSelected(const QStringList &list)
 {
-    int i = _projects.size();
     Project *p = new Project(list[0]);
-    insertProject(i, p);
+    insertProject(_projects.indexOf(_activeProject)+1, p);
     setActiveProject(p, true);
 }
 
@@ -261,9 +286,9 @@ void MultiViewPane::onProjectViewRemoved(View *view)
     remove(view);
 }
 
-void MultiViewPane::onProjectActiveViewChanged(View *, bool triggeredFromSidebar)
+void MultiViewPane::onProjectActiveViewChanged(int index, View *view, bool triggeredFromSidebar)
 {
-    resetProjectActiveView(!triggeredFromSidebar);
+    setProjectActiveView(_activeProject, index, view, !triggeredFromSidebar);
 }
 
 void MultiViewPane::zoomIntoView()
@@ -274,6 +299,10 @@ void MultiViewPane::zoomIntoView()
             remove(at(0));
         // set the active pane to use the current one
         setActivePane(_activeProject->activeView()->detachContent());
+        _newViewShortcut->setEnabled(false);
+        _newProjectShortcut->setEnabled(false);
+        _nextProjectShortcut->setEnabled(false);
+        _changeProjectPathShortcut->setEnabled(false);
     }
 }
 
@@ -295,12 +324,16 @@ void MultiViewPane::zoomOutOfView()
         for (int i = 0; i < _activeProject->size(); i++)
             add(_activeProject->at(i));
         resetProjectActiveView();
+        _newViewShortcut->setEnabled(true);
+        _newProjectShortcut->setEnabled(true);
+        _nextProjectShortcut->setEnabled(true);
+        _changeProjectPathShortcut->setEnabled(true);
     }
 }
 
-void MultiViewPane::addNewView()
+void MultiViewPane::createEmptyView()
 {
-    _activeProject->addNewViewAndSetActive();
+    _activeProject->createEmptyViewAt(_activeProject->activeViewIndex()+1);
 }
 
 void MultiViewPane::setActiveTabWithToast(Tab *tab, bool toast)
@@ -357,7 +390,6 @@ void MultiViewPane::onTranslatorChanged()
     _nextTabShortcut->setProperty("help", tr("Next Tab/Option"));
     _nextProjectShortcut->setProperty("help", tr("Next Project"));
     _changeProjectPathShortcut->setProperty("help", tr("Change Project Path"));
-    _helpShortcut->setProperty("help", tr("Display Shortcuts"));
     emit translatorChanged();
 }
 
@@ -365,20 +397,24 @@ void MultiViewPane::displayShortcuts()
 {
     QList<ShortcutHelp> helps;
     Page *page = activePane()->top();
+    if (dynamic_cast<View *>(page))
+        helps << ShortcutHelp(QString(RETURN_SYMBOL), tr("Focus Editable Area"));
     for (int i = 0; i < page->shortcutCount(); i++)
-        helps.append(ShortcutHelp::fromShortcut(page->shortcutAt(i)));
+        helps << ShortcutHelp::fromShortcut(page->shortcutAt(i));
     // ActionItems
     for (int i = 0; i < page->actionCount(); i++)
-        helps.append(ShortcutHelp::fromActionItem(page->actionAt(i)));
+        helps << ShortcutHelp::fromActionItem(page->actionAt(i));
     // KeyListener
     for (int i = 0; i < page->keyListenerCount(); i++)
-        helps.append(ShortcutHelp::fromKeyListener(page->keyListenerAt(i)));
-    // pane properties
-    helps.append(ShortcutHelp::fromPaneProperties(page->paneProperties()));
-    // from multiViewPane itself
-    helps.append(ShortcutHelp::fromShortcut(_newProjectShortcut));
-    helps.append(ShortcutHelp::fromShortcut(_newViewShortcut));
-    for (int i = 0; i < shortcutCount(); i++)
-        helps.append(ShortcutHelp::fromShortcut(shortcutAt(i)));
+        helps << ShortcutHelp::fromKeyListener(page->keyListenerAt(i));
+    helps << ShortcutHelp::fromPaneProperties(page->paneProperties())
+          // from multiViewPane itself
+          << ShortcutHelp::fromShortcut(_newProjectShortcut)
+          << ShortcutHelp::fromShortcut(_newViewShortcut)
+          << ShortcutHelp::fromShortcut(_prevTabShortcut)
+          << ShortcutHelp::fromShortcut(_nextTabShortcut)
+          << ShortcutHelp::fromShortcut(_nextProjectShortcut)
+          << ShortcutHelp::fromShortcut(_changeProjectPathShortcut)
+          << ShortcutHelp(BACKSPACE_SYMBOL, tr("Display Shortcuts"), QString(RETURN_SYMBOL));
     Utility::dialog(tr("Dismiss"), tr("Shortcuts"), ShortcutHelp::showAll(helps));
 }

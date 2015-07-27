@@ -14,7 +14,6 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 #include <bb/platform/bbm/Context>
-#include <BufferStore.h>
 
 namespace bb {
     namespace cascades {
@@ -32,6 +31,7 @@ class HelpPage;
 class RepushablePage;
 class Segment;
 class View;
+class BufferStore;
 
 class Helium : public bb::cascades::Application
 {
@@ -43,7 +43,7 @@ public:
     FiletypeMap *filetypeMap() { return _filetypeMap; }
     GeneralSettings *general() { return _general; }
     AppearanceSettings *appearance() { return _appearance; }
-    BufferStore *buffers() { return &_buffers; }
+    BufferStore *buffers() { return _buffers; }
     MultiViewPane *scene() const {
         return (MultiViewPane *) bb::cascades::Application::scene();
     }
@@ -52,7 +52,7 @@ Q_SIGNALS:
     void translatorChanged();
 private:
     // buffers
-    BufferStore _buffers;
+    BufferStore *_buffers;
 
     // invocation
     bb::system::InvokeManager _invokeManager;

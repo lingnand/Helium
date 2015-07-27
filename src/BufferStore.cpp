@@ -8,36 +8,22 @@
 #include <BufferStore.h>
 #include <Buffer.h>
 
-BufferStore::BufferStore()
+BufferStore::BufferStore(QObject *parent): QObject(parent)
 {
-}
-
-BufferStore::~BufferStore()
-{
-    for (int i = 0; i < _buffers.size(); i++)
-        _buffers[i]->deleteLater();
 }
 
 Buffer *BufferStore::newBuffer()
 {
-    Buffer *b = new Buffer(100);
-    _buffers.append(b);
-    return b;
+    return new Buffer(100, this);
 }
 
 Buffer *BufferStore::bufferForFilepath(const QString &filepath)
 {
-    for (int i = 0; i < _buffers.size(); i++) {
-        if (_buffers[i]->filepath() == filepath) {
-            return _buffers[i];
+    for (int i = 0; i < children().size(); i++) {
+        Buffer *b = (Buffer *) children()[i];
+        if (b->filepath() == filepath) {
+            return b;
         }
     }
     return NULL;
-}
-
-void BufferStore::remove(Buffer *buffer)
-{
-    if (_buffers.removeOne(buffer)) {
-        buffer->deleteLater();
-    }
 }

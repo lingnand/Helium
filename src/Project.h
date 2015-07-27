@@ -21,7 +21,7 @@ public:
     virtual ~Project();
     View *activeView() const { return _activeView; }
     int activeViewIndex() const { return indexOf(_activeView); }
-    void setActiveViewIndex(int);
+    bool setActiveViewIndex(int); // return whether active view changed
     const QList<View *> &views() const { return _views; }
     const QString &path() const { return _path; };
     void setPath(const QString &path);
@@ -30,23 +30,29 @@ public:
     int indexOf(View *v) const { return _views.indexOf(v); }
     View *at(int i) const { return _views[i]; }
     int size() { return _views.size(); }
-    void insertNewView(int index, Buffer *);
-    void addNewViewAndSetActive();
+    void createEmptyViewAt(int);
     void removeAt(int);
     void removeView(View *view) { removeAt(indexOf(view)); }
     void cloneAt(int);
     void cloneView(View *view) { cloneAt(indexOf(view)); }
+    void openFilesAt(int, const QStringList &);
 Q_SIGNALS:
     void pathChanged(const QString &);
     void viewInserted(int index, View *);
     void viewRemoved(View *);
-    void activeViewChanged(View *, bool triggeredFromSidebar);
+    // this is emitted either the index or the view has changed, or both
+    // XXX: the above line is kinda a lie, because it doesn't pre-emptively
+    // emit signals e.g., when some view inserted
+    // instead the signal is only emitted when one of its public functions
+    // is called i.e. openFilesAt or createEmptyViewAt
+    void activeViewChanged(int index, View *, bool triggeredFromSidebar);
     void translatorChanged();
 private:
     View *_activeView;
     QList<View *> _views;
     QString _path;
 
+    void insertNewView(int index, Buffer *);
     Q_SLOT void onViewTriggered();
 };
 

@@ -27,6 +27,7 @@ namespace bb {
     namespace cascades {
         class NavigationPane;
         class Shortcut;
+        class KeyEvent;
         namespace pickers {
             class FilePicker;
         }
@@ -53,13 +54,14 @@ public:
     void setActiveTabWithToast(bb::cascades::Tab *, bool toast);
     Q_SLOT void setPrevTabActive();
     Q_SLOT void setNextTabActive();
-    Q_SLOT void disableAllShortcuts();
-    Q_SLOT void enableAllShortcuts();
     bb::cascades::Shortcut *newViewShortcut() const { return _newViewShortcut; }
     bb::cascades::Shortcut *prevTabShortcut() const { return _prevTabShortcut; }
     bb::cascades::Shortcut *nextTabShortcut() const { return _nextTabShortcut; }
     Q_SLOT void onTranslatorChanged();
     Q_SLOT void removeActiveProject();
+    // relay to current project
+    Q_SLOT void createEmptyView();
+    bool enterKeyPressedOnTopScope() const { return _enterKeyPressedOnTopScope; }
 Q_SIGNALS:
     void translatorChanged();
 private:
@@ -71,7 +73,6 @@ private:
     bb::cascades::Shortcut *_nextTabShortcut;
     bb::cascades::Shortcut *_nextProjectShortcut;
     bb::cascades::Shortcut *_changeProjectPathShortcut;
-    bb::cascades::Shortcut *_helpShortcut;
     bb::cascades::pickers::FilePicker *_fpicker;
     bb::cascades::pickers::FilePicker *filePicker(const QString &directory,
             QObject *target,
@@ -85,14 +86,12 @@ private:
     void insertProject(int, Project *);
     void setActiveProject(Project *, bool toast);
     Q_SLOT void setNextProjectActive();
-    Q_SLOT void addNewProjectAndSetActive();
+    Q_SLOT void createProject();
     // monitoring for the current project
     Q_SLOT void onProjectViewInserted(int, View *);
     Q_SLOT void onProjectViewRemoved(View *);
-    Q_SLOT void onProjectActiveViewChanged(View *, bool triggeredFromSidebar);
+    Q_SLOT void onProjectActiveViewChanged(int index, View *, bool triggeredFromSidebar);
     Q_SLOT void onNewProjectPathSelected(const QStringList &);
-    // relay to current project
-    Q_SLOT void addNewView();
 
     void setActiveTabIndex(int, bool toast);
     void setActiveTabWithOffset(int, bool toast);
@@ -100,12 +99,18 @@ private:
     Q_SLOT void onProjectTriggered();
     Q_SLOT void onProjectPathSelected(const QStringList &);
     Q_SLOT void resetProjectActiveView(bool toast=false);
+    Q_SLOT void setProjectActiveView(Project *, int viewIndex, View *, bool toast);
 
     Q_SLOT void onSidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type);
     Q_SLOT void onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type);
     Q_SLOT void displayShortcuts();
 
     void removeAt(int);
+
+    bool _enterKeyPressedOnTopScope;
+    Q_SLOT void onModifiedKey(bb::cascades::KeyEvent *);
+    Q_SLOT void onModKey(bb::cascades::KeyEvent *);
+    Q_SLOT void flagEnterKeyOnTopScope();
 };
 
 #endif /* MULTIVIEWPANE_H_ */
