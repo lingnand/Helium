@@ -11,8 +11,9 @@
 
 #define MOD_TIMEOUT 500
 
-ModKeyListener::ModKeyListener(int modKeycap):
-    _modKeycap(modKeycap), _modPressed(false), _modUsed(false), _enabled(true)
+ModKeyListener::ModKeyListener(int modKeycap, bool sticky):
+    _modKeycap(modKeycap), _sticky(sticky),
+    _modPressed(false), _modUsed(false), _enabled(true)
 {
     conn(this, SIGNAL(keyEvent(bb::cascades::KeyEvent*)),
         this, SLOT(onKeyEvent(bb::cascades::KeyEvent*)));
@@ -72,6 +73,13 @@ void ModKeyListener::onKeyEvent(bb::cascades::KeyEvent *event)
             } else {
                 modOn();
                 _modUsed = false;
+            }
+        } else {
+            if (_modPressed) {
+                emit modifiedKeyPressed(event, this);
+                if (!_sticky)
+                    // turn mod off as soon as some other key has been pressed
+                    modOff();
             }
         }
     } else {

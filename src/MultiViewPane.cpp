@@ -67,8 +67,8 @@ MultiViewPane::MultiViewPane(QObject *parent):
     addShortcut(_changeProjectPathShortcut);
     addShortcut(Shortcut::create().key("Enter")
         .onTriggered(this, SLOT(flagEnterKeyOnTopScope())));
-    addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
-        .onModifiedKeyReleased(this, SLOT(onModifiedKey(bb::cascades::KeyEvent*)))
+    addKeyListener(ModKeyListener::create(KEYCODE_RETURN, false)
+        .onModifiedKeyPressed(this, SLOT(onModifiedKey(bb::cascades::KeyEvent*)))
         .onModKeyPressedAndReleased(this, SLOT(onModKey(bb::cascades::KeyEvent*))));
 
     // set up the controls
