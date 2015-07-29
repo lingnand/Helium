@@ -22,6 +22,7 @@
 #include <bb/system/SystemUiResult>
 #include <Buffer.h>
 #include <ShortcutHelp.h>
+#include <Zipper.h>
 
 namespace bb {
     namespace cascades {
@@ -42,9 +43,9 @@ class MultiViewPane : public bb::cascades::TabbedPane
 {
     Q_OBJECT
 public:
-    MultiViewPane(QObject *parent=NULL);
+    MultiViewPane(Zipper<Project *> *projects, QObject *parent=NULL);
     virtual ~MultiViewPane() {}
-    Project *activeProject() const { return _activeProject; }
+    Project *activeProject() const { return _projects->active(); }
     bb::cascades::NavigationPane *activePane() const {
         return (bb::cascades::NavigationPane *) TabbedPane::activePane();
     }
@@ -81,31 +82,34 @@ private:
     bool _zoomed;
     bool _reopenSidebar;
 
-    QList<Project *> _projects;
-    Project *_activeProject;
-    void insertProject(int, Project *);
-    void setActiveProject(Project *, bool toast);
+    Zipper<Project *> *_projects;
     Q_SLOT void setNextProjectActive();
     Q_SLOT void createProject();
     // monitoring for the current project
     Q_SLOT void onProjectViewInserted(int, View *);
     Q_SLOT void onProjectViewRemoved(View *);
-    Q_SLOT void onProjectActiveViewChanged(int index, View *, bool triggeredFromSidebar);
+    Q_SLOT void onProjectActiveViewChanged(int index, View *);
     Q_SLOT void onNewProjectPathSelected(const QStringList &);
+    Q_SLOT void onProjectTriggered();
+    Q_SLOT void onProjectPathSelected(const QStringList &);
+    // monitoring zipper
+    Q_SLOT void onProjectInserted(int, Project *);
+    Q_SLOT void onProjectRemoved(int, Project *);
+    Q_SLOT void onActiveProjectChanged(Project *change, Project *old=NULL);
+
+    Q_SLOT void changeProjectPath();
+    bool sidebarHidden() const {
+        return sidebarVisualState() == bb::cascades::SidebarVisualState::Hidden;
+    }
+    Q_SLOT void resetProjectActiveView(bool toast=false);
+    Q_SLOT void setProjectActiveView(Project *, int viewIndex, View *, bool toast);
 
     void setActiveTabIndex(int, bool toast);
     void setActiveTabWithOffset(int, bool toast);
-    Q_SLOT void changeProjectPath();
-    Q_SLOT void onProjectTriggered();
-    Q_SLOT void onProjectPathSelected(const QStringList &);
-    Q_SLOT void resetProjectActiveView(bool toast=false);
-    Q_SLOT void setProjectActiveView(Project *, int viewIndex, View *, bool toast);
 
     Q_SLOT void onSidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type);
     Q_SLOT void onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type);
     Q_SLOT void displayShortcuts();
-
-    void removeAt(int);
 
     bool _enterKeyPressedOnTopScope;
     Q_SLOT void onModifiedKey(bb::cascades::KeyEvent *);

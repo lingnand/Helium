@@ -36,7 +36,7 @@ bool Project::setActiveViewIndex(int index)
         if (_activeView)
             _activeView->onOutOfView();
         _activeView = n;
-        emit activeViewChanged(index, _activeView, false);
+        emit activeViewChanged(index, _activeView);
         return true;
     }
     return false;
@@ -47,7 +47,7 @@ void Project::onViewTriggered()
     View *src = (View *) sender();
     if (src != _activeView) {
         _activeView = src;
-        emit activeViewChanged(activeViewIndex(), _activeView, true);
+        emit activeViewChanged(activeViewIndex(), _activeView);
     }
 }
 
@@ -145,7 +145,7 @@ void Project::openFilesAt(int index, const QStringList &files)
         int toActivate = index+offset+files.size()-1;
         if (!setActiveViewIndex(toActivate)) {
             if (files.size() > 1) // index DID change
-                emit activeViewChanged(toActivate, _activeView, false);
+                emit activeViewChanged(toActivate, _activeView);
         }
         return;
     }
@@ -171,6 +171,6 @@ void Project::openFilesAt(int index, const QStringList &files)
         }
     }
     if (i > 0) {
-        emit activeViewChanged(index+i, view, false);
+        emit activeViewChanged(index+i, view);
     }
 }

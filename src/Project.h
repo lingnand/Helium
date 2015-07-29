@@ -45,7 +45,7 @@ Q_SIGNALS:
     // emit signals e.g., when some view inserted
     // instead the signal is only emitted when one of its public functions
     // is called i.e. openFilesAt or createEmptyViewAt
-    void activeViewChanged(int index, View *, bool triggeredFromSidebar);
+    void activeViewChanged(int index, View *);
     void translatorChanged();
 private:
     View *_activeView;

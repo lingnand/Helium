@@ -33,7 +33,7 @@
 
 using namespace bb::cascades;
 
-MultiViewPane::MultiViewPane(QObject *parent):
+MultiViewPane::MultiViewPane(Zipper<Project *> *projects, QObject *parent):
     TabbedPane(parent),
     _newProjectShortcut(Shortcut::create().key("m")
         .onTriggered(this, SLOT(createProject()))),
@@ -53,7 +53,7 @@ MultiViewPane::MultiViewPane(QObject *parent):
         .onTriggered(this, SLOT(setNextProjectActive()))),
     _changeProjectPathShortcut(Shortcut::create().key("o")
         .onTriggered(this, SLOT(changeProjectPath()))),
-    _activeProject(NULL),
+    _projects(projects),
     _fpicker(NULL), _zoomed(false), _reopenSidebar(false),
     _enterKeyPressedOnTopScope(false)
 {
@@ -71,13 +71,19 @@ MultiViewPane::MultiViewPane(QObject *parent):
         .onModifiedKeyPressed(this, SLOT(onModifiedKey(bb::cascades::KeyEvent*)))
         .onModKeyPressedAndReleased(this, SLOT(onModKey(bb::cascades::KeyEvent*))));
 
-    // set up the controls
+    // setup the projects
+    // initial population of projects
     add(_newProjectControl);
     add(_newViewControl);
-
-    Project *p = new Project("/accounts/1000/removable/sdcard");
-    insertProject(0, p);
-    setActiveProject(p, false);
+    for (int i = 0; i < _projects->size(); i++)
+        onProjectInserted(i, _projects->at(i));
+    conn(_projects, SIGNAL(itemInserted(int, Project*)),
+        this, SLOT(onProjectInserted(int, Project*)));
+    onActiveProjectChanged(_projects->active());
+    conn(_projects, SIGNAL(activeItemChanged(Project*, Project*)),
+        this, SLOT(onActiveProjectChanged(Project*, Project*)));
+    conn(_projects, SIGNAL(itemRemoved(int, Project*)),
+        this, SLOT(onProjectRemoved(int, Project*)));
 
     conn(this, SIGNAL(sidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)),
         this, SLOT(onSidebarVisualStateChanged(bb::cascades::SidebarVisualState::Type)));
@@ -115,32 +121,32 @@ void MultiViewPane::flagEnterKeyOnTopScope()
 void MultiViewPane::onProjectTriggered()
 {
     Project *src = (Project *) sender();
-    if (_activeProject == src)
+    if (activeProject() == src)
         changeProjectPath();
     else {
-        setActiveProject(src, false);
+        _projects->setActive(src);
         _reopenSidebar = true;
     }
 }
 
 void MultiViewPane::changeProjectPath()
 {
-    filePicker(_activeProject->path(), this,
+    filePicker(activeProject()->path(), this,
             SLOT(onProjectPathSelected(const QStringList&)),
             SLOT(resetProjectActiveView()))->open();
 }
 
 void MultiViewPane::onProjectPathSelected(const QStringList &list)
 {
-    _activeProject->setPath(list[0]);
-    resetProjectActiveView(true);
+    activeProject()->setPath(list[0]);
+    resetProjectActiveView(sidebarHidden());
 }
 
 void MultiViewPane::resetProjectActiveView(bool toast)
 {
-    setProjectActiveView(_activeProject,
-            _activeProject->activeViewIndex(),
-            _activeProject->activeView(), toast);
+    setProjectActiveView(activeProject(),
+            activeProject()->activeViewIndex(),
+            activeProject()->activeView(), toast);
 }
 
 void MultiViewPane::setProjectActiveView(Project *project,
@@ -148,56 +154,53 @@ void MultiViewPane::setProjectActiveView(Project *project,
 {
     setActiveTab(view);
     if (toast)
-        Utility::toast(QString("[%1/%2. %3]\n%4/%5. %6")
-                .arg(_projects.indexOf(project)+1)
-                .arg(_projects.size())
-                .arg(project->title())
+        Utility::toast(QString("%1/%2. %3\n[%4/%5. %6]")
                 .arg(viewIndex+1)
                 .arg(project->size())
-                .arg(view->title()));
+                .arg(view->title())
+                .arg(_projects->indexOf(project)+1)
+                .arg(_projects->size())
+                .arg(project->title()));
 }
 
-void MultiViewPane::setActiveProject(Project *p, bool toast)
+void MultiViewPane::onActiveProjectChanged(Project *change, Project *old)
 {
-    if (p != _activeProject) {
-        if (_activeProject) {
-            _activeProject->unselect();
-            disconn(_activeProject, SIGNAL(viewInserted(int, View*)),
-                this, SLOT(onProjectViewInserted(int, View*)));
-            disconn(_activeProject, SIGNAL(viewRemoved(View*)),
-                this, SLOT(onProjectViewRemoved(View*)));
-            disconn(_activeProject, SIGNAL(activeViewChanged(int, View*, bool)),
-                this, SLOT(onProjectActiveViewChanged(int, View*, bool)));
-            for (int i = 0; i < _activeProject->size(); i++)
-                remove(_activeProject->at(i));
-        }
-        _activeProject = p;
-        _activeProject->select();
-        for (int i = 0; i < _activeProject->size(); i++)
-            add(_activeProject->at(i));
-        resetProjectActiveView(toast);
-        conn(_activeProject, SIGNAL(viewInserted(int, View*)),
+    if (old) {
+        old->unselect();
+        disconn(old, SIGNAL(viewInserted(int, View*)),
             this, SLOT(onProjectViewInserted(int, View*)));
-        conn(_activeProject, SIGNAL(viewRemoved(View*)),
+        disconn(old, SIGNAL(viewRemoved(View*)),
             this, SLOT(onProjectViewRemoved(View*)));
-        conn(_activeProject, SIGNAL(activeViewChanged(int, View*, bool)),
-            this, SLOT(onProjectActiveViewChanged(int, View*, bool)));
+        disconn(old, SIGNAL(activeViewChanged(int, View*)),
+            this, SLOT(onProjectActiveViewChanged(int, View*)));
+        for (int i = 0; i < old->size(); i++)
+            remove(old->at(i));
+    }
+    if (change) {
+        change->select();
+        for (int i = 0; i < change->size(); i++)
+            add(change->at(i));
+        resetProjectActiveView(sidebarHidden());
+        conn(change, SIGNAL(viewInserted(int, View*)),
+            this, SLOT(onProjectViewInserted(int, View*)));
+        conn(change, SIGNAL(viewRemoved(View*)),
+            this, SLOT(onProjectViewRemoved(View*)));
+        conn(change, SIGNAL(activeViewChanged(int, View*)),
+            this, SLOT(onProjectActiveViewChanged(int, View*)));
     }
 }
 
 void MultiViewPane::setNextProjectActive()
 {
-    if (_projects.size() < 2)
-        resetProjectActiveView(true);
+    if (_projects->size() < 2)
+        resetProjectActiveView(sidebarHidden());
     else
-        setActiveProject(
-                _projects[PMOD(_projects.indexOf(_activeProject)+1, _projects.size())],
-                true);
+        _projects->setActive(
+                _projects->at(PMOD(_projects->indexOf(activeProject())+1, _projects->size())));
 }
 
-void MultiViewPane::insertProject(int index, Project *project)
+void MultiViewPane::onProjectInserted(int index, Project *project)
 {
-    _projects.insert(index, project);
     insert(1+index, project);
     conn(this, SIGNAL(translatorChanged()),
         project, SIGNAL(translatorChanged()));
@@ -208,9 +211,9 @@ void MultiViewPane::insertProject(int index, Project *project)
 void MultiViewPane::removeActiveProject()
 {
     QStringList files;
-    for (int i = 0; i < _activeProject->size(); i++) {
-        if (_activeProject->at(i)->unsafeToRemove())
-            files.append(QString("\t%1").arg(_activeProject->at(i)->title()));
+    for (int i = 0; i < activeProject()->size(); i++) {
+        if (activeProject()->at(i)->unsafeToRemove())
+            files.append(QString("\t%1").arg(activeProject()->at(i)->title()));
     }
     if (!files.empty()) {
         Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
@@ -219,29 +222,23 @@ void MultiViewPane::removeActiveProject()
                 "Do you want to continue?").arg(files.join("\n")),
                 this, SLOT(onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type)));
     } else {
-        removeAt(_projects.indexOf(_activeProject));
+        _projects->removeAt(_projects->indexOf(activeProject()));
     }
 }
 
 void MultiViewPane::onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type type)
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        removeAt(_projects.indexOf(_activeProject));
+        _projects->removeAt(_projects->indexOf(activeProject()));
     }
 }
 
-void MultiViewPane::removeAt(int index)
+void MultiViewPane::onProjectRemoved(int index, Project *project)
 {
-    Project *project = _projects[index];
-    _projects.removeAt(index);
     remove(project);
+    if (!_projects->active())
+        _projects->insert(0, new Project(project->path()));
     project->deleteLater();
-    if (project == _activeProject) {
-        if (_projects.isEmpty()) {
-            insertProject(0, new Project(project->path()));
-        }
-        setActiveProject(_projects[qMax(index-1, 0)], true);
-    }
 }
 
 pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
@@ -264,7 +261,7 @@ pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
 
 void MultiViewPane::createProject()
 {
-    filePicker(_activeProject->path(), this,
+    filePicker(activeProject()->path(), this,
             SLOT(onNewProjectPathSelected(const QStringList&)),
             SLOT(resetProjectActiveView()))->open();
 }
@@ -272,13 +269,13 @@ void MultiViewPane::createProject()
 void MultiViewPane::onNewProjectPathSelected(const QStringList &list)
 {
     Project *p = new Project(list[0]);
-    insertProject(_projects.indexOf(_activeProject)+1, p);
-    setActiveProject(p, true);
+    _projects->insert(_projects->indexOf(activeProject())+1, p);
+    _projects->setActive(p);
 }
 
 void MultiViewPane::onProjectViewInserted(int index, View *view)
 {
-    insert(2+_projects.size()+index, view);
+    insert(2+_projects->size()+index, view);
 }
 
 void MultiViewPane::onProjectViewRemoved(View *view)
@@ -286,9 +283,9 @@ void MultiViewPane::onProjectViewRemoved(View *view)
     remove(view);
 }
 
-void MultiViewPane::onProjectActiveViewChanged(int index, View *view, bool triggeredFromSidebar)
+void MultiViewPane::onProjectActiveViewChanged(int index, View *view)
 {
-    setProjectActiveView(_activeProject, index, view, !triggeredFromSidebar);
+    setProjectActiveView(activeProject(), index, view, sidebarHidden());
 }
 
 void MultiViewPane::zoomIntoView()
@@ -298,7 +295,7 @@ void MultiViewPane::zoomIntoView()
         while (count() > 0)
             remove(at(0));
         // set the active pane to use the current one
-        setActivePane(_activeProject->activeView()->detachContent());
+        setActivePane(activeProject()->activeView()->detachContent());
         _newViewShortcut->setEnabled(false);
         _newProjectShortcut->setEnabled(false);
         _nextProjectShortcut->setEnabled(false);
@@ -314,16 +311,16 @@ void MultiViewPane::zoomOutOfView()
             remove(at(0));
         // add the controls
         setActivePane(NULL);
-        _activeProject->activeView()->reattachContent();
+        activeProject()->activeView()->reattachContent();
         add(_newProjectControl);
-        for (int i = 0; i < _projects.size(); i++)
-            add(_projects[i]);
+        for (int i = 0; i < _projects->size(); i++)
+            add(_projects->at(i));
         // add views
         add(_newViewControl);
         // add the views in the projects back
-        for (int i = 0; i < _activeProject->size(); i++)
-            add(_activeProject->at(i));
-        resetProjectActiveView();
+        for (int i = 0; i < activeProject()->size(); i++)
+            add(activeProject()->at(i));
+        resetProjectActiveView(sidebarHidden());
         _newViewShortcut->setEnabled(true);
         _newProjectShortcut->setEnabled(true);
         _nextProjectShortcut->setEnabled(true);
@@ -333,7 +330,7 @@ void MultiViewPane::zoomOutOfView()
 
 void MultiViewPane::createEmptyView()
 {
-    _activeProject->createEmptyViewAt(_activeProject->activeViewIndex()+1);
+    activeProject()->createEmptyViewAt(activeProject()->activeViewIndex()+1);
 }
 
 void MultiViewPane::setActiveTabWithToast(Tab *tab, bool toast)
@@ -354,12 +351,12 @@ void MultiViewPane::setActiveTabWithOffset(int offset, bool toast)
 {
     if (_zoomed)
         setActiveTabIndex(PMOD(indexOf(activeTab())+offset, count()), toast);
-    else if (_activeProject->size() < 2) // refresh display
-        resetProjectActiveView(true);
+    else if (activeProject()->size() < 2) // refresh display
+        resetProjectActiveView(sidebarHidden());
     else
-        _activeProject->setActiveViewIndex(
-                PMOD(_activeProject->activeViewIndex()+offset,
-                        _activeProject->size()));
+        activeProject()->setActiveViewIndex(
+                PMOD(activeProject()->activeViewIndex()+offset,
+                        activeProject()->size()));
 }
 
 void MultiViewPane::setPrevTabActive()

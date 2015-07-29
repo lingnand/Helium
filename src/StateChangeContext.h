@@ -14,7 +14,7 @@ class View;
 class StateChangeContext
 {
 public:
-    unsigned int requestId;
+    uint requestId;
     View *sourceView;
     bool sourceViewShouldUpdate;
     bool shouldMatchCursorPosition;

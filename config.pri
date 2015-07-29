@@ -541,6 +541,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/NormalMode.cpp) \
         $$quote($$BASEDIR/src/NumberPicker.cpp) \
         $$quote($$BASEDIR/src/Project.cpp) \
+        $$quote($$BASEDIR/src/ProjectStorage.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
         $$quote($$BASEDIR/src/RepushablePage.cpp) \
         $$quote($$BASEDIR/src/RunProfile.cpp) \
@@ -555,6 +556,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/WebRunProfile.cpp) \
         $$quote($$BASEDIR/src/WebRunProfileManager.cpp) \
         $$quote($$BASEDIR/src/WebRunProfileSettingsUI.cpp) \
+        $$quote($$BASEDIR/src/Zipper.cpp) \
         $$quote($$BASEDIR/src/hoedown/autolink.c) \
         $$quote($$BASEDIR/src/hoedown/buffer.c) \
         $$quote($$BASEDIR/src/hoedown/document.c) \
@@ -666,6 +668,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/NormalMode.h) \
         $$quote($$BASEDIR/src/NumberPicker.h) \
         $$quote($$BASEDIR/src/Project.h) \
+        $$quote($$BASEDIR/src/ProjectStorage.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
         $$quote($$BASEDIR/src/RepushablePage.h) \
         $$quote($$BASEDIR/src/RunProfile.h) \
@@ -682,6 +685,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/WebRunProfile.h) \
         $$quote($$BASEDIR/src/WebRunProfileManager.h) \
         $$quote($$BASEDIR/src/WebRunProfileSettingsUI.h) \
+        $$quote($$BASEDIR/src/Zipper.h) \
         $$quote($$BASEDIR/src/hoedown/autolink.h) \
         $$quote($$BASEDIR/src/hoedown/buffer.h) \
         $$quote($$BASEDIR/src/hoedown/document.h) \

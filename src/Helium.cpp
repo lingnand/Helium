@@ -41,6 +41,7 @@
 #include <Project.h>
 #include <Defaults.h>
 #include <BufferStore.h>
+#include <ProjectStorage.h>
 
 #define SCENE_COVER_LINE_LIMIT 10
 
@@ -84,7 +85,8 @@ Helium::Helium(int &argc, char **argv):
     conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
          this, SLOT(reloadTranslator()));
 
-    setScene(new MultiViewPane(this));
+    setScene(new MultiViewPane(
+            (new ProjectStorage("projects", this))->read(), this));
     conn(this, SIGNAL(translatorChanged()),
          scene(), SLOT(onTranslatorChanged()));
 

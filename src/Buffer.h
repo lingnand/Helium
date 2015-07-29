@@ -104,7 +104,7 @@ private:
     QThread _workerThread;
     // requestId is a non-decreasing id that identifies
     // the current request to the worker
-    unsigned int _requestId;
+    uint _requestId;
     BufferWorker _worker;
     QString _name;
     bool _autodetectFiletype;
