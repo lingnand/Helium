@@ -5,7 +5,6 @@
  *      Author: lingnan
  */
 
-#include <bb/ApplicationInfo>
 #include <bb/system/InvokeManager>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/ThemeSupport>
@@ -110,11 +109,15 @@ Helium::Helium(int &argc, char **argv):
     conn(&_invokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
         this, SLOT(onInvoked(const bb::system::InvokeRequest&)));
 
-   if (general()->numberOfTimesLaunched() == 1) {
-       Utility::dialog(tr("Show Help"),
-               tr("Welcome"), tr("Thanks for purchasing Helium!"),
-               this, SLOT(showHelp()));
-   }
+    qDebug() << "last version" << general()->lastVersion().string();
+    qDebug() << "current version" << general()->currentVerison().string();
+    if (general()->numberOfTimesLaunched() == 1) {
+        Utility::dialog(tr("Show Help"),
+                tr("Welcome"), tr("Thanks for purchasing Helium!"),
+                this, SLOT(showHelp()));
+    } else if (general()->lastVersion() < general()->currentVerison()) {
+        qDebug() << "Version update detected";
+    }
 }
 
 void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type state)
@@ -234,7 +237,8 @@ void Helium::contact()
     request.setTarget("sys.pim.uib.email.hybridcomposer");
     request.setAction("bb.action.OPEN.bb.action.SENDEMAIL");
     QUrl mailto("mailto:lingnan.d@gmail.com");
-    mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(bb::ApplicationInfo().version()));
+    mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(
+            general()->currentVerison().string()));
     request.setUri(mailto);
     _invokeManager.invoke(request);
 }
