@@ -354,15 +354,15 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Default Open Directory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;Choose a directory&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The default directory the Open command uses when no file has been opened in the current buffer before</source>
+        <source>Default Project Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The default directory for a new project</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -579,15 +579,15 @@ Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Select Project Folder</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Focus Editable Area</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Display Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select Project Directory</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

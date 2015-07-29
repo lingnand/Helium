@@ -360,16 +360,16 @@ These format specifiers will be replaced:
         <translation>高亮範圍</translation>
     </message>
     <message>
-        <source>Default Open Directory</source>
-        <translation>默認打開目錄</translation>
-    </message>
-    <message>
         <source>&lt;Choose a directory&gt;</source>
         <translation>「選擇目錄」</translation>
     </message>
     <message>
-        <source>The default directory the Open command uses when no file has been opened in the current buffer before</source>
-        <translation>未打開任何文件時默認所使用的打開目錄</translation>
+        <source>Default Project Directory</source>
+        <translation>默認項目路徑</translation>
+    </message>
+    <message>
+        <source>The default directory for a new project</source>
+        <translation>新項目所使用的默認路徑</translation>
     </message>
 </context>
 <context>
@@ -593,12 +593,12 @@ Do you want to continue?</source>
 您真的要繼續麼？</translation>
     </message>
     <message>
-        <source>Select Project Folder</source>
-        <translation>選擇項目路徑</translation>
-    </message>
-    <message>
         <source>Focus Editable Area</source>
         <translation>聚焦文本框</translation>
+    </message>
+    <message>
+        <source>Select Project Directory</source>
+        <translation>選擇項目路徑</translation>
     </message>
 </context>
 <context>
