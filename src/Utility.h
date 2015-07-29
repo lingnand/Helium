@@ -36,6 +36,7 @@ namespace bb {
 }
 
 #define PMOD(x, y) (((x) % (y) + (y)) % (y))
+#define DEFAULT_PROJECT_PATH "/accounts/1000/shared/documents"
 
 class Utility : public QObject {
     Q_OBJECT

@@ -28,10 +28,10 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
     _highlightRangePicker(new NumberPicker(0, 40)),
     _highlightRangeHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
-    _chooseDefaultOpenDirOption(Option::create()
-        .onSelectedChanged(this, SLOT(onChooseDefaultOpenDirSelectedChanged(bool)))),
-    _currentDefaultOpenDirOption(Option::create()),
-    _defaultOpenDirHelp(Label::create().multiline(true)
+    _chooseDefaultProjectDirOption(Option::create()
+        .onSelectedChanged(this, SLOT(onChooseDefaultProjectDirSelectedChanged(bool)))),
+    _currentDefaultProjectDirOption(Option::create()),
+    _defaultProjectDirHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
     _fpicker(NULL)
 {
@@ -43,53 +43,53 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObje
     conn(_settings, SIGNAL(highlightRangeChanged(int)),
         _highlightRangePicker, SLOT(setSelectedNumber(int)));
 
-    _defaultOpenDirSelect = DropDown::create()
-        .add(_chooseDefaultOpenDirOption)
-        .add(_currentDefaultOpenDirOption);
-    resetDefaultOpenDirSelection();
-    onDefaultOpenDirectoryChanged(_settings->defaultOpenDirectory());
-    conn(_settings, SIGNAL(defaultOpenDirectoryChanged(const QString&)),
-        this, SLOT(onDefaultOpenDirectoryChanged(const QString&)));
+    _defaultProjectDirSelect = DropDown::create()
+        .add(_chooseDefaultProjectDirOption)
+        .add(_currentDefaultProjectDirOption);
+    resetDefaultProjectDirSelection();
+    onDefaultProjectDirectoryChanged(_settings->defaultProjectDirectory());
+    conn(_settings, SIGNAL(defaultProjectDirectoryChanged(const QString&)),
+        this, SLOT(onDefaultProjectDirectoryChanged(const QString&)));
 
     setContent(ScrollView::create(Segment::create().section()
             .add(Segment::create().subsection().add(_highlightRangePicker))
             .add(Segment::create().subsection().add(_highlightRangeHelp))
             .add(Divider::create())
-            .add(Segment::create().subsection().add(_defaultOpenDirSelect))
-            .add(Segment::create().subsection().add(_defaultOpenDirHelp)))
+            .add(Segment::create().subsection().add(_defaultProjectDirSelect))
+            .add(Segment::create().subsection().add(_defaultProjectDirHelp)))
         .scrollMode(ScrollMode::Vertical));
 
     onTranslatorChanged();
 }
 
-void GeneralSettingsPage::onChooseDefaultOpenDirSelectedChanged(bool selected)
+void GeneralSettingsPage::onChooseDefaultProjectDirSelectedChanged(bool selected)
 {
     if (selected) {
         if (!_fpicker) {
             _fpicker = new pickers::FilePicker(this);
             conn(_fpicker, SIGNAL(fileSelected(const QStringList&)),
-                this, SLOT(onDefaultOpenDirSelected(const QStringList&)));
+                this, SLOT(onDefaultProjectDirSelected(const QStringList&)));
             conn(_fpicker, SIGNAL(pickerClosed()),
-                this, SLOT(resetDefaultOpenDirSelection()));
+                this, SLOT(resetDefaultProjectDirSelection()));
         }
         _fpicker->setMode(pickers::FilePickerMode::SaverMultiple);
         _fpicker->open();
     }
 }
 
-void GeneralSettingsPage::resetDefaultOpenDirSelection()
+void GeneralSettingsPage::resetDefaultProjectDirSelection()
 {
-    _defaultOpenDirSelect->setSelectedOption(_currentDefaultOpenDirOption);
+    _defaultProjectDirSelect->setSelectedOption(_currentDefaultProjectDirOption);
 }
 
-void GeneralSettingsPage::onDefaultOpenDirSelected(const QStringList &list)
+void GeneralSettingsPage::onDefaultProjectDirSelected(const QStringList &list)
 {
-    _settings->setDefaultOpenDirectory(list[0]);
+    _settings->setDefaultProjectDirectory(list[0]);
 }
 
-void GeneralSettingsPage::onDefaultOpenDirectoryChanged(const QString &directory)
+void GeneralSettingsPage::onDefaultProjectDirectoryChanged(const QString &directory)
 {
-    _currentDefaultOpenDirOption->setText(directory);
+    _currentDefaultProjectDirOption->setText(directory);
 }
 
 void GeneralSettingsPage::onTranslatorChanged()
@@ -98,7 +98,7 @@ void GeneralSettingsPage::onTranslatorChanged()
     _highlightRangePicker->setTitle(tr("Highlight Range"));
     _highlightRangeHelp->setText(tr("Highlight range controls the number of lines to be highlighted on each side of the cursor. "
             "Adjusting this value down will improve performance and vice versa."));
-    _defaultOpenDirSelect->setTitle(tr("Default Open Directory"));
-    _chooseDefaultOpenDirOption->setText(tr("<Choose a directory>"));
-    _defaultOpenDirHelp->setText(tr("The default directory the Open command uses when no file has been opened in the current buffer before"));
+    _defaultProjectDirSelect->setTitle(tr("Default Project Directory"));
+    _chooseDefaultProjectDirOption->setText(tr("<Choose a directory>"));
+    _defaultProjectDirHelp->setText(tr("The default directory for a new project"));
 }

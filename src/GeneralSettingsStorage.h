@@ -21,7 +21,7 @@ public:
 private:
     QSettings _settings;
     Q_SLOT void onHighlightRangeChanged(int);
-    Q_SLOT void onDefaultOpenDirectoryChanged(const QString &);
+    Q_SLOT void onDefaultProjectDirectoryChanged(const QString &);
     Q_SLOT void onSupportConfirmed();
 };
 

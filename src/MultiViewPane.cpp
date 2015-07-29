@@ -237,7 +237,7 @@ void MultiViewPane::onProjectRemoved(int index, Project *project)
 {
     remove(project);
     if (!_projects->active())
-        _projects->insert(0, new Project(project->path()));
+        _projects->insert(0, new Project(Helium::instance()->general()->defaultProjectDirectory()));
     project->deleteLater();
 }
 
@@ -249,7 +249,7 @@ pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
         _fpicker = new pickers::FilePicker(this);
         _fpicker->setMode(pickers::FilePickerMode::SaverMultiple);
     }
-    _fpicker->setTitle(tr("Select Project Folder"));
+    _fpicker->setTitle(tr("Select Project Directory"));
     _fpicker->setDirectories(QStringList(directory));
     _fpicker->disconnect();
     conn(_fpicker, SIGNAL(fileSelected(const QStringList&)), target, onFileSelected);
@@ -261,7 +261,7 @@ pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
 
 void MultiViewPane::createProject()
 {
-    filePicker(activeProject()->path(), this,
+    filePicker(Helium::instance()->general()->defaultProjectDirectory(), this,
             SLOT(onNewProjectPathSelected(const QStringList&)),
             SLOT(resetProjectActiveView()))->open();
 }

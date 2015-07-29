@@ -9,8 +9,6 @@
 #include <Project.h>
 #include <Utility.h>
 
-#define DEFAULT_PROJECT_PATH "/accounts/1000/removable/sdcard"
-
 ProjectStorage::ProjectStorage(const QString &prefix, QObject *parent):
     QObject(parent)
 {

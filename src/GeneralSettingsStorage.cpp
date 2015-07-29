@@ -22,7 +22,7 @@ void GeneralSettingsStorage::onHighlightRangeChanged(int range)
     _settings.setValue("highlight_range", range);
 }
 
-void GeneralSettingsStorage::onDefaultOpenDirectoryChanged(const QString &dir)
+void GeneralSettingsStorage::onDefaultProjectDirectoryChanged(const QString &dir)
 {
     _settings.setValue("default_open_directory", dir);
 }
@@ -37,15 +37,15 @@ GeneralSettings *GeneralSettingsStorage::read()
     qDebug() << "Reading general settings...";
     GeneralSettings *settings = new GeneralSettings(
         _settings.value("highlight_range", 23).toInt(),
-        _settings.value("default_open_directory", "/accounts/1000/shared").toString(),
+        _settings.value("default_project_directory", DEFAULT_PROJECT_PATH).toString(),
         _settings.value("number_of_times_launched", 0).toInt() + 1,
         _settings.value("has_confirmed_support", false).toBool(),
         this);
     _settings.setValue("number_of_times_launched", settings->numberOfTimesLaunched());
     conn(settings, SIGNAL(highlightRangeChanged(int)),
             this, SLOT(onHighlightRangeChanged(int)));
-    conn(settings, SIGNAL(defaultOpenDirectoryChanged(const QString&)),
-            this, SLOT(onDefaultOpenDirectoryChanged(const QString&)));
+    conn(settings, SIGNAL(defaultProjectDirectoryChanged(const QString&)),
+            this, SLOT(onDefaultProjectDirectoryChanged(const QString&)));
     conn(settings, SIGNAL(confirmedSupport()),
             this, SLOT(onSupportConfirmed()));
     return settings;

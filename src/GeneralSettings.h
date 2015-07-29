@@ -12,10 +12,10 @@ class GeneralSettings : public QObject
 {
     Q_OBJECT
 public:
-    GeneralSettings(int highlightRange, const QString &defaultOpenDirectory,
+    GeneralSettings(int highlightRange, const QString &defaultProjectDirectory,
             int numberOfTimesLaunched, bool hasConfirmedSupport,
             QObject *parent=NULL):
-        QObject(parent), _highlightRange(highlightRange), _defaultOpenDir(defaultOpenDirectory),
+        QObject(parent), _highlightRange(highlightRange), _defaultProjectDir(defaultProjectDirectory),
         _numberOfTimesLaunched(numberOfTimesLaunched), _hasConfirmedSupport(hasConfirmedSupport) {}
     int highlightRange() const { return _highlightRange; }
     Q_SLOT void setHighlightRange(int r) {
@@ -24,11 +24,11 @@ public:
             emit highlightRangeChanged(_highlightRange);
         }
     }
-    QString defaultOpenDirectory() const { return _defaultOpenDir; }
-    Q_SLOT void setDefaultOpenDirectory(const QString &dir)  {
-        if (dir != _defaultOpenDir) {
-            _defaultOpenDir = dir;
-            emit defaultOpenDirectoryChanged(_defaultOpenDir);
+    QString defaultProjectDirectory() const { return _defaultProjectDir; }
+    Q_SLOT void setDefaultProjectDirectory(const QString &dir)  {
+        if (dir != _defaultProjectDir) {
+            _defaultProjectDir = dir;
+            emit defaultProjectDirectoryChanged(_defaultProjectDir);
         }
     }
     int numberOfTimesLaunched() const { return _numberOfTimesLaunched; };
@@ -41,11 +41,11 @@ public:
     }
 Q_SIGNALS:
     void highlightRangeChanged(int);
-    void defaultOpenDirectoryChanged(const QString &);
+    void defaultProjectDirectoryChanged(const QString &);
     void confirmedSupport();
 private:
     int _highlightRange;
-    QString _defaultOpenDir;
+    QString _defaultProjectDir;
     int _numberOfTimesLaunched;
     bool _hasConfirmedSupport;
 };

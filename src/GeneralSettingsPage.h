@@ -34,15 +34,15 @@ private:
     GeneralSettings *_settings;
     NumberPicker *_highlightRangePicker;
     bb::cascades::Label *_highlightRangeHelp;
-    bb::cascades::DropDown *_defaultOpenDirSelect;
-    bb::cascades::Option *_chooseDefaultOpenDirOption;
-    bb::cascades::Option *_currentDefaultOpenDirOption;
-    bb::cascades::Label *_defaultOpenDirHelp;
+    bb::cascades::DropDown *_defaultProjectDirSelect;
+    bb::cascades::Option *_chooseDefaultProjectDirOption;
+    bb::cascades::Option *_currentDefaultProjectDirOption;
+    bb::cascades::Label *_defaultProjectDirHelp;
     bb::cascades::pickers::FilePicker *_fpicker;
-    Q_SLOT void resetDefaultOpenDirSelection();
-    Q_SLOT void onChooseDefaultOpenDirSelectedChanged(bool);
-    Q_SLOT void onDefaultOpenDirSelected(const QStringList &);
-    Q_SLOT void onDefaultOpenDirectoryChanged(const QString &);
+    Q_SLOT void resetDefaultProjectDirSelection();
+    Q_SLOT void onChooseDefaultProjectDirSelectedChanged(bool);
+    Q_SLOT void onDefaultProjectDirSelected(const QStringList &);
+    Q_SLOT void onDefaultProjectDirectoryChanged(const QString &);
 };
 
 #endif /* GENERALSETTINGSPAGE_H_ */
