@@ -25,7 +25,7 @@ void GeneralSettingsStorage::onHighlightRangeChanged(int range)
 
 void GeneralSettingsStorage::onDefaultProjectDirectoryChanged(const QString &dir)
 {
-    _settings.setValue("default_open_directory", dir);
+    _settings.setValue("default_project_directory", dir);
 }
 
 void GeneralSettingsStorage::onSupportConfirmed()
