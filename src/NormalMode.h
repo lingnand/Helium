@@ -38,14 +38,9 @@ public:
     void onExit();
 private:
     bool _lastFocused;
-
-    bb::cascades::TitleBar *_titleBar;
-    bb::cascades::TextField *_titleField;
-
-    FilePropertiesPage *_propertiesPage;
+    RunProfile *_runProfile;
 
     ModKeyListener *_textAreaModKeyListener;
-
     bb::cascades::ActionItem *_saveAction;
     bb::cascades::ActionItem *_saveAsAction;
     bb::cascades::ActionItem *_openAction;
@@ -57,12 +52,13 @@ private:
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_closeAction;
     bb::cascades::ActionItem *_closeProjectAction;
-    bb::cascades::ActionItem *_propertiesBackButton;
+    FilePropertiesPage *_propertiesPage;
+
+    bb::cascades::TitleBar *_titleBar;
+    bb::cascades::TextField *_titleField;
 
     Q_SLOT void reloadLocked();
 
-    /** run profile **/
-    RunProfile *_runProfile;
     void setRunProfile(RunProfile *);
     Q_SLOT void reloadRunnable();
     Q_SLOT void run();

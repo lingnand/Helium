@@ -90,44 +90,36 @@ Q_SIGNALS:
     void bufferLockedChanged(bool);
     void bufferAutodetectFiletypeChanged(bool);
 private:
-    /** project **/
-    Project *_project;
-
     /** mode **/
     ViewMode *_mode;
-    NormalMode *_normalMode;
     FindMode *_findMode;
-    void setMode(ViewMode *);
-
-    /** settings **/
-    Q_SLOT void onHideActionBarChanged(bool);
-
-    bb::cascades::NavigationPane *_content;
-    bb::cascades::Page *_page;
-    bb::cascades::KeyListener *_pageKeyListener;
+    /** project **/
+    Project *_project;
+    Buffer *_buffer;
+    Range _highlightRange;
+    bb::cascades::pickers::FilePicker *_fpicker;
     bb::cascades::TextArea *_textArea;
     bb::cascades::ProgressIndicator *_progressIndicator;
-
-    /** file related **/
-    bb::cascades::pickers::FilePicker *_fpicker;
-    bb::cascades::pickers::FilePicker *filePicker();
-    Q_SLOT void onFileSelected(const QStringList &files);
-
-    /** navigation **/
-    void scrollTo(int cursorPosition);
-    void scrollByLine(int offset);
-
+    bb::cascades::KeyListener *_pageKeyListener;
+    bb::cascades::Page *_page;
+    bb::cascades::NavigationPane *_content;
     /** buffer and highlight **/
-    Buffer *_buffer;
-    int _highlightRangeLimit;
-    Range _highlightRange;
     ParserPosition _highlightStart;
     QTimer _partialHighlightUpdateTimer;
-    Range partialHighlightRange(const BufferState &st, Range focus);
 
-    /** callbacks **/
+    int _highlightRangeLimit;
+    NormalMode *_normalMode;
+
+    void setMode(ViewMode *);
+    void scrollTo(int cursorPosition);
+    void scrollByLine(int offset);
+    Range partialHighlightRange(const BufferState &st, Range focus);
+    bb::cascades::pickers::FilePicker *filePicker();
     Q_SLOT void reloadTitle();
     Q_SLOT void blockPageKeyListener(bool);
+    /** callbacks **/
+    Q_SLOT void onHideActionBarChanged(bool);
+    Q_SLOT void onFileSelected(const QStringList &files);
     Q_SLOT void onPageKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString &text);
     Q_SLOT void onTextAreaCursorPositionChanged();

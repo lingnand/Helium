@@ -7,7 +7,6 @@
 
 #include <QStringList>
 #include <QDebug>
-#include <bb/ApplicationInfo>
 #include <GeneralSettingsStorage.h>
 #include <GeneralSettings.h>
 #include <Utility.h>
@@ -40,12 +39,9 @@ GeneralSettings *GeneralSettingsStorage::read()
         _settings.value("highlight_range", 23).toInt(),
         _settings.value("default_project_directory", DEFAULT_PROJECT_PATH).toString(),
         _settings.value("number_of_times_launched", 0).toInt() + 1,
-        Version(_settings.value("last_version").toString()),
-        Version(bb::ApplicationInfo().version()),
         _settings.value("has_confirmed_support", false).toBool(),
         this);
     _settings.setValue("number_of_times_launched", settings->numberOfTimesLaunched());
-    _settings.setValue("last_version", settings->currentVerison().string());
     conn(settings, SIGNAL(highlightRangeChanged(int)),
             this, SLOT(onHighlightRangeChanged(int)));
     conn(settings, SIGNAL(defaultProjectDirectoryChanged(const QString&)),

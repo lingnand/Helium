@@ -40,6 +40,7 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
     _tabSpaceConversionToggleHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
     _numberOfSpacesForTabSelect(DropDown::create()
+        .enabled(_tabSpaceConversionToggle->isChecked())
         .add("2", 2)
         .add("4", 4)
         .add("8", 8)),
@@ -52,17 +53,15 @@ FiletypeSettingsUI::FiletypeSettingsUI(Filetype *filetype):
             .value(RunProfileManager::Cmd)),
     _webRunProfileOption(Option::create()
             .value(RunProfileManager::Web)),
+    _runProfileSelect(DropDown::create()
+        .add(_noneRunProfileOption)
+        .add(_cmdRunProfileOption)
+        .add(_webRunProfileOption)),
     _runProfileSettingsUI(NULL)
 {
-    _numberOfSpacesForTabSelect->setEnabled(
-            _tabSpaceConversionToggle->isChecked());
     conn(_tabSpaceConversionToggle, SIGNAL(checkedChanged(bool)),
         _numberOfSpacesForTabSelect, SLOT(setEnabled(bool)));
 
-    _runProfileSelect = DropDown::create()
-        .add(_noneRunProfileOption)
-        .add(_cmdRunProfileOption)
-        .add(_webRunProfileOption);
     conn(_runProfileSelect, SIGNAL(selectedValueChanged(const QVariant&)),
         this, SLOT(onRunProfileSelectionChanged(const QVariant&)));
 

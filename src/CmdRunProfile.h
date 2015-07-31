@@ -35,18 +35,18 @@ public:
     bool runnable() const;
     void exit();
 private:
-    bool _runnable;
-    Q_SLOT void recalcRunnable();
-
     QString _cmd;
-    QProcess _process;
-
-    bb::cascades::Page *_outputPage;
-    bb::cascades::Label *_outputArea;
+    bool _runnable;
     bb::cascades::ActionItem *_terminateAction;
     bb::cascades::ActionItem *_killAction;
     bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;
+    bb::cascades::Label *_outputArea;
+    bb::cascades::Page *_outputPage;
+
+    QProcess _process;
+
+    Q_SLOT void recalcRunnable();
 
     Q_SLOT void onNewStandardOutput();
     Q_SLOT void onNewStandardError();

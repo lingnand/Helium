@@ -34,7 +34,7 @@ using namespace bb::cascades;
 
 NormalMode::NormalMode(View *view):
     ViewMode(view),
-    _runProfile(NULL),
+    _lastFocused(false), _runProfile(NULL),
     _textAreaModKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyReleased(this, SLOT(onTextAreaModifiedKey(bb::cascades::KeyEvent*, ModKeyListener*)))
         .onModKeyPressedAndReleased(this, SLOT(onTextAreaModKey(bb::cascades::KeyEvent*)))
@@ -84,8 +84,7 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_delete.png"))
         .addShortcut(Shortcut::create().key("Backspace"))
         .onTriggered(view, SLOT(closeProject()))),
-    _propertiesPage(NULL),
-    _lastFocused(false)
+    _propertiesPage(NULL)
 {
     view->textArea()->addKeyListener(_textAreaModKeyListener);
 

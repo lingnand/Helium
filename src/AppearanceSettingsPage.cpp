@@ -42,29 +42,9 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
     _themeSelectHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
     _fontHeader(Header::create()),
-    _defaultFontSizeOption(Option::create().value(FontSize::Default)),
-    _extraSmallFontSizeOption(Option::create().value(FontSize::XSmall)),
-    _smallFontSizeOption(Option::create().value(FontSize::Small)),
-    _mediumFontSizeOption(Option::create().value(FontSize::Medium)),
-    _largeFontSizeOption(Option::create().value(FontSize::Large)),
-    _extraLargeFontSizeOption(Option::create().value(FontSize::XLarge))
-{
-    setTitleBar(TitleBar::create());
-
-    _hideActionBarToggle->setChecked(appearanceSettings->hideActionBar());
-    conn(_hideActionBarToggle, SIGNAL(checkedChanged(bool)),
-        appearanceSettings, SLOT(setHideActionBar(bool)));
-    conn(appearanceSettings, SIGNAL(hideActionBarChanged(bool)),
-        _hideActionBarToggle, SLOT(setChecked(bool)));
-
-    onThemeChanged(appearanceSettings->theme());
-    conn(_themeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
-        this, SLOT(onThemeSelectionChanged(const QVariant&)));
-    conn(appearanceSettings, SIGNAL(themeChanged(AppearanceSettings::Theme)),
-        this, SLOT(onThemeChanged(AppearanceSettings::Theme)));
-
-    _fontFamilySelect = DropDown::create()
-        .add(_defaultFontFamilyOption = Option::create().value(QString()))
+    _defaultFontFamilyOption(Option::create().value(QString())),
+    _fontFamilySelect(DropDown::create()
+        .add(_defaultFontFamilyOption)
         .add("Andale Mono", "Andale Mono")
         .add("Arial", "Arial")
         .add("Arial Black", "Arial Black")
@@ -85,20 +65,41 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
         .add("Verdana", "Verdana")
         .add("Webdings", "Webdings")
         .add("Webdings 2", "Webdings 2")
-        .add("Webdings 3", "Webdings 3");
+        .add("Webdings 3", "Webdings 3")),
+    _defaultFontSizeOption(Option::create().value(FontSize::Default)),
+    _extraSmallFontSizeOption(Option::create().value(FontSize::XSmall)),
+    _smallFontSizeOption(Option::create().value(FontSize::Small)),
+    _mediumFontSizeOption(Option::create().value(FontSize::Medium)),
+    _largeFontSizeOption(Option::create().value(FontSize::Large)),
+    _extraLargeFontSizeOption(Option::create().value(FontSize::XLarge)),
+    _fontSizeSelect(DropDown::create()
+        .add(_defaultFontSizeOption)
+        .add(_extraSmallFontSizeOption)
+        .add(_smallFontSizeOption)
+        .add(_mediumFontSizeOption)
+        .add(_largeFontSizeOption)
+        .add(_extraLargeFontSizeOption))
+{
+    setTitleBar(TitleBar::create());
+
+    _hideActionBarToggle->setChecked(appearanceSettings->hideActionBar());
+    conn(_hideActionBarToggle, SIGNAL(checkedChanged(bool)),
+        appearanceSettings, SLOT(setHideActionBar(bool)));
+    conn(appearanceSettings, SIGNAL(hideActionBarChanged(bool)),
+        _hideActionBarToggle, SLOT(setChecked(bool)));
+
+    onThemeChanged(appearanceSettings->theme());
+    conn(_themeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
+        this, SLOT(onThemeSelectionChanged(const QVariant&)));
+    conn(appearanceSettings, SIGNAL(themeChanged(AppearanceSettings::Theme)),
+        this, SLOT(onThemeChanged(AppearanceSettings::Theme)));
+
     onFontFamilyChanged(appearanceSettings->fontFamily());
     conn(_fontFamilySelect, SIGNAL(selectedValueChanged(const QVariant&)),
         this, SLOT(onFontFamilySelectionChanged(const QVariant&)));
     conn(appearanceSettings, SIGNAL(fontFamilyChanged(const QString&)),
         this, SLOT(onFontFamilyChanged(const QString&)));
 
-    _fontSizeSelect = DropDown::create()
-        .add(_defaultFontSizeOption)
-        .add(_extraSmallFontSizeOption)
-        .add(_smallFontSizeOption)
-        .add(_mediumFontSizeOption)
-        .add(_largeFontSizeOption)
-        .add(_extraLargeFontSizeOption);
     onFontSizeChanged(appearanceSettings->fontSize());
     conn(_fontSizeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
         this, SLOT(onFontSizeSelectionChanged(const QVariant&)));

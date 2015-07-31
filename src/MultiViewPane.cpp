@@ -35,6 +35,7 @@ using namespace bb::cascades;
 
 MultiViewPane::MultiViewPane(Zipper<Project *> *projects, QObject *parent):
     TabbedPane(parent),
+    _projects(projects),
     _newProjectShortcut(Shortcut::create().key("m")
         .onTriggered(this, SLOT(createProject()))),
     _newProjectControl(Tab::create()
@@ -53,7 +54,6 @@ MultiViewPane::MultiViewPane(Zipper<Project *> *projects, QObject *parent):
         .onTriggered(this, SLOT(setNextProjectActive()))),
     _changeProjectPathShortcut(Shortcut::create().key("o")
         .onTriggered(this, SLOT(changeProjectPath()))),
-    _projects(projects),
     _fpicker(NULL), _zoomed(false), _reopenSidebar(false),
     _enterKeyPressedOnTopScope(false)
 {

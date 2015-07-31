@@ -99,24 +99,24 @@ private:
     // store the list of attached views
     QSet<View *> _views;
 
-    bool _dirty;
-    bool _locked;
-    QThread _workerThread;
     // requestId is a non-decreasing id that identifies
     // the current request to the worker
     uint _requestId;
-    BufferWorker _worker;
-    QString _name;
-    bool _autodetectFiletype;
-    QString _filepath;
     BufferHistory _states;
     QDateTime _lastEdited;
+    bool _locked;
+    bool _dirty;
+    bool _autodetectFiletype;
+
+    QThread _workerThread;
+    BufferWorker _worker;
+    QString _name;
+    QString _filepath;
+    QString _highlightStyleFile;
 
     BufferState &modifyState(bool forceCopy=false);
     void setLocked(bool);
     void setDirty(bool);
-
-    QString _highlightStyleFile;
 
     void _setName(const QString &name, bool setHighlightType, Progress &);
     void setHighlightType(const HighlightType &, Progress &);

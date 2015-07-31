@@ -90,9 +90,9 @@ Q_SIGNALS:
 private:
     int _modKeycap;
     bool _sticky;
-    bool _enabled;
     bool _modPressed;
     bool _modUsed;
+    bool _enabled;
     bool modOn();
     Q_SLOT void onKeyEvent(bb::cascades::KeyEvent *event);
 };

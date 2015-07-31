@@ -37,14 +37,14 @@ Q_SIGNALS:
     void filetypeSelectionChanged(Filetype *);
     void backButtonTriggered();
 private:
-    bb::cascades::ToggleButton *_autodetectFiletypeToggle;
     bb::cascades::Label *_autodetectFiletypeToggleLabel;
+    bb::cascades::ToggleButton *_autodetectFiletypeToggle;
     bb::cascades::Label *_autodetectFiletypeToggleHelp;
-    bb::cascades::DropDown *_filetypeSelect;
     bb::cascades::Option *_noneFiletypeOption;
+    bb::cascades::DropDown *_filetypeSelect;
     bb::cascades::Label *_filetypeSelectHelp;
-    bb::cascades::ActionItem *_backButton;
     FiletypeSettingsUI *_filetypeSettingsUI;
+    bb::cascades::ActionItem *_backButton;
     Q_SLOT void onFiletypeSelectionChanged(const QVariant &);
 };
 

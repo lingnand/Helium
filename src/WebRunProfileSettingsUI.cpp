@@ -26,13 +26,13 @@ WebRunProfileSettingsUI::WebRunProfileSettingsUI(WebRunProfileManager *manager):
         .value(WebRunProfile::Javascript)),
     _markdownOption(Option::create()
         .value(WebRunProfile::Markdown)),
+    _modeSelect(DropDown::create()
+        .add(_htmlOption)
+        .add(_javascriptOption)
+        .add(_markdownOption)),
     _help(Label::create()
         .textStyle(Defaults::helpText()))
 {
-    _modeSelect = DropDown::create()
-        .add(_htmlOption)
-        .add(_javascriptOption)
-        .add(_markdownOption);
     conn(_modeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
             this, SLOT(onModeSelectionChanged(const QVariant&)));
     onManagerModeChanged(manager->mode());

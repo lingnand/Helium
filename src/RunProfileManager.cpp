@@ -12,13 +12,12 @@
 RunProfileManager *RunProfileManager::create(RunProfileManager::Type type)
 {
     switch (type) {
-        case RunProfileManager::None:
-            return NULL;
         case RunProfileManager::Cmd:
             return new CmdRunProfileManager;
         case RunProfileManager::Web:
             return new WebRunProfileManager;
     }
+    return NULL;
 }
 
 RunProfileManager::Type RunProfileManager::type(RunProfileManager *manager)

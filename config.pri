@@ -551,6 +551,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/SettingsPage.cpp) \
         $$quote($$BASEDIR/src/ShortcutHelp.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
+        $$quote($$BASEDIR/src/Versioner.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
         $$quote($$BASEDIR/src/ViewMode.cpp) \
         $$quote($$BASEDIR/src/WebRunProfile.cpp) \
@@ -680,6 +681,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
         $$quote($$BASEDIR/src/Utility.h) \
+        $$quote($$BASEDIR/src/Versioner.h) \
         $$quote($$BASEDIR/src/View.h) \
         $$quote($$BASEDIR/src/ViewMode.h) \
         $$quote($$BASEDIR/src/WebRunProfile.h) \

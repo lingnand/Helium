@@ -43,11 +43,11 @@ private:
     bb::cascades::ActionItem *_forwardAction;
     bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;
-    QTemporaryFile *_temp;
     // hoedown stuff
     hoedown_renderer *_hoedown_renderer;
     hoedown_document *_hoedown_document;
     hoedown_buffer *_hoedown_buffer;
+    QTemporaryFile *_temp;
     Q_SLOT void rerun();
     Q_SLOT void onNavigationHistoryChanged();
     Q_SLOT void onBufferFilepathChanged(const QString &);

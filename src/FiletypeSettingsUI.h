@@ -34,19 +34,19 @@ public:
 private:
     Filetype *_filetype;
     bb::cascades::Header *_header;
-    bb::cascades::ToggleButton *_highlightToggle;
     bb::cascades::Label *_highlightToggleLabel;
+    bb::cascades::ToggleButton *_highlightToggle;
     bb::cascades::Label *_highlightToggleHelp;
-    bb::cascades::ToggleButton *_tabSpaceConversionToggle;
     bb::cascades::Label *_tabSpaceConversionToggleLabel;
+    bb::cascades::ToggleButton *_tabSpaceConversionToggle;
     bb::cascades::Label *_tabSpaceConversionToggleHelp;
     bb::cascades::DropDown *_numberOfSpacesForTabSelect;
     bb::cascades::Label *_numberOfSpacesForTabHelp;
     bb::cascades::Header *_runProfileHeader;
-    bb::cascades::DropDown *_runProfileSelect;
     bb::cascades::Option *_noneRunProfileOption;
     bb::cascades::Option *_cmdRunProfileOption;
     bb::cascades::Option *_webRunProfileOption;
+    bb::cascades::DropDown *_runProfileSelect;
     RunProfileSettingsUI *_runProfileSettingsUI;
 
     void reloadHeader();

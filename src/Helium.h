@@ -14,6 +14,8 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 #include <bb/platform/bbm/Context>
+#include <Versioner.h>
+#include <HelpPage.h>
 
 namespace bb {
     namespace cascades {
@@ -27,7 +29,6 @@ class FiletypeMap;
 class GeneralSettings;
 class AppearanceSettings;
 class SettingsPage;
-class HelpPage;
 class RepushablePage;
 class Segment;
 class View;
@@ -40,6 +41,7 @@ public:
     static Helium *instance();
     Helium(int &argc, char **argv);
     virtual ~Helium() {}
+    const Versioner &version() { return _version; }
     FiletypeMap *filetypeMap() { return _filetypeMap; }
     GeneralSettings *general() { return _general; }
     AppearanceSettings *appearance() { return _appearance; }
@@ -51,45 +53,39 @@ public:
 Q_SIGNALS:
     void translatorChanged();
 private:
-    // buffers
     BufferStore *_buffers;
-
-    // invocation
-    bb::system::InvokeManager _invokeManager;
-    Q_SLOT void onInvoked(const bb::system::InvokeRequest &);
-
-    void onTranslatorChanged();
-    // settings
-    FiletypeMap *_filetypeMap;
-    GeneralSettings *_general;
-    AppearanceSettings *_appearance;
-
     SettingsPage *_settingsPage;
     HelpPage *_helpPage;
 
     bb::cascades::ActionItem *_contactAction;
-    Q_SLOT void contact();
+    Segment *_coverContent;
+    bb::cascades::SceneCover *_cover;
+    bb::cascades::ActionItem *_inviteToDownloadAction;
+    bb::cascades::ActionItem *_shareAction;
+    bb::platform::bbm::Context _bbmContext;
 
+    FiletypeMap *_filetypeMap;
+    GeneralSettings *_general;
+    AppearanceSettings *_appearance;
+
+    Versioner _version;
+    bb::system::InvokeManager _invokeManager;
     QTranslator _translator;
     bb::cascades::LocaleHandler _localeHandler;
 
+    void performUpdate(const Version &current, const Version &last);
     Q_SLOT void showSettings();
-    Q_SLOT void showHelp();
+    Q_SLOT void showHelp(HelpPage::Mode mode=HelpPage::Reference);
+    Q_SLOT void contact();
+    Q_SLOT void inviteToDownload();
+    Q_SLOT void sharePersonalMessage();
     void pushPage(RepushablePage *);
 
-    // scene cover
-    Segment *_coverContent;
-    bb::cascades::SceneCover *_cover;
+    void onTranslatorChanged();
+    Q_SLOT void onInvoked(const bb::system::InvokeRequest &);
     Q_SLOT void onThumbnail();
-
     Q_SLOT void onSupportDialogConfirmed(bb::system::SystemUiResult::Type);
-    // bbm
-    bb::platform::bbm::Context _bbmContext;
     Q_SLOT void onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type);
-    bb::cascades::ActionItem *_inviteToDownloadAction;
-    Q_SLOT void inviteToDownload();
-    bb::cascades::ActionItem *_shareAction;
-    Q_SLOT void sharePersonalMessage();
     Q_SLOT void onPersonalMessageConfirmed(bb::system::SystemUiResult::Type, const QString &);
 };
 

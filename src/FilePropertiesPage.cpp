@@ -37,6 +37,9 @@ FilePropertiesPage::FilePropertiesPage():
         .textStyle(Defaults::helpText())),
     _noneFiletypeOption(Option::create()
         .value(QVariant::fromValue((Filetype *) NULL))),
+    _filetypeSelect(DropDown::create()
+        .add(_noneFiletypeOption)
+        .enabled(false)),
     _filetypeSelectHelp(Label::create()
         .multiline(true)
         .textStyle(Defaults::helpText())),
@@ -49,9 +52,6 @@ FilePropertiesPage::FilePropertiesPage():
     conn(_autodetectFiletypeToggle, SIGNAL(checkedChanged(bool)),
         this, SIGNAL(autodetectFiletypeCheckedChanged(bool)));
 
-    _filetypeSelect = DropDown::create()
-        .add(_noneFiletypeOption)
-        .enabled(false);
     QList<Filetype *> filetypes = Helium::instance()->filetypeMap()->filetypes();
     for (int i = 0; i < filetypes.size(); i++) {
         Filetype *f = filetypes[i];

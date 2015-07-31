@@ -33,7 +33,6 @@
 #include <AppearanceSettingsStorage.h>
 #include <AppearanceSettings.h>
 #include <SettingsPage.h>
-#include <HelpPage.h>
 #include <Utility.h>
 #include <RepushablePage.h>
 #include <Segment.h>
@@ -58,15 +57,13 @@ Helium *Helium::instance()
 Helium::Helium(int &argc, char **argv):
     Application(argc, argv),
     _buffers(new BufferStore(this)),
-    _filetypeMap((new FiletypeMapStorage("filetypes", this))->read()),
-    _general((new GeneralSettingsStorage("general_settings", this))->read()),
-    _appearance((new AppearanceSettingsStorage("appearance_settings", this))->read()),
     _settingsPage(NULL),
     _helpPage(NULL),
     _contactAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_email.png"))
         .onTriggered(this, SLOT(contact()))),
     _coverContent(Segment::create().section().subsection()),
+    _cover(SceneCover::create().content(_coverContent)),
     // bbm
     _inviteToDownloadAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_bbm.png"))
@@ -76,6 +73,12 @@ Helium::Helium(int &argc, char **argv):
         .onTriggered(this, SLOT(sharePersonalMessage()))),
     _bbmContext(QUuid(BBM_UUID))
 {
+    performUpdate(_version.current(), _version.last());
+
+    _filetypeMap = (new FiletypeMapStorage("filetypes", this))->read();
+    _general = (new GeneralSettingsStorage("general_settings", this))->read();
+    _appearance = (new AppearanceSettingsStorage("appearance_settings", this))->read();
+
     themeSupport()->setVisualStyle(_appearance->visualStyle());
     conn(_appearance, SIGNAL(visualStyleChanged(bb::cascades::VisualStyle::Type)),
         themeSupport(), SLOT(setVisualStyle(bb::cascades::VisualStyle::Type)));
@@ -98,7 +101,7 @@ Helium::Helium(int &argc, char **argv):
         .addAction(_inviteToDownloadAction)
         .addAction(_shareAction));
 
-    setCover(_cover = SceneCover::create().content(_coverContent));
+    setCover(_cover);
     conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
 
     // bbm
@@ -109,15 +112,36 @@ Helium::Helium(int &argc, char **argv):
     conn(&_invokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
         this, SLOT(onInvoked(const bb::system::InvokeRequest&)));
 
-    qDebug() << "last version" << general()->lastVersion().string();
-    qDebug() << "current version" << general()->currentVerison().string();
-    if (general()->numberOfTimesLaunched() == 1) {
+    if (_general->numberOfTimesLaunched() == 1) {
         Utility::dialog(tr("Show Help"),
                 tr("Welcome"), tr("Thanks for purchasing Helium!"),
                 this, SLOT(showHelp()));
-    } else if (general()->lastVersion() < general()->currentVerison()) {
-        qDebug() << "Version update detected";
+    } else if (_version.last() < _version.current()) {
+        Utility::toast(tr("Helium updated to %1").arg(_version.current().string()));
+        showHelp(HelpPage::ChangeList);
     }
+}
+
+void Helium::performUpdate(const Version &, const Version &last)
+{
+    if (last >= Version(1, 0, 3, 0))
+        return;
+    QSettings settings;
+    QVariant v = settings.value("general_settings/default_open_directory");
+    if (v.isValid()) {
+        settings.remove("general_settings/default_open_directory");
+        settings.setValue("general_settings/default_project_directory", v);
+    }
+    if (last >= Version(1, 0, 2, 4))
+        return;
+    if (settings.value("filetypes/python/run_profile_manager/cmd").toString()
+            == "cd '%dir%'; /base/usr/bin/python3.2 '%name%'")
+        settings.setValue("filetypes/python/run_profile_manager/cmd",
+                "cd '%dir%'; exec /base/usr/bin/python3.2 -u '%name%'");
+    if (settings.value("filetypes/sh/run_profile_manager/cmd").toString()
+            == "cd '%dir%'; /bin/sh '%name%'")
+        settings.setValue("filetypes/sh/run_profile_manager/cmd",
+                "cd '%dir%'; exec /bin/sh '%name%'");
 }
 
 void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type state)
@@ -128,7 +152,7 @@ void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Ty
             _bbmContext.requestRegisterApplication();
             break;
         case bb::platform::bbm::RegistrationState::Allowed:
-            if (general()->numberOfTimesLaunched() >= 3 && !general()->hasConfirmedSupport()) {
+            if (_general->numberOfTimesLaunched() >= 3 && !_general->hasConfirmedSupport()) {
                 Utility::dialog(tr("Rate it"), tr("Never ask again"), tr("Share BBM status"),
                         tr("Like Helium?"), tr("If yes, help spread the word!"),
                         this, SLOT(onSupportDialogConfirmed(bb::system::SystemUiResult::Type)));
@@ -139,7 +163,7 @@ void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Ty
 
 void Helium::onSupportDialogConfirmed(bb::system::SystemUiResult::Type type)
 {
-    general()->confirmSupport();
+    _general->confirmSupport();
     switch (type) {
     case bb::system::SystemUiResult::ConfirmButtonSelection: {
         bb::system::InvokeRequest request;
@@ -238,7 +262,7 @@ void Helium::contact()
     request.setAction("bb.action.OPEN.bb.action.SENDEMAIL");
     QUrl mailto("mailto:lingnan.d@gmail.com");
     mailto.addQueryItem("subject", tr("RE: Support - Helium %1").arg(
-            general()->currentVerison().string()));
+            _version.current().string()));
     request.setUri(mailto);
     _invokeManager.invoke(request);
 }
@@ -270,13 +294,14 @@ void Helium::showSettings()
     pushPage(_settingsPage);
 }
 
-void Helium::showHelp()
+void Helium::showHelp(HelpPage::Mode mode)
 {
     if (!_helpPage) {
         _helpPage = new HelpPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _helpPage, SLOT(onTranslatorChanged()));
     }
+    _helpPage->setMode(mode);
     pushPage(_helpPage);
 }
 

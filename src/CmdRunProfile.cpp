@@ -45,18 +45,8 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         .format(TextFormat::Html)
         .contentFlags(TextContentFlag::ActiveTextOff)
         .textStyle(SystemDefaults::TextStyles::bodyText())
-        .preferredWidth(0))
-{
-    conn(view->content(), SIGNAL(pushTransitionEnded(bb::cascades::Page*)),
-        this, SLOT(onViewPagePushed(bb::cascades::Page*)));
-    conn(view->content(), SIGNAL(popTransitionEnded(bb::cascades::Page*)),
-        this, SLOT(onViewPagePopped(bb::cascades::Page*)));
-    conn(&_process, SIGNAL(readyReadStandardOutput()),
-        this, SLOT(onNewStandardOutput()));
-    conn(&_process, SIGNAL(readyReadStandardError()),
-        this, SLOT(onNewStandardError()));
-
-    _outputPage = Page::create()
+        .preferredWidth(0)),
+    _outputPage(Page::create()
         .titleBar(TitleBar::create())
         .content(ScrollView::create(Segment::create()
                 .section().subsection()
@@ -67,7 +57,17 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         .addAction(_terminateAction, ActionBarPlacement::OnBar)
         .addAction(_killAction, ActionBarPlacement::OnBar)
         .paneProperties(NavigationPaneProperties::create()
-            .backButton(_backButton));
+            .backButton(_backButton)))
+{
+    conn(view->content(), SIGNAL(pushTransitionEnded(bb::cascades::Page*)),
+        this, SLOT(onViewPagePushed(bb::cascades::Page*)));
+    conn(view->content(), SIGNAL(popTransitionEnded(bb::cascades::Page*)),
+        this, SLOT(onViewPagePopped(bb::cascades::Page*)));
+    conn(&_process, SIGNAL(readyReadStandardOutput()),
+        this, SLOT(onNewStandardOutput()));
+    conn(&_process, SIGNAL(readyReadStandardError()),
+        this, SLOT(onNewStandardError()));
+
     _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
     // when not activated _outputPage is owned by this profile,
     // so when the profile is replaced its associated view elements

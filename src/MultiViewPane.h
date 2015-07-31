@@ -66,23 +66,23 @@ public:
 Q_SIGNALS:
     void translatorChanged();
 private:
-    bb::cascades::Tab *_newProjectControl;
+    Zipper<Project *> *_projects;
     bb::cascades::Shortcut *_newProjectShortcut;
-    bb::cascades::Tab *_newViewControl;
+    bb::cascades::Tab *_newProjectControl;
     bb::cascades::Shortcut *_newViewShortcut;
+    bb::cascades::Tab *_newViewControl;
     bb::cascades::Shortcut *_prevTabShortcut;
     bb::cascades::Shortcut *_nextTabShortcut;
     bb::cascades::Shortcut *_nextProjectShortcut;
     bb::cascades::Shortcut *_changeProjectPathShortcut;
     bb::cascades::pickers::FilePicker *_fpicker;
+    bool _zoomed;
+    bool _reopenSidebar;
+    bool _enterKeyPressedOnTopScope;
+
     bb::cascades::pickers::FilePicker *filePicker(const QString &directory,
             QObject *target,
             const char *onFileSelected, const char *onCancelled=NULL);
-
-    bool _zoomed;
-    bool _reopenSidebar;
-
-    Zipper<Project *> *_projects;
     Q_SLOT void setNextProjectActive();
     Q_SLOT void createProject();
     // monitoring for the current project
@@ -111,7 +111,6 @@ private:
     Q_SLOT void onUnsavedChangeDialogFinishedWhenClosingProject(bb::system::SystemUiResult::Type);
     Q_SLOT void displayShortcuts();
 
-    bool _enterKeyPressedOnTopScope;
     Q_SLOT void onModifiedKey(bb::cascades::KeyEvent *);
     Q_SLOT void onModKey(bb::cascades::KeyEvent *);
     Q_SLOT void flagEnterKeyOnTopScope();

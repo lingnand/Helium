@@ -54,8 +54,8 @@ using namespace bb::cascades;
 View::View(Project *project, Buffer *buffer):
     _mode(NULL), _findMode(NULL),
     _project(project), _buffer(NULL),
-    _fpicker(NULL),
     _highlightRange(0, 1),
+    _fpicker(NULL),
     _textArea(TextArea::create()
         .format(TextFormat::Html)
         .inputFlags(TextInputFlag::SpellCheckOff
@@ -72,7 +72,16 @@ View::View(Project *project, Buffer *buffer):
         .vertical(VerticalAlignment::Bottom)
         .topMargin(0)),
     _pageKeyListener(KeyListener::create()
-        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *))))
+        .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *)))),
+    _page(Page::create()
+        .content(Container::create()
+            .add(_textArea)
+            .add(_progressIndicator))
+//        .actionBarVisibility(ChromeVisibility::Visible)
+//        .actionBarVisibility(ChromeVisibility::Hidden)
+        // navigation
+        .addKeyListener(_pageKeyListener)),
+    _content(NavigationPane::create().add(_page))
 {
     GeneralSettings *general = Helium::instance()->general();
     _highlightRangeLimit = general->highlightRange();
@@ -89,15 +98,6 @@ View::View(Project *project, Buffer *buffer):
     conn(&_partialHighlightUpdateTimer, SIGNAL(timeout()),
         this, SLOT(updateTextAreaPartialHighlight()));
 
-    _page = Page::create()
-        .content(Container::create()
-            .add(_textArea)
-            .add(_progressIndicator))
-//        .actionBarVisibility(ChromeVisibility::Visible)
-//        .actionBarVisibility(ChromeVisibility::Hidden)
-        // navigation
-        .addKeyListener(_pageKeyListener);
-
     AppearanceSettings *appearance = Helium::instance()->appearance();
     onHideActionBarChanged(appearance->hideActionBar());
     conn(appearance, SIGNAL(hideActionBarChanged(bool)),
@@ -110,7 +110,7 @@ View::View(Project *project, Buffer *buffer):
     conn(appearance, SIGNAL(fontSizeChanged(bb::cascades::FontSize::Type)),
         _textArea->textStyle(), SLOT(setFontSize(bb::cascades::FontSize::Type)));
 
-    setContent(_content = NavigationPane::create().add(_page));
+    setContent(_content);
 
     setBuffer(buffer);
 
