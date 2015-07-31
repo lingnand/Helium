@@ -37,14 +37,14 @@ public:
 private:
     QString _cmd;
     bool _runnable;
+    QProcess _process;
+
     bb::cascades::ActionItem *_terminateAction;
     bb::cascades::ActionItem *_killAction;
     bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;
     bb::cascades::Label *_outputArea;
     bb::cascades::Page *_outputPage;
-
-    QProcess _process;
 
     Q_SLOT void recalcRunnable();
 
