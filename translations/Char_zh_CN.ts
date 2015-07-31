@@ -458,13 +458,13 @@ These format specifiers will be replaced:
         <source>Failed to update status message: maybe you haven&apos;t granted Helium BBM permissions</source>
         <translation>无法更新状态：您可能未授予BBM相关权限</translation>
     </message>
+    <message>
+        <source>Helium updated to %1</source>
+        <translation>Helium更新至%1</translation>
+    </message>
 </context>
 <context>
     <name>HelpPage</name>
-    <message>
-        <source>Help</source>
-        <translation>帮助</translation>
-    </message>
     <message>
         <source>Tabs &amp; Buffers</source>
         <translation>标签页面和缓冲区</translation>
@@ -510,10 +510,6 @@ These format specifiers will be replaced:
         <translation>快捷键</translation>
     </message>
     <message>
-        <source>&lt;p&gt;Helium supports a wide range of keyboard shortcuts from the normal ones to the ones triggered directly while editing text via modifiers (press the shortcut key while holding %3). At any time you can view the full list of shortcuts by pressing:&lt;/p&gt;  %1 %2 when nothing is in focus&lt;br/&gt;  %1 %3 %2 when inside a text field or text area</source>
-        <translation>&lt;p&gt;Helium不仅支持普通的操作快捷键，而且还支持编辑文本时直接使用的快捷键（在按下%3的同时按下快捷键）。在任何时候您都可以通过按下以下快接捷来浏览完整的快捷键列表：&lt;/p&gt;  %1 %2 当没有文本框聚焦时&lt;br/&gt;  %1 %3 %2 当使用某个文本框时</translation>
-    </message>
-    <message>
         <source>Run Profile</source>
         <translation>运行参数</translation>
     </message>
@@ -522,12 +518,36 @@ These format specifiers will be replaced:
         <translation>每个文件类型都可以通过&lt;strong&gt;属性&lt;/strong&gt;或&lt;strong&gt;设定——文件类型&lt;/strong&gt;来设置独立的&lt;p&gt;&lt;em&gt;运行参数&lt;/em&gt;。当编辑的文件所属的文件类型拥有一个有效的运行参数时，您可以使用&lt;strong&gt;运行&lt;/strong&gt;命令来运行当前文件的内容。以下文件类型拥有默认的运行参数：&lt;/p&gt;  %1 &lt;em&gt;python, shell, html, javascript&lt;/em&gt;</translation>
     </message>
     <message>
-        <source>&lt;p&gt;Helium supports opening multiple files at once. Simply use the &lt;strong&gt;Open&lt;/strong&gt; action in any tab, choose the files you desire to edit and select &lt;strong&gt;Done&lt;/strong&gt;. If there are more than one file chosen, the additional files will be put into new tabs &lt;em&gt;just before&lt;/em&gt; the current one.&lt;/p&gt;Saving is done asynchronously i.e. every time you trigger the &lt;strong&gt;Save&lt;/strong&gt; action, Helium copies the content in the current buffer, and starts a background routine that saves it to disk. Progress is displayed at the bottom of the tab in an non-interruptive way - this means that you can continue editing the document without having to wait for it to finish.</source>
-        <translation>&lt;p&gt;Helium支持一次性打开多个文件：使用&lt;strong&gt;打开&lt;/strong&gt;命令，您可以选择多个您想要编辑的文件，然后选择&lt;strong&gt;完成&lt;/strong&gt;。多选的文件会在新的标签页（当前标签页之前）里打开。&lt;/p&gt;保存是异步完成的：每次您触发&lt;strong&gt;保存&lt;/strong&gt;命令，Helium拷贝当前缓冲区的内容，然后启动一个后台进程把它保存至磁盘。保存进度以非打扰的形式显示在标签页的底部——这意味着您可以不用等待保存完成就继续编辑文件。</translation>
-    </message>
-    <message>
         <source>&lt;p&gt;Use the &lt;strong&gt;Find&lt;/strong&gt; action to enter &lt;em&gt;Find Mode&lt;/em&gt;. Helium supports regex find and replace with three different styles (accessed as tab options or via keyboard shortcuts)&lt;/p&gt;  %1 &lt;strong&gt;Full Regex&lt;/strong&gt;: see &lt;a href=&apos;http://perldoc.perl.org/perlre.html#Regular-Expressions&apos;&gt;http://perldoc.perl.org/perlre.html#Regular-Expressions&lt;/a&gt; for Perl-style regular expressions&lt;br/&gt;  %1 &lt;strong&gt;Ignore Case&lt;/strong&gt;: similar to &lt;em&gt;Full Regex&lt;/em&gt; but ignore the case for letters&lt;br/&gt;  %1 &lt;strong&gt;Exact Match&lt;/strong&gt;: all characters are taken literally&lt;br/&gt;Replacments support capturing groups as well, e.g. replacing &lt;span style=&apos;color:orange&apos;&gt;([^a-z]*)$&lt;/span&gt; with &lt;span style=&apos;color:orange&apos;&gt;\n\1&lt;/span&gt; will put non-alphabetic characters at the end of each line into a new line.</source>
         <translation>&lt;p&gt;使用&lt;strong&gt;查找&lt;/strong&gt;命令进入&lt;em&gt;查找模式&lt;/em&gt;。Helium支持三种不同风格的查找模式（可通过标签列表或快捷键切换）&lt;/p&gt;  %1 &lt;strong&gt;正则表达式&lt;/strong&gt;：参见&lt;a href=&apos;http://perldoc.perl.org/perlre.html#Regular-Expressions&apos;&gt;http://perldoc.perl.org/perlre.html#Regular-Expressions&lt;/a&gt;&lt;br/&gt;  %1 &lt;strong&gt;忽略大小写&lt;/strong&gt;：类似于&lt;em&gt;正则表达式&lt;/em&gt;，但是忽略表达式里字母的大小写&lt;br/&gt;  %1 &lt;strong&gt;精确匹配&lt;/strong&gt;：表达式内的所有特殊字符都当作普通字符逐一对应&lt;br/&gt;替换的表达式支持&lt;em&gt;捕获组&lt;/em&gt;，比如，将&lt;span style=&apos;color:orange&apos;&gt;([^a-z]*)$&lt;/span&gt;替换为&lt;span style=&apos;color:orange&apos;&gt;\n\1&lt;/span&gt;会把每一行结尾处的连续非字母放到新行。</translation>
+    </message>
+    <message>
+        <source>Reference</source>
+        <translation>说明</translation>
+    </message>
+    <message>
+        <source>Change List</source>
+        <translation>更改历史</translation>
+    </message>
+    <message>
+        <source>Project Management</source>
+        <translation>项目管理</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Helium supports opening multiple files at once. Simply use the &lt;strong&gt;Open&lt;/strong&gt; action in any tab, choose the files you desire to edit and select &lt;strong&gt;Done&lt;/strong&gt;.&lt;/p&gt;Saving is done asynchronously i.e. every time you trigger the &lt;strong&gt;Save&lt;/strong&gt; action, Helium copies the content in the current buffer, and starts a background routine that saves it to disk. Progress is displayed at the bottom of the tab in an non-interruptive way - this means that you can continue editing the document without having to wait for it to finish.</source>
+        <translation>&lt;p&gt;Helium支持一次性打开多个文件：使用&lt;strong&gt;打开&lt;/strong&gt;命令，您可以选择多个您想要编辑的文件，然后选择&lt;strong&gt;完成&lt;/strong&gt;。&lt;/p&gt;保存是异步完成的：每次您触发&lt;strong&gt;保存&lt;/strong&gt;命令，Helium拷贝当前缓冲区的内容，然后启动一个后台进程把它保存至磁盘。保存进度以非打扰的形式显示在标签页的底部——这意味着您可以不用等待保存完成就继续编辑文件。</translation>
+    </message>
+    <message>
+        <source>Each tab lives in a &lt;em&gt;project&lt;/em&gt;, which is just a workspace with a working directory. Projects are listed at the top of the sidebar, with the active one having a ticked image besides it. Tapping another project switches to that project and displays the tabs opened in it, while tapping the active one brings up a file picker to change its working directory. Projects are useful for opening many files under the same directory and managing many tabs.</source>
+        <translation>每个标签页都有所属的&lt;em&gt;项目&lt;/em&gt;。每个项目有其独立的工作空间和路径。您可在标签列表的顶部查看所有项目——当前项目以打勾图片表示。选择另一个项目会切换至该项目并显示该项目内的标签；而选择当前项目则会打开文件选择对话框来改动它的工作路径。</translation>
+    </message>
+    <message>
+        <source>Helium supports a wide range of keyboard shortcuts from the normal ones to the ones triggered directly while editing text via modifiers (press the shortcut key while holding %1). At any time (inside a text field/area or not) you can view the full list of shortcuts (where currently applicable) by pressing %1 %2</source>
+        <translation>&lt;p&gt;Helium不仅支持普通的操作快捷键，而且还支持编辑文本时直接使用的快捷键（在按下%1的同时按下快捷键）。在任何时候（不管是否在文本框内）您都可以通过按下快接捷%1 %2来浏览完整的快捷键列表。</translation>
+    </message>
+    <message>
+        <source>&lt;strong&gt;&lt;u&gt;Version 1.0.3.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: project management - manage tabs with &lt;em&gt;projects&lt;/em&gt; and open files within the project directory easily&lt;br/&gt;  %1 NEW: persistence for opened projects&lt;br/&gt;  %1 &lt;strong&gt;CHANGE&lt;/strong&gt;: %3 (when text field/area is not focused) is now mapped to &lt;em&gt;Close Project&lt;/em&gt;; &lt;strong&gt;keyboard shortcut help is now triggered by&lt;/strong&gt; %2 %3 &lt;strong&gt;regardless of whether a text field/area is focused or not&lt;/strong&gt;&lt;br/&gt;  %1 IMPROVE: opening files now doesn&apos;t ask for &lt;em&gt;Unsaved change&lt;/em&gt; confirmation anymore: it creates new tabs after the current one&lt;br/&gt;  %1 IMPROVE: new tab is now inserted after the current one instead of always appending to the end&lt;br/&gt;  %1 IMPROVE: keyboard shortcut help is now displayed via prompt instead of toast: too much information for a toast&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.2.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: space-tab conversion for each filetype&lt;br/&gt;  %1 IMPROVE: saving progress is displayed more clearly&lt;br/&gt;  %1 IMPROVE: web run profile now allows previewing files with relative path to other files e.g., images, style files&lt;br/&gt;  %1 IMPROVE: added SIGTERM control to command run profile - now programs can handle termination gracefully&lt;br/&gt;  %1 IMPROVE: changed python run command to output without buffering&lt;br/&gt;  %1 FIX: syntax highlight problem with files containing special control characters&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.1.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Markdown syntax highlight support and previewing support&lt;br/&gt;  %1 NEW: Markdown previewing support for Math symbols&lt;br/&gt;  %1 FIX: Alt+Enter problem on some devices&lt;br/&gt;  %1 FIX: some pages are not scrollable&lt;br/&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
