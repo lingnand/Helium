@@ -130,7 +130,8 @@ void Helium::performUpdate(const Version &, const Version &last)
     QVariant v = settings.value("general_settings/default_open_directory");
     if (v.isValid()) {
         settings.remove("general_settings/default_open_directory");
-        settings.setValue("general_settings/default_project_directory", v);
+        if (v.toString() != "/accounts/1000/shared") // this is an invalid directory
+            settings.setValue("general_settings/default_project_directory", v);
     }
     if (last >= Version(1, 0, 2, 4))
         return;
