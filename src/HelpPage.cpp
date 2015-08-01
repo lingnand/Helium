@@ -181,7 +181,8 @@ void HelpPage::onTranslatorChanged()
     _filetypeDesc->setText(tr("Each filetype defines its own set of highlight rules, as well as having its own settings for highlight and <em>run profiles</em>. These settings can be accessed via <strong>Properties</strong> inside any tab (which shows settings of the filetype currently associated with the given buffer); they can also be accessed inside <strong>Settings-Filetypes</strong>."));
     _runProfile->setTitle(tr("Run Profile"));
     _runProfileDesc->setText(tr("<p><em>Run profiles</em> can be configured for each filetype inside <strong>Properties</strong> or <strong>Settings-Filetypes</strong>. When editing a file of a filetype with an available run profile, you can use the <strong>Run</strong> action to run the current content. By default,  the following filetypes already have their run profiles defined:</p>"
-        "  %1 <em>python, shell, html, javascript</em>"
+        "  %1 <em>python, shell, html, javascript</em><br/>"
+        "Note that the command run profile supports running <em>any</em> shell command. For example, you can compile gcc using <a href='https://github.com/mordak/playbook-dev-tools'>playbook-dev-tools</a> and define a command to compile and run your cpp files directly."
         ).arg(BULLET_SYMBOL));
     _changeList->setText(tr("<strong><u>Version 1.0.3.x</u></strong><br/><br/>"
         "  %1 NEW: project management - manage tabs with <em>projects</em> and open files within the project directory easily<br/>"
