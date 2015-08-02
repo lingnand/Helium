@@ -128,7 +128,7 @@ void FindMode::onEnter()
     view()->page()->addAction(_undoAction);
     view()->page()->addAction(_redoAction);
     view()->page()->addAction(_findCancelAction, ActionBarPlacement::OnBar);
-    view()->page()->setTitleBar(_findTitleBar);
+    view()->setPageTitleBar(_findTitleBar);
 
     // replace the tabs
     view()->parent()->zoomIntoView();

@@ -9,6 +9,7 @@
 #define NORMALMODE_H_
 
 #include <bb/cascades/Page>
+#include <bb/system/SystemUiResult>
 #include <ViewMode.h>
 
 namespace bb {
@@ -37,7 +38,9 @@ public:
     void onEnter();
     void onExit();
 private:
+    bool _active;
     bool _lastFocused;
+    bool _modifyingTextField;
     RunProfile *_runProfile;
 
     ModKeyListener *_textAreaModKeyListener;
@@ -64,6 +67,9 @@ private:
     Q_SLOT void run();
     Q_SLOT void showProperties();
 
+    Q_SLOT void resetTitleBar();
+    Q_SLOT void onTitleFieldTextChanged(const QString &);
+    Q_SLOT void onTitlePromptClosed(bb::system::SystemUiResult::Type, const QString &);
     Q_SLOT void onTextAreaModKey(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *listener);
     Q_SLOT void onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *listener);

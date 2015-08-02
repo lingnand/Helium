@@ -23,6 +23,16 @@ void AppearanceSettingsStorage::onHideActionBarChanged(bool hide)
     _settings.setValue("hide_actionbar", hide);
 }
 
+void AppearanceSettingsStorage::onHideTitleBarChanged(bool hide)
+{
+    _settings.setValue("hide_titlebar", hide);
+}
+
+void AppearanceSettingsStorage::onFullScreenChanged(bool full)
+{
+    _settings.setValue("full_screen", full);
+}
+
 void AppearanceSettingsStorage::onThemeChanged(AppearanceSettings::Theme theme)
 {
     _settings.setValue("theme", theme);
@@ -42,13 +52,19 @@ AppearanceSettings *AppearanceSettingsStorage::read()
 {
     qDebug() << "Reading appearance settings...";
     AppearanceSettings *settings = new AppearanceSettings(
-        _settings.value("hide_actionbar", false).toBool(),
+        _settings.value("hide_actionbar", true).toBool(),
+        _settings.value("hide_titlebar", false).toBool(),
+        _settings.value("full_screen", false).toBool(),
         (AppearanceSettings::Theme) _settings.value("theme", AppearanceSettings::SummerFruit).toInt(),
         _settings.value("font_family", QString()).toString(),
         (FontSize::Type) _settings.value("font_size", FontSize::Default).toInt(),
         this);
     conn(settings, SIGNAL(hideActionBarChanged(bool)),
             this, SLOT(onHideActionBarChanged(bool)));
+    conn(settings, SIGNAL(hideTitleBarChanged(bool)),
+            this, SLOT(onHideTitleBarChanged(bool)));
+    conn(settings, SIGNAL(fullScreenChanged(bool)),
+            this, SLOT(onFullScreenChanged(bool)));
     conn(settings, SIGNAL(themeChanged(AppearanceSettings::Theme)),
             this, SLOT(onThemeChanged(AppearanceSettings::Theme)));
     conn(settings, SIGNAL(fontFamilyChanged(const QString&)),

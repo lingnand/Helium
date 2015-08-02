@@ -28,13 +28,16 @@
 #include <FilePropertiesPage.h>
 #include <MultiViewPane.h>
 #include <Project.h>
+#include <Helium.h>
+#include <AppearanceSettings.h>
 #include <ShortcutHelp.h>
 
 using namespace bb::cascades;
 
 NormalMode::NormalMode(View *view):
     ViewMode(view),
-    _lastFocused(false), _runProfile(NULL),
+    _active(false), _lastFocused(false), _modifyingTextField(false),
+    _runProfile(NULL),
     _textAreaModKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyReleased(this, SLOT(onTextAreaModifiedKey(bb::cascades::KeyEvent*, ModKeyListener*)))
         .onModKeyPressedAndReleased(this, SLOT(onTextAreaModKey(bb::cascades::KeyEvent*)))
@@ -94,7 +97,7 @@ NormalMode::NormalMode(View *view):
     _titleField->setBackgroundVisible(true);
     _titleField->textStyle()->setBase(SystemDefaults::TextStyles::titleText());
     conn(_titleField, SIGNAL(textChanged(const QString &)),
-        view, SLOT(setName(const QString &)));
+        this, SLOT(onTitleFieldTextChanged(const QString &)));
     conn(_titleField, SIGNAL(focusedChanged(bool)),
         view, SLOT(blockPageKeyListener(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
@@ -112,6 +115,8 @@ NormalMode::NormalMode(View *view):
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
 
+    conn(view, SIGNAL(outOfView()), _titleField, SLOT(loseFocus()));
+
     onBufferDirtyChanged(view->buffer()->dirty());
     conn(view, SIGNAL(bufferDirtyChanged(bool)),
             this, SLOT(onBufferDirtyChanged(bool)));
@@ -127,6 +132,9 @@ NormalMode::NormalMode(View *view):
     onBufferFiletypeChanged(view->buffer()->filetype());
     conn(view, SIGNAL(bufferFiletypeChanged(Filetype*, Filetype*)),
             this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)))
+
+    conn(Helium::instance()->appearance(), SIGNAL(shouldHideTitleBarChanged(bool)),
+            this, SLOT(resetTitleBar()));
 }
 
 void NormalMode::setRunProfile(RunProfile *profile)
@@ -178,6 +186,19 @@ void NormalMode::showProperties()
     view()->content()->push(_propertiesPage);
 }
 
+void NormalMode::resetTitleBar()
+{
+    view()->setPageTitleBar(
+        Helium::instance()->appearance()->shouldHideTitleBar() ? NULL : _titleBar);
+}
+
+void NormalMode::onTitleFieldTextChanged(const QString &text)
+{
+    _modifyingTextField = true;
+    view()->setName(text);
+    _modifyingTextField = false;
+}
+
 void NormalMode::onTextAreaModKey(KeyEvent *)
 {
     view()->textArea()->editor()->insertPlainText("\n");
@@ -199,7 +220,7 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
                   << ShortcutHelp::fromActionItem(_closeAction, prefix)
                   << ShortcutHelp("T", TAB_SYMBOL, prefix)
                   << ShortcutHelp("D", tr("Delete line"), prefix)
-                  << ShortcutHelp("H", tr("Focus Title"), prefix)
+                  << ShortcutHelp("H", tr("Focus/Change Title"), prefix)
                   << ShortcutHelp("V", tr("Paste Clipboard"), prefix)
                   << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"), prefix)
                   << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut(), prefix)
@@ -219,7 +240,16 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
             view()->buffer()->redo();
             break;
         case KEYCODE_H: // Head
-            _titleField->requestFocus();
+            if (_titleField->isEnabled()) {
+                if (view()->page()->titleBar() == _titleBar)
+                    _titleField->requestFocus();
+                else {
+                    Utility::prompt(tr("Done"), tr("Cancel"),
+                            tr("Name"), tr("Change the name of the buffer"),
+                            _titleField->text(), tr("Enter the name"),
+                            this, SLOT(onTitlePromptClosed(bb::system::SystemUiResult::Type, const QString&)));
+                }
+            }
             break;
         case KEYCODE_F: // Find
             view()->setFindMode();
@@ -258,8 +288,18 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
     }
 }
 
+void NormalMode::onTitlePromptClosed(bb::system::SystemUiResult::Type type, const QString &text)
+{
+    _textAreaModKeyListener->modOff();
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        _titleField->setText(text);
+}
+
 void NormalMode::onBufferNameChanged(const QString &name)
 {
+    if (_modifyingTextField) {
+        return;
+    }
     if (!_titleField->isEnabled()) {
         // NOTE: hack to get around the problem of title field not grey
         _titleField->setEnabled(true);
@@ -296,7 +336,8 @@ void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager
 void NormalMode::autoFocus()
 {
     // focus title text only when the text area is empty
-    if (view()->buffer()->state().empty() && _titleField->isEnabled())
+    if (view()->page()->titleBar() == _titleBar
+            && view()->buffer()->state().empty() && _titleField->isEnabled())
         _titleField->requestFocus();
     else
         view()->textArea()->requestFocus();
@@ -304,6 +345,8 @@ void NormalMode::autoFocus()
 
 void NormalMode::onEnter()
 {
+    _active = true;
+
     view()->hideAllPageActions();
 
     reloadLocked();
@@ -323,7 +366,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_cloneAction);
     view()->page()->addAction(_closeAction);
     view()->page()->addAction(_closeProjectAction);
-    view()->page()->setTitleBar(_titleBar);
+    resetTitleBar();
 
     view()->textArea()->setEditable(true);
     _textAreaModKeyListener->setEnabled(true);
@@ -336,6 +379,8 @@ void NormalMode::onEnter()
 
 void NormalMode::onExit()
 {
+    _active = false;
+
     disconn(view(), SIGNAL(bufferLockedChanged(bool)), this, SLOT(reloadLocked()));
     disconn(view()->textArea(), SIGNAL(focusedChanged(bool)),
         view(), SLOT(blockPageKeyListener(bool)));
@@ -380,7 +425,14 @@ void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyLi
 void NormalMode::reloadLocked()
 {
     bool locked = view()->buffer()->locked();
-    view()->textArea()->setEditable(!locked);
+    if (view()->textArea()->isFocused() && !view()->textArea()->isEditable() && !locked) {
+        // XXX: hack to get around virtual keyboard not getting put up (OMG..)
+        view()->textArea()->loseFocus();
+        view()->textArea()->setEditable(true);
+        view()->textArea()->requestFocus();
+    } else {
+        view()->textArea()->setEditable(!locked);
+    }
     _titleField->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
     _saveAction->setEnabled(!locked);
     _saveAsAction->setEnabled(!locked);
@@ -402,7 +454,7 @@ void NormalMode::reloadRunnable()
 void NormalMode::onTranslatorChanged()
 {
     _titleBar->setTitle(tr("Editor"));
-    _titleField->setHintText(tr("Title"));
+    _titleField->setHintText(tr("Name"));
     _saveAction->setTitle(tr("Save"));
     _saveAsAction->setTitle(tr("Save As"));
     _openAction->setTitle(tr("Open"));

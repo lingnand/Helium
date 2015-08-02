@@ -190,9 +190,11 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_edit.png) \
         $$quote($$BASEDIR/assets/images/ic_email.png) \
         $$quote($$BASEDIR/assets/images/ic_exact_match.png) \
+        $$quote($$BASEDIR/assets/images/ic_exit_fullscreen.png) \
         $$quote($$BASEDIR/assets/images/ic_folder_selected.png) \
         $$quote($$BASEDIR/assets/images/ic_folder_unselected.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
+        $$quote($$BASEDIR/assets/images/ic_fullscreen.png) \
         $$quote($$BASEDIR/assets/images/ic_helium.png) \
         $$quote($$BASEDIR/assets/images/ic_ignore_case.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
@@ -209,6 +211,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_save.png) \
         $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \
+        $$quote($$BASEDIR/assets/images/ic_settings.png) \
         $$quote($$BASEDIR/assets/images/ic_share.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
         $$quote($$BASEDIR/assets/mathjax/MathJax.js) \

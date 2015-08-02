@@ -1,7 +1,5 @@
 /*
  * AppearanceSettingsPage.cpp
-#include <bb/cascades/Label>
-#include <bb/cascades/Label>
  *
  *  Created on: Jun 6, 2015
  *      Author: lingnan
@@ -28,12 +26,6 @@ using namespace bb::cascades;
 AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSettings, QObject *parent):
     RepushablePage(parent),
     _settings(appearanceSettings),
-    _hideActionBarToggleLabel(Label::create()
-        .layoutProperties(StackLayoutProperties::create().spaceQuota(1))
-        .textStyle(SystemDefaults::TextStyles::primaryText())),
-    _hideActionBarToggle(ToggleButton::create()),
-    _hideActionBarHelp(Label::create().multiline(true)
-        .textStyle(Defaults::helpText())),
     _themeSelect(DropDown::create()
         .add("Summer Fruit", AppearanceSettings::SummerFruit)
         .add("JellyX", AppearanceSettings::JellyX)
@@ -78,7 +70,18 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
         .add(_smallFontSizeOption)
         .add(_mediumFontSizeOption)
         .add(_largeFontSizeOption)
-        .add(_extraLargeFontSizeOption))
+        .add(_extraLargeFontSizeOption)),
+    _fullScreenHeader(Header::create()),
+    _hideActionBarToggleLabel(Label::create()
+        .layoutProperties(StackLayoutProperties::create().spaceQuota(1))
+        .textStyle(SystemDefaults::TextStyles::primaryText())),
+    _hideActionBarToggle(ToggleButton::create()),
+    _hideTitleBarToggleLabel(Label::create()
+        .layoutProperties(StackLayoutProperties::create().spaceQuota(1))
+        .textStyle(SystemDefaults::TextStyles::primaryText())),
+    _hideTitleBarToggle(ToggleButton::create()),
+    _fullScreenHelp(Label::create().multiline(true)
+        .textStyle(Defaults::helpText()))
 {
     setTitleBar(TitleBar::create());
 
@@ -87,6 +90,11 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
         appearanceSettings, SLOT(setHideActionBar(bool)));
     conn(appearanceSettings, SIGNAL(hideActionBarChanged(bool)),
         _hideActionBarToggle, SLOT(setChecked(bool)));
+    _hideTitleBarToggle->setChecked(appearanceSettings->hideTitleBar());
+    conn(_hideTitleBarToggle, SIGNAL(checkedChanged(bool)),
+        appearanceSettings, SLOT(setHideTitleBar(bool)));
+    conn(appearanceSettings, SIGNAL(hideTitleBarChanged(bool)),
+        _hideTitleBarToggle, SLOT(setChecked(bool)));
 
     onThemeChanged(appearanceSettings->theme());
     conn(_themeSelect, SIGNAL(selectedValueChanged(const QVariant&)),
@@ -107,16 +115,19 @@ AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSet
         this, SLOT(onFontSizeChanged(bb::cascades::FontSize::Type)));
 
     setContent(ScrollView::create(Segment::create().section()
-            .add(Segment::create().subsection().leftToRight()
-                .add(_hideActionBarToggleLabel)
-                .add(_hideActionBarToggle))
-            .add(Segment::create().subsection().add(_hideActionBarHelp))
-            .add(Divider::create())
             .add(Segment::create().subsection().add(_themeSelect))
             .add(Segment::create().subsection().add(_themeSelectHelp))
             .add(_fontHeader)
             .add(Segment::create().subsection().add(_fontFamilySelect))
-            .add(Segment::create().subsection().add(_fontSizeSelect)))
+            .add(Segment::create().subsection().add(_fontSizeSelect))
+            .add(_fullScreenHeader)
+            .add(Segment::create().subsection().leftToRight()
+                .add(_hideActionBarToggleLabel)
+                .add(_hideActionBarToggle))
+            .add(Segment::create().subsection().leftToRight()
+                .add(_hideTitleBarToggleLabel)
+                .add(_hideTitleBarToggle))
+            .add(Segment::create().subsection().add(_fullScreenHelp)))
         .scrollMode(ScrollMode::Vertical));
 
     onTranslatorChanged();
@@ -170,8 +181,6 @@ void AppearanceSettingsPage::onFontSizeSelectionChanged(const QVariant &v)
 void AppearanceSettingsPage::onTranslatorChanged()
 {
     titleBar()->setTitle(tr("Appearance"));
-    _hideActionBarToggleLabel->setText(tr("Hide ActionBar"));
-    _hideActionBarHelp->setText(tr("Hide the ActionBar under the text areas. All the actions are still accessible via keyboard shortcuts."));
     _themeSelect->setTitle(tr("Theme"));
     _themeSelectHelp->setText(tr("Overall theme for Helium"));
     _fontHeader->setTitle(tr("Font Settings"));
@@ -184,4 +193,8 @@ void AppearanceSettingsPage::onTranslatorChanged()
     _mediumFontSizeOption->setText(tr("Medium"));
     _largeFontSizeOption->setText(tr("Large"));
     _extraLargeFontSizeOption->setText(tr("Extra Large"));
+    _fullScreenHeader->setTitle(tr("Full-screen Settings"));
+    _hideActionBarToggleLabel->setText(tr("Hide ActionBar"));
+    _hideTitleBarToggleLabel->setText(tr("Hide TitleBar"));
+    _fullScreenHelp->setText(tr("These settings affect the UI for the main editing area when inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen."));
 }

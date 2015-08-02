@@ -57,11 +57,13 @@ private:
     SettingsPage *_settingsPage;
     HelpPage *_helpPage;
 
-    bb::cascades::ActionItem *_contactAction;
     Segment *_coverContent;
     bb::cascades::SceneCover *_cover;
-    bb::cascades::ActionItem *_inviteToDownloadAction;
+
+    bb::cascades::ActionItem *_contactAction;
     bb::cascades::ActionItem *_shareAction;
+    bb::cascades::ActionItem *_settingsAction;
+    bb::cascades::ActionItem *_fullScreenAction;
     bb::platform::bbm::Context _bbmContext;
 
     FiletypeMap *_filetypeMap;
@@ -74,16 +76,20 @@ private:
     bb::cascades::LocaleHandler _localeHandler;
 
     void performUpdate(const Version &current, const Version &last);
+    Q_SLOT void toggleFullScreen();
     Q_SLOT void showSettings();
     Q_SLOT void showHelp(HelpPage::Mode mode=HelpPage::Reference);
     Q_SLOT void contact();
+    Q_SLOT void share();
     Q_SLOT void inviteToDownload();
-    Q_SLOT void sharePersonalMessage();
+    Q_SLOT void postPersonalMessage();
+    Q_SLOT void resetFullScreenAction();
     void pushPage(RepushablePage *);
 
     void onTranslatorChanged();
     Q_SLOT void onInvoked(const bb::system::InvokeRequest &);
     Q_SLOT void onThumbnail();
+    Q_SLOT void onShareDialogConfirmed(bb::system::SystemUiResult::Type);
     Q_SLOT void onSupportDialogConfirmed(bb::system::SystemUiResult::Type);
     Q_SLOT void onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type);
     Q_SLOT void onPersonalMessageConfirmed(bb::system::SystemUiResult::Type, const QString &);

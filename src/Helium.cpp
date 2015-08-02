@@ -11,7 +11,6 @@
 #include <bb/cascades/Page>
 #include <bb/cascades/Menu>
 #include <bb/cascades/ActionItem>
-#include <bb/cascades/SettingsActionItem>
 #include <bb/cascades/HelpActionItem>
 #include <bb/cascades/SceneCover>
 #include <bb/cascades/SystemDefaults>
@@ -59,33 +58,39 @@ Helium::Helium(int &argc, char **argv):
     _buffers(new BufferStore(this)),
     _settingsPage(NULL),
     _helpPage(NULL),
+    _coverContent(Segment::create().section().subsection()),
+    _cover(SceneCover::create().content(_coverContent)),
     _contactAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_email.png"))
         .onTriggered(this, SLOT(contact()))),
-    _coverContent(Segment::create().section().subsection()),
-    _cover(SceneCover::create().content(_coverContent)),
-    // bbm
-    _inviteToDownloadAction(ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_bbm.png"))
-        .onTriggered(this, SLOT(inviteToDownload()))),
     _shareAction(ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_share.png"))
-        .onTriggered(this, SLOT(sharePersonalMessage()))),
+        .imageSource(QUrl("asset:///images/ic_bbm.png"))
+        .onTriggered(this, SLOT(share()))),
+    _settingsAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_settings.png"))
+        .onTriggered(this, SLOT(showSettings()))),
+    _fullScreenAction(ActionItem::create()
+        .onTriggered(this, SLOT(toggleFullScreen()))),
     _bbmContext(QUuid(BBM_UUID))
 {
+    // settings
     performUpdate(_version.current(), _version.last());
 
     _filetypeMap = (new FiletypeMapStorage("filetypes", this))->read();
     _general = (new GeneralSettingsStorage("general_settings", this))->read();
     _appearance = (new AppearanceSettingsStorage("appearance_settings", this))->read();
 
+    // UI
+    reloadTranslator();
+    conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
+         this, SLOT(reloadTranslator()));
+
     themeSupport()->setVisualStyle(_appearance->visualStyle());
     conn(_appearance, SIGNAL(visualStyleChanged(bb::cascades::VisualStyle::Type)),
         themeSupport(), SLOT(setVisualStyle(bb::cascades::VisualStyle::Type)));
 
-    reloadTranslator();
-    conn(&_localeHandler, SIGNAL(systemLanguageChanged()),
-         this, SLOT(reloadTranslator()));
+    conn(_appearance, SIGNAL(fullScreenChanged(bool)),
+            this, SLOT(resetFullScreenAction()));
 
     setScene(new MultiViewPane(
             (new ProjectStorage("projects", this))->read(), this));
@@ -95,11 +100,10 @@ Helium::Helium(int &argc, char **argv):
     setMenu(Menu::create()
         .help(HelpActionItem::create()
             .onTriggered(this, SLOT(showHelp())))
-        .settings(SettingsActionItem::create()
-            .onTriggered(this, SLOT(showSettings())))
+        .addAction(_fullScreenAction)
         .addAction(_contactAction)
-        .addAction(_inviteToDownloadAction)
-        .addAction(_shareAction));
+        .addAction(_shareAction)
+        .addAction(_settingsAction));
 
     setCover(_cover);
     conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
@@ -120,6 +124,11 @@ Helium::Helium(int &argc, char **argv):
         Utility::toast(tr("Helium updated to %1").arg(_version.current().string()));
         showHelp(HelpPage::ChangeList);
     }
+}
+
+void Helium::toggleFullScreen()
+{
+    _appearance->setFullScreen(!_appearance->fullScreen());
 }
 
 void Helium::performUpdate(const Version &, const Version &last)
@@ -154,7 +163,7 @@ void Helium::onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Ty
             break;
         case bb::platform::bbm::RegistrationState::Allowed:
             if (_general->numberOfTimesLaunched() >= 3 && !_general->hasConfirmedSupport()) {
-                Utility::dialog(tr("Rate it"), tr("Never ask again"), tr("Share BBM status"),
+                Utility::dialog(tr("Rate it"), tr("Never ask again"), tr("Post BBM status"),
                         tr("Like Helium?"), tr("If yes, help spread the word!"),
                         this, SLOT(onSupportDialogConfirmed(bb::system::SystemUiResult::Type)));
             }
@@ -175,7 +184,25 @@ void Helium::onSupportDialogConfirmed(bb::system::SystemUiResult::Type type)
         break;
     }
     case bb::system::SystemUiResult::CustomButtonSelection:
-        sharePersonalMessage(); break;
+        postPersonalMessage(); break;
+    }
+}
+
+void Helium::share()
+{
+    Utility::dialog(tr("Post status"), tr("Cancel"), tr("Invite to download"),
+            tr("BBM Share"), tr("Support Helium by spreading the love!"),
+            this, SLOT(onShareDialogConfirmed(bb::system::SystemUiResult::Type)));
+}
+
+void Helium::onShareDialogConfirmed(bb::system::SystemUiResult::Type type)
+{
+    _general->confirmSupport();
+    switch (type) {
+    case bb::system::SystemUiResult::ConfirmButtonSelection:
+        inviteToDownload(); break;
+    case bb::system::SystemUiResult::CustomButtonSelection:
+        postPersonalMessage(); break;
     }
 }
 
@@ -186,7 +213,7 @@ void Helium::inviteToDownload()
     }
 }
 
-void Helium::sharePersonalMessage()
+void Helium::postPersonalMessage()
 {
     Utility::prompt(tr("OK"), tr("Cancel"),
             tr("Post BBM status message"), tr("This will be visible to your BBM contacts"),
@@ -306,11 +333,23 @@ void Helium::showHelp(HelpPage::Mode mode)
     pushPage(_helpPage);
 }
 
+void Helium::resetFullScreenAction()
+{
+    if (_appearance->fullScreen()) {
+        _fullScreenAction->setTitle(tr("Exit Full-screen"));
+        _fullScreenAction->setImage(QUrl("asset:///images/ic_exit_fullscreen.png"));
+    } else {
+        _fullScreenAction->setTitle(tr("Enter Full-screen"));
+        _fullScreenAction->setImage(QUrl("asset:///images/ic_fullscreen.png"));
+    }
+}
+
 void Helium::onTranslatorChanged()
 {
     _contactAction->setTitle(tr("Contact"));
-    _inviteToDownloadAction->setTitle(tr("Invite to Download"));
-    _shareAction->setTitle(tr("Share BBM Status"));
+    _shareAction->setTitle(tr("BBM Share"));
+    _settingsAction->setTitle(tr("Settings"));
+    resetFullScreenAction();
     emit translatorChanged();
 }
 

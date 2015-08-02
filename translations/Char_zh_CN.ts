@@ -12,10 +12,6 @@
         <translation>隐藏操作菜单</translation>
     </message>
     <message>
-        <source>Hide the ActionBar under the text areas. All the actions are still accessible via keyboard shortcuts.</source>
-        <translation>隐藏文本输入窗口下的操作菜单。所有的功能依然可以通过键盘快捷键触发。</translation>
-    </message>
-    <message>
         <source>Theme</source>
         <translation>主题</translation>
     </message>
@@ -58,6 +54,18 @@
     <message>
         <source>Extra Large</source>
         <translation>特大</translation>
+    </message>
+    <message>
+        <source>Full-screen Settings</source>
+        <translation>全屏设置</translation>
+    </message>
+    <message>
+        <source>Hide TitleBar</source>
+        <translation>隐藏标题栏</translation>
+    </message>
+    <message>
+        <source>These settings affect the UI for the main editing area when inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
+        <translation>这些设定将影响全屏模式时主编辑页面的界面。全屏模式选项可以从屏幕顶端往下滑动手指触发的菜单中找到。</translation>
     </message>
 </context>
 <context>
@@ -423,10 +431,6 @@ These format specifiers will be replaced:
         <translation>如果是的话，请推荐给你的朋友！</translation>
     </message>
     <message>
-        <source>Share BBM status</source>
-        <translation>分享BBM状态</translation>
-    </message>
-    <message>
         <source>Post BBM status message</source>
         <translation>发送BBM状态</translation>
     </message>
@@ -437,14 +441,6 @@ These format specifiers will be replaced:
     <message>
         <source>Enter status message</source>
         <translation>输入状态消息</translation>
-    </message>
-    <message>
-        <source>Invite to Download</source>
-        <translation>邀请下载</translation>
-    </message>
-    <message>
-        <source>Share BBM Status</source>
-        <translation>分享BBM状态</translation>
     </message>
     <message>
         <source>Rate it</source>
@@ -461,6 +457,38 @@ These format specifiers will be replaced:
     <message>
         <source>Helium updated to %1</source>
         <translation>Helium更新至%1</translation>
+    </message>
+    <message>
+        <source>Post status</source>
+        <translation>分享状态</translation>
+    </message>
+    <message>
+        <source>BBM Share</source>
+        <translation>BBM分享</translation>
+    </message>
+    <message>
+        <source>Exit Full-screen</source>
+        <translation>退出全屏</translation>
+    </message>
+    <message>
+        <source>Enter Full-screen</source>
+        <translation>全屏</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>Invite to download</source>
+        <translation>邀请下载</translation>
+    </message>
+    <message>
+        <source>Post BBM status</source>
+        <translation>分享BBM状态</translation>
+    </message>
+    <message>
+        <source>Support Helium by spreading the love!</source>
+        <translation>通过分享推荐来支持Helium！</translation>
     </message>
 </context>
 <context>
@@ -664,16 +692,8 @@ Do you want to continue?</source>
         <translation>属性</translation>
     </message>
     <message>
-        <source>Title</source>
-        <translation>标题</translation>
-    </message>
-    <message>
         <source>Delete line</source>
         <translation>删除行</translation>
-    </message>
-    <message>
-        <source>Focus Title</source>
-        <translation>聚焦标题文本框</translation>
     </message>
     <message>
         <source>Paste Clipboard</source>
@@ -702,6 +722,30 @@ Do you want to continue?</source>
     <message>
         <source>Display Shortcuts</source>
         <translation>显示快捷键</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>完成</translation>
+    </message>
+    <message>
+        <source>Change the name of the buffer</source>
+        <translation>更改文件名</translation>
+    </message>
+    <message>
+        <source>Focus/Change Title</source>
+        <translation>聚焦/更改标题</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Enter the name</source>
+        <translation>输入文件名</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>文件名</translation>
     </message>
 </context>
 <context>

@@ -23,6 +23,8 @@ namespace bb {
         class ProgressIndicator;
         class KeyEvent;
         class KeyListener;
+        class TitleBar;
+        class Header;
         namespace pickers {
             class FilePicker;
         }
@@ -79,7 +81,10 @@ public:
     Q_SLOT void setFiletype(Filetype *);
     Q_SLOT void setName(const QString &);
     Q_SLOT void autoFocus();
+    // wrappers over the page
+    void setPageTitleBar(bb::cascades::TitleBar *);
 Q_SIGNALS:
+    void outOfView();
     void hasUndosChanged(bool);
     void hasRedosChanged(bool);
     void translatorChanged();
@@ -98,6 +103,7 @@ private:
     Buffer *_buffer;
     Range _highlightRange;
     bb::cascades::pickers::FilePicker *_fpicker;
+    bb::cascades::Header *_header;
     bb::cascades::TextArea *_textArea;
     bb::cascades::ProgressIndicator *_progressIndicator;
     bb::cascades::KeyListener *_pageKeyListener;
@@ -118,7 +124,8 @@ private:
     Q_SLOT void reloadTitle();
     Q_SLOT void blockPageKeyListener(bool);
     /** callbacks **/
-    Q_SLOT void onHideActionBarChanged(bool);
+    Q_SLOT void onProjectTitleChanged(const QString&);
+    Q_SLOT void onShouldHideActionBarChanged(bool);
     Q_SLOT void onFileSelected(const QStringList &files);
     Q_SLOT void onPageKeyPressed(bb::cascades::KeyEvent *event);
     Q_SLOT void onTextAreaTextChanged(const QString &text);

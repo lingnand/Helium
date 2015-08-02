@@ -320,7 +320,7 @@ void MultiViewPane::zoomOutOfView()
         // add the views in the projects back
         for (int i = 0; i < activeProject()->size(); i++)
             add(activeProject()->at(i));
-        resetProjectActiveView(sidebarHidden());
+        resetProjectActiveView(false);
         _newViewShortcut->setEnabled(true);
         _newProjectShortcut->setEnabled(true);
         _nextProjectShortcut->setEnabled(true);

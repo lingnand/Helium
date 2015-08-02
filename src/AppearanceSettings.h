@@ -16,14 +16,20 @@ class AppearanceSettings : public QObject
     Q_OBJECT
 public:
     enum Theme { SummerFruit, JellyX, Tomorrow, TomorrowNight };
-    AppearanceSettings(bool hideActionBar, Theme theme,
-            const QString &fontFamily, bb::cascades::FontSize::Type fontSize,
+    AppearanceSettings(
+            bool hideActionBar, bool hideTitleBar, bool fullScreen,
+            Theme theme, const QString &fontFamily, bb::cascades::FontSize::Type fontSize,
             QObject *parent=NULL):
-        QObject(parent), _hideActionBar(hideActionBar), _theme((Theme) -1),
-        _fontFamily(fontFamily), _fontSize(fontSize) {
+        QObject(parent),
+        _hideActionBar(hideActionBar), _hideTitleBar(hideTitleBar), _fullScreen(fullScreen),
+        _theme((Theme) -1), _fontFamily(fontFamily), _fontSize(fontSize) {
         setTheme(theme);
     }
     bool hideActionBar() const { return _hideActionBar; }
+    bool shouldHideActionBar() const { return _fullScreen && _hideActionBar; }
+    bool hideTitleBar() const { return _hideTitleBar; }
+    bool shouldHideTitleBar() const { return _fullScreen && _hideTitleBar; }
+    bool fullScreen() const { return _fullScreen; }
     Theme theme() const { return _theme; }
     bb::cascades::VisualStyle::Type visualStyle() const { return _visualStyle; }
     QString highlightStyleFile() const { return _highlightStyleFile; }
@@ -31,6 +37,26 @@ public:
         if (h != _hideActionBar) {
             _hideActionBar = h;
             emit hideActionBarChanged(_hideActionBar);
+            if (_fullScreen)
+                emit shouldHideActionBarChanged(_hideActionBar);
+        }
+    }
+    Q_SLOT void setHideTitleBar(bool h) {
+        if (h != _hideTitleBar) {
+            _hideTitleBar = h;
+            emit hideTitleBarChanged(_hideTitleBar);
+            if (_fullScreen)
+                emit shouldHideTitleBarChanged(_hideTitleBar);
+        }
+    }
+    Q_SLOT void setFullScreen(bool f) {
+        if (f != _fullScreen) {
+            _fullScreen = f;
+            emit fullScreenChanged(_fullScreen);
+            if (_hideActionBar)
+                emit shouldHideActionBarChanged(_fullScreen);
+            if (_hideTitleBar)
+                emit shouldHideTitleBarChanged(_fullScreen);
         }
     }
     Q_SLOT void setTheme(Theme t) {
@@ -82,7 +108,11 @@ public:
         }
     }
 Q_SIGNALS:
+    void fullScreenChanged(bool);
     void hideActionBarChanged(bool);
+    void hideTitleBarChanged(bool);
+    void shouldHideActionBarChanged(bool); // fullScreen && hideActionBar
+    void shouldHideTitleBarChanged(bool); // fullscreen && hideTitleBar
     void highlightStyleFileChanged(const QString &);
     void visualStyleChanged(bb::cascades::VisualStyle::Type);
     void themeChanged(AppearanceSettings::Theme);
@@ -90,6 +120,8 @@ Q_SIGNALS:
     void fontSizeChanged(bb::cascades::FontSize::Type);
 private:
     bool _hideActionBar;
+    bool _hideTitleBar;
+    bool _fullScreen;
     Theme _theme;
     QString _highlightStyleFile;
     bb::cascades::VisualStyle::Type _visualStyle;

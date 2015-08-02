@@ -32,9 +32,6 @@ public:
     Q_SLOT void onTranslatorChanged();
 private:
     AppearanceSettings *_settings;
-    bb::cascades::Label *_hideActionBarToggleLabel;
-    bb::cascades::ToggleButton *_hideActionBarToggle;
-    bb::cascades::Label *_hideActionBarHelp;
     bb::cascades::DropDown *_themeSelect;
     bb::cascades::Label *_themeSelectHelp;
     bb::cascades::Header *_fontHeader;
@@ -47,6 +44,12 @@ private:
     bb::cascades::Option *_largeFontSizeOption;
     bb::cascades::Option *_extraLargeFontSizeOption;
     bb::cascades::DropDown *_fontSizeSelect;
+    bb::cascades::Header *_fullScreenHeader;
+    bb::cascades::Label *_hideActionBarToggleLabel;
+    bb::cascades::ToggleButton *_hideActionBarToggle;
+    bb::cascades::Label *_hideTitleBarToggleLabel;
+    bb::cascades::ToggleButton *_hideTitleBarToggle;
+    bb::cascades::Label *_fullScreenHelp;
     Q_SLOT void onThemeChanged(AppearanceSettings::Theme);
     Q_SLOT void onThemeSelectionChanged(const QVariant &);
     Q_SLOT void onFontFamilyChanged(const QString &);

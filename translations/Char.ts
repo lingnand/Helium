@@ -12,10 +12,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Hide the ActionBar under the text areas. All the actions are still accessible via keyboard shortcuts.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Theme</source>
         <translation type="unfinished"></translation>
     </message>
@@ -57,6 +53,18 @@
     </message>
     <message>
         <source>Extra Large</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Full-screen Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hide TitleBar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>These settings affect the UI for the main editing area when inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -417,10 +425,6 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Share BBM status</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Post BBM status message</source>
         <translation type="unfinished"></translation>
     </message>
@@ -430,14 +434,6 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Enter status message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invite to Download</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Share BBM Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -454,6 +450,38 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Helium updated to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Post status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BBM Share</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exit Full-screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter Full-screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invite to download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Post BBM status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Support Helium by spreading the love!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -654,15 +682,7 @@ Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Title</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Delete line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Focus Title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -691,6 +711,30 @@ Do you want to continue?</source>
     </message>
     <message>
         <source>Display Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Change the name of the buffer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Focus/Change Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

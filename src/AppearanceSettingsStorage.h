@@ -22,6 +22,8 @@ public:
 private:
     QSettings _settings;
     Q_SLOT void onHideActionBarChanged(bool);
+    Q_SLOT void onHideTitleBarChanged(bool);
+    Q_SLOT void onFullScreenChanged(bool);
     Q_SLOT void onThemeChanged(AppearanceSettings::Theme);
     Q_SLOT void onFontFamilyChanged(const QString &);
     Q_SLOT void onFontSizeChanged(bb::cascades::FontSize::Type);

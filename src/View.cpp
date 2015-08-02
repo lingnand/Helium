@@ -14,6 +14,8 @@
 #include <bb/cascades/KeyEvent>
 #include <bb/cascades/KeyListener>
 #include <bb/cascades/Shortcut>
+#include <bb/cascades/TitleBar>
+#include <bb/cascades/Header>
 #include <bb/cascades/pickers/FilePicker>
 #include <View.h>
 #include <MultiViewPane.h>
@@ -56,7 +58,9 @@ View::View(Project *project, Buffer *buffer):
     _project(project), _buffer(NULL),
     _highlightRange(0, 1),
     _fpicker(NULL),
+    _header(Header::create().enabled(false)),
     _textArea(TextArea::create()
+        .topMargin(0)
         .format(TextFormat::Html)
         .inputFlags(TextInputFlag::SpellCheckOff
                     | TextInputFlag::AutoCorrectionOff
@@ -75,6 +79,7 @@ View::View(Project *project, Buffer *buffer):
         .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *)))),
     _page(Page::create()
         .content(Container::create()
+            .add(_header)
             .add(_textArea)
             .add(_progressIndicator))
 //        .actionBarVisibility(ChromeVisibility::Visible)
@@ -83,6 +88,10 @@ View::View(Project *project, Buffer *buffer):
         .addKeyListener(_pageKeyListener)),
     _content(NavigationPane::create().add(_page))
 {
+    onProjectTitleChanged(_project->title());
+    conn(_project, SIGNAL(titleChanged(const QString&)),
+        this, SLOT(onProjectTitleChanged(const QString&)));
+
     GeneralSettings *general = Helium::instance()->general();
     _highlightRangeLimit = general->highlightRange();
     conn(general, SIGNAL(highlightRangeChanged(int)),
@@ -99,9 +108,9 @@ View::View(Project *project, Buffer *buffer):
         this, SLOT(updateTextAreaPartialHighlight()));
 
     AppearanceSettings *appearance = Helium::instance()->appearance();
-    onHideActionBarChanged(appearance->hideActionBar());
-    conn(appearance, SIGNAL(hideActionBarChanged(bool)),
-        this, SLOT(onHideActionBarChanged(bool)));
+    onShouldHideActionBarChanged(appearance->shouldHideActionBar());
+    conn(appearance, SIGNAL(shouldHideActionBarChanged(bool)),
+        this, SLOT(onShouldHideActionBarChanged(bool)));
 
     _textArea->textStyle()->setFontFamily(appearance->fontFamily());
     conn(appearance, SIGNAL(fontFamilyChanged(const QString&)),
@@ -123,7 +132,7 @@ View::~View()
     setBuffer(NULL); // this will erase the buffer if necessary
 }
 
-void View::onHideActionBarChanged(bool hide)
+void View::onShouldHideActionBarChanged(bool hide)
 {
     _page->setActionBarVisibility(hide ?
             ChromeVisibility::Hidden :
@@ -143,8 +152,28 @@ void View::setMode(ViewMode *mode)
     }
 }
 
+void View::onProjectTitleChanged(const QString &title)
+{
+    _header->setSubtitle(QString("[%1]").arg(title));
+}
+
+void View::setPageTitleBar(TitleBar *title)
+{
+    if (title && !_page->titleBar()) {
+        // XXX: relying on the fact that only the main thread
+        // will be used to update UI; this local static initialization
+        // should be fine
+        static TitleBar *dummy = TitleBar::create();
+        // XXX: this is a hack to work around BB's bug!
+        _page->setTitleBar(dummy);
+    }
+    _page->setTitleBar(title);
+    // use a header if the title bar is hidden
+    _header->setVisible(!title);
+}
+
 // detachPage can only be called when at the main page
-bb::cascades::NavigationPane *View::detachContent()
+NavigationPane *View::detachContent()
 {
     _content->setParent(NULL);
     return _content;
@@ -177,6 +206,7 @@ bool View::untouched() const
 void View::onOutOfView()
 {
     _textArea->loseFocus();
+    emit outOfView();
 }
 
 void View::autoFocus()
@@ -199,12 +229,14 @@ void View::setFindMode()
 
 void View::reloadTitle()
 {
-    QString namefmt = unsafeToRemove() ? "%1*" : "%1";
+    QString name = unsafeToRemove() ? "%1*" : "%1";
     if (_buffer->name().isEmpty()) {
-        Tab::setTitle(namefmt.arg(tr("No Name")));
+        name = name.arg(tr("No Name"));
     } else {
-        Tab::setTitle(namefmt.arg(_buffer->name()));
+        name = name.arg(_buffer->name());
     }
+    setTitle(name);
+    _header->setTitle(name);
 }
 
 void View::setBuffer(Buffer *buffer)
