@@ -183,6 +183,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_add_folder.png) \
         $$quote($$BASEDIR/assets/images/ic_backward.png) \
         $$quote($$BASEDIR/assets/images/ic_bbm.png) \
+        $$quote($$BASEDIR/assets/images/ic_browser.png) \
         $$quote($$BASEDIR/assets/images/ic_cancel.png) \
         $$quote($$BASEDIR/assets/images/ic_clear.png) \
         $$quote($$BASEDIR/assets/images/ic_copy_link.png) \

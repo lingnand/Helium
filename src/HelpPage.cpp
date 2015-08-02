@@ -11,10 +11,12 @@
 #include <bb/cascades/Label>
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/Option>
+#include <bb/cascades/ActionItem>
 #include <HelpPage.h>
 #include <ShortcutHelp.h>
 #include <Utility.h>
 #include <Segment.h>
+#include <Helium.h>
 
 using namespace bb::cascades;
 
@@ -72,7 +74,10 @@ HelpPage::HelpPage(QObject *parent):
         .add(_changeList)),
     _view(ScrollView::create(_referenceSegment)
         .scrollMode(ScrollMode::Vertical)),
-    _contentPage(NULL)
+    _contentPage(NULL),
+    _rateAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_browser.png"))
+        .onTriggered(Helium::instance(), SLOT(goToAppWorld())))
 {
     setTitleBar(TitleBar::create(TitleBarKind::Segmented)
         .addOption(_referenceOption)
@@ -81,6 +86,7 @@ HelpPage::HelpPage(QObject *parent):
         this, SLOT(onSelectedOptionChanged(bb::cascades::Option*)));
 
     setContent(_view);
+    addAction(_rateAction, ActionBarPlacement::OnBar);
     setActionBarVisibility(ChromeVisibility::Overlay);
     setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
 
@@ -184,7 +190,11 @@ void HelpPage::onTranslatorChanged()
         "  %1 <em>python, shell, html, javascript</em><br/>"
         "Note that the command run profile supports running <em>any</em> shell command. For example, you can compile gcc using <a href='https://github.com/mordak/playbook-dev-tools'>playbook-dev-tools</a> and define a command to compile and run your cpp files directly."
         ).arg(BULLET_SYMBOL));
-    _changeList->setText(tr("<strong><u>Version 1.0.3.x</u></strong><br/><br/>"
+    _changeList->setText(tr(
+        "<strong><u>Version 1.0.4.x</u></strong><br/><br/>"
+        "  %1 NEW: Full-screen mode and ability to hide title bar<br/>"
+        "  %1 NEW: instruction on how to compile and run c/c++ files within Helium (<strong>Reference-Run Profile</strong>)<br/><br/>"
+        "<strong><u>Version 1.0.3.x</u></strong><br/><br/>"
         "  %1 NEW: project management - manage tabs with <em>projects</em> and open files within the project directory easily<br/>"
         "  %1 NEW: persistence for opened projects<br/>"
         "  %1 <strong>CHANGE</strong>: %3 (when text field/area is not focused) is now mapped to <em>Close Project</em>; <strong>keyboard shortcut help is now triggered by</strong> %2 %3 <strong>regardless of whether a text field/area is focused or not</strong><br/>"
@@ -204,4 +214,5 @@ void HelpPage::onTranslatorChanged()
         "  %1 FIX: Alt+Enter problem on some devices<br/>"
         "  %1 FIX: some pages are not scrollable<br/>"
         ).arg(BULLET_SYMBOL, RETURN_SYMBOL, BACKSPACE_SYMBOL));
+    _rateAction->setTitle(tr("Rate Helium"));
 }

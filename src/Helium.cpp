@@ -176,16 +176,20 @@ void Helium::onSupportDialogConfirmed(bb::system::SystemUiResult::Type type)
     _general->confirmSupport();
     switch (type) {
     case bb::system::SystemUiResult::ConfirmButtonSelection: {
-        bb::system::InvokeRequest request;
-        request.setTarget("sys.appworld");
-        request.setAction("bb.action.OPEN");
-        request.setUri(QUrl(APPWORLD_URI));
-        _invokeManager.invoke(request);
-        break;
+        goToAppWorld(); break;
     }
     case bb::system::SystemUiResult::CustomButtonSelection:
         postPersonalMessage(); break;
     }
+}
+
+void Helium::goToAppWorld()
+{
+    bb::system::InvokeRequest request;
+    request.setTarget("sys.appworld");
+    request.setAction("bb.action.OPEN");
+    request.setUri(QUrl(APPWORLD_URI));
+    _invokeManager.invoke(request);
 }
 
 void Helium::share()

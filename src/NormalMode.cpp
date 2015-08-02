@@ -240,16 +240,17 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
             view()->buffer()->redo();
             break;
         case KEYCODE_H: // Head
-            if (_titleField->isEnabled()) {
                 if (view()->page()->titleBar() == _titleBar)
                     _titleField->requestFocus();
                 else {
-                    Utility::prompt(tr("Done"), tr("Cancel"),
-                            tr("Name"), tr("Change the name of the buffer"),
-                            _titleField->text(), tr("Enter the name"),
-                            this, SLOT(onTitlePromptClosed(bb::system::SystemUiResult::Type, const QString&)));
+                    if (_titleField->isEnabled())
+                        Utility::prompt(tr("Done"), tr("Cancel"),
+                                tr("Name"), tr("Change the name of the buffer"),
+                                _titleField->text(), tr("Enter the name"),
+                                this, SLOT(onTitlePromptClosed(bb::system::SystemUiResult::Type, const QString&)));
+                    else
+                        Utility::toast(tr("Buffer name is locked"));
                 }
-            }
             break;
         case KEYCODE_F: // Find
             view()->setFindMode();

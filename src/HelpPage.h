@@ -16,6 +16,7 @@ namespace bb {
         class Header;
         class Option;
         class ScrollView;
+        class ActionItem;
     }
 }
 
@@ -56,6 +57,7 @@ private:
         bb::cascades::Label *contentLabel;
         ContentPage(QObject *parent=NULL);
     } *_contentPage;
+    bb::cascades::ActionItem *_rateAction;
 
     Q_SLOT void onSelectedOptionChanged(bb::cascades::Option *);
     Q_SLOT void onTabsAndBuffersHeaderClicked();

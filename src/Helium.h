@@ -50,6 +50,7 @@ public:
         return (MultiViewPane *) bb::cascades::Application::scene();
     }
     Q_SLOT void reloadTranslator();
+    Q_SLOT void goToAppWorld();
 Q_SIGNALS:
     void translatorChanged();
 private:
