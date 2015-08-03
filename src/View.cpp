@@ -166,8 +166,12 @@ void View::setPageTitleBar(TitleBar *title)
         static TitleBar *dummy = TitleBar::create();
         // XXX: this is a hack to work around BB's bug!
         _page->setTitleBar(dummy);
+        _page->setTitleBar(title);
+        // reset the parent so that dummy won't accidentally get deleted!
+        dummy->setParent(NULL);
+    } else {
+        _page->setTitleBar(title);
     }
-    _page->setTitleBar(title);
     // use a header if the title bar is hidden
     _header->setVisible(!title);
 }
