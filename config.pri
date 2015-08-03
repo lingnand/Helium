@@ -4,45 +4,73 @@ BASEDIR = $$quote($$_PRO_FILE_PWD_)
 device {
     CONFIG(debug, debug|release) {
         profile {
-            INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+            INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/include) \
+                $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/include) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
                 $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
-            DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+            DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/include) \
+                $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/include) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
                 $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lssl \
                 -lbbplatformbbm \
+                -lgit2 \
                 -lbb \
-                -lbbsystem
+                -lbbsystem \
+                -lssh2 \
+                -lz
 
-            LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
+            LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/libssh2/lib) \
+                $$quote(-L/opt/bbndk/lib_10_3_0_698/libgit2/lib) \
+                $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
 
-            PRE_TARGETDEPS += $$quote(/opt/bbndk/lib_10_3_0_698/boost/lib)
+            PRE_TARGETDEPS += $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/lib) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/lib) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/lib)
 
             CONFIG += \
                 config_pri_assets \
                 config_pri_source_group1
         } else {
-            INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+            INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/include) \
+                $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/include) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
                 $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
-            DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+            DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/include) \
+                $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/include) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
                 $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lssl \
                 -lbbplatformbbm \
+                -lgit2 \
                 -lbb \
-                -lbbsystem
+                -lbbsystem \
+                -lssh2 \
+                -lz
 
-            LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
+            LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/libssh2/lib) \
+                $$quote(-L/opt/bbndk/lib_10_3_0_698/libgit2/lib) \
+                $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
 
-            PRE_TARGETDEPS += $$quote(/opt/bbndk/lib_10_3_0_698/boost/lib)
+            PRE_TARGETDEPS += $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/lib) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/lib) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/lib)
 
             CONFIG += \
                 config_pri_assets \
@@ -53,23 +81,37 @@ device {
 
     CONFIG(release, debug|release) {
         !profile {
-            INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+            INCLUDEPATH += $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/include) \
+                $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/include) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
                 $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
-            DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
+            DEPENDPATH += $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/include) \
+                $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/include) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/include) \
                 $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lboost_regex \
                 -lbbcascadespickers \
+                -lssl \
                 -lbbplatformbbm \
+                -lgit2 \
                 -lbb \
-                -lbbsystem
+                -lbbsystem \
+                -lssh2 \
+                -lz
 
-            LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
+            LIBS += $$quote(-L/opt/bbndk/lib_10_3_0_698/libssh2/lib) \
+                $$quote(-L/opt/bbndk/lib_10_3_0_698/libgit2/lib) \
+                $$quote(-L/opt/bbndk/lib_10_3_0_698/boost/lib)
 
-            PRE_TARGETDEPS += $$quote(/opt/bbndk/lib_10_3_0_698/boost/lib)
+            PRE_TARGETDEPS += $$quote(/opt/bbndk/lib_10_3_0_698/libssh2/lib) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/libgit2/lib) \
+                $$quote(/opt/bbndk/lib_10_3_0_698/boost/lib)
 
             CONFIG += \
                 config_pri_assets \
@@ -81,16 +123,20 @@ device {
 simulator {
     CONFIG(debug, debug|release) {
         !profile {
-            INCLUDEPATH += $$quote(${QNX_TARGET}/usr/include/bb) \
+            INCLUDEPATH += $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
-            DEPENDPATH += $$quote(${QNX_TARGET}/usr/include/bb) \
+            DEPENDPATH += $$quote(${QNX_TARGET}/usr/include/openssl) \
+                $$quote(${QNX_TARGET}/usr/include/bb) \
                 $$quote(${QNX_TARGET}/usr/include/bb/system)
 
             LIBS += -lbbcascadespickers \
+                -lssl \
                 -lbbplatformbbm \
                 -lbb \
-                -lbbsystem
+                -lbbsystem \
+                -lz
 
             CONFIG += \
                 config_pri_assets \
@@ -571,6 +617,44 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/hoedown/html_smartypants.c) \
         $$quote($$BASEDIR/src/hoedown/stack.c) \
         $$quote($$BASEDIR/src/hoedown/version.c) \
+        $$quote($$BASEDIR/src/libqgit2/private/annotatedcommit.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/private/pathcodec.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/private/qbuffer.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/private/remotecallbacks.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/private/strarray.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitblob.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcheckoutoptions.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcherrypickoptions.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcommit.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitconfig.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcredentials.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdatabase.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdatabasebackend.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiff.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffdelta.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdifffile.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitexception.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitglobal.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitindex.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitindexentry.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitindexmodel.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitmergeoptions.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitobject.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitoid.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrebase.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrebaseoptions.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitref.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitremote.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrepository.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrevwalk.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitsignature.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatus.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatusentry.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatuslist.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatusoptions.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgittag.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgittree.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgittreeentry.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.cpp) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.cc) \
@@ -699,6 +783,46 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/hoedown/html.h) \
         $$quote($$BASEDIR/src/hoedown/stack.h) \
         $$quote($$BASEDIR/src/hoedown/version.h) \
+        $$quote($$BASEDIR/src/libqgit2/credentials_p.h) \
+        $$quote($$BASEDIR/src/libqgit2/libqgit2_config.h) \
+        $$quote($$BASEDIR/src/libqgit2/private/annotatedcommit.h) \
+        $$quote($$BASEDIR/src/libqgit2/private/pathcodec.h) \
+        $$quote($$BASEDIR/src/libqgit2/private/qbuffer.h) \
+        $$quote($$BASEDIR/src/libqgit2/private/remotecallbacks.h) \
+        $$quote($$BASEDIR/src/libqgit2/private/strarray.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitblob.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcheckoutoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcherrypickoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcommit.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitconfig.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitcredentials.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdatabase.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdatabasebackend.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiff.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffdelta.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdifffile.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitexception.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitglobal.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitindex.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitindexentry.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitindexmodel.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitmergeoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitobject.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitoid.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrebase.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrebaseoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitref.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitremote.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrepository.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrevwalk.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitsignature.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatus.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatusentry.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatuslist.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstatusoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgittag.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgittree.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgittreeentry.h) \
         $$quote($$BASEDIR/src/srchilite/bufferedoutput.h) \
         $$quote($$BASEDIR/src/srchilite/chartranslator.h) \
         $$quote($$BASEDIR/src/srchilite/colormap.h) \
@@ -786,6 +910,8 @@ config_pri_source_group1 {
 }
 
 INCLUDEPATH += $$quote($$BASEDIR/src/hoedown) \
+    $$quote($$BASEDIR/src/libqgit2) \
+    $$quote($$BASEDIR/src/libqgit2/private) \
     $$quote($$BASEDIR/src/srchilite) \
     $$quote($$BASEDIR/src)
 
@@ -805,6 +931,16 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../src/hoedown/*.cc) \
         $$quote($$BASEDIR/../src/hoedown/*.cpp) \
         $$quote($$BASEDIR/../src/hoedown/*.cxx) \
+        $$quote($$BASEDIR/../src/libqgit2/*.c) \
+        $$quote($$BASEDIR/../src/libqgit2/*.c++) \
+        $$quote($$BASEDIR/../src/libqgit2/*.cc) \
+        $$quote($$BASEDIR/../src/libqgit2/*.cpp) \
+        $$quote($$BASEDIR/../src/libqgit2/*.cxx) \
+        $$quote($$BASEDIR/../src/libqgit2/private/*.c) \
+        $$quote($$BASEDIR/../src/libqgit2/private/*.c++) \
+        $$quote($$BASEDIR/../src/libqgit2/private/*.cc) \
+        $$quote($$BASEDIR/../src/libqgit2/private/*.cpp) \
+        $$quote($$BASEDIR/../src/libqgit2/private/*.cxx) \
         $$quote($$BASEDIR/../src/srchilite/*.c) \
         $$quote($$BASEDIR/../src/srchilite/*.c++) \
         $$quote($$BASEDIR/../src/srchilite/*.cc) \
@@ -1011,6 +1147,4 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../src/*.hxx)
 }
 
-TRANSLATIONS = $$quote($${TARGET}_zh_CN.ts) \
-    $$quote($${TARGET}_zh_TW.ts) \
-    $$quote($${TARGET}.ts)
+TRANSLATIONS = $$quote($${TARGET}.ts)

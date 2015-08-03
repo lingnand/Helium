@@ -31,17 +31,23 @@
        <platformArchitecture>armle-v7</platformArchitecture>
        <asset path="arm/o.le-v7-g/Char" entry="true" type="Qnx/Elf">Char</asset>
        <asset path="/opt/bbndk/lib_10_3_0_698/boost/lib/libboost_regex.so" type="Qnx/Elf">lib/libboost_regex.so.1.48.0</asset>
+       <asset path="/opt/bbndk/lib_10_3_0_698/libssh2/lib/libssh2.so" type="Qnx/Elf">lib/libssh2.so</asset>
+       <asset path="/opt/bbndk/lib_10_3_0_698/libgit2/lib/libgit2.so" type="Qnx/Elf">lib/libgit2.so.22</asset>
     </configuration>
     <configuration name="Device-Release">
        <entryPointType>Qnx/Cascades</entryPointType>
        <platformArchitecture>armle-v7</platformArchitecture>
        <asset path="arm/o.le-v7/Char.so" entry="true" type="Qnx/Elf">Char.so</asset>
        <asset path="/opt/bbndk/lib_10_3_0_698/boost/lib/libboost_regex.so" type="Qnx/Elf">lib/libboost_regex.so.1.48.0</asset>
+       <asset path="/opt/bbndk/lib_10_3_0_698/libssh2/lib/libssh2.so" type="Qnx/Elf">lib/libssh2.so</asset>
+       <asset path="/opt/bbndk/lib_10_3_0_698/libgit2/lib/libgit2.so" type="Qnx/Elf">lib/libgit2.so.22</asset>
     </configuration>
     <configuration name="Device-Profile">
        <platformArchitecture>armle-v7</platformArchitecture>
        <asset path="arm-p/o.le-v7-g/Char" entry="true" type="Qnx/Elf">Char</asset>
        <asset path="/opt/bbndk/lib_10_3_0_698/boost/lib/libboost_regex.so" type="Qnx/Elf">lib/libboost_regex.so.1.48.0</asset>
+       <asset path="/opt/bbndk/lib_10_3_0_698/libssh2/lib/libssh2.so" type="Qnx/Elf">lib/libssh2.so</asset>
+       <asset path="/opt/bbndk/lib_10_3_0_698/libgit2/lib/libgit2.so" type="Qnx/Elf">lib/libgit2.so.22</asset>
     </configuration>
     <configuration name="Simulator-Debug">
        <platformArchitecture>x86</platformArchitecture>
