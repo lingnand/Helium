@@ -14,7 +14,9 @@
 
 using namespace bb::cascades;
 
-Project::Project(const QString &path): _activeView(NULL)
+Project::Project(Zipper<Project *> *projects, const QString &path):
+        _projects(projects),
+        _activeView(NULL)
 {
     setPath(path);
     unselect();
@@ -25,7 +27,7 @@ Project::~Project()
 {
     // this assumes that all the views should have been
     // removed from a MultiViewPane (which should be the case)
-    for (int i = 0; i < size(); i++)
+    for (int i = 0; i < _views.size(); i++)
         _views[i]->deleteLater();
 }
 
@@ -68,6 +70,7 @@ void Project::setPath(const QString &path)
             title = _path.right(_path.size()-22); // XXX: hardcoded length
         }
         setTitle(title);
+        resetViewHeaderSubtitles();
         emit pathChanged(_path);
     }
 }
@@ -85,11 +88,33 @@ void Project::select()
 void Project::insertNewView(int index, Buffer *buffer)
 {
     View *view = new View(this, buffer);
-    conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
-    conn(view, SIGNAL(triggered()), this, SLOT(onViewTriggered()));
     _views.insert(index, view);
+    conn(view, SIGNAL(triggered()), this, SLOT(onViewTriggered()));
+    conn(this, SIGNAL(translatorChanged()), view, SLOT(onTranslatorChanged()));
+    // title
+    resetViewHeaderTitles();
+    conn(view, SIGNAL(titleChanged(const QString&)), view, SLOT(resetHeaderTitle()));
+    // subtitle
+    view->resetHeaderSubtitle(_projects->indexOf(this), _projects->size());
     setUnreadContentCount(_views.size());
     emit viewInserted(index, view);
+}
+
+void Project::resetViewHeaderSubtitles()
+{
+    resetViewHeaderSubtitles(_projects->indexOf(this), _projects->size());
+}
+
+void Project::resetViewHeaderSubtitles(int index, int total)
+{
+    for (int i = 0; i < _views.size(); i++)
+        _views[i]->resetHeaderSubtitle(index, total);
+}
+
+void Project::resetViewHeaderTitles()
+{
+    for (int i = 0, total = _views.size(); i < total; i++)
+        _views[i]->resetHeaderTitle(i, total);
 }
 
 void Project::createEmptyViewAt(int index)
@@ -102,6 +127,7 @@ void Project::removeAt(int index)
 {
     View *view = _views[index];
     _views.removeAt(index);
+    resetViewHeaderTitles();
     setUnreadContentCount(_views.size());
     emit viewRemoved(view);
     if (_views.isEmpty()) {

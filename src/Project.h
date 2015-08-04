@@ -9,6 +9,7 @@
 #define PROJECT_H_
 
 #include <bb/cascades/Tab>
+#include <Zipper.h>
 
 class View;
 class Buffer;
@@ -17,7 +18,7 @@ class Project : public bb::cascades::Tab
 {
     Q_OBJECT
 public:
-    Project(const QString &path);
+    Project(Zipper<Project *> *, const QString &path);
     virtual ~Project();
     View *activeView() const { return _activeView; }
     int activeViewIndex() const { return indexOf(_activeView); }
@@ -36,6 +37,7 @@ public:
     void cloneAt(int);
     void cloneView(View *view) { cloneAt(indexOf(view)); }
     void openFilesAt(int, const QStringList &);
+    void resetViewHeaderSubtitles(int index, int total);
 Q_SIGNALS:
     void pathChanged(const QString &);
     void viewInserted(int index, View *);
@@ -48,11 +50,14 @@ Q_SIGNALS:
     void activeViewChanged(int index, View *);
     void translatorChanged();
 private:
+    Zipper<Project *> *_projects;
     View *_activeView;
     QList<View *> _views;
     QString _path;
 
     void insertNewView(int index, Buffer *);
+    void resetViewHeaderSubtitles();
+    void resetViewHeaderTitles();
     Q_SLOT void onViewTriggered();
 };
 

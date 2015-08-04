@@ -30,7 +30,7 @@ class Zipper : public ZipperSignalsSlots
 {
 public:
     Zipper(QObject *parent=NULL): ZipperSignalsSlots(parent), _active(NULL) {}
-    int indexOf(const T &t, int from = 0) const { return _list.indexOf(t, 0); }
+    int indexOf(const T &t, int from = 0) const { return _list.indexOf(t, from); }
     T &operator[](int i) { return _list[i]; }
     const T &operator[](int i) const { return _list[i]; }
     const T &at(int i) const { return _list.at(i); }

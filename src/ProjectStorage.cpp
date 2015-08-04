@@ -101,7 +101,7 @@ Zipper<Project *> *ProjectStorage::read()
         for (int i = 0; i < keys.size(); i++) {
             qDebug() << "Reading" << keys[i];
             _settings.beginGroup(keys[i]);
-            Project *p = new Project(_settings.value("path").toString());
+            Project *p = new Project(zipper, _settings.value("path").toString());
             vec[_settings.value("index").toInt()] = p;
             if (_settings.value("active").toBool()) {
                 active = p;
@@ -129,7 +129,7 @@ Zipper<Project *> *ProjectStorage::read()
         this, SLOT(onProjectRemoved(int, Project*)));
     if (zipper->empty()) {
         qDebug() << "Appending default project...";
-        zipper->append(new Project(DEFAULT_PROJECT_PATH));
+        zipper->append(new Project(zipper, DEFAULT_PROJECT_PATH));
     }
     return zipper;
 }

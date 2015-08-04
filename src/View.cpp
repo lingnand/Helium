@@ -88,10 +88,6 @@ View::View(Project *project, Buffer *buffer):
         .addKeyListener(_pageKeyListener)),
     _content(NavigationPane::create().add(_page))
 {
-    onProjectTitleChanged(_project->title());
-    conn(_project, SIGNAL(titleChanged(const QString&)),
-        this, SLOT(onProjectTitleChanged(const QString&)));
-
     GeneralSettings *general = Helium::instance()->general();
     _highlightRangeLimit = general->highlightRange();
     conn(general, SIGNAL(highlightRangeChanged(int)),
@@ -152,9 +148,25 @@ void View::setMode(ViewMode *mode)
     }
 }
 
-void View::onProjectTitleChanged(const QString &title)
+void View::resetHeaderTitle()
 {
-    _header->setSubtitle(QString("[%1]").arg(title));
+    resetHeaderTitle(_project->indexOf(this), _project->size());
+}
+
+void View::resetHeaderTitle(int viewIndex, int viewsSize)
+{
+    _header->setTitle(QString("%1/%2. %3")
+            .arg(viewIndex+1)
+            .arg(viewsSize)
+            .arg(title()));
+}
+
+void View::resetHeaderSubtitle(int projectIndex, int projectsSize)
+{
+    _header->setSubtitle(QString("[%1/%2. %3]")
+            .arg(projectIndex+1)
+            .arg(projectsSize)
+            .arg(_project->title()));
 }
 
 void View::setPageTitleBar(TitleBar *title)
@@ -240,7 +252,6 @@ void View::reloadTitle()
         name = name.arg(_buffer->name());
     }
     setTitle(name);
-    _header->setTitle(name);
 }
 
 void View::setBuffer(Buffer *buffer)

@@ -28,6 +28,7 @@
 #include <Buffer.h>
 #include <Project.h>
 #include <Helium.h>
+#include <AppearanceSettings.h>
 #include <Utility.h>
 #include <ModKeyListener.h>
 
@@ -79,7 +80,7 @@ MultiViewPane::MultiViewPane(Zipper<Project *> *projects, QObject *parent):
         onProjectInserted(i, _projects->at(i));
     conn(_projects, SIGNAL(itemInserted(int, Project*)),
         this, SLOT(onProjectInserted(int, Project*)));
-    onActiveProjectChanged(_projects->active());
+    connectActiveProject(_projects->active(), false);
     conn(_projects, SIGNAL(activeItemChanged(Project*, Project*)),
         this, SLOT(onActiveProjectChanged(Project*, Project*)));
     conn(_projects, SIGNAL(itemRemoved(int, Project*)),
@@ -91,6 +92,13 @@ MultiViewPane::MultiViewPane(Zipper<Project *> *projects, QObject *parent):
     // load text
     onTranslatorChanged();
 }
+
+bool MultiViewPane::useNavigationPopup() const
+{
+    return !Helium::instance()->appearance()->fullScreen() &&
+            sidebarVisualState() == bb::cascades::SidebarVisualState::Hidden;
+}
+
 
 void MultiViewPane::onModifiedKey(bb::cascades::KeyEvent *event)
 {
@@ -139,7 +147,7 @@ void MultiViewPane::changeProjectPath()
 void MultiViewPane::onProjectPathSelected(const QStringList &list)
 {
     activeProject()->setPath(list[0]);
-    resetProjectActiveView(sidebarHidden());
+    resetProjectActiveView(useNavigationPopup());
 }
 
 void MultiViewPane::resetProjectActiveView(bool toast)
@@ -163,40 +171,54 @@ void MultiViewPane::setProjectActiveView(Project *project,
                 .arg(project->title()));
 }
 
+void MultiViewPane::connectActiveProject(Project *p, bool toast)
+{
+    p->select();
+    for (int i = 0; i < p->size(); i++)
+        add(p->at(i));
+    resetProjectActiveView(toast);
+    conn(p, SIGNAL(viewInserted(int, View*)),
+        this, SLOT(onProjectViewInserted(int, View*)));
+    conn(p, SIGNAL(viewRemoved(View*)),
+        this, SLOT(onProjectViewRemoved(View*)));
+    conn(p, SIGNAL(activeViewChanged(int, View*)),
+        this, SLOT(onProjectActiveViewChanged(int, View*)));
+}
+
+void MultiViewPane::disconnectActiveProject(Project *p)
+{
+    p->unselect();
+    disconn(p, SIGNAL(viewInserted(int, View*)),
+        this, SLOT(onProjectViewInserted(int, View*)));
+    disconn(p, SIGNAL(viewRemoved(View*)),
+        this, SLOT(onProjectViewRemoved(View*)));
+    disconn(p, SIGNAL(activeViewChanged(int, View*)),
+        this, SLOT(onProjectActiveViewChanged(int, View*)));
+    for (int i = 0; i < p->size(); i++)
+        remove(p->at(i));
+}
+
 void MultiViewPane::onActiveProjectChanged(Project *change, Project *old)
 {
-    if (old) {
-        old->unselect();
-        disconn(old, SIGNAL(viewInserted(int, View*)),
-            this, SLOT(onProjectViewInserted(int, View*)));
-        disconn(old, SIGNAL(viewRemoved(View*)),
-            this, SLOT(onProjectViewRemoved(View*)));
-        disconn(old, SIGNAL(activeViewChanged(int, View*)),
-            this, SLOT(onProjectActiveViewChanged(int, View*)));
-        for (int i = 0; i < old->size(); i++)
-            remove(old->at(i));
-    }
-    if (change) {
-        change->select();
-        for (int i = 0; i < change->size(); i++)
-            add(change->at(i));
-        resetProjectActiveView(sidebarHidden());
-        conn(change, SIGNAL(viewInserted(int, View*)),
-            this, SLOT(onProjectViewInserted(int, View*)));
-        conn(change, SIGNAL(viewRemoved(View*)),
-            this, SLOT(onProjectViewRemoved(View*)));
-        conn(change, SIGNAL(activeViewChanged(int, View*)),
-            this, SLOT(onProjectActiveViewChanged(int, View*)));
-    }
+    if (old)
+        disconnectActiveProject(old);
+    if (change)
+        connectActiveProject(change, useNavigationPopup());
 }
 
 void MultiViewPane::setNextProjectActive()
 {
     if (_projects->size() < 2)
-        resetProjectActiveView(sidebarHidden());
+        resetProjectActiveView(useNavigationPopup());
     else
         _projects->setActive(
                 _projects->at(PMOD(_projects->indexOf(activeProject())+1, _projects->size())));
+}
+
+void MultiViewPane::resetProjectViewHeaderSubtitles()
+{
+    for (int i = 0, total = _projects->size(); i < total; i++)
+        _projects->at(i)->resetViewHeaderSubtitles(i, total);
 }
 
 void MultiViewPane::onProjectInserted(int index, Project *project)
@@ -206,6 +228,7 @@ void MultiViewPane::onProjectInserted(int index, Project *project)
         project, SIGNAL(translatorChanged()));
     conn(project, SIGNAL(triggered()),
         this, SLOT(onProjectTriggered()));
+    resetProjectViewHeaderSubtitles();
 }
 
 void MultiViewPane::removeActiveProject()
@@ -237,8 +260,9 @@ void MultiViewPane::onProjectRemoved(int index, Project *project)
 {
     remove(project);
     if (!_projects->active())
-        _projects->insert(0, new Project(Helium::instance()->general()->defaultProjectDirectory()));
+        _projects->insert(0, new Project(_projects, Helium::instance()->general()->defaultProjectDirectory()));
     project->deleteLater();
+    resetProjectViewHeaderSubtitles();
 }
 
 pickers::FilePicker *MultiViewPane::filePicker(const QString &directory,
@@ -268,7 +292,7 @@ void MultiViewPane::createProject()
 
 void MultiViewPane::onNewProjectPathSelected(const QStringList &list)
 {
-    Project *p = new Project(list[0]);
+    Project *p = new Project(_projects, list[0]);
     _projects->insert(_projects->indexOf(activeProject())+1, p);
     _projects->setActive(p);
 }
@@ -285,7 +309,7 @@ void MultiViewPane::onProjectViewRemoved(View *view)
 
 void MultiViewPane::onProjectActiveViewChanged(int index, View *view)
 {
-    setProjectActiveView(activeProject(), index, view, sidebarHidden());
+    setProjectActiveView(activeProject(), index, view, useNavigationPopup());
 }
 
 void MultiViewPane::zoomIntoView()
@@ -352,7 +376,7 @@ void MultiViewPane::setActiveTabWithOffset(int offset, bool toast)
     if (_zoomed)
         setActiveTabIndex(PMOD(indexOf(activeTab())+offset, count()), toast);
     else if (activeProject()->size() < 2) // refresh display
-        resetProjectActiveView(sidebarHidden());
+        resetProjectActiveView(useNavigationPopup());
     else
         activeProject()->setActiveViewIndex(
                 PMOD(activeProject()->activeViewIndex()+offset,

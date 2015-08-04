@@ -95,12 +95,13 @@ private:
     // monitoring zipper
     Q_SLOT void onProjectInserted(int, Project *);
     Q_SLOT void onProjectRemoved(int, Project *);
-    Q_SLOT void onActiveProjectChanged(Project *change, Project *old=NULL);
+    Q_SLOT void onActiveProjectChanged(Project *change, Project *old);
+    void resetProjectViewHeaderSubtitles();
+    void connectActiveProject(Project *, bool toast);
+    void disconnectActiveProject(Project *);
 
     Q_SLOT void changeProjectPath();
-    bool sidebarHidden() const {
-        return sidebarVisualState() == bb::cascades::SidebarVisualState::Hidden;
-    }
+    bool useNavigationPopup() const;
     Q_SLOT void resetProjectActiveView(bool toast=false);
     Q_SLOT void setProjectActiveView(Project *, int viewIndex, View *, bool toast);
 
