@@ -728,32 +728,16 @@ Do you want to continue?</source>
         <translation>显示快捷键</translation>
     </message>
     <message>
-        <source>Done</source>
-        <translation>完成</translation>
-    </message>
-    <message>
-        <source>Change the name of the buffer</source>
-        <translation>更改文件名</translation>
-    </message>
-    <message>
-        <source>Focus/Change Title</source>
-        <translation>聚焦/更改标题</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>取消</translation>
-    </message>
-    <message>
-        <source>Enter the name</source>
-        <translation>输入文件名</translation>
-    </message>
-    <message>
         <source>Name</source>
         <translation>文件名</translation>
     </message>
     <message>
         <source>Buffer name is locked</source>
         <translation>文件名已锁定</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>重命名</translation>
     </message>
 </context>
 <context>

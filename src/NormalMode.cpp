@@ -79,6 +79,10 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_copy_link.png"))
         .addShortcut(Shortcut::create().key("g"))
         .onTriggered(view, SLOT(clone()))),
+    _renameAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_rename.png"))
+        .addShortcut(Shortcut::create().key("h"))
+        .onTriggered(this, SLOT(rename()))),
     _closeAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_clear.png"))
         .addShortcut(Shortcut::create().key("x"))
@@ -99,7 +103,7 @@ NormalMode::NormalMode(View *view):
     conn(_titleField, SIGNAL(textChanged(const QString &)),
         this, SLOT(onTitleFieldTextChanged(const QString &)));
     conn(_titleField, SIGNAL(focusedChanged(bool)),
-        view, SLOT(blockPageKeyListener(bool)));
+        this, SLOT(onTitleFieldFocusedChanged(bool)));
     _titleField->addKeyListener(ModKeyListener::create(KEYCODE_RETURN)
         .onModifiedKeyReleased(this, SLOT(onTitleFieldModifiedKey(bb::cascades::KeyEvent*, ModKeyListener*)))
         .onModKeyPressedAndReleased(view->textArea(), SLOT(requestFocus()))
@@ -188,8 +192,9 @@ void NormalMode::showProperties()
 
 void NormalMode::resetTitleBar()
 {
-    view()->setPageTitleBar(
-        Helium::instance()->appearance()->shouldHideTitleBar() ? NULL : _titleBar);
+    if (_active)
+        view()->setPageTitleBar(
+            Helium::instance()->appearance()->shouldHideTitleBar() ? NULL : _titleBar);
 }
 
 void NormalMode::onTitleFieldTextChanged(const QString &text)
@@ -217,10 +222,10 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
                   << ShortcutHelp::fromActionItem(_findAction, prefix)
                   << ShortcutHelp::fromActionItem(_runAction, prefix)
                   << ShortcutHelp::fromActionItem(_cloneAction, prefix)
+                  << ShortcutHelp::fromActionItem(_renameAction, prefix)
                   << ShortcutHelp::fromActionItem(_closeAction, prefix)
                   << ShortcutHelp("T", TAB_SYMBOL, prefix)
                   << ShortcutHelp("D", tr("Delete line"), prefix)
-                  << ShortcutHelp("H", tr("Focus/Change Title"), prefix)
                   << ShortcutHelp("V", tr("Paste Clipboard"), prefix)
                   << ShortcutHelp(SPACE_SYMBOL, tr("Lose Focus"), prefix)
                   << ShortcutHelp::fromShortcut(view()->parent()->newViewShortcut(), prefix)
@@ -240,17 +245,7 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
             view()->buffer()->redo();
             break;
         case KEYCODE_H: // Head
-                if (view()->page()->titleBar() == _titleBar)
-                    _titleField->requestFocus();
-                else {
-                    if (_titleField->isEnabled())
-                        Utility::prompt(tr("Done"), tr("Cancel"),
-                                tr("Name"), tr("Change the name of the buffer"),
-                                _titleField->text(), tr("Enter the name"),
-                                this, SLOT(onTitlePromptClosed(bb::system::SystemUiResult::Type, const QString&)));
-                    else
-                        Utility::toast(tr("Buffer name is locked"));
-                }
+            rename();
             break;
         case KEYCODE_F: // Find
             view()->setFindMode();
@@ -289,11 +284,15 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
     }
 }
 
-void NormalMode::onTitlePromptClosed(bb::system::SystemUiResult::Type type, const QString &text)
+void NormalMode::rename()
 {
-    _textAreaModKeyListener->modOff();
-    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
-        _titleField->setText(text);
+    if (_titleField->isEnabled()) {
+        // make sure the title field is put into view
+        view()->setPageTitleBar(_titleBar);
+        _titleField->requestFocus();
+    } else {
+        Utility::toast(tr("Buffer name is locked"));
+    }
 }
 
 void NormalMode::onBufferNameChanged(const QString &name)
@@ -314,7 +313,9 @@ void NormalMode::onBufferNameChanged(const QString &name)
 void NormalMode::onBufferFilepathChanged(const QString &filepath)
 {
     qDebug() << "filepath set to" << filepath;
-    _titleField->setEnabled(filepath.isEmpty());
+    bool enable = filepath.isEmpty();
+    _titleField->setEnabled(enable);
+    _renameAction->setEnabled(enable);
 }
 
 void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
@@ -365,6 +366,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_runAction);
     view()->page()->addAction(_propertiesAction);
     view()->page()->addAction(_cloneAction);
+    view()->page()->addAction(_renameAction);
     view()->page()->addAction(_closeAction);
     view()->page()->addAction(_closeProjectAction);
     resetTitleBar();
@@ -392,6 +394,13 @@ void NormalMode::onExit()
 void NormalMode::onBufferDirtyChanged(bool dirty)
 {
     _titleField->textStyle()->setFontStyle(dirty ? FontStyle::Italic : FontStyle::Normal);
+}
+
+void NormalMode::onTitleFieldFocusedChanged(bool focused)
+{
+    view()->blockPageKeyListener(focused);
+    if (!focused)
+        resetTitleBar();
 }
 
 void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyListener *)
@@ -442,6 +451,7 @@ void NormalMode::reloadLocked()
     _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
     _findAction->setEnabled(!locked);
     _cloneAction->setEnabled(!locked);
+    _renameAction->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
     _closeAction->setEnabled(!locked);
     _closeProjectAction->setEnabled(!locked);
     reloadRunnable();
@@ -465,6 +475,7 @@ void NormalMode::onTranslatorChanged()
     _runAction->setTitle(tr("Run"));
     _propertiesAction->setTitle(tr("Properties"));
     _cloneAction->setTitle(tr("Clone"));
+    _renameAction->setTitle(tr("Rename"));
     _closeAction->setTitle(tr("Close"));
     _closeProjectAction->setTitle(tr("Close Project"));
 }

@@ -83,6 +83,7 @@ public:
     Q_SLOT void autoFocus();
     Q_SLOT void resetHeaderTitle(int viewIndex, int viewsSize);
     Q_SLOT void resetHeaderSubtitle(int projectIndex, int projectsSize);
+    Q_SLOT void blockPageKeyListener(bool);
     // wrappers over the page
     void setPageTitleBar(bb::cascades::TitleBar *);
 Q_SIGNALS:
@@ -125,7 +126,6 @@ private:
     Range partialHighlightRange(const BufferState &st, Range focus);
     bb::cascades::pickers::FilePicker *filePicker();
     Q_SLOT void reloadTitle();
-    Q_SLOT void blockPageKeyListener(bool);
     /** callbacks **/
     Q_SLOT void onShouldHideActionBarChanged(bool);
     Q_SLOT void onFileSelected(const QStringList &files);

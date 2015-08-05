@@ -95,7 +95,7 @@ MultiViewPane::MultiViewPane(Zipper<Project *> *projects, QObject *parent):
 
 bool MultiViewPane::useNavigationPopup() const
 {
-    return !Helium::instance()->appearance()->fullScreen() &&
+    return !Helium::instance()->appearance()->shouldHideTitleBar() &&
             sidebarVisualState() == bb::cascades::SidebarVisualState::Hidden;
 }
 
