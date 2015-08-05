@@ -16,6 +16,7 @@ namespace bb {
         class WebView;
         class Page;
         class ActionItem;
+        class TitleBar;
     }
 }
 
@@ -37,7 +38,7 @@ public:
     Q_SLOT void onTranslatorChanged();
 private:
     Mode _mode;
-    bb::cascades::Page *_outputPage;
+    bb::cascades::TitleBar *_titleBar;
     bb::cascades::WebView *_webView;
     bb::cascades::ActionItem *_backAction;
     bb::cascades::ActionItem *_forwardAction;
@@ -48,7 +49,14 @@ private:
     hoedown_document *_hoedown_document;
     hoedown_buffer *_hoedown_buffer;
     QTemporaryFile *_temp;
+
+    bb::cascades::Page *_outputPage;
+
     Q_SLOT void rerun();
+
+    Q_SLOT void onShouldHideActionBarChanged(bool);
+    Q_SLOT void onShouldHideTitleBarChanged(bool);
+
     Q_SLOT void onNavigationHistoryChanged();
     Q_SLOT void onBufferFilepathChanged(const QString &);
 };

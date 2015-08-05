@@ -16,6 +16,7 @@ namespace bb {
         class Page;
         class ActionItem;
         class Label;
+        class TitleBar;
     }
 }
 
@@ -39,6 +40,7 @@ private:
     bool _runnable;
     QProcess _process;
 
+    bb::cascades::TitleBar *_titleBar;
     bb::cascades::ActionItem *_terminateAction;
     bb::cascades::ActionItem *_killAction;
     bb::cascades::ActionItem *_rerunAction;
@@ -53,6 +55,9 @@ private:
 
     Q_SLOT void onViewPagePushed(bb::cascades::Page *);
     Q_SLOT void onViewPagePopped(bb::cascades::Page *);
+
+    Q_SLOT void onShouldHideActionBarChanged(bool);
+    Q_SLOT void onShouldHideTitleBarChanged(bool);
 
     Q_SLOT void onProcessStateChanged(QProcess::ProcessState);
     Q_SLOT void onTranslatorChanged();

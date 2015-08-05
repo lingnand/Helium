@@ -17,6 +17,8 @@
 #include <WebRunProfile.h>
 #include <View.h>
 #include <Buffer.h>
+#include <Helium.h>
+#include <AppearanceSettings.h>
 #include <Utility.h>
 #include <hoedown/html.h>
 
@@ -25,14 +27,15 @@ using namespace bb::cascades;
 WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     RunProfile(view),
     _mode(mode),
+    _titleBar(TitleBar::create()),
     _webView(WebView::create()),
     _backAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_backward.png"))
-        .addShortcut(Shortcut::create().key("b"))
+        .addShortcut(Shortcut::create().key("h"))
         .onTriggered(_webView, SLOT(goBack()))),
     _forwardAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_forward.png"))
-        .addShortcut(Shortcut::create().key("f"))
+        .addShortcut(Shortcut::create().key("l"))
         .onTriggered(_webView, SLOT(goForward()))),
     _rerunAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_reload.png"))
@@ -58,9 +61,7 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     conn(_webView, SIGNAL(navigationHistoryChanged()),
         this, SLOT(onNavigationHistoryChanged()));
     _outputPage = Page::create()
-        .titleBar(TitleBar::create())
         .content(scrollView)
-        .actionBarVisibility(ChromeVisibility::Overlay)
         .addAction(_backAction, ActionBarPlacement::OnBar)
         .addAction(_rerunAction, ActionBarPlacement::Signature)
         .addAction(_forwardAction, ActionBarPlacement::OnBar)
@@ -68,6 +69,14 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
             .backButton(_backButton));
     _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
     _outputPage->setParent(this);
+
+    AppearanceSettings *appearance = Helium::instance()->appearance();
+    onShouldHideActionBarChanged(appearance->shouldHideActionBar());
+    conn(appearance, SIGNAL(shouldHideActionBarChanged(bool)),
+        this, SLOT(onShouldHideActionBarChanged(bool)));
+    onShouldHideTitleBarChanged(appearance->shouldHideTitleBar());
+    conn(appearance, SIGNAL(shouldHideTitleBarChanged(bool)),
+        this, SLOT(onShouldHideTitleBarChanged(bool)));
 
     onNavigationHistoryChanged();
     onTranslatorChanged();
@@ -93,6 +102,18 @@ void WebRunProfile::run()
     _outputPage->setParent(NULL);
     view()->content()->push(_outputPage);
     rerun();
+}
+
+void WebRunProfile::onShouldHideTitleBarChanged(bool hide)
+{
+    _outputPage->setTitleBar(hide ? NULL : _titleBar);
+}
+
+void WebRunProfile::onShouldHideActionBarChanged(bool hide)
+{
+    _outputPage->setActionBarVisibility(hide ?
+            ChromeVisibility::Hidden :
+            ChromeVisibility::Overlay);
 }
 
 void WebRunProfile::onBufferFilepathChanged(const QString &filepath)
@@ -211,7 +232,7 @@ void WebRunProfile::exit()
 
 void WebRunProfile::onTranslatorChanged()
 {
-    _outputPage->titleBar()->setTitle(tr("View Page"));
+    _titleBar->setTitle(tr("View Page"));
     _backAction->setTitle(tr("Go Back"));
     _rerunAction->setTitle(tr("Rerun"));
     _forwardAction->setTitle(tr("Go Forward"));

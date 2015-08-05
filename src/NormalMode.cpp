@@ -435,14 +435,7 @@ void NormalMode::onTitleFieldModifiedKey(bb::cascades::KeyEvent *event, ModKeyLi
 void NormalMode::reloadLocked()
 {
     bool locked = view()->buffer()->locked();
-    if (view()->textArea()->isFocused() && !view()->textArea()->isEditable() && !locked) {
-        // XXX: hack to get around virtual keyboard not getting put up (OMG..)
-        view()->textArea()->loseFocus();
-        view()->textArea()->setEditable(true);
-        view()->textArea()->requestFocus();
-    } else {
-        view()->textArea()->setEditable(!locked);
-    }
+    view()->textArea()->setEditable(!locked);
     _titleField->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
     _saveAction->setEnabled(!locked);
     _saveAsAction->setEnabled(!locked);

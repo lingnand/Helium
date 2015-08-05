@@ -18,6 +18,8 @@
 #include <CmdRunProfile.h>
 #include <View.h>
 #include <Buffer.h>
+#include <Helium.h>
+#include <AppearanceSettings.h>
 #include <Segment.h>
 #include <Utility.h>
 
@@ -26,6 +28,7 @@ using namespace bb::cascades;
 CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
     RunProfile(view), _cmd(cmd),
     _runnable(false),
+    _titleBar(TitleBar::create()),
     _terminateAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_clear.png"))
         .addShortcut(Shortcut::create().key("t"))
@@ -47,12 +50,10 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         .textStyle(SystemDefaults::TextStyles::bodyText())
         .preferredWidth(0)),
     _outputPage(Page::create()
-        .titleBar(TitleBar::create())
         .content(ScrollView::create(Segment::create()
                 .section().subsection()
                 .add(_outputArea))
             .scrollMode(ScrollMode::Vertical))
-        .actionBarVisibility(ChromeVisibility::Overlay)
         .addAction(_rerunAction, ActionBarPlacement::Signature)
         .addAction(_terminateAction, ActionBarPlacement::OnBar)
         .addAction(_killAction, ActionBarPlacement::OnBar)
@@ -74,6 +75,14 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
     // are removed gracefully
     _outputPage->setParent(this);
 
+    AppearanceSettings *appearance = Helium::instance()->appearance();
+    onShouldHideActionBarChanged(appearance->shouldHideActionBar());
+    conn(appearance, SIGNAL(shouldHideActionBarChanged(bool)),
+        this, SLOT(onShouldHideActionBarChanged(bool)));
+    onShouldHideTitleBarChanged(appearance->shouldHideTitleBar());
+    conn(appearance, SIGNAL(shouldHideTitleBarChanged(bool)),
+        this, SLOT(onShouldHideTitleBarChanged(bool)));
+
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
 
@@ -82,6 +91,18 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         this, SLOT(recalcRunnable()));
     conn(&_process, SIGNAL(stateChanged(QProcess::ProcessState)),
         this, SLOT(onProcessStateChanged(QProcess::ProcessState)));
+}
+
+void CmdRunProfile::onShouldHideTitleBarChanged(bool hide)
+{
+    _outputPage->setTitleBar(hide ? NULL : _titleBar);
+}
+
+void CmdRunProfile::onShouldHideActionBarChanged(bool hide)
+{
+    _outputPage->setActionBarVisibility(hide ?
+            ChromeVisibility::Hidden :
+            ChromeVisibility::Overlay);
 }
 
 void CmdRunProfile::run()
@@ -216,7 +237,7 @@ void CmdRunProfile::onViewPagePopped(Page *page)
 
 void CmdRunProfile::onTranslatorChanged()
 {
-    _outputPage->titleBar()->setTitle(tr("Run"));
+    _titleBar->setTitle(tr("Run"));
     _terminateAction->setTitle(tr("Terminate (SIGTERM)"));
     _killAction->setTitle(tr("Kill (SIGKILL)"));
     _rerunAction->setTitle(tr("Rerun"));
