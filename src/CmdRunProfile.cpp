@@ -82,6 +82,13 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
     onShouldHideTitleBarChanged(appearance->shouldHideTitleBar());
     conn(appearance, SIGNAL(shouldHideTitleBarChanged(bool)),
         this, SLOT(onShouldHideTitleBarChanged(bool)));
+    _outputArea->textStyle()->setFontFamily(appearance->fontFamily());
+    conn(appearance, SIGNAL(fontFamilyChanged(const QString&)),
+        _outputArea->textStyle(), SLOT(setFontFamily(const QString&)));
+    _outputArea->textStyle()->setFontSize(appearance->fontSize());
+    conn(appearance, SIGNAL(fontSizeChanged(bb::cascades::FontSize::Type)),
+        _outputArea->textStyle(), SLOT(setFontSize(bb::cascades::FontSize::Type)));
+
 
     onTranslatorChanged();
     conn(view, SIGNAL(translatorChanged()), this, SLOT(onTranslatorChanged()));
