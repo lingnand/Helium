@@ -193,7 +193,10 @@ void HelpPage::onTranslatorChanged()
     _changeList->setText(tr(
         "<strong><u>Version 1.0.4.x</u></strong><br/><br/>"
         "  %1 NEW: Full-screen mode and ability to hide title bar<br/>"
-        "  %1 NEW: instruction on how to compile and run c/c++ files within Helium (<strong>Reference-Run Profile</strong>)<br/><br/>"
+        "  %1 NEW: added <strong>Rename</strong> and <strong>Reload</strong> actions<br/>"
+        "  %1 NEW: added auto-detection of external changes on files being edited<br/>"
+        "  %1 NEW: instruction on how to compile and run c/c++ files within Helium (<strong>Reference-Run Profile</strong>)<br/>"
+        "  %1 IMPROVE: make use of font settings for command output<br/><br/>"
         "<strong><u>Version 1.0.3.x</u></strong><br/><br/>"
         "  %1 NEW: project management - manage tabs with <em>projects</em> and open files within the project directory easily<br/>"
         "  %1 NEW: persistence for opened projects<br/>"

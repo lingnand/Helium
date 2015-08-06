@@ -18,7 +18,11 @@ QList<ShortcutHelp> ShortcutHelp::fromShortcut(AbstractShortcut *shortcut, const
     QList<ShortcutHelp> list;
     if (shortcut->isEnabled()) {
         if (Shortcut *sh = dynamic_cast<Shortcut *>(shortcut)) {
-            QString key = sh->key().toUpper();
+            QString mod, key = sh->key().toUpper();
+            if (key.startsWith("SHIFT+")) {
+                mod = QString(SHIFT_SYMBOL) + " ";
+                key = key.right(key.size()-6);
+            }
             if (key == "BACKSPACE") {
                 key = BACKSPACE_SYMBOL;
             } else if (key == "ENTER") {
@@ -26,7 +30,7 @@ QList<ShortcutHelp> ShortcutHelp::fromShortcut(AbstractShortcut *shortcut, const
             } else if (key == "SPACE") {
                 key = SPACE_SYMBOL;
             }
-            list.append(ShortcutHelp(key, sh->property("help").toString(), prefix));
+            list.append(ShortcutHelp(mod+key, sh->property("help").toString(), prefix));
         }
     }
     return list;
