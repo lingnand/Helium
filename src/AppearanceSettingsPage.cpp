@@ -196,5 +196,5 @@ void AppearanceSettingsPage::onTranslatorChanged()
     _fullScreenHeader->setTitle(tr("Full-screen Settings"));
     _hideActionBarToggleLabel->setText(tr("Hide ActionBar"));
     _hideTitleBarToggleLabel->setText(tr("Hide TitleBar"));
-    _fullScreenHelp->setText(tr("These settings affect the UI for the main editing area when inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen."));
+    _fullScreenHelp->setText(tr("These settings affect the UI inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen."));
 }

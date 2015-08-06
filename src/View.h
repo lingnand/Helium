@@ -72,10 +72,9 @@ public:
     Q_SLOT void clone();
     Q_SLOT void close();
     Q_SLOT void closeProject();
-    Q_SLOT void onOutOfView();
+    Q_SLOT void onDeactivated();
+    Q_SLOT void onActivated();
     Q_SLOT void onTranslatorChanged();
-    Q_SLOT void undo();
-    Q_SLOT void redo();
     // wrappers over the linked buffer
     Q_SLOT void setAutodetectFiletype(bool);
     Q_SLOT void setFiletype(Filetype *);
@@ -86,6 +85,9 @@ public:
     Q_SLOT void blockPageKeyListener(bool);
     // wrappers over the page
     void setPageTitleBar(bb::cascades::TitleBar *);
+    Q_SLOT void undo();
+    Q_SLOT void redo();
+    Q_SLOT void reload();
 Q_SIGNALS:
     void outOfView();
     void hasUndosChanged(bool);
@@ -136,8 +138,8 @@ private:
     Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);
     Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
     Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);
-    Q_SLOT void onBufferSavedToFile(const QString &filename);
     Q_SLOT void onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type);
+    Q_SLOT void onTopChanged(bb::cascades::Page *);
 };
 
 #endif /* VIEW_H_ */

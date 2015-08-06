@@ -64,8 +64,55 @@
         <translation>隐藏标题栏</translation>
     </message>
     <message>
-        <source>These settings affect the UI for the main editing area when inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
-        <translation>这些设定将影响全屏模式时主编辑页面的界面。全屏模式选项可以从屏幕顶端往下滑动手指触发的菜单中找到。</translation>
+        <source>These settings affect the UI inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
+        <translation>这些设定将影响全屏模式时的界面。全屏模式选项可以从屏幕顶端往下滑动手指触发的菜单中找到。</translation>
+    </message>
+</context>
+<context>
+    <name>Buffer</name>
+    <message>
+        <source>Buffer is not saved</source>
+        <translation>文件未保存</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>是</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>否</translation>
+    </message>
+    <message>
+        <source>Unsaved change detected</source>
+        <translation>发现未保存内容</translation>
+    </message>
+    <message>
+        <source>Do you want to abandon the changes and reload?</source>
+        <translation>您真的要放弃更改并重读么？</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>保存完毕</translation>
+    </message>
+    <message>
+        <source>External change detected</source>
+        <translation>发现外界更改</translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation>重读</translation>
+    </message>
+    <message>
+        <source>Ignore</source>
+        <translation>忽略</translation>
+    </message>
+    <message>
+        <source>File &quot;%1&quot; changed on disk. Reload?</source>
+        <translation>发现文件「%1」有外界更改。需要重读么？</translation>
+    </message>
+    <message>
+        <source>File has been removed externally</source>
+        <translation>文件已被外界删除</translation>
     </message>
 </context>
 <context>
@@ -739,6 +786,10 @@ Do you want to continue?</source>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
+    <message>
+        <source>Reload</source>
+        <translation>重读</translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -788,10 +839,6 @@ Do you want to continue?</source>
     <message>
         <source>Filetype set to %1</source>
         <translation>文件类型变更为%1</translation>
-    </message>
-    <message>
-        <source>Saved</source>
-        <translation>保存完毕</translation>
     </message>
     <message>
         <source>Unsaved change detected</source>

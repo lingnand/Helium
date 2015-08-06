@@ -64,7 +64,54 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>These settings affect the UI for the main editing area when inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
+        <source>These settings affect the UI inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Buffer</name>
+    <message>
+        <source>Buffer is not saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unsaved change detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to abandon the changes and reload?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>External change detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ignore</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File &quot;%1&quot; changed on disk. Reload?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File has been removed externally</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -729,6 +776,10 @@ Do you want to continue?</source>
         <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -777,10 +828,6 @@ Do you want to continue?</source>
     </message>
     <message>
         <source>Filetype set to %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

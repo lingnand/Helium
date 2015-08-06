@@ -18,6 +18,7 @@
 
 #define SECONDS_TO_REGISTER_HISTORY 1
 #define DEFAULT_EDIT_TIME (QDateTime::fromTime_t(0))
+#define DEFAULT_CHECKPOINT_TIME (QDateTime::fromTime_t(0))
 
 // Buffer
 Buffer::Buffer(int historyLimit, QObject *parent):
@@ -25,7 +26,9 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     _requestId(0),
     _states(historyLimit),
     _lastEdited(DEFAULT_EDIT_TIME),
-    _locked(false), _dirty(false), _autodetectFiletype(true)
+    _locked(false), _dirty(false),
+    _autodetectFiletype(true),
+    _lastCheckPoint(DEFAULT_CHECKPOINT_TIME)
 {
     AppearanceSettings *appearanceSettings = Helium::instance()->appearance();
     _highlightStyleFile = appearanceSettings->highlightStyleFile();
@@ -59,10 +62,9 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     conn(&_worker, SIGNAL(stateRehighlighted(const StateChangeContext&, const BufferState&)),
             this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
     conn(&_worker, SIGNAL(stateLoadedFromFile(const StateChangeContext&, const BufferState&, const QString&)),
-            this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
-    // report
+            this, SLOT(onStateLoadedFromFile(const StateChangeContext&, const BufferState&, const QString&)));
     conn(&_worker, SIGNAL(stateSavedToFile(const QString&)),
-            this, SIGNAL(savedToFile(const QString&)));
+            this, SLOT(onStateSavedToFile(const QString&)));
     _workerThread.start();
 
     conn(&_states, SIGNAL(retractableChanged(bool)),
@@ -112,6 +114,11 @@ void Buffer::setFilepath(const QString &filepath, bool setHighlightType, Progres
 {
     if (filepath != _filepath) {
         _filepath = filepath;
+        QFileInfo f(_filepath);
+        if (f.exists())
+            _lastCheckPoint = f.lastModified();
+        else
+            _lastCheckPoint = DEFAULT_CHECKPOINT_TIME;
         _setName(QFileInfo(_filepath).fileName(), setHighlightType, progress);
         emit filepathChanged(_filepath);
     }
@@ -272,6 +279,32 @@ void Buffer::redo()
     traverse(&BufferHistory::advance);
 }
 
+void Buffer::reload()
+{
+    if (_filepath.isEmpty()) {
+        Utility::toast(tr("Buffer is not saved"));
+        return;
+    }
+    if (!QFileInfo(_filepath).exists()) {
+        Utility::toast(tr("File has been removed externally"));
+        setDirty(true);
+        return;
+    }
+    if (_dirty) {
+        Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
+                tr("Do you want to abandon the changes and reload?"),
+                this, SLOT(onUnsavedChangeDialogFinishedWhenReloading(bb::system::SystemUiResult::Type)));
+    } else {
+        load(_filepath, false);
+    }
+}
+
+void Buffer::onUnsavedChangeDialogFinishedWhenReloading(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        load(_filepath);
+}
+
 void Buffer::traverse(bool (BufferHistory::*fn)())
 {
     HighlightType highlightType = state().highlightType();
@@ -298,17 +331,16 @@ void Buffer::save(const QString &filepath)
     setFilepath(filepath, _autodetectFiletype, progress);
     progress.cap = 1;
     emit workerSaveStateToFile(state(), _filepath, progress);
-    setDirty(false);
 }
 
-void Buffer::load(const QString &filepath)
+void Buffer::load(const QString &filepath, bool resetCursor)
 {
     Progress progress;
     setFilepath(filepath, false, progress);
     setLocked(true);
     // clear all the existing states
     _states.clear();
-    StateChangeContext ctx(++_requestId, NULL, true, true);
+    StateChangeContext ctx(++_requestId, NULL, true, resetCursor);
     emit workerLoadStateFromFile(ctx, filepath, _autodetectFiletype, progress);
     setDirty(false);
 }
@@ -326,4 +358,44 @@ void Buffer::attachView(View *view)
 void Buffer::detachView(View *view)
 {
     _views.remove(view);
+}
+
+void Buffer::onStateLoadedFromFile(const StateChangeContext &ctx, const BufferState &state, const QString &)
+{
+    setDirty(false);
+    handleStateChangeResult(ctx, state);
+}
+
+void Buffer::onStateSavedToFile(const QString &)
+{
+    _lastCheckPoint = QDateTime::currentDateTime();
+    setDirty(false);
+    Utility::toast(tr("Saved"));
+}
+
+void Buffer::checkExternalChange()
+{
+    if (!_filepath.isEmpty()) {
+        QFileInfo f(_filepath);
+        if (!f.exists()) {
+            Utility::toast(tr("File has been removed externally"));
+            setDirty(true);
+            return;
+        }
+        QDateTime lastM = f.lastModified();
+        if (lastM > _lastCheckPoint.addSecs(2)) {
+            _lastCheckPoint = lastM;
+            Utility::dialog(tr("Reload"), tr("Ignore"), tr("External change detected"),
+                    tr("File \"%1\" changed on disk. Reload?").arg(Utility::shortenPath(_filepath)),
+                    this, SLOT(onReloadDialogFinishedForExternalChange(bb::system::SystemUiResult::Type)));
+        }
+    }
+}
+
+void Buffer::onReloadDialogFinishedForExternalChange(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        reload();
+    else
+        setDirty(true);
 }

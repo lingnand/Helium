@@ -36,8 +36,9 @@ bool Project::setActiveViewIndex(int index)
     View *n = _views[index];
     if (n != _activeView) {
         if (_activeView)
-            _activeView->onOutOfView();
+            _activeView->onDeactivated();
         _activeView = n;
+        _activeView->onActivated();
         emit activeViewChanged(index, _activeView);
         return true;
     }
@@ -57,19 +58,7 @@ void Project::setPath(const QString &path)
 {
     if (path != _path) {
         _path = path;
-        // shorten the path for display
-        QString title = _path;
-        if (_path.startsWith("/accounts/1000/removable/sdcard")) {
-            QStringRef rem = _path.rightRef(_path.size()-31); // XXX: hardcoded length
-            title = "SD";
-            if (!rem.isEmpty()) {
-                title += ":";
-                title += rem;
-            }
-        } else if (_path.startsWith("/accounts/1000/shared/")) {
-            title = _path.right(_path.size()-22); // XXX: hardcoded length
-        }
-        setTitle(title);
+        setTitle(Utility::shortenPath(_path));
         resetViewHeaderSubtitles();
         emit pathChanged(_path);
     }

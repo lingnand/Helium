@@ -90,6 +90,7 @@ private:
     void onTranslatorChanged();
     Q_SLOT void onInvoked(const bb::system::InvokeRequest &);
     Q_SLOT void onThumbnail();
+    Q_SLOT void onFullscreen();
     Q_SLOT void onShareDialogConfirmed(bb::system::SystemUiResult::Type);
     Q_SLOT void onSupportDialogConfirmed(bb::system::SystemUiResult::Type);
     Q_SLOT void onRegistrationStateUpdated(bb::platform::bbm::RegistrationState::Type);

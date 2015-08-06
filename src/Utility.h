@@ -59,6 +59,7 @@ public:
         const QString &defaultText, const QString &emptyText,
         const QObject *receiver=NULL, const char *method=NULL);
     static void handleBasicTextControlModifiedKey(bb::cascades::TextEditor *, bb::cascades::KeyEvent *);
+    static QString shortenPath(const QString &path);
 Q_SIGNALS:
     void promptFinished(bb::system::SystemUiResult::Type, const QString &);
 private:

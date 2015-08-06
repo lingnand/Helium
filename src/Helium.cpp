@@ -107,6 +107,7 @@ Helium::Helium(int &argc, char **argv):
 
     setCover(_cover);
     conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
+    conn(this, SIGNAL(fullscreen()), this, SLOT(onFullscreen()));
 
     // bbm
     conn(&_bbmContext, SIGNAL(registrationStateUpdated(bb::platform::bbm::RegistrationState::Type)),
@@ -285,6 +286,11 @@ void Helium::onThumbnail()
                     .topMargin(0).bottomMargin(0)
                     .text(state.at(i).line.plainText()));
     }
+}
+
+void Helium::onFullscreen()
+{
+    scene()->activeProject()->activeView()->onActivated();
 }
 
 void Helium::contact()

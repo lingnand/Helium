@@ -115,6 +115,9 @@ View::View(Project *project, Buffer *buffer):
     conn(appearance, SIGNAL(fontSizeChanged(bb::cascades::FontSize::Type)),
         _textArea->textStyle(), SLOT(setFontSize(bb::cascades::FontSize::Type)));
 
+    conn(_content, SIGNAL(topChanged(bb::cascades::Page*)),
+        this, SLOT(onTopChanged(bb::cascades::Page*)));
+
     setContent(_content);
 
     setBuffer(buffer);
@@ -219,10 +222,23 @@ bool View::untouched() const
     return !_buffer->dirty() && _buffer->state().isEmpty() && _buffer->name().isEmpty();
 }
 
-void View::onOutOfView()
+void View::onDeactivated()
 {
     _textArea->loseFocus();
     emit outOfView();
+}
+
+void View::onActivated()
+{
+    if (_content->top() == _page)
+        _buffer->checkExternalChange();
+}
+
+void View::onTopChanged(Page *page)
+{
+    // check for external change when we come back to main editable area
+    if (page == _page)
+        _buffer->checkExternalChange();
 }
 
 void View::autoFocus()
@@ -292,9 +308,6 @@ void View::setBuffer(Buffer *buffer)
 
             conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
                 this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
-
-            conn(_buffer, SIGNAL(savedToFile(const QString&)),
-                this, SLOT(onBufferSavedToFile(const QString&)));
 
             emit bufferFilepathChanged(_buffer->filepath());
             conn(_buffer, SIGNAL(filepathChanged(const QString&)),
@@ -582,11 +595,6 @@ View::SaveStatus View::saveAs()
     return OpenedFilePicker;
 }
 
-void View::onBufferSavedToFile(const QString &)
-{
-    Utility::toast(tr("Saved"));
-}
-
 void View::open()
 {
     filePicker()->setMode(pickers::FilePickerMode::PickerMultiple);
@@ -658,4 +666,9 @@ void View::undo()
 void View::redo()
 {
     _buffer->redo();
+}
+
+void View::reload()
+{
+    _buffer->reload();
 }

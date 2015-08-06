@@ -183,3 +183,19 @@ void Utility::handleBasicTextControlModifiedKey(bb::cascades::TextEditor *editor
             break;
     }
 }
+
+QString Utility::shortenPath(const QString &path)
+{
+    QString shorten = path;
+    if (path.startsWith("/accounts/1000/removable/sdcard")) {
+        QStringRef rem = path.rightRef(path.size()-31); // XXX: hardcoded length
+        shorten = "SD";
+        if (!rem.isEmpty()) {
+            shorten += ":";
+            shorten += rem;
+        }
+    } else if (path.startsWith("/accounts/1000/shared/")) {
+        shorten = path.right(path.size()-22); // XXX: hardcoded length
+    }
+    return shorten;
+}

@@ -53,6 +53,7 @@ private:
     bb::cascades::ActionItem *_propertiesAction;
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_renameAction;
+    bb::cascades::ActionItem *_reloadAction;
     bb::cascades::ActionItem *_closeAction;
     bb::cascades::ActionItem *_closeProjectAction;
     FilePropertiesPage *_propertiesPage;

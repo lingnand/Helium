@@ -49,7 +49,7 @@ NormalMode::NormalMode(View *view):
         .onTriggered(view, SLOT(save()))),
     _saveAsAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_save_as.png"))
-        .addShortcut(Shortcut::create().key("l"))
+        .addShortcut(Shortcut::create().key("Shift+s"))
         .onTriggered(view, SLOT(saveAs()))),
     _openAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_open.png"))
@@ -83,6 +83,10 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_rename.png"))
         .addShortcut(Shortcut::create().key("h"))
         .onTriggered(this, SLOT(rename()))),
+    _reloadAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_reload.png"))
+        .addShortcut(Shortcut::create().key("l"))
+        .onTriggered(view, SLOT(reload()))),
     _closeAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_clear.png"))
         .addShortcut(Shortcut::create().key("x"))
@@ -313,9 +317,10 @@ void NormalMode::onBufferNameChanged(const QString &name)
 void NormalMode::onBufferFilepathChanged(const QString &filepath)
 {
     qDebug() << "filepath set to" << filepath;
-    bool enable = filepath.isEmpty();
-    _titleField->setEnabled(enable);
-    _renameAction->setEnabled(enable);
+    bool empty = filepath.isEmpty();
+    _titleField->setEnabled(empty);
+    _renameAction->setEnabled(empty);
+    _reloadAction->setEnabled(!empty);
 }
 
 void NormalMode::onBufferFiletypeChanged(Filetype *change, Filetype *old)
@@ -367,6 +372,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_propertiesAction);
     view()->page()->addAction(_cloneAction);
     view()->page()->addAction(_renameAction);
+    view()->page()->addAction(_reloadAction);
     view()->page()->addAction(_closeAction);
     view()->page()->addAction(_closeProjectAction);
     resetTitleBar();
@@ -445,6 +451,7 @@ void NormalMode::reloadLocked()
     _findAction->setEnabled(!locked);
     _cloneAction->setEnabled(!locked);
     _renameAction->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
+    _reloadAction->setEnabled(!locked && !view()->buffer()->filepath().isEmpty());
     _closeAction->setEnabled(!locked);
     _closeProjectAction->setEnabled(!locked);
     reloadRunnable();
@@ -469,6 +476,7 @@ void NormalMode::onTranslatorChanged()
     _propertiesAction->setTitle(tr("Properties"));
     _cloneAction->setTitle(tr("Clone"));
     _renameAction->setTitle(tr("Rename"));
+    _reloadAction->setTitle(tr("Reload"));
     _closeAction->setTitle(tr("Close"));
     _closeProjectAction->setTitle(tr("Close Project"));
 }

@@ -26,6 +26,7 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <QThread>
+#include <bb/system/SystemUiResult>
 #include <boost/regex.hpp>
 #include <StateChangeContext.h>
 #include <BufferWorker.h>
@@ -67,7 +68,9 @@ public:
     bool hasRedo() { return _states.advanceable(); }
     Q_SLOT void redo();
     Q_SLOT void save(const QString &filepath);
-    Q_SLOT void load(const QString &filepath);
+    Q_SLOT void load(const QString &filepath, bool resetCursor=true);
+    Q_SLOT void reload();
+    void checkExternalChange();
     // views
     const QSet<View *> &views() const;
     void attachView(View *);
@@ -93,8 +96,6 @@ Q_SIGNALS:
     void workerRehighlight(StateChangeContext &, BufferState &, int index, Progress &);
     void workerSaveStateToFile(const BufferState &, const QString &filename, Progress &);
     void workerLoadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress &);
-    // task report
-    void savedToFile(const QString &filename);
 private:
     // store the list of attached views
     QSet<View *> _views;
@@ -108,6 +109,7 @@ private:
     bool _dirty;
     bool _autodetectFiletype;
 
+    QDateTime _lastCheckPoint;
     QThread _workerThread;
     BufferWorker _worker;
     QString _name;
@@ -124,6 +126,10 @@ private:
     void traverse(bool (BufferHistory::*fn)());
     Q_SLOT void handleStateChangeResult(const StateChangeContext &, const BufferState &);
     Q_SLOT void refreshFiletype();
+    Q_SLOT void onUnsavedChangeDialogFinishedWhenReloading(bb::system::SystemUiResult::Type);
+    Q_SLOT void onReloadDialogFinishedForExternalChange(bb::system::SystemUiResult::Type);
+    Q_SLOT void onStateSavedToFile(const QString &);
+    Q_SLOT void onStateLoadedFromFile(const StateChangeContext &, const BufferState &, const QString &);
 };
 
 #endif /* BUFFER_H_ */
