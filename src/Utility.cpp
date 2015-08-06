@@ -97,6 +97,8 @@ void Utility::escapeHtml(QTextStream &input, QTextStream &output)
             output << "&amp;";
         } else if (ch == '<') {
             output << "&lt;";
+        } else if (ch == '>') {
+            output << "&gt;";
         } else {
             output << ch;
         }
