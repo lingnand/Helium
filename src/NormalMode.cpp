@@ -442,7 +442,8 @@ void NormalMode::reloadLocked()
 {
     bool locked = view()->buffer()->locked();
     view()->textArea()->setEditable(!locked);
-    _titleField->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
+    bool pathEmpty = view()->buffer()->filepath().isEmpty();
+    _titleField->setEnabled(!locked && pathEmpty);
     _saveAction->setEnabled(!locked);
     _saveAsAction->setEnabled(!locked);
     _openAction->setEnabled(!locked);
@@ -450,8 +451,8 @@ void NormalMode::reloadLocked()
     _redoAction->setEnabled(!locked && view()->buffer()->hasRedo());
     _findAction->setEnabled(!locked);
     _cloneAction->setEnabled(!locked);
-    _renameAction->setEnabled(!locked && view()->buffer()->filepath().isEmpty());
-    _reloadAction->setEnabled(!locked && !view()->buffer()->filepath().isEmpty());
+    _renameAction->setEnabled(!locked && pathEmpty);
+    _reloadAction->setEnabled(!locked && !pathEmpty);
     _closeAction->setEnabled(!locked);
     _closeProjectAction->setEnabled(!locked);
     reloadRunnable();
