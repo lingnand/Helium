@@ -235,7 +235,7 @@ void MultiViewPane::removeActiveProject()
 {
     QStringList files;
     for (int i = 0; i < activeProject()->size(); i++) {
-        if (activeProject()->at(i)->unsafeToRemove())
+        if (activeProject()->at(i)->buffer()->dirty())
             files.append(QString("\t%1").arg(activeProject()->at(i)->title()));
     }
     if (!files.empty()) {

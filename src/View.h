@@ -57,7 +57,6 @@ public:
     bb::cascades::NavigationPane *detachContent();
     void reattachContent();
     void hideAllPageActions();
-    bool unsafeToRemove() const;
     bool untouched() const;
     Q_SLOT void setBuffer(Buffer* buffer);
     Q_SLOT void setHighlightRangeLimit(int limit);

@@ -106,6 +106,7 @@ void Buffer::_setName(const QString &name, bool sethl, Progress &progress)
         if (sethl)
             setHighlightType(HighlightType(_highlightStyleFile,
                     Helium::instance()->filetypeMap()->filetypeForName(name)), progress);
+        setDirty(true);
         emit nameChanged(name);
     }
 }

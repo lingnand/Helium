@@ -211,12 +211,6 @@ void View::hideAllPageActions()
     }
 }
 
-bool View::unsafeToRemove() const
-{
-    return _buffer->views().size() == 1 &&
-            (_buffer->dirty() || !_buffer->name().isEmpty() && _buffer->filepath().isEmpty());
-}
-
 bool View::untouched() const
 {
     return !_buffer->dirty() && _buffer->state().isEmpty() && _buffer->name().isEmpty();
@@ -261,7 +255,7 @@ void View::setFindMode()
 
 void View::reloadTitle()
 {
-    QString name = unsafeToRemove() ? "%1*" : "%1";
+    QString name = _buffer->dirty() ? "%1*" : "%1";
     if (_buffer->name().isEmpty()) {
         name = name.arg(tr("No Name"));
     } else {
@@ -619,7 +613,7 @@ void View::clone()
 
 void View::close()
 {
-    if  (unsafeToRemove()) {
+    if  (_buffer->dirty()) {
         Utility::dialog(tr("Yes"), tr("No"), tr("Unsaved change detected"),
                 tr("Do you want to continue?"),
                 this, SLOT(onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type)));
