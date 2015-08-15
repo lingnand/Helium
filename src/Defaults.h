@@ -21,6 +21,7 @@ class Defaults
 public:
     static bb::cascades::TextStyle helpText();
     static bb::cascades::TextStyle hintText();
+    static bb::cascades::TextStyle centeredBodyText();
     static float space();
 };
 

@@ -28,6 +28,13 @@ TextStyle Defaults::hintText()
     return style;
 }
 
+TextStyle Defaults::centeredBodyText()
+{
+    TextStyle style = SystemDefaults::TextStyles::bodyText();
+    style.setTextAlign(TextAlign::Center);
+    return style;
+}
+
 float Defaults::space()
 {
     return 20;

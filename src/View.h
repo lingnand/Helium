@@ -54,6 +54,7 @@ public:
     MultiViewPane *parent() const {
         return (MultiViewPane *) QObject::parent();
     }
+    Project *project() const { return _project; }
     bb::cascades::NavigationPane *detachContent();
     void reattachContent();
     void hideAllPageActions();

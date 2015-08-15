@@ -25,6 +25,8 @@
 
 #include "libqgit2_config.h"
 
+#include "qgitpatch.h"
+
 namespace LibQGit2
 {
 
@@ -54,6 +56,7 @@ public:
      */
     DiffDelta delta(size_t index) const;
 
+    Patch patch(size_t index) const;
 public:
     QSharedPointer<git_diff> d;
 };

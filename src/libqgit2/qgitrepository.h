@@ -34,6 +34,7 @@
 #include "qgitref.h"
 #include "qgittree.h"
 #include "qgitindex.h"
+#include "qgitdiffoptions.h"
 #include "qgitstatuslist.h"
 #include "qgitstatusoptions.h"
 #include "qgitcheckoutoptions.h"
@@ -512,10 +513,32 @@ namespace LibQGit2
              *
              * @param oldTree the Tree on the `old' side of the diff.
              * @param newTree the Tree on the `new' side of the diff.
+             * @param opts the diff options.
              * @throws LibQGit2::Exception
              * @return The Diff between the provided Trees.
              */
-            Diff diffTrees(const Tree &oldTree, const Tree &newTree) const;
+            Diff diffTrees(const Tree &oldTree, const Tree &newTree, const DiffOptions &opts = DiffOptions()) const;
+
+            /**
+             * @brief Makes a Diff between a Tree and Index.
+             *
+             * @param tree the Tree
+             * @param index the Index
+             * @param opts the diff options.
+             * @throws LibQGit2::Exception
+             * @return The Diff
+             */
+            Diff diffTreeToIndex(const Tree &tree, const Index &index, const DiffOptions &opts = DiffOptions()) const;
+
+            /**
+             * @brief Makes a Diff between Index and working directory.
+             *
+             * @param index the Index
+             * @param opts the diff options.
+             * @throws LibQGit2::Exception
+             * @return The Diff
+             */
+            Diff diffIndexToWorkdir(const Index &index, const DiffOptions &opts = DiffOptions()) const;
 
             /**
              * Finds a merge base between two commits.

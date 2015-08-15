@@ -9,6 +9,7 @@
 #define PROJECT_H_
 
 #include <bb/cascades/Tab>
+#include <libqgit2/qgitrepository.h>
 #include <Zipper.h>
 
 class View;
@@ -38,6 +39,8 @@ public:
     void cloneView(View *view) { cloneAt(indexOf(view)); }
     void openFilesAt(int, const QStringList &);
     void resetViewHeaderSubtitles(int index, int total);
+    // returns the git repo
+    LibQGit2::Repository *gitRepo() { return &_repo; };
 Q_SIGNALS:
     void pathChanged(const QString &);
     void viewInserted(int index, View *);
@@ -54,6 +57,9 @@ private:
     View *_activeView;
     QList<View *> _views;
     QString _path;
+
+    // git
+    LibQGit2::Repository _repo;
 
     void insertNewView(int index, Buffer *);
     void resetViewHeaderSubtitles();

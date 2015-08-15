@@ -416,10 +416,24 @@ Repository::GraphRelationship Repository::commitRelationship(const Commit &local
     return result;
 }
 
-Diff Repository::diffTrees(const Tree &oldTree, const Tree &newTree) const
+Diff Repository::diffTrees(const Tree &oldTree, const Tree &newTree, const DiffOptions &opts) const
 {
     git_diff *diff = NULL;
-    qGitThrow(git_diff_tree_to_tree(&diff, SAFE_DATA, oldTree.data(), newTree.data(), NULL));
+    qGitThrow(git_diff_tree_to_tree(&diff, SAFE_DATA, oldTree.data(), newTree.data(), opts.data()));
+    return Diff(diff);
+}
+
+Diff Repository::diffTreeToIndex(const Tree &tree, const Index &index, const DiffOptions &opts) const
+{
+    git_diff *diff = NULL;
+    qGitThrow(git_diff_tree_to_index(&diff, SAFE_DATA, tree.data(), index.data(), opts.data()));
+    return Diff(diff);
+}
+
+Diff Repository::diffIndexToWorkdir(const Index &index, const DiffOptions &opts) const
+{
+    git_diff *diff = NULL;
+    qGitThrow(git_diff_index_to_workdir(&diff, SAFE_DATA, index.data(), opts.data()));
     return Diff(diff);
 }
 

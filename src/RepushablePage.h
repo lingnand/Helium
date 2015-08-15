@@ -22,13 +22,13 @@ class RepushablePage : public bb::cascades::Page
     Q_OBJECT
 public:
     RepushablePage(QObject *parent=NULL);
+    Q_SLOT void pop();
 Q_SIGNALS:
     void toPush(bb::cascades::Page *);
     void toPop();
     void exited();
 private:
     QObject *_parent;
-    Q_SLOT void pop();
 };
 
 #endif /* REPUSHABLEPAGE_H_ */

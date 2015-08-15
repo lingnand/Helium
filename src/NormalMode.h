@@ -26,6 +26,7 @@ class RunProfile;
 class RunProfileManager;
 class Filetype;
 class FilePropertiesPage;
+class GitRepoPage;
 
 class NormalMode: public ViewMode
 {
@@ -54,9 +55,11 @@ private:
     bb::cascades::ActionItem *_cloneAction;
     bb::cascades::ActionItem *_renameAction;
     bb::cascades::ActionItem *_reloadAction;
+    bb::cascades::ActionItem *_gitAction;
     bb::cascades::ActionItem *_closeAction;
     bb::cascades::ActionItem *_closeProjectAction;
     FilePropertiesPage *_propertiesPage;
+    GitRepoPage *_gitRepoPage;
 
     bb::cascades::TitleBar *_titleBar;
     bb::cascades::TextField *_titleField;
@@ -67,6 +70,7 @@ private:
     Q_SLOT void reloadRunnable();
     Q_SLOT void run();
     Q_SLOT void showProperties();
+    Q_SLOT void showGitRepo();
 
     Q_SLOT void resetTitleBar();
     Q_SLOT void rename();

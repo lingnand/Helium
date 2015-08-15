@@ -31,6 +31,7 @@
 #include <Helium.h>
 #include <AppearanceSettings.h>
 #include <ShortcutHelp.h>
+#include <GitRepoPage.h>
 
 using namespace bb::cascades;
 
@@ -77,7 +78,7 @@ NormalMode::NormalMode(View *view):
         .onTriggered(this, SLOT(showProperties()))),
     _cloneAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_copy_link.png"))
-        .addShortcut(Shortcut::create().key("g"))
+        .addShortcut(Shortcut::create().key("i"))
         .onTriggered(view, SLOT(clone()))),
     _renameAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_rename.png"))
@@ -87,6 +88,10 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_reload.png"))
         .addShortcut(Shortcut::create().key("l"))
         .onTriggered(view, SLOT(reload()))),
+    _gitAction(ActionItem::create()
+//        .imageSource(QUrl("asset:///images/ic_reload.png"))
+        .addShortcut(Shortcut::create().key("g"))
+        .onTriggered(this, SLOT(showGitRepo()))),
     _closeAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_clear.png"))
         .addShortcut(Shortcut::create().key("x"))
@@ -95,7 +100,7 @@ NormalMode::NormalMode(View *view):
         .imageSource(QUrl("asset:///images/ic_delete.png"))
         .addShortcut(Shortcut::create().key("Backspace"))
         .onTriggered(view, SLOT(closeProject()))),
-    _propertiesPage(NULL)
+    _propertiesPage(NULL), _gitRepoPage(NULL)
 {
     view->textArea()->addKeyListener(_textAreaModKeyListener);
 
@@ -194,6 +199,19 @@ void NormalMode::showProperties()
     view()->content()->push(_propertiesPage);
 }
 
+void NormalMode::showGitRepo()
+{
+    if (!_gitRepoPage) {
+        _gitRepoPage = new GitRepoPage(view()->project(), view()->content());
+        conn(_gitRepoPage, SIGNAL(toPush(bb::cascades::Page*)),
+            view()->content(), SLOT(push(bb::cascades::Page*)));
+        conn(_gitRepoPage, SIGNAL(toPop()),
+            view()->content(), SLOT(pop()));
+    }
+    _gitRepoPage->reload();
+    view()->content()->push(_gitRepoPage);
+}
+
 void NormalMode::resetTitleBar()
 {
     if (_active)
@@ -225,8 +243,8 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
                   << ShortcutHelp::fromActionItem(_openAction, prefix)
                   << ShortcutHelp::fromActionItem(_findAction, prefix)
                   << ShortcutHelp::fromActionItem(_runAction, prefix)
-                  << ShortcutHelp::fromActionItem(_cloneAction, prefix)
                   << ShortcutHelp::fromActionItem(_renameAction, prefix)
+                  << ShortcutHelp::fromActionItem(_gitAction, prefix)
                   << ShortcutHelp::fromActionItem(_closeAction, prefix)
                   << ShortcutHelp("T", TAB_SYMBOL, prefix)
                   << ShortcutHelp("D", tr("Delete line"), prefix)
@@ -271,8 +289,8 @@ void NormalMode::onTextAreaModifiedKey(KeyEvent *event, ModKeyListener *listener
         case KEYCODE_X: // Kill
             view()->close();
             break;
-        case KEYCODE_G: // Germinate
-            view()->clone();
+        case KEYCODE_G: // git
+            showGitRepo();
             break;
         case KEYCODE_C: // Create
             view()->parent()->createEmptyView();
@@ -373,6 +391,7 @@ void NormalMode::onEnter()
     view()->page()->addAction(_cloneAction);
     view()->page()->addAction(_renameAction);
     view()->page()->addAction(_reloadAction);
+    view()->page()->addAction(_gitAction);
     view()->page()->addAction(_closeAction);
     view()->page()->addAction(_closeProjectAction);
     resetTitleBar();
@@ -453,6 +472,7 @@ void NormalMode::reloadLocked()
     _cloneAction->setEnabled(!locked);
     _renameAction->setEnabled(!locked && pathEmpty);
     _reloadAction->setEnabled(!locked && !pathEmpty);
+    _gitAction->setEnabled(!locked);
     _closeAction->setEnabled(!locked);
     _closeProjectAction->setEnabled(!locked);
     reloadRunnable();
@@ -478,6 +498,11 @@ void NormalMode::onTranslatorChanged()
     _cloneAction->setTitle(tr("Clone"));
     _renameAction->setTitle(tr("Rename"));
     _reloadAction->setTitle(tr("Reload"));
+    _gitAction->setTitle(tr("Git"));
     _closeAction->setTitle(tr("Close"));
     _closeProjectAction->setTitle(tr("Close Project"));
+    if (_propertiesPage)
+        _propertiesPage->onTranslatorChanged();
+    if (_gitRepoPage)
+        _gitRepoPage->onTranslatorChanged();
 }

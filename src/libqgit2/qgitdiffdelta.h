@@ -19,6 +19,8 @@
 #ifndef LIBQGIT2_DIFFDELTA_H
 #define LIBQGIT2_DIFFDELTA_H
 
+#include <QMetaType>
+
 #include "libqgit2_config.h"
 
 #include "git2.h"
@@ -36,7 +38,7 @@ class DiffFile;
 class LIBQGIT2_EXPORT DiffDelta
 {
 public:
-    DiffDelta(const git_diff_delta *d);
+    DiffDelta(const git_diff_delta *d = 0);
 
     enum Type {
         Unknown = GIT_DELTA_UNMODIFIED - 1,  ///< unknown type

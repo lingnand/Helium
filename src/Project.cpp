@@ -5,6 +5,7 @@
  *      Author: lingnan
  */
 
+#include <libqgit2/qgitexception.h>
 #include <Project.h>
 #include <Utility.h>
 #include <View.h>
@@ -60,6 +61,11 @@ void Project::setPath(const QString &path)
         _path = path;
         setTitle(Utility::shortenPath(_path));
         resetViewHeaderSubtitles();
+        try {
+            _repo.open(_path);
+        } catch (const LibQGit2::Exception &e) {
+            qDebug() << "Error in opening git repo:" << e.what();
+        }
         emit pathChanged(_path);
     }
 }

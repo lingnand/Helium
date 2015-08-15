@@ -45,4 +45,13 @@ DiffDelta Diff::delta(size_t index) const
     return DiffDelta(delta);
 }
 
+Patch Diff::patch(size_t index) const
+{
+    git_patch *patch = 0;
+    if (!d.isNull()) {
+        git_patch_from_diff(&patch, d.data(), index);
+    }
+    return Patch(patch);
+}
+
 }

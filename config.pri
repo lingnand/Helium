@@ -582,6 +582,8 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
+        $$quote($$BASEDIR/src/GitDiffPage.cpp) \
+        $$quote($$BASEDIR/src/GitRepoPage.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HelpPage.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
@@ -600,6 +602,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Segment.cpp) \
         $$quote($$BASEDIR/src/SettingsPage.cpp) \
         $$quote($$BASEDIR/src/ShortcutHelp.cpp) \
+        $$quote($$BASEDIR/src/StatusActionSet.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/Versioner.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
@@ -633,6 +636,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitdiff.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitdiffdelta.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitdifffile.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffhunk.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffline.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffoptions.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitexception.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitglobal.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitindex.cpp) \
@@ -641,6 +647,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitmergeoptions.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitobject.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitoid.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitpatch.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebase.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebaseoptions.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitref.cpp) \
@@ -746,6 +753,8 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettings.h) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.h) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
+        $$quote($$BASEDIR/src/GitDiffPage.h) \
+        $$quote($$BASEDIR/src/GitRepoPage.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HelpPage.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
@@ -768,6 +777,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/ShortcutHelp.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
+        $$quote($$BASEDIR/src/StatusActionSet.h) \
         $$quote($$BASEDIR/src/Utility.h) \
         $$quote($$BASEDIR/src/Versioner.h) \
         $$quote($$BASEDIR/src/View.h) \
@@ -801,6 +811,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitdiff.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitdiffdelta.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitdifffile.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffhunk.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffline.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitdiffoptions.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitexception.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitglobal.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitindex.h) \
@@ -809,6 +822,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitmergeoptions.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitobject.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitoid.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitpatch.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebase.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebaseoptions.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitref.h) \

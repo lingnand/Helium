@@ -16,6 +16,7 @@
 
 #include <Qt/qdeclarativedebug.h>
 #include <bb/cascades/ProgressIndicatorState>
+#include <libqgit2/qgitglobal.h>
 #include <Helium.h>
 #include <HighlightType.h>
 #include <BufferState.h>
@@ -38,8 +39,10 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     qRegisterMetaType<ParserPosition>();
 
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
-
+    // init LibQGit2
+    LibQGit2::initLibQGit2();
     Helium app(argc, argv);
-    // Enter the application main event loop.
-    return Helium::exec();
+    int ret = Helium::exec();
+    LibQGit2::shutdownLibQGit2();
+    return ret;
 }
