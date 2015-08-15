@@ -373,3 +373,10 @@ void GitRepoPage::StatusItemProvider::updateItem(ListView *list, VisualNode *lis
         li->addActionSet(new StatusActionSet(_gitRepoPage, sdelta));
     }
 }
+
+void GitRepoPage::onPopTransitionEnded(Page *page)
+{
+    if (page == _diffPage) {
+        _diffPage->resetPatch();
+    }
+}

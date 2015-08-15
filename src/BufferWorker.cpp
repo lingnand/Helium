@@ -73,13 +73,13 @@ HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, 
         HighlightStateData::ptr state = HighlightStateData::ptr(new HighlightStateData(*highlightState));
         _sourceHighlight.getHighlighter()->setCurrentState(state->currentState);
         _sourceHighlight.getHighlighter()->setStateStack(state->stateStack);
-        _sourceHighlight.clearBuffer();
         QByteArray plainText;
         QTextStream stream(&plainText);
         lineState.line.writePlainText(stream);
         stream << flush;
         _sourceHighlight.getHighlighter()->highlightParagraph(std::string(plainText.constData()));
         lineState.highlightText = QString::fromStdString(_sourceHighlight.getBuffer().str());
+        _sourceHighlight.clearBuffer();
         state->currentState = _sourceHighlight.getHighlighter()->getCurrentState();
         lineState.endHighlightState = state;
     }

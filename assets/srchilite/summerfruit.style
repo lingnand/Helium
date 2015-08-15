@@ -60,3 +60,7 @@ label "#FF0007" b ;
 // for errors
 error "#FFFFFF" bg:"#D40000" ;
 warning "#EE0000" ;
+
+// for git
+diffadd "#22A21F" ;
+diffdel "#FF0007" ;

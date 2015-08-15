@@ -12,7 +12,6 @@
 #include <ostream>
 #include <sstream>
 
-#include "textstyleformattercollection.h"
 #include "sourcehighlighter.h"
 #include "bufferedoutput.h"
 #include "textstyles.h"
@@ -59,9 +58,6 @@ class SourceHighlight {
     // the text styles
     TextStylesPtr textStyles;
 
-    /// all the formatters that are created
-    TextStyleFormatterCollection formatterCollection;
-
     /// for loading language definitions
     LangDefManager *langDefManager;
 
@@ -90,8 +86,8 @@ public:
         return buffer;
     }
 
-    const TextStyleFormatterCollection &getFormatterCollection() const {
-        return formatterCollection;
+    FormatterManager *getFormatterManager() const {
+        return formatterManager;
     }
 
     void setHighlightEventListener(HighlightEventListener *l) {

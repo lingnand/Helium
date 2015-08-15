@@ -203,6 +203,8 @@ void NormalMode::showGitRepo()
 {
     if (!_gitRepoPage) {
         _gitRepoPage = new GitRepoPage(view()->project());
+        conn(view()->content(), SIGNAL(popTransitionEnded(bb::cascades::Page*)),
+            _gitRepoPage, SLOT(onPopTransitionEnded(bb::cascades::Page*)));
     }
     _gitRepoPage->reload();
     view()->content()->push(_gitRepoPage);

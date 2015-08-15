@@ -13,10 +13,13 @@
 #include <bb/cascades/ScrollView>
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/NavigationPane>
+#include <srchilite/formattermanager.h>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitdifffile.h>
 #include <GitRepoPage.h>
 #include <GitDiffPage.h>
+#include <Helium.h>
+#include <AppearanceSettings.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -29,8 +32,14 @@ GitDiffPage::GitDiffPage(GitRepoPage *page):
     _reset(ActionItem::create()
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(reset()))),
-    _content(Segment::create())
+    _content(Segment::create()),
+    _sourceHighlight("xhtml.outlang")
 {
+    AppearanceSettings *appearance = Helium::instance()->appearance();
+    _sourceHighlight.setStyleFile(appearance->highlightStyleFile().toStdString());
+    conn(appearance, SIGNAL(highlightStyleFileChanged(const QString&)),
+        this, SLOT(onHighlightStyleFileChanged(const QString&)));
+
     setTitleBar(TitleBar::create());
     setContent(ScrollView::create(_content)
         .scrollMode(ScrollMode::Vertical));
@@ -39,12 +48,16 @@ GitDiffPage::GitDiffPage(GitRepoPage *page):
     onTranslatorChanged();
 }
 
+void GitDiffPage::onHighlightStyleFileChanged(const QString &styleFile)
+{
+    _sourceHighlight.setStyleFile(styleFile.toStdString());
+    reloadContent();
+}
+
 void GitDiffPage::setPatch(const StatusPatch &spatch)
 {
     _spatch = spatch;
-    // refill the content
-    const LibQGit2::Patch &p = _spatch.patch;
-    titleBar()->setTitle(p.delta().newFile().path());
+    titleBar()->setTitle(_spatch.patch.delta().newFile().path());
     while (actionCount() > 0)
         removeAction(actionAt(0));
     switch (_spatch.type) {
@@ -53,9 +66,14 @@ void GitDiffPage::setPatch(const StatusPatch &spatch)
         case IndexToWorkdir:
             addAction(_add, ActionBarPlacement::Signature); break;
     }
+    reloadContent();
+}
+
+void GitDiffPage::reloadContent()
+{
+    const LibQGit2::Patch &p = _spatch.patch;
     // reuse the children under content
     int i = 0;
-    qDebug() << "NUM HUNKS" << p.numHunks();
     for (int numHunks = p.numHunks(); i < numHunks; i++) {
         GitDiffPage::HunkView *view;
         if (i == _content->count()) {
@@ -75,31 +93,30 @@ void GitDiffPage::setPatch(const StatusPatch &spatch)
             size_t j = 0;
             while (true) {
                 const LibQGit2::DiffLine &line = hunk.line(j);
-                QString prefix, affix;
-                bool print = true;
+                srchilite::FormatterPtr formatter;
                 switch (line.type()) {
                     case LibQGit2::DiffLine::Addition:
-                        prefix = "<span style='color:green'>";
-                        affix = "</span>";
+                        formatter = _sourceHighlight.getFormatterManager()
+                            ->getFormatter(std::string("diffadd"));
                         break;
                     case LibQGit2::DiffLine::Deletion:
-                        prefix = "<span style='color:red'>";
-                        affix = "</span>";
+                        formatter = _sourceHighlight.getFormatterManager()
+                            ->getFormatter(std::string("diffdel"));
                         break;
                     case LibQGit2::DiffLine::Context:
+                        formatter = _sourceHighlight.getFormatterManager()
+                            ->getDefaultFormatter();
                         break;
                     default:
                         qDebug() << "UNHANDLED LINE" << QChar(line.type());
                         qDebug() << line.content();
-                        print = false;
                 }
-                if (print) {
-                    output << prefix;
+                if (formatter) {
                     QString content(QChar(line.type()));
                     content += line.content();
-                    QTextStream input(&content);
-                    Utility::escapeHtml(input, output);
-                    output << affix;
+                    formatter->format(content.toStdString());
+                    output << QString::fromStdString(_sourceHighlight.getBuffer().str());
+                    _sourceHighlight.clearBuffer();
                 }
                 j++;
                 if (j >= numLines)
@@ -111,11 +128,17 @@ void GitDiffPage::setPatch(const StatusPatch &spatch)
         }
         view->text->setText(text);
     }
+    // delete all the unused content
     for (; i < _content->count(); i++) {
         Control *con = _content->at(i);
         _content->remove(con);
         con->deleteLater();
     }
+}
+
+void GitDiffPage::resetPatch()
+{
+    _spatch = StatusPatch();
 }
 
 void GitDiffPage::add()
@@ -141,6 +164,14 @@ GitDiffPage::HunkView::HunkView():
     text(Label::create().multiline(true).format(TextFormat::Html)
         .textStyle(SystemDefaults::TextStyles::bodyText()))
 {
+    AppearanceSettings *appearance = Helium::instance()->appearance();
+    text->textStyle()->setFontFamily(appearance->fontFamily());
+    conn(appearance, SIGNAL(fontFamilyChanged(const QString&)),
+        text->textStyle(), SLOT(setFontFamily(const QString&)));
+    text->textStyle()->setFontSize(appearance->fontSize());
+    conn(appearance, SIGNAL(fontSizeChanged(bb::cascades::FontSize::Type)),
+        text->textStyle(), SLOT(setFontSize(bb::cascades::FontSize::Type)));
+
     add(header);
     add(Segment::create().subsection().add(text));
 }

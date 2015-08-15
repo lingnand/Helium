@@ -16,6 +16,7 @@
 #include "parsestyles.h"
 #include "textstyleformatter.h"
 #include "textstyleformatterfactory.h"
+#include "textstyleformattercollection.h"
 #include "outlangdefparserfun.h"
 #include "langdefmanager.h"
 #include "regexrulefactory.h"
@@ -76,7 +77,7 @@ void SourceHighlight::setStyleFile(const std::string &_styleFile) {
 
         formatterFactory.addDefaultFormatter();
 
-        formatterCollection = formatterFactory.getFormatterCollection();
+        TextStyleFormatterCollection formatterCollection = formatterFactory.getFormatterCollection();
 
         // set the preformatter in all the formatters
         for (TextStyleFormatterCollection::const_iterator it =

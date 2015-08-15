@@ -8,6 +8,7 @@
 #ifndef GITDIFFPAGE_H_
 #define GITDIFFPAGE_H_
 
+#include <srchilite/sourcehighlight.h>
 #include <libqgit2/qgitpatch.h>
 #include <PushablePage.h>
 #include <Segment.h>
@@ -36,6 +37,7 @@ class GitDiffPage : public PushablePage
 public:
     GitDiffPage(GitRepoPage *);
     void setPatch(const StatusPatch &);
+    Q_SLOT void resetPatch(); // reset the patch
     Q_SLOT void onTranslatorChanged();
 private:
     GitRepoPage *_repoPage;
@@ -48,8 +50,13 @@ private:
         HunkView();
     };
 
+    srchilite::SourceHighlight _sourceHighlight;
+
     Q_SLOT void add();
     Q_SLOT void reset();
+    void reloadContent();
+
+    Q_SLOT void onHighlightStyleFileChanged(const QString &);
 };
 
 #endif /* GITDIFFPAGE_H_ */

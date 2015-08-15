@@ -61,3 +61,7 @@ label "#AFDF87" b ;
 // for errors
 error bg:"#870000" ;
 warning "#FFDFDF" ;
+
+// for git
+diffadd "#AFDF87" ;
+diffdel "#DF8787" ;

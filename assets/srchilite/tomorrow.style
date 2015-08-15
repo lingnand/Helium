@@ -61,3 +61,6 @@ label "#8959A8" b ;
 error bg:"#FF0000" ;
 warning "#8959A8" ;
 
+// for git
+diffadd "#718C00" ;
+diffdel "#C82829" ;

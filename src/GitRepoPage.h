@@ -36,6 +36,7 @@ public:
     Q_SLOT void onTranslatorChanged();
     void addPaths(const QList<QString> &);
     void resetPaths(const QList<QString> &);
+    Q_SLOT void onPopTransitionEnded(bb::cascades::Page *);
 Q_SIGNALS:
     void translatorChanged();
 private:
