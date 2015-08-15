@@ -14,6 +14,7 @@
 #include <bb/cascades/Label>
 #include <bb/cascades/Header>
 #include <bb/cascades/StandardListItem>
+#include <bb/cascades/NavigationPane>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitexception.h>
 #include <libqgit2/qgitdifffile.h>
@@ -29,8 +30,7 @@
 
 using namespace bb::cascades;
 
-GitRepoPage::GitRepoPage(Project *project, QObject *parent):
-    RepushablePage(parent),
+GitRepoPage::GitRepoPage(Project *project):
     _project(project),
     _initAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("i"))
@@ -230,16 +230,12 @@ void GitRepoPage::diffIndexPath(const QVariantList &indexPath)
     qDebug() << "NUM DIFF DELTAS" << diff.numDeltas();
     if (!_diffPage) {
         _diffPage = new GitDiffPage(this);
-        conn(_diffPage, SIGNAL(toPush(bb::cascades::Page*)),
-            this, SIGNAL(toPush(bb::cascades::Page*)));
-        conn(_diffPage, SIGNAL(toPop()),
-            this, SIGNAL(toPop()));
         conn(this, SIGNAL(translatorChanged()),
             _diffPage, SLOT(onTranslatorChanged()));
     }
     _diffPage->setPatch(StatusPatch(sdelta.type, diff.patch(0)));
     _diffPage->setParent(NULL);
-    emit toPush(_diffPage);
+    parent()->push(_diffPage);
 }
 
 void GitRepoPage::onTranslatorChanged()

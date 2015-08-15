@@ -23,8 +23,7 @@
 
 using namespace bb::cascades;
 
-AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSettings, QObject *parent):
-    RepushablePage(parent),
+AppearanceSettingsPage::AppearanceSettingsPage(AppearanceSettings *appearanceSettings):
     _settings(appearanceSettings),
     _themeSelect(DropDown::create()
         .add("Summer Fruit", AppearanceSettings::SummerFruit)

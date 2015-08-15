@@ -21,14 +21,14 @@ namespace bb {
 class NumberPicker;
 
 #include <bb/cascades/FontSize>
-#include <RepushablePage.h>
+#include <PushablePage.h>
 #include <AppearanceSettings.h>
 
-class AppearanceSettingsPage : public RepushablePage
+class AppearanceSettingsPage : public PushablePage
 {
     Q_OBJECT
 public:
-    AppearanceSettingsPage(AppearanceSettings *, QObject *parent=NULL);
+    AppearanceSettingsPage(AppearanceSettings *);
     Q_SLOT void onTranslatorChanged();
 private:
     AppearanceSettings *_settings;

@@ -8,9 +8,14 @@
 #ifndef SETTINGSPAGE_H_
 #define SETTINGSPAGE_H_
 
-#include <bb/cascades/Page>
+#include <bb/cascades/NavigationPane>
 #include <bb/cascades/QListDataModel>
-#include <RepushablePage.h>
+
+namespace bb {
+    namespace cascades {
+        class Page;
+    }
+}
 
 class GeneralSettings;
 class GeneralSettingsPage;
@@ -20,15 +25,13 @@ class FiletypeMap;
 class FiletypeMapSettingsPage;
 
 // the Settings Page for the entire app
-class SettingsPage : public RepushablePage
+class SettingsPage : public bb::cascades::NavigationPane
 {
     Q_OBJECT
 public:
-    SettingsPage(GeneralSettings *, AppearanceSettings *, FiletypeMap *, QObject *parent=NULL);
+    SettingsPage(GeneralSettings *, AppearanceSettings *, FiletypeMap *);
     Q_SLOT void onTranslatorChanged();
 private:
-    bb::cascades::QListDataModel<QString> _model;
-
     GeneralSettings *_generalSettings;
     GeneralSettingsPage *_generalSettingsPage;
 
@@ -37,6 +40,11 @@ private:
 
     FiletypeMap *_filetypeMap;
     FiletypeMapSettingsPage *_filetypeMapSettingsPage;
+
+    bb::cascades::Page *_base;
+    bb::cascades::QListDataModel<QString> _model;
+
+    Q_SLOT void closeSheet();
     Q_SLOT void onTriggered(QVariantList);
 };
 

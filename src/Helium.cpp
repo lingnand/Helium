@@ -17,6 +17,7 @@
 #include <bb/cascades/UIPalette>
 #include <bb/cascades/Label>
 #include <bb/cascades/TextArea>
+#include <bb/cascades/Sheet>
 #include <bb/platform/bbm/MessageService>
 #include <bb/platform/bbm/UserProfile>
 #include <Segment.h>
@@ -33,7 +34,6 @@
 #include <AppearanceSettings.h>
 #include <SettingsPage.h>
 #include <Utility.h>
-#include <RepushablePage.h>
 #include <Segment.h>
 #include <Project.h>
 #include <Defaults.h>
@@ -56,6 +56,7 @@ Helium *Helium::instance()
 Helium::Helium(int &argc, char **argv):
     Application(argc, argv),
     _buffers(new BufferStore(this)),
+    _sheet(Sheet::create()),
     _settingsPage(NULL),
     _helpPage(NULL),
     _coverContent(Segment::create().section().subsection()),
@@ -305,42 +306,33 @@ void Helium::contact()
     _invokeManager.invoke(request);
 }
 
-void Helium::pushPage(RepushablePage *page)
+void Helium::pushOnSheet(AbstractPane *page)
 {
-    scene()->disableAllShortcuts();
-    page->disconnect();
-    conn(page, SIGNAL(exited()),
-        scene(), SLOT(enableAllShortcuts()));
-    NavigationPane *pane = scene()->activePane();
-    // pop to the base page
-    pane->navigateTo(pane->at(0));
-    conn(page, SIGNAL(toPush(bb::cascades::Page*)),
-        pane, SLOT(push(bb::cascades::Page*)));
-    conn(page, SIGNAL(toPop()),
-        pane, SLOT(pop()));
-    page->setParent(NULL);
-    pane->push(page);
+    if (!_sheet)
+        _sheet = Sheet::create();
+    _sheet->setContent(page);
+    _sheet->open();
 }
 
 void Helium::showSettings()
 {
     if (!_settingsPage) {
-        _settingsPage = new SettingsPage(_general, _appearance, _filetypeMap, this);
+        _settingsPage = new SettingsPage(_general, _appearance, _filetypeMap);
         conn(this, SIGNAL(translatorChanged()),
             _settingsPage, SLOT(onTranslatorChanged()));
     }
-    pushPage(_settingsPage);
+    pushOnSheet(_settingsPage);
 }
 
 void Helium::showHelp(HelpPage::Mode mode)
 {
     if (!_helpPage) {
-        _helpPage = new HelpPage(this);
+        _helpPage = new HelpPage;
         conn(this, SIGNAL(translatorChanged()),
             _helpPage, SLOT(onTranslatorChanged()));
     }
     _helpPage->setMode(mode);
-    pushPage(_helpPage);
+    pushOnSheet(_helpPage);
 }
 
 void Helium::resetFullScreenAction()

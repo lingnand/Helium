@@ -10,24 +10,24 @@
 
 #include <bb/cascades/Page>
 #include <bb/cascades/QListDataModel>
-#include <RepushablePage.h>
+#include <PushablePage.h>
 
 class Filetype;
 class FiletypeMap;
 class FiletypeSettingsUI;
 
-class FiletypeMapSettingsPage : public RepushablePage
+class FiletypeMapSettingsPage : public PushablePage
 {
     Q_OBJECT
 public:
-    FiletypeMapSettingsPage(FiletypeMap *, QObject *parent=NULL);
+    FiletypeMapSettingsPage(FiletypeMap *);
     Q_SLOT void onTranslatorChanged();
 private:
     QList<Filetype *> _filetypes;
     FiletypeSettingsUI *_filetypeSettingsUI;
 
     bb::cascades::QListDataModel<QString> _model;
-    RepushablePage *_filetypeSettingsPage;
+    PushablePage *_filetypeSettingsPage;
     Q_SLOT void onTriggered(QVariantList);
 };
 

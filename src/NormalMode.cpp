@@ -202,11 +202,7 @@ void NormalMode::showProperties()
 void NormalMode::showGitRepo()
 {
     if (!_gitRepoPage) {
-        _gitRepoPage = new GitRepoPage(view()->project(), view()->content());
-        conn(_gitRepoPage, SIGNAL(toPush(bb::cascades::Page*)),
-            view()->content(), SLOT(push(bb::cascades::Page*)));
-        conn(_gitRepoPage, SIGNAL(toPop()),
-            view()->content(), SLOT(pop()));
+        _gitRepoPage = new GitRepoPage(view()->project());
     }
     _gitRepoPage->reload();
     view()->content()->push(_gitRepoPage);

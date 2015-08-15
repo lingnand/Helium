@@ -9,7 +9,7 @@
 #define GITDIFFPAGE_H_
 
 #include <libqgit2/qgitpatch.h>
-#include <RepushablePage.h>
+#include <PushablePage.h>
 #include <Segment.h>
 #include <StatusActionSet.h>
 
@@ -30,7 +30,7 @@ struct StatusPatch {
         type(t), patch(p) {}
 };
 
-class GitDiffPage : public RepushablePage
+class GitDiffPage : public PushablePage
 {
     Q_OBJECT
 public:

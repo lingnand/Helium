@@ -12,6 +12,7 @@
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/ScrollView>
 #include <bb/cascades/SystemDefaults>
+#include <bb/cascades/NavigationPane>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitdifffile.h>
 #include <GitRepoPage.h>
@@ -21,7 +22,6 @@
 using namespace bb::cascades;
 
 GitDiffPage::GitDiffPage(GitRepoPage *page):
-    RepushablePage(page),
     _repoPage(page),
     _add(ActionItem::create()
         .addShortcut(Shortcut::create().key("a"))
@@ -121,13 +121,13 @@ void GitDiffPage::setPatch(const StatusPatch &spatch)
 void GitDiffPage::add()
 {
     _repoPage->addPaths(QList<QString>() << _spatch.patch.delta().newFile().path());
-    pop();
+    parent()->pop();
 }
 
 void GitDiffPage::reset()
 {
     _repoPage->resetPaths(QList<QString>() << _spatch.patch.delta().newFile().path());
-    pop();
+    parent()->pop();
 }
 
 void GitDiffPage::onTranslatorChanged()

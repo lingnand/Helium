@@ -1,11 +1,11 @@
 /*
- * RepushablePage.cpp
+ * PushablePage.cpp
  *
  *  Created on: May 26, 2015
  *      Author: lingnan
  */
 
-#include <RepushablePage.h>
+#include <PushablePage.h>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/NavigationPaneProperties>
 #include <bb/cascades/ActionItem>
@@ -14,8 +14,7 @@
 
 using namespace bb::cascades;
 
-RepushablePage::RepushablePage(QObject *parent):
-    Page(parent), _parent(parent)
+PushablePage::PushablePage()
 {
     setPaneProperties(NavigationPaneProperties::create()
         .backButton(ActionItem::create()
@@ -23,9 +22,10 @@ RepushablePage::RepushablePage(QObject *parent):
             .onTriggered(this, SLOT(pop()))));
 }
 
-void RepushablePage::pop()
-{
-    setParent(_parent);
-    emit toPop();
-    emit exited();
+NavigationPane *PushablePage::parent() const {
+    return (NavigationPane *) Page::parent();
+}
+
+void PushablePage::pop() {
+    parent()->pop();
 }

@@ -11,7 +11,7 @@
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
 #include <libqgit2/qgitstatuslist.h>
-#include <RepushablePage.h>
+#include <PushablePage.h>
 
 namespace bb {
     namespace cascades {
@@ -27,11 +27,11 @@ class Project;
 class Segment;
 class GitDiffPage;
 
-class GitRepoPage : public RepushablePage
+class GitRepoPage : public PushablePage
 {
     Q_OBJECT
 public:
-    GitRepoPage(Project *, QObject *parent=NULL);
+    GitRepoPage(Project *);
     Q_SLOT void reload(); // refresh the view
     Q_SLOT void onTranslatorChanged();
     void addPaths(const QList<QString> &);

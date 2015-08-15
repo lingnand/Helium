@@ -8,7 +8,8 @@
 #ifndef HELPPAGE_H_
 #define HELPPAGE_H_
 
-#include <RepushablePage.h>
+#include <bb/cascades/NavigationPane>
+#include <PushablePage.h>
 
 namespace bb {
     namespace cascades {
@@ -17,17 +18,18 @@ namespace bb {
         class Option;
         class ScrollView;
         class ActionItem;
+        class NavigationPane;
     }
 }
 
 class Segment;
 
-class HelpPage : public RepushablePage
+class HelpPage : public bb::cascades::NavigationPane
 {
     Q_OBJECT
 public:
     enum Mode { Reference, ChangeList };
-    HelpPage(QObject *parent=NULL);
+    HelpPage();
     void setMode(Mode);
     Q_SLOT void onTranslatorChanged();
 private:
@@ -53,12 +55,14 @@ private:
     bb::cascades::Label *_changeList;
     Segment *_changeListSegment;
     bb::cascades::ScrollView *_view;
-    struct ContentPage : public RepushablePage {
-        bb::cascades::Label *contentLabel;
-        ContentPage(QObject *parent=NULL);
-    } *_contentPage;
     bb::cascades::ActionItem *_rateAction;
+    bb::cascades::Page *_base;
+    struct ContentPage : public PushablePage {
+        bb::cascades::Label *contentLabel;
+        ContentPage();
+    } *_contentPage;
 
+    Q_SLOT void closeSheet();
     Q_SLOT void onSelectedOptionChanged(bb::cascades::Option *);
     Q_SLOT void onTabsAndBuffersHeaderClicked();
     void loadPage(const QString &title, const QString &content);

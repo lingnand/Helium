@@ -14,13 +14,15 @@
 #include <bb/cascades/Application>
 #include <bb/cascades/LocaleHandler>
 #include <bb/platform/bbm/Context>
-#include <Versioner.h>
 #include <HelpPage.h>
+#include <Versioner.h>
 
 namespace bb {
     namespace cascades {
         class ActionItem;
         class SceneCover;
+        class Sheet;
+        class AbstractPane;
     }
 }
 
@@ -29,7 +31,6 @@ class FiletypeMap;
 class GeneralSettings;
 class AppearanceSettings;
 class SettingsPage;
-class RepushablePage;
 class Segment;
 class View;
 class BufferStore;
@@ -55,6 +56,7 @@ Q_SIGNALS:
     void translatorChanged();
 private:
     BufferStore *_buffers;
+    bb::cascades::Sheet *_sheet;
     SettingsPage *_settingsPage;
     HelpPage *_helpPage;
 
@@ -85,7 +87,7 @@ private:
     Q_SLOT void inviteToDownload();
     Q_SLOT void postPersonalMessage();
     Q_SLOT void resetFullScreenAction();
-    void pushPage(RepushablePage *);
+    void pushOnSheet(bb::cascades::AbstractPane *);
 
     void onTranslatorChanged();
     Q_SLOT void onInvoked(const bb::system::InvokeRequest &);

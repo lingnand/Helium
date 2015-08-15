@@ -12,6 +12,9 @@
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/Option>
 #include <bb/cascades/ActionItem>
+#include <bb/cascades/Sheet>
+#include <bb/cascades/SegmentedControl>
+#include <bb/cascades/Shortcut>
 #include <HelpPage.h>
 #include <ShortcutHelp.h>
 #include <Utility.h>
@@ -22,8 +25,7 @@ using namespace bb::cascades;
 
 #define BULLET_SYMBOL QChar(0x2022)
 
-HelpPage::HelpPage(QObject *parent):
-    RepushablePage(parent),
+HelpPage::HelpPage():
     _referenceOption(Option::create()),
     _changeListOption(Option::create()),
     _tabsAndBuffers(Header::create().mode(HeaderMode::Interactive)
@@ -73,28 +75,36 @@ HelpPage::HelpPage(QObject *parent):
     _changeListSegment(Segment::create().section().subsection()
         .add(_changeList)),
     _view(ScrollView::create(_referenceSegment)
-        .scrollMode(ScrollMode::Vertical)),
-    _contentPage(NULL),
+        .scrollMode(ScrollMode::Vertical)
+        .scrollRole(ScrollRole::Main)),
     _rateAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_browser.png"))
-        .onTriggered(Helium::instance(), SLOT(goToAppWorld())))
+        .onTriggered(Helium::instance(), SLOT(goToAppWorld()))),
+    _base(Page::create()
+        .titleBar(TitleBar::create()
+            .dismissAction(ActionItem::create()
+                .onTriggered(this, SLOT(closeSheet()))))
+        .addAction(_rateAction, ActionBarPlacement::OnBar)
+        .addShortcut(Shortcut::create().key("x")
+            .onTriggered(this, SLOT(closeSheet())))
+        .actionBarVisibility(ChromeVisibility::Overlay)),
+    _contentPage(NULL)
 {
-    setTitleBar(TitleBar::create(TitleBarKind::Segmented)
-        .addOption(_referenceOption)
-        .addOption(_changeListOption));
-    conn(titleBar(), SIGNAL(selectedOptionChanged(bb::cascades::Option*)),
+    SegmentedControl *segment = SegmentedControl::create()
+        .add(_referenceOption)
+        .add(_changeListOption);
+    conn(segment, SIGNAL(selectedOptionChanged(bb::cascades::Option*)),
         this, SLOT(onSelectedOptionChanged(bb::cascades::Option*)));
 
-    setContent(_view);
-    addAction(_rateAction, ActionBarPlacement::OnBar);
-    setActionBarVisibility(ChromeVisibility::Overlay);
-    setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
+    _base->setContent(Segment::create().section()
+        .add(segment).add(_view));
+    _base->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
+    push(_base);
 
     onTranslatorChanged();
 }
 
-HelpPage::ContentPage::ContentPage(QObject *parent):
-    RepushablePage(parent),
+HelpPage::ContentPage::ContentPage():
     contentLabel(Label::create().multiline(true).format(TextFormat::Html)
         .textStyle(SystemDefaults::TextStyles::bodyText()))
 {
@@ -109,16 +119,11 @@ HelpPage::ContentPage::ContentPage(QObject *parent):
 void HelpPage::loadPage(const QString &title, const QString &content)
 {
     if (!_contentPage) {
-        _contentPage = new HelpPage::ContentPage(this);
-        conn(_contentPage, SIGNAL(toPush(bb::cascades::Page*)),
-            this, SIGNAL(toPush(bb::cascades::Page*)));
-        conn(_contentPage, SIGNAL(toPop()),
-            this, SIGNAL(toPop()));
+        _contentPage = new HelpPage::ContentPage;
     }
     _contentPage->titleBar()->setTitle(title);
     _contentPage->contentLabel->setText(content);
-    _contentPage->setParent(NULL);
-    emit toPush(_contentPage);
+    push(_contentPage);
 }
 
 void HelpPage::onSelectedOptionChanged(bb::cascades::Option *option)
@@ -133,10 +138,15 @@ void HelpPage::setMode(HelpPage::Mode mode)
 {
     switch (mode) {
         case HelpPage::Reference:
-            titleBar()->setSelectedOption(_referenceOption); break;
+            _base->titleBar()->setSelectedOption(_referenceOption); break;
         case HelpPage::ChangeList:
-            titleBar()->setSelectedOption(_changeListOption); break;
+            _base->titleBar()->setSelectedOption(_changeListOption); break;
     }
+}
+
+void HelpPage::closeSheet()
+{
+    ((Sheet *) parent())->close();
 }
 
 void HelpPage::onTabsAndBuffersHeaderClicked()
@@ -158,6 +168,8 @@ void HelpPage::onTabsAndBuffersHeaderClicked()
 
 void HelpPage::onTranslatorChanged()
 {
+    _base->titleBar()->setTitle(tr("Help"));
+    _base->titleBar()->dismissAction()->setTitle(tr("Close"));
     _referenceOption->setText(tr("Reference"));
     _changeListOption->setText(tr("Change List"));
     _tabsAndBuffers->setTitle(tr("Tabs & Buffers"));

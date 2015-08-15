@@ -8,7 +8,7 @@
 #ifndef GENERALSETTINGSPAGE_H_
 #define GENERALSETTINGSPAGE_H_
 
-#include <RepushablePage.h>
+#include <PushablePage.h>
 
 namespace bb {
     namespace cascades {
@@ -24,11 +24,11 @@ namespace bb {
 class GeneralSettings;
 class NumberPicker;
 
-class GeneralSettingsPage : public RepushablePage
+class GeneralSettingsPage : public PushablePage
 {
     Q_OBJECT
 public:
-    GeneralSettingsPage(GeneralSettings *, QObject *parent=NULL);
+    GeneralSettingsPage(GeneralSettings *);
     Q_SLOT void onTranslatorChanged();
 private:
     GeneralSettings *_settings;

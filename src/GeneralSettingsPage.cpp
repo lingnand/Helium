@@ -22,8 +22,7 @@
 
 using namespace bb::cascades;
 
-GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings, QObject *parent):
-    RepushablePage(parent),
+GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings):
     _settings(generalSettings),
     _highlightRangePicker(new NumberPicker(0, 40)),
     _highlightRangeHelp(Label::create().multiline(true)

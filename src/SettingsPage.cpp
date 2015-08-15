@@ -7,6 +7,10 @@
 
 #include <bb/cascades/ListView>
 #include <bb/cascades/TitleBar>
+#include <bb/cascades/Page>
+#include <bb/cascades/Sheet>
+#include <bb/cascades/ActionItem>
+#include <bb/cascades/Shortcut>
 #include <SettingsPage.h>
 #include <GeneralSettingsPage.h>
 #include <AppearanceSettingsPage.h>
@@ -15,21 +19,31 @@
 
 using namespace bb::cascades;
 
-SettingsPage::SettingsPage(GeneralSettings *generalSettings, AppearanceSettings *appearanceSettings, FiletypeMap *filetypeMap, QObject *parent):
-    RepushablePage(parent),
+SettingsPage::SettingsPage(GeneralSettings *generalSettings, AppearanceSettings *appearanceSettings, FiletypeMap *filetypeMap):
     _generalSettings(generalSettings),
     _generalSettingsPage(NULL),
     _appearanceSettings(appearanceSettings),
     _appearanceSettingsPage(NULL),
     _filetypeMap(filetypeMap),
-    _filetypeMapSettingsPage(NULL)
+    _filetypeMapSettingsPage(NULL),
+    _base(Page::create()
+        .titleBar(TitleBar::create()
+            .dismissAction(ActionItem::create()
+                .onTriggered(this, SLOT(closeSheet()))))
+        .addShortcut(Shortcut::create().key("x")
+            .onTriggered(this, SLOT(closeSheet()))))
 {
-    setTitleBar(TitleBar::create());
     ListView *listView = ListView::create().dataModel(&_model);
     conn(listView, SIGNAL(triggered(QVariantList)),
         this, SLOT(onTriggered(QVariantList)));
-    setContent(listView);
+    _base->setContent(listView);
+    push(_base);
     onTranslatorChanged();
+}
+
+void SettingsPage::closeSheet()
+{
+    ((Sheet *) parent())->close();
 }
 
 void SettingsPage::onTriggered(QVariantList indexPath)
@@ -37,39 +51,29 @@ void SettingsPage::onTriggered(QVariantList indexPath)
     switch (indexPath[0].toInt()) {
         case 0:
             if (!_generalSettingsPage) {
-                _generalSettingsPage = new GeneralSettingsPage(_generalSettings, this);
-                conn(_generalSettingsPage, SIGNAL(toPop()),
-                    this, SIGNAL(toPop()));
+                _generalSettingsPage = new GeneralSettingsPage(_generalSettings);
             }
-            _generalSettingsPage->setParent(NULL);
-            emit toPush(_generalSettingsPage);
+            push(_generalSettingsPage);
             break;
         case 1:
             if (!_appearanceSettingsPage) {
-                _appearanceSettingsPage = new AppearanceSettingsPage(_appearanceSettings, this);
-                conn(_appearanceSettingsPage, SIGNAL(toPop()),
-                    this, SIGNAL(toPop()));
+                _appearanceSettingsPage = new AppearanceSettingsPage(_appearanceSettings);
             }
-            _appearanceSettingsPage->setParent(NULL);
-            emit toPush(_appearanceSettingsPage);
+            push(_appearanceSettingsPage);
             break;
         case 2:
             if (!_filetypeMapSettingsPage) {
-                _filetypeMapSettingsPage = new FiletypeMapSettingsPage(_filetypeMap, this);
-                conn(_filetypeMapSettingsPage, SIGNAL(toPush(bb::cascades::Page*)),
-                    this, SIGNAL(toPush(bb::cascades::Page*)));
-                conn(_filetypeMapSettingsPage, SIGNAL(toPop()),
-                    this, SIGNAL(toPop()));
+                _filetypeMapSettingsPage = new FiletypeMapSettingsPage(_filetypeMap);
             }
-            _filetypeMapSettingsPage->setParent(NULL);
-            emit toPush(_filetypeMapSettingsPage);
+            push(_filetypeMapSettingsPage);
             break;
     }
 }
 
 void SettingsPage::onTranslatorChanged()
 {
-    titleBar()->setTitle(tr("Settings"));
+    _base->titleBar()->setTitle(tr("Settings"));
+    _base->titleBar()->dismissAction()->setTitle(tr("Close"));
     _model.clear();
     _model.append(tr("General"));
     _model.append(tr("Appearance"));

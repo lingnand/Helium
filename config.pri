@@ -594,8 +594,8 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/NumberPicker.cpp) \
         $$quote($$BASEDIR/src/Project.cpp) \
         $$quote($$BASEDIR/src/ProjectStorage.cpp) \
+        $$quote($$BASEDIR/src/PushablePage.cpp) \
         $$quote($$BASEDIR/src/Replacement.cpp) \
-        $$quote($$BASEDIR/src/RepushablePage.cpp) \
         $$quote($$BASEDIR/src/RunProfile.cpp) \
         $$quote($$BASEDIR/src/RunProfileManager.cpp) \
         $$quote($$BASEDIR/src/RunProfileSettingsUI.cpp) \
@@ -767,8 +767,8 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/NumberPicker.h) \
         $$quote($$BASEDIR/src/Project.h) \
         $$quote($$BASEDIR/src/ProjectStorage.h) \
+        $$quote($$BASEDIR/src/PushablePage.h) \
         $$quote($$BASEDIR/src/Replacement.h) \
-        $$quote($$BASEDIR/src/RepushablePage.h) \
         $$quote($$BASEDIR/src/RunProfile.h) \
         $$quote($$BASEDIR/src/RunProfileManager.h) \
         $$quote($$BASEDIR/src/RunProfileSettingsUI.h) \

@@ -9,6 +9,7 @@
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/ScrollView>
 #include <bb/cascades/Page>
+#include <bb/cascades/NavigationPane>
 #include <FiletypeMapSettingsPage.h>
 #include <FiletypeSettingsUI.h>
 #include <FiletypeMap.h>
@@ -17,11 +18,10 @@
 
 using namespace bb::cascades;
 
-FiletypeMapSettingsPage::FiletypeMapSettingsPage(FiletypeMap *map, QObject *parent):
-    RepushablePage(parent),
+FiletypeMapSettingsPage::FiletypeMapSettingsPage(FiletypeMap *map):
     _filetypes(map->filetypes()),
     _filetypeSettingsUI(new FiletypeSettingsUI),
-    _filetypeSettingsPage(new RepushablePage(this))
+    _filetypeSettingsPage(new PushablePage)
 {
     setTitleBar(TitleBar::create());
     for (int i = 0; i < _filetypes.size(); i++) {
@@ -35,8 +35,6 @@ FiletypeMapSettingsPage::FiletypeMapSettingsPage(FiletypeMap *map, QObject *pare
     _filetypeSettingsPage->setTitleBar(TitleBar::create());
     _filetypeSettingsPage->setContent(ScrollView::create(_filetypeSettingsUI)
         .scrollMode(ScrollMode::Vertical));
-    conn(_filetypeSettingsPage, SIGNAL(toPop()),
-        this, SIGNAL(toPop()));
 
     onTranslatorChanged();
 }
@@ -48,8 +46,7 @@ void FiletypeMapSettingsPage::onTriggered(QVariantList indexPath)
     QString title(ft->name());
     title[0] = title[0].toUpper();
     _filetypeSettingsPage->titleBar()->setTitle(title);
-    _filetypeSettingsPage->setParent(NULL);
-    emit toPush(_filetypeSettingsPage);
+    parent()->push(_filetypeSettingsPage);
 }
 
 void FiletypeMapSettingsPage::onTranslatorChanged()
