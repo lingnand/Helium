@@ -258,6 +258,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_save.png) \
         $$quote($$BASEDIR/assets/images/ic_save_as.png) \
         $$quote($$BASEDIR/assets/images/ic_search.png) \
+        $$quote($$BASEDIR/assets/images/ic_select_all.png) \
         $$quote($$BASEDIR/assets/images/ic_settings.png) \
         $$quote($$BASEDIR/assets/images/ic_share.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \

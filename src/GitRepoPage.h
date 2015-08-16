@@ -39,6 +39,9 @@ public:
     Q_SLOT bool commit(const QString &);
     Q_SLOT void onPagePopped(bb::cascades::Page *);
     void onTranslatorChanged();
+    bb::cascades::ListView *statusListView() const;
+    Q_SLOT void selectAllOnIndex();
+    Q_SLOT void selectAllOnWorkdir();
 Q_SIGNALS:
     void translatorChanged();
 private:
@@ -49,12 +52,15 @@ private:
     bb::cascades::Control *_noRepoContent;
     // UIs for an existing repo
     bb::cascades::ActionItem *_commitAction, *_branchesAction, *_logAction;
+    bb::cascades::ActionItem *_addAllAction, *_resetAllAction;
     class StatusDataModel : public bb::cascades::DataModel {
     public:
         int childCount(const QVariantList &);
         bool hasChildren(const QVariantList &);
         QString itemType(const QVariantList &);
         QVariant data(const QVariantList &);
+        size_t validDiffDeltasToAdd() const;
+        const LibQGit2::StatusList &statusList() const { return _statusList; }
         void setStatusList(const LibQGit2::StatusList &);
         // reset, but keep the cached views untouched (stale)
         void resetStatusList();
@@ -79,12 +85,18 @@ private:
     Q_SLOT void clone();
     Q_SLOT void branches();
     Q_SLOT void log();
+    Q_SLOT void addAll();
+    Q_SLOT void resetAll();
     Q_SLOT void showCommitPage();
     Q_SLOT void showDiffSelection();
     Q_SLOT void showDiffIndexPath(const QVariantList &);
     Q_SLOT void addSelections();
     Q_SLOT void resetSelections();
     void hideAllActions();
+
+    // multi selection
+    void selectAllChildren(const QVariantList &);
+    Q_SLOT void reloadMultiSelectActionsEnabled();
 
     Q_SLOT void onProjectPathChanged();
 };

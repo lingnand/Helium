@@ -36,7 +36,11 @@ public:
     StatusActionSet(GitRepoPage *, const StatusDiffDelta &);
     Q_SLOT void onTranslatorChanged();
 private:
+    GitRepoPage *_repoPage;
     bb::cascades::ActionItem *_diff, *_reset, *_add;
+    bb::cascades::ActionItem *_selectAll;
+    Q_SLOT void onSelectAllOnIndexTriggered();
+    Q_SLOT void onSelectAllOnWorkdirTriggered();
 };
 
 #endif /* STATUSACTIONSET_H_ */
