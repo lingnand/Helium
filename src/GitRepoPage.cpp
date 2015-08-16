@@ -296,10 +296,17 @@ void GitRepoPage::onTranslatorChanged()
 void GitRepoPage::StatusDataModel::setStatusList(const LibQGit2::StatusList &list)
 {
     DataModelChangeType::Type changeType = DataModelChangeType::Init;
-    if (list.entryCount() == _statusList.entryCount())
+    // if == 0 then do an Init, as there might still be elements left over
+    // after resetStatusList
+    if (list.entryCount() != 0 && list.entryCount() == _statusList.entryCount())
         changeType = DataModelChangeType::Update;
     _statusList = list;
     emit itemsChanged(changeType);
+}
+
+void GitRepoPage::StatusDataModel::resetStatusList()
+{
+    _statusList = LibQGit2::StatusList();
 }
 
 int GitRepoPage::StatusDataModel::childCount(const QVariantList &indexPath)
@@ -418,9 +425,10 @@ void GitRepoPage::StatusItemProvider::updateItem(ListView *list, VisualNode *lis
 
 void GitRepoPage::onPagePopped(Page *page)
 {
-    if (page == _diffPage) {
+    if (page == this)
+        _statusDataModel.resetStatusList();
+    else if (page == _diffPage)
         _diffPage->resetPatch();
-    }
 }
 
 void GitRepoPage::onProjectPathChanged()

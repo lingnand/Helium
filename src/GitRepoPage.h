@@ -56,6 +56,8 @@ private:
         QString itemType(const QVariantList &);
         QVariant data(const QVariantList &);
         void setStatusList(const LibQGit2::StatusList &);
+        // reset, but keep the cached views untouched (stale)
+        void resetStatusList();
     private:
         LibQGit2::StatusList _statusList;
     } _statusDataModel;
