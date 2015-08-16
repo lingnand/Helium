@@ -83,6 +83,8 @@ private:
     Q_SLOT void addSelections();
     Q_SLOT void resetSelections();
     void hideAllActions();
+
+    Q_SLOT void onProjectPathChanged();
 };
 
 #endif /* GITREPOPAGE_H_ */

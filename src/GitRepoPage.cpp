@@ -79,6 +79,10 @@ GitRepoPage::GitRepoPage(Project *project):
     conn(_repoContent, SIGNAL(triggered(QVariantList)),
         this, SLOT(showDiffIndexPath(const QVariantList &)));
     setTitleBar(TitleBar::create());
+
+    conn(_project, SIGNAL(pathChanged(const QString&)),
+        this, SLOT(onProjectPathChanged()));
+
     onTranslatorChanged();
 }
 
@@ -416,5 +420,14 @@ void GitRepoPage::onPagePopped(Page *page)
 {
     if (page == _diffPage) {
         _diffPage->resetPatch();
+    }
+}
+
+void GitRepoPage::onProjectPathChanged()
+{
+    if (parent()->indexOf(this) >= 0) {
+        // pop any page
+        parent()->navigateTo(this);
+        reload();
     }
 }
