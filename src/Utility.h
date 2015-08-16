@@ -23,6 +23,10 @@ namespace bb {
     }
 }
 
+namespace srchilite {
+    class SourceHighlight;
+}
+
 #define conn(sender, signal, receiver, slot) { \
     bool res = ::QObject::connect(sender, signal, receiver, slot); \
     Q_ASSERT(res); \
@@ -45,6 +49,8 @@ public:
         const QObject *receiver=NULL, const char *method=NULL);
     static void bigToast(const QString &msg);
     static void escapeHtml(QTextStream &input, QTextStream &output);
+    // a thread unsafe helper that formats the given input and appends to the output
+    static void formatHtml(const QString &elem, const QString &input, QTextStream &output);
     static void dialog(const QString &confirm,
             const QString &title, const QString &body,
             const QObject *receiver=NULL, const char *method=NULL);
@@ -60,8 +66,12 @@ public:
         const QObject *receiver=NULL, const char *method=NULL);
     static void handleBasicTextControlModifiedKey(bb::cascades::TextEditor *, bb::cascades::KeyEvent *);
     static QString shortenPath(const QString &path);
+    static void connect(const char *signal, const QObject *receiver, const char *method,
+            Qt::ConnectionType type = Qt::AutoConnection);
+    static void disconnect(const char *signal=0, const QObject *receiver=0, const char *method=0);
 Q_SIGNALS:
     void promptFinished(bb::system::SystemUiResult::Type, const QString &);
+    void htmlFormatterStyleChanged();
 private:
     Utility();
     bb::system::SystemToast *_toast;
@@ -72,7 +82,11 @@ private:
     bb::system::SystemDialog *dialog();
     bb::system::SystemPrompt *_prompt;
     bb::system::SystemPrompt *prompt();
+    srchilite::SourceHighlight *_sourceHighlight;
+    srchilite::SourceHighlight *sourceHighlight();
+
     Q_SLOT void onPromptFinished(bb::system::SystemUiResult::Type);
+    Q_SLOT void onHighlightStyleFileChanged(const QString &);
 };
 
 #endif /* UTILITY_H_ */

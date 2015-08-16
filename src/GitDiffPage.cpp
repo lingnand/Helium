@@ -13,7 +13,6 @@
 #include <bb/cascades/ScrollView>
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/NavigationPane>
-#include <srchilite/formattermanager.h>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitdifffile.h>
 #include <GitRepoPage.h>
@@ -32,8 +31,7 @@ GitDiffPage::GitDiffPage(GitRepoPage *page):
     _reset(ActionItem::create()
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(reset()))),
-    _content(Segment::create()),
-    _sourceHighlight("xhtml.outlang")
+    _content(Segment::create())
 {
     setTitleBar(TitleBar::create());
     setContent(ScrollView::create(_content)
@@ -41,18 +39,10 @@ GitDiffPage::GitDiffPage(GitRepoPage *page):
     setActionBarVisibility(ChromeVisibility::Overlay);
     setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
 
-    AppearanceSettings *appearance = Helium::instance()->appearance();
-    onHighlightStyleFileChanged(appearance->highlightStyleFile());
-    conn(appearance, SIGNAL(highlightStyleFileChanged(const QString&)),
-        this, SLOT(onHighlightStyleFileChanged(const QString&)));
+    Utility::connect(SIGNAL(htmlFormatterStyleChanged()),
+            this, SLOT(reloadContent()));
 
     onTranslatorChanged();
-}
-
-void GitDiffPage::onHighlightStyleFileChanged(const QString &styleFile)
-{
-    _sourceHighlight.setStyleFile(styleFile.toStdString());
-    reloadContent();
 }
 
 void GitDiffPage::setPatch(const StatusPatch &spatch)
@@ -94,30 +84,24 @@ void GitDiffPage::reloadContent()
             size_t j = 0;
             while (true) {
                 const LibQGit2::DiffLine &line = hunk.line(j);
-                srchilite::FormatterPtr formatter;
+                QString elem;
+                bool print = true;
                 switch (line.type()) {
                     case LibQGit2::DiffLine::Addition:
-                        formatter = _sourceHighlight.getFormatterManager()
-                            ->getFormatter(std::string("diffadd"));
-                        break;
+                        elem = "diffadd"; break;
                     case LibQGit2::DiffLine::Deletion:
-                        formatter = _sourceHighlight.getFormatterManager()
-                            ->getFormatter(std::string("diffdel"));
-                        break;
+                        elem = "diffdel"; break;
                     case LibQGit2::DiffLine::Context:
-                        formatter = _sourceHighlight.getFormatterManager()
-                            ->getDefaultFormatter();
                         break;
                     default:
+                        print = false;
                         qDebug() << "UNHANDLED LINE" << QChar(line.type());
                         qDebug() << line.content();
                 }
-                if (formatter) {
+                if (print) {
                     QString content(QChar(line.type()));
                     content += line.content();
-                    formatter->format(content.toStdString());
-                    output << QString::fromStdString(_sourceHighlight.getBuffer().str());
-                    _sourceHighlight.clearBuffer();
+                    Utility::formatHtml(elem, content, output);
                 }
                 j++;
                 if (j >= numLines)

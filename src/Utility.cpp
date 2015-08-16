@@ -5,7 +5,6 @@
  *      Author: lingnan
  */
 
-#include <Utility.h>
 #include <bb/cascades/AbstractTextControl>
 #include <bb/cascades/TextEditor>
 #include <bb/cascades/KeyEvent>
@@ -14,11 +13,38 @@
 #include <bb/system/SystemPrompt>
 #include <bb/system/SystemUiPosition>
 #include <bb/system/Clipboard>
+#include <srchilite/sourcehighlight.h>
+#include <srchilite/formattermanager.h>
+#include <Helium.h>
+#include <AppearanceSettings.h>
+#include <Utility.h>
 
 static Utility *utility = NULL;
 
+void Utility::connect(const char *signal, const QObject *receiver, const char *method,
+        Qt::ConnectionType type)
+{
+    if (!utility) {
+        utility = new Utility;
+    }
+    bool res = QObject::connect(utility, signal, receiver, method, type);
+    Q_ASSERT(res);
+    Q_UNUSED(res);
+}
+
+void Utility::disconnect(const char *signal, const QObject *receiver, const char *method)
+{
+    if (!utility) {
+        return;
+    }
+    bool res = QObject::disconnect(utility, signal, receiver, method);
+    Q_ASSERT(res);
+    Q_UNUSED(res);
+}
+
 Utility::Utility():
-    _toast(NULL), _bigToast(NULL), _dialog(NULL), _prompt(NULL)
+    _toast(NULL), _bigToast(NULL), _dialog(NULL), _prompt(NULL),
+    _sourceHighlight(NULL)
 {
 }
 
@@ -103,6 +129,43 @@ void Utility::escapeHtml(QTextStream &input, QTextStream &output)
             output << ch;
         }
     }
+}
+
+srchilite::SourceHighlight *Utility::sourceHighlight()
+{
+    if (!_sourceHighlight) {
+        _sourceHighlight = new srchilite::SourceHighlight("xhtml.outlang");
+        // setup the connections with the global instance
+        AppearanceSettings *appearance = Helium::instance()->appearance();
+        _sourceHighlight->setStyleFile(appearance->highlightStyleFile().toStdString());
+        conn(appearance, SIGNAL(highlightStyleFileChanged(const QString&)),
+            this, SLOT(onHighlightStyleFileChanged(const QString&)));
+    }
+    return _sourceHighlight;
+}
+
+void Utility::onHighlightStyleFileChanged(const QString &styleFile)
+{
+    if (_sourceHighlight) {
+        _sourceHighlight->setStyleFile(styleFile.toStdString());
+        emit htmlFormatterStyleChanged();
+    }
+}
+
+void Utility::formatHtml(const QString &elem, const QString &input, QTextStream &output)
+{
+    if (!utility) {
+        utility = new Utility;
+    }
+    srchilite::SourceHighlight *highlighter = utility->sourceHighlight();
+    srchilite::FormatterPtr formatter;
+    if (elem.isNull())
+        formatter = highlighter->getFormatterManager()->getDefaultFormatter();
+    else
+        formatter = highlighter->getFormatterManager()->getFormatter(elem.toStdString());
+    formatter->format(input.toStdString());
+    output << QString::fromStdString(highlighter->getBuffer().str());
+    highlighter->clearBuffer();
 }
 
 void Utility::dialog(const QString &confirm,
