@@ -241,11 +241,6 @@ void Helium::onPersonalMessageConfirmed(bb::system::SystemUiResult::Type type, c
 
 void Helium::onInvoked(const bb::system::InvokeRequest &request)
 {
-    // pop any views on the stack
-    NavigationPane *pane = scene()->activePane();
-    if (pane) {
-        pane->navigateTo(pane->at(0));
-    }
     // notify the scene to recover from non-view mode
     // TODO: make this less hacky
     Project *p = scene()->activeProject();
