@@ -53,7 +53,6 @@ private:
     Q_SLOT void onNewStandardOutput();
     Q_SLOT void onNewStandardError();
 
-    Q_SLOT void onViewPagePushed(bb::cascades::Page *);
     Q_SLOT void onViewPagePopped(bb::cascades::Page *);
 
     Q_SLOT void onShouldHideActionBarChanged(bool);

@@ -35,16 +35,17 @@ GitDiffPage::GitDiffPage(GitRepoPage *page):
     _content(Segment::create()),
     _sourceHighlight("xhtml.outlang")
 {
-    AppearanceSettings *appearance = Helium::instance()->appearance();
-    _sourceHighlight.setStyleFile(appearance->highlightStyleFile().toStdString());
-    conn(appearance, SIGNAL(highlightStyleFileChanged(const QString&)),
-        this, SLOT(onHighlightStyleFileChanged(const QString&)));
-
     setTitleBar(TitleBar::create());
     setContent(ScrollView::create(_content)
         .scrollMode(ScrollMode::Vertical));
     setActionBarVisibility(ChromeVisibility::Overlay);
     setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
+
+    AppearanceSettings *appearance = Helium::instance()->appearance();
+    onHighlightStyleFileChanged(appearance->highlightStyleFile());
+    conn(appearance, SIGNAL(highlightStyleFileChanged(const QString&)),
+        this, SLOT(onHighlightStyleFileChanged(const QString&)));
+
     onTranslatorChanged();
 }
 
@@ -155,6 +156,7 @@ void GitDiffPage::reset()
 
 void GitDiffPage::onTranslatorChanged()
 {
+    PushablePage::onTranslatorChanged();
     _add->setTitle(tr("Add"));
     _reset->setTitle(tr("Reset"));
 }

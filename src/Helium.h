@@ -30,6 +30,7 @@ class MultiViewPane;
 class FiletypeMap;
 class GeneralSettings;
 class AppearanceSettings;
+class GitSettings;
 class SettingsPage;
 class Segment;
 class View;
@@ -46,12 +47,14 @@ public:
     FiletypeMap *filetypeMap() { return _filetypeMap; }
     GeneralSettings *general() { return _general; }
     AppearanceSettings *appearance() { return _appearance; }
+    GitSettings *git() { return _git; }
     BufferStore *buffers() { return _buffers; }
     MultiViewPane *scene() const {
         return (MultiViewPane *) bb::cascades::Application::scene();
     }
     Q_SLOT void reloadTranslator();
     Q_SLOT void goToAppWorld();
+//    bool notify(QObject *, QEvent *);
 Q_SIGNALS:
     void translatorChanged();
 private:
@@ -72,6 +75,7 @@ private:
     FiletypeMap *_filetypeMap;
     GeneralSettings *_general;
     AppearanceSettings *_appearance;
+    GitSettings *_git;
 
     Versioner _version;
     bb::system::InvokeManager _invokeManager;

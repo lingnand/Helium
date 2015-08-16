@@ -29,7 +29,7 @@ class GeneralSettingsPage : public PushablePage
     Q_OBJECT
 public:
     GeneralSettingsPage(GeneralSettings *);
-    Q_SLOT void onTranslatorChanged();
+    void onTranslatorChanged();
 private:
     GeneralSettings *_settings;
     NumberPicker *_highlightRangePicker;

@@ -582,6 +582,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
+        $$quote($$BASEDIR/src/GitCommitPage.cpp) \
         $$quote($$BASEDIR/src/GitDiffPage.cpp) \
         $$quote($$BASEDIR/src/GitRepoPage.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
@@ -753,8 +754,10 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettings.h) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.h) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
+        $$quote($$BASEDIR/src/GitCommitPage.h) \
         $$quote($$BASEDIR/src/GitDiffPage.h) \
         $$quote($$BASEDIR/src/GitRepoPage.h) \
+        $$quote($$BASEDIR/src/GitSettings.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HelpPage.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \

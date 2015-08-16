@@ -20,9 +20,12 @@
 #include <libqgit2/qgitdifffile.h>
 #include <libqgit2/qgitdiffdelta.h>
 #include <libqgit2/qgitdiff.h>
+#include <Helium.h>
+#include <GitSettings.h>
 #include <Defaults.h>
 #include <GitRepoPage.h>
 #include <GitDiffPage.h>
+#include <GitCommitPage.h>
 #include <StatusActionSet.h>
 #include <Project.h>
 #include <Segment.h>
@@ -52,7 +55,7 @@ GitRepoPage::GitRepoPage(Project *project):
             .add(_noRepoLabel))),
     _commitAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("c"))
-        .onTriggered(this, SLOT(commit()))),
+        .onTriggered(this, SLOT(showCommitPage()))),
     _branchesAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("b"))
         .onTriggered(this, SLOT(branches()))),
@@ -67,13 +70,14 @@ GitRepoPage::GitRepoPage(Project *project):
         .onTriggered(this, SLOT(addSelections()))),
     _multiResetAction(ActionItem::create()
         .onTriggered(this, SLOT(resetSelections()))),
-    _diffPage(NULL)
+    _diffPage(NULL),
+    _commitPage(NULL)
 {
     _repoContent->setMultiSelectAction(MultiSelectActionItem::create());
     _repoContent->multiSelectHandler()->addAction(_multiAddAction);
     _repoContent->multiSelectHandler()->addAction(_multiResetAction);
     conn(_repoContent, SIGNAL(triggered(QVariantList)),
-        this, SLOT(diffIndexPath(const QVariantList &)));
+        this, SLOT(showDiffIndexPath(const QVariantList &)));
     setTitleBar(TitleBar::create());
     onTranslatorChanged();
 }
@@ -133,9 +137,40 @@ void GitRepoPage::clone()
 
 }
 
-void GitRepoPage::commit()
+bool GitRepoPage::commit(const QString &message)
 {
+    try {
+        LibQGit2::Repository *repo = _project->gitRepo();
+        // pop open a new page to record the commit message
+        QList<LibQGit2::Commit> parents;
+        if (!repo->isHeadUnborn()) {
+            parents.append(repo->lookupCommit(repo->head().resolve().target()));
+        }
+        // obtain the signature directly from global config
+        GitSettings *git = Helium::instance()->git();
+        LibQGit2::Signature sig(git->name(), git->email());
+        LibQGit2::OId oid = repo->createCommit(repo->lookupTree(repo->index().createTree()),
+                parents, sig, sig, message, "HEAD");
+        Utility::toast(tr("Commited %1").arg(QString(oid.nformat(7))));
+        // rewrite index
+        repo->index().write();
+    } catch (const LibQGit2::Exception &e) {
+        Utility::toast(e.what());
+        return false;
+    }
+    reload();
+    return true;
+}
 
+void GitRepoPage::showCommitPage()
+{
+    if (!_commitPage) {
+        _commitPage = new GitCommitPage(this);
+        conn(this, SIGNAL(translatorChanged()),
+            _commitPage, SLOT(onTranslatorChanged()));
+    }
+    parent()->push(_commitPage);
+    _commitPage->focus();
 }
 
 void GitRepoPage::branches()
@@ -194,12 +229,12 @@ void GitRepoPage::resetPaths(const QList<QString> &paths)
     reload();
 }
 
-void GitRepoPage::diffSelection()
+void GitRepoPage::showDiffSelection()
 {
-    diffIndexPath(_repoContent->selected());
+    showDiffIndexPath(_repoContent->selected());
 }
 
-void GitRepoPage::diffIndexPath(const QVariantList &indexPath)
+void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
 {
     qDebug() << "DIFFING SELECTION" << indexPath;
     const StatusDiffDelta &sdelta = _statusDataModel.data(indexPath)
@@ -234,12 +269,12 @@ void GitRepoPage::diffIndexPath(const QVariantList &indexPath)
             _diffPage, SLOT(onTranslatorChanged()));
     }
     _diffPage->setPatch(StatusPatch(sdelta.type, diff.patch(0)));
-    _diffPage->setParent(NULL);
     parent()->push(_diffPage);
 }
 
 void GitRepoPage::onTranslatorChanged()
 {
+    PushablePage::onTranslatorChanged();
     // no repo
     _initAction->setTitle(tr("Init"));
     _cloneAction->setTitle(tr("Clone"));
@@ -256,8 +291,11 @@ void GitRepoPage::onTranslatorChanged()
 
 void GitRepoPage::StatusDataModel::setStatusList(const LibQGit2::StatusList &list)
 {
+    DataModelChangeType::Type changeType = DataModelChangeType::Init;
+    if (list.entryCount() == _statusList.entryCount())
+        changeType = DataModelChangeType::Update;
     _statusList = list;
-    emit itemsChanged(DataModelChangeType::Update);
+    emit itemsChanged(changeType);
 }
 
 int GitRepoPage::StatusDataModel::childCount(const QVariantList &indexPath)
@@ -374,7 +412,7 @@ void GitRepoPage::StatusItemProvider::updateItem(ListView *list, VisualNode *lis
     }
 }
 
-void GitRepoPage::onPopTransitionEnded(Page *page)
+void GitRepoPage::onPagePopped(Page *page)
 {
     if (page == _diffPage) {
         _diffPage->resetPatch();

@@ -138,6 +138,11 @@ namespace LibQGit2
             QByteArray format() const;
 
             /**
+             * Format a OId into a hex string with length n.
+             */
+            QByteArray nformat(size_t) const;
+
+            /**
              * Format a git_oid into a loose-object path string.
              *
              * The resulting string is "aa/...", where "aa" is the first two

@@ -44,15 +44,16 @@ private:
     bb::cascades::ActionItem *_forwardAction;
     bb::cascades::ActionItem *_rerunAction;
     bb::cascades::ActionItem *_backButton;
+    bb::cascades::Page *_outputPage;
     // hoedown stuff
     hoedown_renderer *_hoedown_renderer;
     hoedown_document *_hoedown_document;
     hoedown_buffer *_hoedown_buffer;
     QTemporaryFile *_temp;
 
-    bb::cascades::Page *_outputPage;
-
     Q_SLOT void rerun();
+
+    Q_SLOT void onViewPagePopped(bb::cascades::Page *);
 
     Q_SLOT void onShouldHideActionBarChanged(bool);
     Q_SLOT void onShouldHideTitleBarChanged(bool);

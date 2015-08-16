@@ -50,6 +50,10 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         .textStyle(SystemDefaults::TextStyles::bodyText())
         .preferredWidth(0)),
     _outputPage(Page::create()
+        // when not activated _outputPage is owned by this profile,
+        // so when the profile is replaced its associated view elements
+        // are removed gracefully
+        .parent(this)
         .content(ScrollView::create(Segment::create()
                 .section().subsection()
                 .add(_outputArea))
@@ -60,8 +64,6 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         .paneProperties(NavigationPaneProperties::create()
             .backButton(_backButton)))
 {
-    conn(view->content(), SIGNAL(pushTransitionEnded(bb::cascades::Page*)),
-        this, SLOT(onViewPagePushed(bb::cascades::Page*)));
     conn(view->content(), SIGNAL(popTransitionEnded(bb::cascades::Page*)),
         this, SLOT(onViewPagePopped(bb::cascades::Page*)));
     conn(&_process, SIGNAL(readyReadStandardOutput()),
@@ -70,10 +72,6 @@ CmdRunProfile::CmdRunProfile(View *view, const QString &cmd):
         this, SLOT(onNewStandardError()));
 
     _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
-    // when not activated _outputPage is owned by this profile,
-    // so when the profile is replaced its associated view elements
-    // are removed gracefully
-    _outputPage->setParent(this);
 
     AppearanceSettings *appearance = Helium::instance()->appearance();
     onShouldHideActionBarChanged(appearance->shouldHideActionBar());
@@ -120,17 +118,14 @@ void CmdRunProfile::run()
     }
     _outputPage->setParent(NULL);
     view()->content()->push(_outputPage);
+    rerun();
 }
 
 void CmdRunProfile::exit()
 {
-    _process.kill();
-    _outputArea->resetText();
-    // pop the page if necessary
     if (view()->content()->top() == _outputPage) {
         view()->content()->pop();
     }
-    _outputPage->setParent(this);
 }
 
 QString formatCmd(const QString &format, const QString &path, const QString &dir, const QString &name)
@@ -225,20 +220,13 @@ void CmdRunProfile::onNewStandardError()
     _outputArea->setText(out);
 }
 
-void CmdRunProfile::onViewPagePushed(Page *page)
-{
-    if (page == _outputPage) {
-        qDebug() << "output page activated";
-        // run the actual command
-        rerun();
-    }
-}
-
 void CmdRunProfile::onViewPagePopped(Page *page)
 {
     if (page == _outputPage) {
-        qDebug() << "output page out of view";
-        exit();
+        qDebug() << "CmdRunProfile output page out of view";
+        _process.kill();
+        _outputArea->resetText();
+        _outputPage->setParent(this);
     }
 }
 

@@ -32,6 +32,7 @@
 #include <AppearanceSettings.h>
 #include <ShortcutHelp.h>
 #include <GitRepoPage.h>
+#include <GitCommitPage.h>
 
 using namespace bb::cascades;
 
@@ -204,7 +205,7 @@ void NormalMode::showGitRepo()
     if (!_gitRepoPage) {
         _gitRepoPage = new GitRepoPage(view()->project());
         conn(view()->content(), SIGNAL(popTransitionEnded(bb::cascades::Page*)),
-            _gitRepoPage, SLOT(onPopTransitionEnded(bb::cascades::Page*)));
+            _gitRepoPage, SLOT(onPagePopped(bb::cascades::Page*)));
     }
     _gitRepoPage->reload();
     view()->content()->push(_gitRepoPage);
@@ -358,12 +359,18 @@ void NormalMode::onRunProfileManagerChanged(RunProfileManager *runProfileManager
 
 void NormalMode::autoFocus()
 {
-    // focus title text only when the text area is empty
-    if (view()->page()->titleBar() == _titleBar
-            && view()->buffer()->state().empty() && _titleField->isEnabled())
-        _titleField->requestFocus();
-    else
-        view()->textArea()->requestFocus();
+    Page *top = view()->content()->top();
+    if (top == view()->page()) {
+        // focus title text only when the text area is empty
+        if (view()->page()->titleBar() == _titleBar
+                && view()->buffer()->state().empty() && _titleField->isEnabled())
+            _titleField->requestFocus();
+        else
+            view()->textArea()->requestFocus();
+    } else if (GitCommitPage *cpage = dynamic_cast<GitCommitPage *>(top)) {
+        // XXX: a bit hacky!
+        cpage->focus();
+    }
 }
 
 void NormalMode::onEnter()

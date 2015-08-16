@@ -20,6 +20,7 @@
 #include <bb/cascades/Sheet>
 #include <bb/platform/bbm/MessageService>
 #include <bb/platform/bbm/UserProfile>
+#include <libqgit2/qgitexception.h>
 #include <Segment.h>
 #include <Helium.h>
 #include <MultiViewPane.h>
@@ -32,6 +33,7 @@
 #include <GeneralSettings.h>
 #include <AppearanceSettingsStorage.h>
 #include <AppearanceSettings.h>
+#include <GitSettings.h>
 #include <SettingsPage.h>
 #include <Utility.h>
 #include <Segment.h>
@@ -80,6 +82,7 @@ Helium::Helium(int &argc, char **argv):
     _filetypeMap = (new FiletypeMapStorage("filetypes", this))->read();
     _general = (new GeneralSettingsStorage("general_settings", this))->read();
     _appearance = (new AppearanceSettingsStorage("appearance_settings", this))->read();
+    _git = new GitSettings("Lingnan Dai", "lingnan.d@gmail.com");
 
     // UI
     reloadTranslator();
@@ -364,3 +367,13 @@ void Helium::reloadTranslator()
         onTranslatorChanged();
     }
 }
+
+//bool Helium::notify(QObject *receiver, QEvent *event)
+//{
+//    try {
+//        return Application::notify(receiver, event);
+//    } catch (const LibQGit2::Exception &e) {
+//        qDebug() << "::::LIBQGIT2 ERROR::::" << e.what();
+//    }
+//    return false;
+//}

@@ -14,7 +14,7 @@ using namespace bb::cascades;
 
 StatusActionSet::StatusActionSet(GitRepoPage *page, const StatusDiffDelta &sdelta):
     _diff(ActionItem::create()
-        .onTriggered(page, SLOT(diffSelection()))),
+        .onTriggered(page, SLOT(showDiffSelection()))),
     _reset(NULL), _add(NULL)
 {
     add(_diff);

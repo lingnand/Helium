@@ -44,9 +44,18 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
     _backButton(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(view->content(), SLOT(pop()))),
+    _outputPage(Page::create()
+        .parent(this)
+        .addAction(_backAction, ActionBarPlacement::OnBar)
+        .addAction(_rerunAction, ActionBarPlacement::Signature)
+        .addAction(_forwardAction, ActionBarPlacement::OnBar)
+        .paneProperties(NavigationPaneProperties::create()
+            .backButton(_backButton))),
     _hoedown_renderer(NULL), _hoedown_document(NULL), _hoedown_buffer(NULL),
     _temp(NULL)
 {
+    conn(view->content(), SIGNAL(popTransitionEnded(bb::cascades::Page*)),
+        this, SLOT(onViewPagePopped(bb::cascades::Page*)));
 //    _webView->saveImageAction()->setEnabled(false);
 //    _webView->shareImageAction()->setEnabled(false);
     _webView->openLinkInNewTabAction()->setEnabled(false);
@@ -60,15 +69,8 @@ WebRunProfile::WebRunProfile(View *view, WebRunProfile::Mode mode):
         scrollView->scrollViewProperties(), SLOT(setMaxContentScale(float)));
     conn(_webView, SIGNAL(navigationHistoryChanged()),
         this, SLOT(onNavigationHistoryChanged()));
-    _outputPage = Page::create()
-        .content(scrollView)
-        .addAction(_backAction, ActionBarPlacement::OnBar)
-        .addAction(_rerunAction, ActionBarPlacement::Signature)
-        .addAction(_forwardAction, ActionBarPlacement::OnBar)
-        .paneProperties(NavigationPaneProperties::create()
-            .backButton(_backButton));
+    _outputPage->setContent(scrollView);
     _outputPage->setActionBarAutoHideBehavior(ActionBarAutoHideBehavior::HideOnScroll);
-    _outputPage->setParent(this);
 
     AppearanceSettings *appearance = Helium::instance()->appearance();
     onShouldHideActionBarChanged(appearance->shouldHideActionBar());
@@ -227,7 +229,14 @@ void WebRunProfile::exit()
     if (view()->content()->top() == _outputPage) {
         view()->content()->pop();
     }
-    _outputPage->setParent(this);
+}
+
+void WebRunProfile::onViewPagePopped(Page *page)
+{
+    if (page == _outputPage) {
+        qDebug() << "WebRunProfile output page out of view";
+        _outputPage->setParent(this);
+    }
 }
 
 void WebRunProfile::onTranslatorChanged()

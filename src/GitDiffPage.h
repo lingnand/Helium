@@ -38,7 +38,7 @@ public:
     GitDiffPage(GitRepoPage *);
     void setPatch(const StatusPatch &);
     Q_SLOT void resetPatch(); // reset the patch
-    Q_SLOT void onTranslatorChanged();
+    void onTranslatorChanged();
 private:
     GitRepoPage *_repoPage;
     bb::cascades::ActionItem *_add, *_reset;

@@ -51,5 +51,7 @@ void FiletypeMapSettingsPage::onTriggered(QVariantList indexPath)
 
 void FiletypeMapSettingsPage::onTranslatorChanged()
 {
+    PushablePage::onTranslatorChanged();
     titleBar()->setTitle(tr("Filetypes"));
+    _filetypeSettingsPage->onTranslatorChanged();
 }

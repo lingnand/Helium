@@ -179,6 +179,7 @@ void AppearanceSettingsPage::onFontSizeSelectionChanged(const QVariant &v)
 
 void AppearanceSettingsPage::onTranslatorChanged()
 {
+    PushablePage::onTranslatorChanged();
     titleBar()->setTitle(tr("Appearance"));
     _themeSelect->setTitle(tr("Theme"));
     _themeSelectHelp->setText(tr("Overall theme for Helium"));

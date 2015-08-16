@@ -16,6 +16,7 @@
 
 #include <bb/cascades/Application>
 #include <bb/cascades/TabbedPane>
+#include <bb/cascades/TitleBar>
 #include <bb/cascades/Tab>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/Page>
@@ -423,6 +424,12 @@ void MultiViewPane::displayShortcuts()
     for (int i = 0; i < page->shortcutCount(); i++)
         helps << ShortcutHelp::fromShortcut(page->shortcutAt(i));
     // ActionItems
+    if (page->titleBar()) {
+        if (page->titleBar()->acceptAction())
+            helps << ShortcutHelp::fromActionItem((AbstractActionItem *) page->titleBar()->acceptAction());
+        if (page->titleBar()->dismissAction())
+            helps << ShortcutHelp::fromActionItem((AbstractActionItem *) page->titleBar()->dismissAction());
+    }
     for (int i = 0; i < page->actionCount(); i++)
         helps << ShortcutHelp::fromActionItem(page->actionAt(i));
     // KeyListener

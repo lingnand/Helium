@@ -91,6 +91,13 @@ QByteArray OId::format() const
     return ba;
 }
 
+QByteArray OId::nformat(size_t n) const
+{
+    QByteArray ba(n, Qt::Uninitialized);
+    git_oid_nfmt(ba.data(), n, constData());
+    return ba;
+}
+
 QByteArray OId::pathFormat() const
 {
     QByteArray ba(GIT_OID_HEXSZ+1, Qt::Uninitialized);

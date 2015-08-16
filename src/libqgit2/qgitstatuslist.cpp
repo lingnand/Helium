@@ -39,9 +39,11 @@ StatusList::~StatusList()
 {
 }
 
-size_t StatusList::entryCount()
+size_t StatusList::entryCount() const
 {
-    return git_status_list_entrycount(data());
+    if (data())
+        return git_status_list_entrycount(data());
+    return 0;
 }
 
 const StatusEntry StatusList::entryByIndex(size_t idx)

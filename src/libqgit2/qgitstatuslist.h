@@ -50,7 +50,7 @@ public:
     /**
      * Returns the number of entries in the status list.
      */
-    size_t entryCount();
+    size_t entryCount() const;
 
     /**
      * Returns the entry with the given index.

@@ -26,6 +26,7 @@ namespace bb {
 class Project;
 class Segment;
 class GitDiffPage;
+class GitCommitPage;
 
 class GitRepoPage : public PushablePage
 {
@@ -33,10 +34,11 @@ class GitRepoPage : public PushablePage
 public:
     GitRepoPage(Project *);
     Q_SLOT void reload(); // refresh the view
-    Q_SLOT void onTranslatorChanged();
     void addPaths(const QList<QString> &);
     void resetPaths(const QList<QString> &);
-    Q_SLOT void onPopTransitionEnded(bb::cascades::Page *);
+    Q_SLOT bool commit(const QString &);
+    Q_SLOT void onPagePopped(bb::cascades::Page *);
+    void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
 private:
@@ -69,14 +71,15 @@ private:
     bb::cascades::ListView *_repoContent;
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
     GitDiffPage *_diffPage;
+    GitCommitPage *_commitPage;
 
     Q_SLOT void init();
     Q_SLOT void clone();
-    Q_SLOT void commit();
     Q_SLOT void branches();
     Q_SLOT void log();
-    Q_SLOT void diffSelection();
-    Q_SLOT void diffIndexPath(const QVariantList &);
+    Q_SLOT void showCommitPage();
+    Q_SLOT void showDiffSelection();
+    Q_SLOT void showDiffIndexPath(const QVariantList &);
     Q_SLOT void addSelections();
     Q_SLOT void resetSelections();
     void hideAllActions();

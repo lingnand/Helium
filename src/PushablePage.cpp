@@ -14,18 +14,25 @@
 
 using namespace bb::cascades;
 
-PushablePage::PushablePage()
+PushablePage::PushablePage():
+    _backButton(ActionItem::create()
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SLOT(pop())))
 {
     setPaneProperties(NavigationPaneProperties::create()
-        .backButton(ActionItem::create()
-            .addShortcut(Shortcut::create().key("x"))
-            .onTriggered(this, SLOT(pop()))));
+        .backButton(_backButton));
 }
 
 NavigationPane *PushablePage::parent() const {
     return (NavigationPane *) Page::parent();
 }
 
-void PushablePage::pop() {
+void PushablePage::pop()
+{
     parent()->pop();
+}
+
+void PushablePage::onTranslatorChanged()
+{
+    _backButton->setTitle(tr("Back"));
 }

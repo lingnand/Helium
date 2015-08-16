@@ -32,7 +32,7 @@ public:
     bool fullScreen() const { return _fullScreen; }
     Theme theme() const { return _theme; }
     bb::cascades::VisualStyle::Type visualStyle() const { return _visualStyle; }
-    QString highlightStyleFile() const { return _highlightStyleFile; }
+    const QString &highlightStyleFile() const { return _highlightStyleFile; }
     Q_SLOT void setHideActionBar(bool h) {
         if (h != _hideActionBar) {
             _hideActionBar = h;
@@ -93,7 +93,7 @@ public:
             emit themeChanged(_theme);
         }
     }
-    QString fontFamily() const { return _fontFamily; }
+    const QString &fontFamily() const { return _fontFamily; }
     void setFontFamily(const QString &f) {
         if (f != _fontFamily) {
             _fontFamily = f;

@@ -230,4 +230,6 @@ void HelpPage::onTranslatorChanged()
         "  %1 FIX: some pages are not scrollable<br/>"
         ).arg(BULLET_SYMBOL, RETURN_SYMBOL, BACKSPACE_SYMBOL));
     _rateAction->setTitle(tr("Rate Helium"));
+    if (_contentPage)
+        _contentPage->onTranslatorChanged();
 }

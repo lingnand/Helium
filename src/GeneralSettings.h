@@ -27,7 +27,7 @@ public:
             emit highlightRangeChanged(_highlightRange);
         }
     }
-    QString defaultProjectDirectory() const { return _defaultProjectDir; }
+    const QString &defaultProjectDirectory() const { return _defaultProjectDir; }
     Q_SLOT void setDefaultProjectDirectory(const QString &dir)  {
         if (dir != _defaultProjectDir) {
             _defaultProjectDir = dir;

@@ -12,6 +12,7 @@
 
 namespace bb {
     namespace cascades {
+        class ActionItem;
         class NavigationPane;
     }
 }
@@ -23,7 +24,9 @@ class PushablePage : public bb::cascades::Page
 public:
     PushablePage();
     bb::cascades::NavigationPane *parent() const;
-private:
+    Q_SLOT void onTranslatorChanged();
+protected:
+    bb::cascades::ActionItem *_backButton;
     Q_SLOT void pop();
 };
 
