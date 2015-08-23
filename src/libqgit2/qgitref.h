@@ -27,6 +27,10 @@
 #include "git2.h"
 
 #include "qgitsignature.h"
+#include "qgittree.h"
+#include "qgitcommit.h"
+#include "qgittag.h"
+#include "qgitblob.h"
 #include "libqgit2_config.h"
 
 namespace LibQGit2
@@ -111,6 +115,14 @@ namespace LibQGit2
              * @throws LibQGit2::Exception
              */
             Reference resolve() const;
+
+            Tree peelToTree() const;
+
+            Commit peelToCommit() const;
+
+            Tag peelToTag() const;
+
+            Blob peelToBlob() const;
 
             /**
              * Get the repository where a reference resides

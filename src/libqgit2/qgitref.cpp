@@ -74,6 +74,35 @@ Reference Reference::resolve() const
     return Reference(ref);
 }
 
+Tree Reference::peelToTree() const
+{
+    git_object *obj;
+    qGitThrow(git_reference_peel(&obj, d.data(), GIT_OBJ_TREE));
+    return Tree((git_tree *) obj);
+}
+
+
+Commit Reference::peelToCommit() const
+{
+    git_object *obj;
+    qGitThrow(git_reference_peel(&obj, d.data(), GIT_OBJ_COMMIT));
+    return Commit((git_commit *) obj);
+}
+
+Tag Reference::peelToTag() const
+{
+    git_object *obj;
+    qGitThrow(git_reference_peel(&obj, d.data(), GIT_OBJ_TAG));
+    return Tag((git_tag *) obj);
+}
+
+Blob Reference::peelToBlob() const
+{
+    git_object *obj;
+    qGitThrow(git_reference_peel(&obj, d.data(), GIT_OBJ_BLOB));
+    return Blob((git_blob *) obj);
+}
+
 Repository Reference::owner() const
 {
     return Repository(git_reference_owner(d.data()));

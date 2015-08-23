@@ -236,7 +236,7 @@ bool GitRepoPage::commit(const QString &message)
         // pop open a new page to record the commit message
         QList<LibQGit2::Commit> parents;
         if (!repo->isHeadUnborn()) {
-            parents.append(repo->lookupCommit(repo->head().resolve().target()));
+            parents.append(repo->head().resolve().peelToCommit());
         }
         // obtain the signature directly from global config
         GitSettings *git = Helium::instance()->git();
@@ -394,8 +394,7 @@ void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
             case HeadToIndex: {
                 LibQGit2::Tree tree;
                 if (!_project->gitRepo()->isHeadUnborn()) {
-                    tree = _project->gitRepo()->lookupTree(
-                            _project->gitRepo()->head().resolve().target());
+                    tree = _project->gitRepo()->head().peelToTree();
                 }
                 diff = _project->gitRepo()->diffTreeToIndex(tree, _project->gitRepo()->index(), opts);
                 break;
