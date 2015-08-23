@@ -15,21 +15,26 @@
 #include <bb/cascades/Header>
 #include <bb/cascades/StandardListItem>
 #include <bb/cascades/NavigationPane>
+#include <bb/cascades/Container>
+#include <bb/cascades/ProgressIndicator>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitexception.h>
 #include <libqgit2/qgitdifffile.h>
 #include <libqgit2/qgitdiffdelta.h>
 #include <libqgit2/qgitdiff.h>
+#include <libqgit2/qgitpatch.h>
 #include <Helium.h>
 #include <GitSettings.h>
 #include <Defaults.h>
 #include <GitRepoPage.h>
 #include <GitDiffPage.h>
+#include <GitLogPage.h>
 #include <GitCommitPage.h>
 #include <StatusActionSet.h>
 #include <Project.h>
 #include <Segment.h>
 #include <SignalBlocker.h>
+#include <AutoHideProgressIndicator.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -58,7 +63,7 @@ GitRepoPage::GitRepoPage(Project *project):
         .addShortcut(Shortcut::create().key("c"))
         .onTriggered(this, SLOT(showCommitPage()))),
     _branchesAction(ActionItem::create()
-        .addShortcut(Shortcut::create().key("b"))
+        .addShortcut(Shortcut::create().key("h"))
         .onTriggered(this, SLOT(branches()))),
     _logAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("g"))
@@ -70,7 +75,8 @@ GitRepoPage::GitRepoPage(Project *project):
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(resetAll()))),
     _statusItemProvider(this),
-    _repoContent(ListView::create()
+    _statusListView(ListView::create()
+        .scrollRole(ScrollRole::Main)
         .dataModel(&_statusDataModel)
         .listItemProvider(&_statusItemProvider)),
     _multiAddAction(ActionItem::create()
@@ -79,29 +85,56 @@ GitRepoPage::GitRepoPage(Project *project):
     _multiResetAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(resetSelections()))),
-    _diffPage(NULL),
-    _commitPage(NULL)
+    _diffPage(NULL), _diffAddAction(NULL), _diffResetAction(NULL),
+    _logPage(NULL),
+    _commitPage(NULL),
+    _worker(project->gitRepo())
 {
-    _repoContent->setMultiSelectAction(MultiSelectActionItem::create());
-    _repoContent->multiSelectHandler()->addAction(_multiAddAction);
-    _repoContent->multiSelectHandler()->addAction(_multiResetAction);
-    conn(_repoContent, SIGNAL(triggered(QVariantList)),
+    _statusListView->setMultiSelectAction(MultiSelectActionItem::create());
+    _statusListView->multiSelectHandler()->addAction(_multiAddAction);
+    _statusListView->multiSelectHandler()->addAction(_multiResetAction);
+    _statusListView->setEnabled(false);
+    AutoHideProgressIndicator *progressIndicator = new AutoHideProgressIndicator;
+    _repoContent = Container::create()
+        .add(_statusListView)
+        .add(progressIndicator);
+    conn(_statusListView, SIGNAL(triggered(QVariantList)),
         this, SLOT(showDiffIndexPath(const QVariantList &)));
-    conn(_repoContent, SIGNAL(selectionChangeStarted()),
+    conn(_statusListView, SIGNAL(selectionChangeStarted()),
         this, SLOT(reloadMultiSelectActionsEnabled()));
     setTitleBar(TitleBar::create());
+
+    _worker.moveToThread(&_workerThread);
+    conn(this, SIGNAL(workerFetchStatusList()),
+        &_worker, SLOT(fetchStatusList()));
+    conn(this, SIGNAL(workerAddPaths(const QList<QString>&)),
+        &_worker, SLOT(addPathsAndFetchNewStatusList(const QList<QString>&)));
+    conn(this, SIGNAL(workerResetPaths(const QList<QString>&)),
+        &_worker, SLOT(resetPathsAndFetchNewStatusList(const QList<QString>&)));
+
+    conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
+        progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
+    conn(&_worker, SIGNAL(statusListFetched(const LibQGit2::StatusList&)),
+        this, SLOT(handleStatusList(const LibQGit2::StatusList&)));
+    _workerThread.start();
 
     conn(_project, SIGNAL(pathChanged(const QString&)),
         this, SLOT(onProjectPathChanged()));
 
-    onTranslatorChanged();
+    onTranslatorChanged(false);
+}
+
+GitRepoPage::~GitRepoPage()
+{
+    _workerThread.quit();
+    _workerThread.wait();
 }
 
 void GitRepoPage::reloadMultiSelectActionsEnabled()
 {
     _multiAddAction->setEnabled(false);
     _multiResetAction->setEnabled(false);
-    const QVariantList list = _repoContent->selectionList();
+    const QVariantList list = _statusListView->selectionList();
     if (list.empty())
         return;
     int header = list[0].toList()[0].toInt();
@@ -117,20 +150,48 @@ void GitRepoPage::reloadMultiSelectActionsEnabled()
     }
 }
 
+void GitRepoPage::lockRepoContent()
+{
+    _statusListView->setEnabled(false);
+    _commitAction->setEnabled(false);
+    _branchesAction->setEnabled(false);
+    _logAction->setEnabled(false);
+    _addAllAction->setEnabled(false);
+    _resetAllAction->setEnabled(false);
+    _reloadAction->setEnabled(false);
+}
+
 void GitRepoPage::hideAllActions()
 {
     while (actionCount() > 0)
         removeAction(actionAt(0));
 }
 
+void GitRepoPage::handleStatusList(const LibQGit2::StatusList &list)
+{
+    // XXX: assumes that we are with repoContent
+    _statusDataModel.setStatusList(list);
+    _statusListView->setEnabled(true);
+    bool hasDiffDeltasInIndex = _project->gitRepo()->index().entryCount() > 0;
+    _commitAction->setEnabled(hasDiffDeltasInIndex);
+    _branchesAction->setEnabled(true);
+    _logAction->setEnabled(!_project->gitRepo()->isHeadUnborn());
+    _addAllAction->setEnabled(_statusDataModel.validDiffDeltasToAdd() > 0);
+    _resetAllAction->setEnabled(hasDiffDeltasInIndex);
+    _reloadAction->setEnabled(true);
+}
+
 void GitRepoPage::reload()
 {
     try {
         // title
-        if (_project->gitRepo()->isHeadUnborn())
+        if (_project->gitRepo()->isHeadUnborn()) {
             titleBar()->setTitle(tr("No commit"));
-        else
+            _logAction->setEnabled(false);
+        } else {
             titleBar()->setTitle(_project->gitRepo()->head().name());
+            _logAction->setEnabled(true);
+        }
         // actions
         hideAllActions();
         addAction(_commitAction, ActionBarPlacement::Signature);
@@ -139,18 +200,9 @@ void GitRepoPage::reload()
         addAction(_addAllAction);
         addAction(_resetAllAction);
         addAction(_reloadAction);
+        lockRepoContent();
+        emit workerFetchStatusList();
         // content
-        const LibQGit2::StatusList &list = _project->gitRepo()->status(
-                LibQGit2::StatusOptions(LibQGit2::StatusOptions::ShowIndexAndWorkdir,
-                        LibQGit2::StatusOptions::IncludeUntracked |
-//                        LibQGit2::StatusOptions::ExcludeSubmodules |
-                        LibQGit2::StatusOptions::RenamesHeadToIndex |
-                        LibQGit2::StatusOptions::RenamesIndexToWorkdir));
-        _statusDataModel.setStatusList(list);
-        bool hasDiffDeltasInIndex = _project->gitRepo()->index().entryCount() > 0;
-        _commitAction->setEnabled(hasDiffDeltasInIndex);
-        _resetAllAction->setEnabled(hasDiffDeltasInIndex);
-        _addAllAction->setEnabled(_statusDataModel.validDiffDeltasToAdd() > 0);
         setContent(_repoContent);
     } catch (const LibQGit2::Exception &e) {
         qDebug() << "::::LIBQGIT2 ERROR when reloading RepoPage::::" << e.what();
@@ -220,90 +272,113 @@ void GitRepoPage::branches()
 
 void GitRepoPage::log()
 {
-
+    if (!_logPage) {
+        _logPage = new GitLogPage(_project->gitRepo());
+        conn(this, SIGNAL(translatorChanged()),
+            _logPage, SLOT(onTranslatorChanged()));
+    }
+    _logPage->setReference(_project->gitRepo()->head());
+    parent()->push(_logPage);
 }
 
 void GitRepoPage::addSelections()
 {
-    const QVariantList &selections =  _repoContent->selectionList();
+    const QVariantList &selections =  _statusListView->selectionList();
     QList<QString> paths;
     for (int i = 0; i < selections.size(); i++) {
         paths.append(_statusDataModel.data(selections[i].toList())
                 .value<StatusDiffDelta>()
                 .delta.newFile().path());
     }
-    addPaths(paths);
+    addAll(paths);
 }
 
-void GitRepoPage::addAll()
+// add progress bar
+void GitRepoPage::addAll(const QList<QString> &paths)
 {
-    QList<QString> paths;
-    for (size_t i = 0, size = _statusDataModel.statusList().entryCount(); i < size; i++) {
-        LibQGit2::DiffDelta delta = _statusDataModel.statusList().entryByIndex(i).indexToWorkdir();
-        switch (delta.type()) {
-            case LibQGit2::DiffDelta::Unknown:
-            case LibQGit2::DiffDelta::Unmodified:
-                break;
-            default:
-                paths << delta.newFile().path();
-        }
-    }
-    addPaths(paths);
-}
-
-void GitRepoPage::addPaths(const QList<QString> &paths)
-{
-    try {
-        for (int i = 0; i < paths.size(); i++)
-            _project->gitRepo()->index().addByPath(paths[i]);
-    } catch (const LibQGit2::Exception &e) {
-        Utility::toast(e.what());
-    }
-    reload();
+    lockRepoContent();
+    emit workerAddPaths(paths);
 }
 
 void GitRepoPage::resetSelections()
 {
-    const QVariantList &selections =  _repoContent->selectionList();
+    const QVariantList &selections =  _statusListView->selectionList();
     QList<QString> paths;
     for (int i = 0; i < selections.size(); i++) {
         paths.append(_statusDataModel.data(selections[i].toList())
                 .value<StatusDiffDelta>()
                 .delta.newFile().path());
     }
-    resetPaths(paths);
+    resetAll(paths);
 }
 
-void GitRepoPage::resetAll()
+void GitRepoPage::resetAll(const QList<QString> &paths)
 {
-    QList<QString> paths;
-    for (size_t i = 0, size = _statusDataModel.statusList().entryCount(); i < size; i++) {
-        LibQGit2::DiffDelta delta = _statusDataModel.statusList().entryByIndex(i).headToIndex();
-        switch (delta.type()) {
-            case LibQGit2::DiffDelta::Unknown:
-            case LibQGit2::DiffDelta::Unmodified:
-                break;
-            default:
-                paths << delta.newFile().path();
-        }
-    }
-    resetPaths(paths);
+    lockRepoContent();
+    emit workerResetPaths(paths);
 }
 
-void GitRepoPage::resetPaths(const QList<QString> &paths)
+GitDiffPage *GitRepoPage::diffPage()
 {
-    try {
-        for (int i = 0; i < paths.size(); i++)
-            _project->gitRepo()->index().remove(paths[i], 0);
-    } catch (const LibQGit2::Exception &e) {
-        Utility::toast(e.what());
+    if (!_diffPage) {
+        _diffPage = new GitDiffPage;
+        conn(this, SIGNAL(translatorChanged()),
+            _diffPage, SLOT(onTranslatorChanged()));
     }
-    reload();
+    return _diffPage;
+}
+
+ActionItem *GitRepoPage::diffAddAction()
+{
+    if (!_diffAddAction) {
+        _diffAddAction = ActionItem::create()
+            .addShortcut(Shortcut::create().key("a"))
+            .onTriggered(this, SLOT(diffPageAddFile()));
+        reloadDiffAddActionTitle();
+        conn(this, SIGNAL(translatorChanged()),
+            this, SLOT(reloadDiffAddActionTitle()));
+    }
+    return _diffAddAction;
+}
+
+void GitRepoPage::reloadDiffAddActionTitle()
+{
+    _diffAddAction->setTitle(tr("Add"));
+}
+
+void GitRepoPage::diffPageAddFile()
+{
+    addAll(QList<QString>() << _diffPage->patch().delta().newFile().path());
+    parent()->navigateTo(this); // pop the diff page
+}
+
+ActionItem *GitRepoPage::diffResetAction()
+{
+    if (!_diffResetAction) {
+        _diffResetAction = ActionItem::create()
+            .addShortcut(Shortcut::create().key("r"))
+            .onTriggered(this, SLOT(diffPageResetFile()));
+        reloadDiffResetActionTitle();
+        conn(this, SIGNAL(translatorChanged()),
+            this, SLOT(reloadDiffResetActionTitle()));
+    }
+    return _diffResetAction;
+}
+
+void GitRepoPage::reloadDiffResetActionTitle()
+{
+    _diffResetAction->setTitle(tr("Reset"));
+}
+
+void GitRepoPage::diffPageResetFile()
+{
+    resetAll(QList<QString>() << _diffPage->patch().delta().newFile().path());
+    parent()->navigateTo(this); // pop the diff page
 }
 
 void GitRepoPage::showDiffSelection()
 {
-    showDiffIndexPath(_repoContent->selected());
+    showDiffIndexPath(_statusListView->selected());
 }
 
 void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
@@ -335,17 +410,21 @@ void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
         return;
     }
     qDebug() << "NUM DIFF DELTAS" << diff.numDeltas();
-    if (!_diffPage) {
-        _diffPage = new GitDiffPage(this);
-        conn(this, SIGNAL(translatorChanged()),
-            _diffPage, SLOT(onTranslatorChanged()));
+    diffPage()->setPatch(diff.patch(0));
+    diffPage()->hideAllActions();
+    switch (sdelta.type) {
+        case HeadToIndex:
+            diffPage()->addAction(diffResetAction(), ActionBarPlacement::Signature);
+            break;
+        case IndexToWorkdir:
+            diffPage()->addAction(diffAddAction(), ActionBarPlacement::Signature);
+            break;
     }
-    _diffPage->setPatch(StatusPatch(sdelta.type, diff.patch(0)));
-    parent()->push(_diffPage);
+    parent()->push(diffPage());
 }
 
 ListView *GitRepoPage::statusListView() const {
-    return _repoContent;
+    return _statusListView;
 }
 
 void GitRepoPage::selectAllOnIndex()
@@ -361,7 +440,7 @@ void GitRepoPage::selectAllOnWorkdir()
 void GitRepoPage::selectAllChildren(const QVariantList &index)
 {
     // prevent firing of selectionChangeStarted
-    SignalBlocker blocker(_repoContent);
+    SignalBlocker blocker(_statusListView);
     int i = 0, size = _statusDataModel.childCount(index);
     for (; i < size; i++) {
         QVariantList ip = index;
@@ -373,14 +452,14 @@ void GitRepoPage::selectAllChildren(const QVariantList &index)
             case LibQGit2::DiffDelta::Unmodified:
                 break;
             default:
-                _repoContent->select(ip, true);
+                _statusListView->select(ip, true);
         }
     }
     if (i > 0)
         reloadMultiSelectActionsEnabled();
 }
 
-void GitRepoPage::onTranslatorChanged()
+void GitRepoPage::onTranslatorChanged(bool reload)
 {
     PushablePage::onTranslatorChanged();
     // no repo
@@ -396,6 +475,8 @@ void GitRepoPage::onTranslatorChanged()
     _resetAllAction->setTitle(tr("Reset All"));
     _multiAddAction->setTitle(tr("Add"));
     _multiResetAction->setTitle(tr("Reset"));
+    if (reload)
+        this->reload();
     emit translatorChanged();
 }
 
@@ -404,7 +485,7 @@ void GitRepoPage::StatusDataModel::setStatusList(const LibQGit2::StatusList &lis
     DataModelChangeType::Type changeType = DataModelChangeType::Init;
     // if == 0 then do an Init, as there might still be elements left over
     // after resetStatusList
-    if (list.entryCount() != 0 && list.entryCount() == _statusList.entryCount())
+    if (_statusList.entryCount() != 0 && list.entryCount() == _statusList.entryCount())
         changeType = DataModelChangeType::Update;
     _statusList = list;
     emit itemsChanged(changeType);
@@ -445,6 +526,8 @@ int GitRepoPage::StatusDataModel::childCount(const QVariantList &indexPath)
 
 bool GitRepoPage::StatusDataModel::hasChildren(const QVariantList &indexPath)
 {
+    if (indexPath.empty())
+        return true;
     if (indexPath.size() == 1)  {
         switch (indexPath[0].toInt()) {
             case 0: case 1:

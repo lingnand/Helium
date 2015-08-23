@@ -9,15 +9,9 @@
 #include <HighlightStateData.h>
 #include <Replacement.h>
 #include <HighlightType.h>
+#include <Progress.h>
 
 class View;
-
-struct Progress {
-    float current;
-    float cap;
-    Progress(float start=0, float end=1): current(start), cap(end) {}
-};
-Q_DECLARE_METATYPE(Progress)
 
 class BufferWorker : public QObject
 {
@@ -27,14 +21,21 @@ public:
     virtual ~BufferWorker() {}
     HighlightType highlightType() const;
     // all these functions always do the specified job
-    Q_SLOT void setHighlightType(StateChangeContext &, BufferState &, const HighlightType &, Progress &);
+    Q_SLOT void setHighlightType(StateChangeContext &, BufferState &, const HighlightType &,
+            Progress progress=Progress());
     Q_SLOT BufferStateChange parseBufferChange(BufferState &, const QString &content, ParserPosition, int cursorPosition);
-    Q_SLOT void parseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
-    Q_SLOT void mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
-    Q_SLOT void replace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
-    Q_SLOT void rehighlight(StateChangeContext &, BufferState &, int index, Progress &);
-    Q_SLOT void saveStateToFile(const BufferState &, const QString &filename, Progress &);
-    Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress &);
+    Q_SLOT void parseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition,
+            Progress progress=Progress());
+    Q_SLOT void mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &,
+            Progress progress=Progress());
+    Q_SLOT void replace(StateChangeContext &, BufferState &, const QList<Replacement> &,
+            Progress progress=Progress());
+    Q_SLOT void rehighlight(StateChangeContext &, BufferState &, int index,
+            Progress progress=Progress());
+    Q_SLOT void saveStateToFile(const BufferState &, const QString &filename,
+            Progress progress=Progress());
+    Q_SLOT void loadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype,
+            Progress progress=Progress());
 Q_SIGNALS:
     void progressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state=bb::cascades::ProgressIndicatorState::Progress, const QString &msg=QString());
     void highlightTypeChanged(const StateChangeContext &, const BufferState &);
@@ -53,11 +54,12 @@ private:
 
     void _setHighlightType(const HighlightType &highlightType);
     BufferStateChange _parseBufferChange(BufferState &state, const QString &content, ParserPosition start, int cursorPosition);
-    void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &progress);
+    void _mergeChange(StateChangeContext &, BufferState &, const BufferStateChange &,
+            Progress progress=Progress());
     HighlightStateData::ptr highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState);
     void _highlight(BufferState &state, int index,
             HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState,
-            Progress &);
+            Progress progress=Progress());
 };
 
 QDebug operator<<(QDebug dbg, const BufferLineState *lineState);

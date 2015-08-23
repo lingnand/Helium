@@ -82,13 +82,7 @@ public:
 
     void setPaths(const QList<QString> &paths)
     {
-        QList<QByteArray> pathByteArrays;
-        pathByteArrays.reserve(paths.size());
-        foreach (const QString &path, paths) {
-            pathByteArrays.append(PathCodec::toLibGit2(path));
-        }
-        m_paths.set(pathByteArrays);
-
+        m_paths.set(paths);
         native.paths = m_paths.data();
     }
 

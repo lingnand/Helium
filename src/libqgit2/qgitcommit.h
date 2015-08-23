@@ -172,4 +172,6 @@ namespace LibQGit2
     /**@}*/
 }
 
+Q_DECLARE_METATYPE(LibQGit2::Commit)
+
 #endif // LIBQGIT2_COMMIT_H

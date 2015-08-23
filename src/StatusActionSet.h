@@ -27,6 +27,7 @@ struct StatusDiffDelta {
     StatusDiffDelta(StatusDiffType t=HeadToIndex, const LibQGit2::DiffDelta &d=LibQGit2::DiffDelta()):
         type(t), delta(d) {}
 };
+
 Q_DECLARE_METATYPE(StatusDiffDelta)
 
 class StatusActionSet : public bb::cascades::ActionSet

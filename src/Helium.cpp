@@ -363,12 +363,12 @@ void Helium::reloadTranslator()
     }
 }
 
-//bool Helium::notify(QObject *receiver, QEvent *event)
-//{
-//    try {
-//        return Application::notify(receiver, event);
-//    } catch (const LibQGit2::Exception &e) {
-//        qDebug() << "::::LIBQGIT2 ERROR::::" << e.what();
-//    }
-//    return false;
-//}
+bool Helium::notify(QObject *receiver, QEvent *event)
+{
+    try {
+        return Application::notify(receiver, event);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR::::" << e.what();
+    }
+    return false;
+}

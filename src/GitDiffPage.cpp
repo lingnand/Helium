@@ -15,7 +15,6 @@
 #include <bb/cascades/NavigationPane>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitdifffile.h>
-#include <GitRepoPage.h>
 #include <GitDiffPage.h>
 #include <Helium.h>
 #include <AppearanceSettings.h>
@@ -23,14 +22,7 @@
 
 using namespace bb::cascades;
 
-GitDiffPage::GitDiffPage(GitRepoPage *page):
-    _repoPage(page),
-    _add(ActionItem::create()
-        .addShortcut(Shortcut::create().key("a"))
-        .onTriggered(this, SLOT(add()))),
-    _reset(ActionItem::create()
-        .addShortcut(Shortcut::create().key("r"))
-        .onTriggered(this, SLOT(reset()))),
+GitDiffPage::GitDiffPage():
     _content(Segment::create())
 {
     setTitleBar(TitleBar::create());
@@ -45,27 +37,18 @@ GitDiffPage::GitDiffPage(GitRepoPage *page):
     onTranslatorChanged();
 }
 
-void GitDiffPage::setPatch(const StatusPatch &spatch)
+void GitDiffPage::setPatch(const LibQGit2::Patch &patch)
 {
-    _spatch = spatch;
-    titleBar()->setTitle(_spatch.patch.delta().newFile().path());
-    while (actionCount() > 0)
-        removeAction(actionAt(0));
-    switch (_spatch.type) {
-        case HeadToIndex:
-            addAction(_reset, ActionBarPlacement::Signature); break;
-        case IndexToWorkdir:
-            addAction(_add, ActionBarPlacement::Signature); break;
-    }
+    _patch = patch;
+    titleBar()->setTitle(patch.delta().newFile().path());
     reloadContent();
 }
 
 void GitDiffPage::reloadContent()
 {
-    const LibQGit2::Patch &p = _spatch.patch;
     // reuse the children under content
     int i = 0;
-    for (int numHunks = p.numHunks(); i < numHunks; i++) {
+    for (int numHunks = _patch.numHunks(); i < numHunks; i++) {
         GitDiffPage::HunkView *view;
         if (i == _content->count()) {
             view = new GitDiffPage::HunkView;
@@ -73,7 +56,7 @@ void GitDiffPage::reloadContent()
         } else {
             view = (GitDiffPage::HunkView *) _content->at(i);
         }
-        const LibQGit2::DiffHunk &hunk = p.hunk(i);
+        const LibQGit2::DiffHunk &hunk = _patch.hunk(i);
         view->header->setTitle(QString("-%1,%2 +%3,%4")
                 .arg(hunk.oldStart()).arg(hunk.oldLines())
                 .arg(hunk.newStart()).arg(hunk.newLines()));
@@ -123,26 +106,13 @@ void GitDiffPage::reloadContent()
 
 void GitDiffPage::resetPatch()
 {
-    _spatch = StatusPatch();
+    _patch = LibQGit2::Patch();
 }
 
-void GitDiffPage::add()
+void GitDiffPage::hideAllActions()
 {
-    _repoPage->addPaths(QList<QString>() << _spatch.patch.delta().newFile().path());
-    parent()->pop();
-}
-
-void GitDiffPage::reset()
-{
-    _repoPage->resetPaths(QList<QString>() << _spatch.patch.delta().newFile().path());
-    parent()->pop();
-}
-
-void GitDiffPage::onTranslatorChanged()
-{
-    PushablePage::onTranslatorChanged();
-    _add->setTitle(tr("Add"));
-    _reset->setTitle(tr("Reset"));
+    while (actionCount() > 0)
+        removeAction(actionAt(0));
 }
 
 GitDiffPage::HunkView::HunkView():

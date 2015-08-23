@@ -31,7 +31,6 @@ private:
     // whether this change concludes the entire buffer
     bool _atEnd;
 };
-Q_DECLARE_METATYPE(BufferStateChange)
 
 class HtmlBufferChangeParser : public HtmlParser
 {

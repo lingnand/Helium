@@ -17,6 +17,7 @@
  */
 
 #include "strarray.h"
+#include "pathcodec.h"
 #include <QtCore/QByteArray>
 
 namespace LibQGit2 {
@@ -37,6 +38,13 @@ StrArray::StrArray(const QList<QByteArray> &list) :
     updateNative();
 }
 
+StrArray::StrArray(const QList<QString> &paths)
+{
+    m_data.count = 0;
+    m_data.strings = NULL;
+    set(paths);
+}
+
 StrArray::~StrArray()
 {
     free(m_data.strings);
@@ -46,6 +54,16 @@ void StrArray::set(const QList<QByteArray> &list)
 {
     m_strings = list;
     updateNative();
+}
+
+void StrArray::set(const QList<QString> &paths)
+{
+    QList<QByteArray> pathByteArrays;
+    pathByteArrays.reserve(paths.size());
+    foreach (const QString &path, paths) {
+        pathByteArrays.append(PathCodec::toLibGit2(path));
+    }
+    set(pathByteArrays);
 }
 
 size_t StrArray::count() const

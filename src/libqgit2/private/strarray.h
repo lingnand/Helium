@@ -30,9 +30,12 @@ class StrArray
 public:
     explicit StrArray();
     explicit StrArray(const QList<QByteArray> &list);
+    explicit StrArray(const QList<QString> &paths);
     ~StrArray();
 
     void set(const QList<QByteArray> &list);
+
+    void set(const QList<QString> &paths);
 
     size_t count() const;
 

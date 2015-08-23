@@ -17,26 +17,28 @@
 #include <Qt/qdeclarativedebug.h>
 #include <bb/cascades/ProgressIndicatorState>
 #include <libqgit2/qgitglobal.h>
+#include <libqgit2/qgitstatuslist.h>
 #include <Helium.h>
 #include <HighlightType.h>
 #include <BufferState.h>
-#include <BufferWorker.h>
+#include <Replacement.h>
+#include <Progress.h>
 #include <StateChangeContext.h>
 #include <HtmlBufferChangeParser.h>
 
-Q_DECLARE_METATYPE(bb::cascades::ProgressIndicatorState::Type)
-Q_DECLARE_METATYPE(QList<Replacement>)
-
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
-    qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>();
-    qRegisterMetaType<HighlightType>();
+    qRegisterMetaType<bb::cascades::ProgressIndicatorState::Type>(
+            "bb::cascades::ProgressIndicatorState::Type");
+    qRegisterMetaType<HighlightType>("HighlightType");
     qRegisterMetaType<BufferState>("BufferState&");
-    qRegisterMetaType<Progress>("Progress&");
-    qRegisterMetaType<BufferStateChange>();
+    qRegisterMetaType<BufferStateChange>("BufferStateChange");
     qRegisterMetaType<StateChangeContext>("StateChangeContext&");
-    qRegisterMetaType<QList<Replacement> >();
-    qRegisterMetaType<ParserPosition>();
+    qRegisterMetaType<Progress>("Progress");
+    qRegisterMetaType<QList<Replacement> >("QList<Replacement>");
+    qRegisterMetaType<QList<QString> >("QList<QString>");
+    qRegisterMetaType<ParserPosition>("ParserPosition");
+    qRegisterMetaType<LibQGit2::StatusList>("LibQGit2::StatusList");
 
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
     // init LibQGit2

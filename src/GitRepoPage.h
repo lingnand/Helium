@@ -11,6 +11,7 @@
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
 #include <libqgit2/qgitstatuslist.h>
+#include <GitWorker.h>
 #include <PushablePage.h>
 
 namespace bb {
@@ -26,6 +27,7 @@ namespace bb {
 class Project;
 class Segment;
 class GitDiffPage;
+class GitLogPage;
 class GitCommitPage;
 
 class GitRepoPage : public PushablePage
@@ -33,17 +35,21 @@ class GitRepoPage : public PushablePage
     Q_OBJECT
 public:
     GitRepoPage(Project *);
+    virtual ~GitRepoPage();
     Q_SLOT void reload(); // refresh the view
-    void addPaths(const QList<QString> &);
-    void resetPaths(const QList<QString> &);
+    Q_SLOT void addAll(const QList<QString> &pathspecs=QList<QString>());
+    Q_SLOT void resetAll(const QList<QString> &pathspecs=QList<QString>());
     Q_SLOT bool commit(const QString &);
     Q_SLOT void onPagePopped(bb::cascades::Page *);
-    void onTranslatorChanged();
+    void onTranslatorChanged(bool reload=true);
     bb::cascades::ListView *statusListView() const;
     Q_SLOT void selectAllOnIndex();
     Q_SLOT void selectAllOnWorkdir();
 Q_SIGNALS:
     void translatorChanged();
+    void workerFetchStatusList();
+    void workerAddPaths(const QList<QString> &);
+    void workerResetPaths(const QList<QString> &);
 private:
     Project *_project;
     // UIs that apply when there is no repo
@@ -76,17 +82,31 @@ private:
     private:
         GitRepoPage *_gitRepoPage;
     } _statusItemProvider;
-    bb::cascades::ListView *_repoContent;
+    bb::cascades::ListView *_statusListView;
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
+    // lazily instantiated
     GitDiffPage *_diffPage;
+    bb::cascades::ActionItem *_diffAddAction;
+    bb::cascades::ActionItem *_diffResetAction;
+    GitLogPage *_logPage;
     GitCommitPage *_commitPage;
+
+    GitWorker _worker;
+
+    bb::cascades::Control *_repoContent;
+    QThread _workerThread;
 
     Q_SLOT void init();
     Q_SLOT void clone();
     Q_SLOT void branches();
     Q_SLOT void log();
-    Q_SLOT void addAll();
-    Q_SLOT void resetAll();
+    GitDiffPage *diffPage();
+    bb::cascades::ActionItem *diffAddAction();
+    Q_SLOT void reloadDiffAddActionTitle();
+    Q_SLOT void diffPageAddFile();
+    bb::cascades::ActionItem *diffResetAction();
+    Q_SLOT void reloadDiffResetActionTitle();
+    Q_SLOT void diffPageResetFile();
     Q_SLOT void showCommitPage();
     Q_SLOT void showDiffSelection();
     Q_SLOT void showDiffIndexPath(const QVariantList &);
@@ -98,6 +118,8 @@ private:
     void selectAllChildren(const QVariantList &);
     Q_SLOT void reloadMultiSelectActionsEnabled();
 
+    void lockRepoContent();
+    Q_SLOT void handleStatusList(const LibQGit2::StatusList &);
     Q_SLOT void onProjectPathChanged();
 };
 

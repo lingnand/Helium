@@ -141,7 +141,6 @@ private:
     HighlightType _highlightType;
     int _cursorPosition;
 };
-Q_DECLARE_METATYPE(BufferState)
 
 QDebug operator<<(QDebug dbg, const BufferLine &line);
 QDebug operator<<(QDebug dbg, const BufferLineState &lineState);

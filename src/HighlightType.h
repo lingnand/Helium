@@ -30,7 +30,5 @@ struct HighlightType {
         return filetype && highlightEnabled;
     }
 };
-Q_DECLARE_METATYPE(HighlightType)
-
 
 #endif /* HIGHLIGHTTYPE_H_ */

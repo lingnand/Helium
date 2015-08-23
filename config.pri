@@ -565,6 +565,7 @@ config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/AppearanceSettingsPage.cpp) \
         $$quote($$BASEDIR/src/AppearanceSettingsStorage.cpp) \
+        $$quote($$BASEDIR/src/AutoHideProgressIndicator.cpp) \
         $$quote($$BASEDIR/src/Buffer.cpp) \
         $$quote($$BASEDIR/src/BufferHistory.cpp) \
         $$quote($$BASEDIR/src/BufferState.cpp) \
@@ -585,7 +586,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/GitCommitPage.cpp) \
         $$quote($$BASEDIR/src/GitDiffPage.cpp) \
+        $$quote($$BASEDIR/src/GitLogPage.cpp) \
         $$quote($$BASEDIR/src/GitRepoPage.cpp) \
+        $$quote($$BASEDIR/src/GitWorker.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
         $$quote($$BASEDIR/src/HelpPage.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
@@ -661,6 +664,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitstatusentry.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatuslist.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatusoptions.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstrarray.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgittag.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgittree.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgittreeentry.cpp) \
@@ -736,6 +740,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/AppearanceSettings.h) \
         $$quote($$BASEDIR/src/AppearanceSettingsPage.h) \
         $$quote($$BASEDIR/src/AppearanceSettingsStorage.h) \
+        $$quote($$BASEDIR/src/AutoHideProgressIndicator.h) \
         $$quote($$BASEDIR/src/Buffer.h) \
         $$quote($$BASEDIR/src/BufferHistory.h) \
         $$quote($$BASEDIR/src/BufferState.h) \
@@ -757,8 +762,10 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
         $$quote($$BASEDIR/src/GitCommitPage.h) \
         $$quote($$BASEDIR/src/GitDiffPage.h) \
+        $$quote($$BASEDIR/src/GitLogPage.h) \
         $$quote($$BASEDIR/src/GitRepoPage.h) \
         $$quote($$BASEDIR/src/GitSettings.h) \
+        $$quote($$BASEDIR/src/GitWorker.h) \
         $$quote($$BASEDIR/src/Helium.h) \
         $$quote($$BASEDIR/src/HelpPage.h) \
         $$quote($$BASEDIR/src/HighlightStateData.h) \
@@ -769,6 +776,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
         $$quote($$BASEDIR/src/NumberPicker.h) \
+        $$quote($$BASEDIR/src/Progress.h) \
         $$quote($$BASEDIR/src/Project.h) \
         $$quote($$BASEDIR/src/ProjectStorage.h) \
         $$quote($$BASEDIR/src/PushablePage.h) \
@@ -838,6 +846,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitstatusentry.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatuslist.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatusoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitstrarray.h) \
         $$quote($$BASEDIR/src/libqgit2/qgittag.h) \
         $$quote($$BASEDIR/src/libqgit2/qgittree.h) \
         $$quote($$BASEDIR/src/libqgit2/qgittreeentry.h) \

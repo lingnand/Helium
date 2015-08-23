@@ -21,36 +21,24 @@ namespace bb {
     }
 }
 
-class GitRepoPage;
-
-struct StatusPatch {
-    StatusDiffType type;
-    LibQGit2::Patch patch;
-    StatusPatch(StatusDiffType t=HeadToIndex, const LibQGit2::Patch &p=LibQGit2::Patch()):
-        type(t), patch(p) {}
-};
-
 class GitDiffPage : public PushablePage
 {
     Q_OBJECT
 public:
-    GitDiffPage(GitRepoPage *);
-    void setPatch(const StatusPatch &);
+    GitDiffPage();
+    void setPatch(const LibQGit2::Patch &);
+    const LibQGit2::Patch &patch() const { return _patch; }
     Q_SLOT void resetPatch(); // reset the patch
-    void onTranslatorChanged();
+    void hideAllActions();
 private:
-    GitRepoPage *_repoPage;
-    bb::cascades::ActionItem *_add, *_reset;
     Segment *_content;
-    StatusPatch _spatch;
+    LibQGit2::Patch _patch;
     struct HunkView : public Segment {
         bb::cascades::Header *header;
         bb::cascades::Label *text;
         HunkView();
     };
 
-    Q_SLOT void add();
-    Q_SLOT void reset();
     Q_SLOT void reloadContent();
 };
 

@@ -50,6 +50,7 @@ public:
     const QString &name() const { return _name; }
     // the name the buffer will use to write to the filesystem when requested
     Q_SLOT void setName(const QString &name);
+    void setName(const QString &name, bool setHighlightType, Progress progress=Progress());
     bool autodetectFiletype() const { return _autodetectFiletype; }
     Q_SLOT void setAutodetectFiletype(bool);
     // the filepath of the buffer, empty if not yet bound
@@ -89,13 +90,13 @@ Q_SIGNALS:
     void hasUndosChanged(bool hasUndos);
     void hasRedosChanged(bool hasRedos);
     // worker
-    void workerSetHighlightType(StateChangeContext &, BufferState &, const HighlightType &, Progress &);
-    void workerParseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress &);
-    void workerMergeChange(StateChangeContext &, BufferState &, const BufferStateChange &, Progress &);
-    void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &, Progress &);
-    void workerRehighlight(StateChangeContext &, BufferState &, int index, Progress &);
-    void workerSaveStateToFile(const BufferState &, const QString &filename, Progress &);
-    void workerLoadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress &);
+    void workerSetHighlightType(StateChangeContext &, BufferState &, const HighlightType &, Progress);
+    void workerParseAndMergeChange(StateChangeContext &, BufferState &, const QString &content, ParserPosition, int cursorPosition, Progress);
+    void workerMergeChange(StateChangeContext &, BufferState &, const BufferStateChange &);
+    void workerReplace(StateChangeContext &, BufferState &, const QList<Replacement> &);
+    void workerRehighlight(StateChangeContext &, BufferState &, int index);
+    void workerSaveStateToFile(const BufferState &, const QString &filename, Progress);
+    void workerLoadStateFromFile(StateChangeContext &, const QString &filename, bool autodetectFiletype, Progress);
 private:
     // store the list of attached views
     QSet<View *> _views;
@@ -120,9 +121,8 @@ private:
     void setLocked(bool);
     void setDirty(bool);
 
-    void _setName(const QString &name, bool setHighlightType, Progress &);
-    void setHighlightType(const HighlightType &, Progress &);
-    void setFilepath(const QString &filepath, bool setHighlightType, Progress &);
+    void setHighlightType(const HighlightType &, Progress progress=Progress());
+    void setFilepath(const QString &filepath, bool setHighlightType, Progress progress=Progress());
     void traverse(bool (BufferHistory::*fn)());
     Q_SLOT void handleStateChangeResult(const StateChangeContext &, const BufferState &);
     Q_SLOT void refreshFiletype();

@@ -84,9 +84,19 @@ void Index::addByPath(const QString& path)
     qGitThrow(git_index_add_bypath(data(), PathCodec::toLibGit2(path)));
 }
 
+void Index::addAll(const StrArray &pathspecs, AddFlag flags)
+{
+    qGitThrow(git_index_add_all(data(), pathspecs.data(), flags, NULL, 0));
+}
+
 void Index::remove(const QString& path, int stage)
 {
     qGitThrow(git_index_remove(data(), PathCodec::toLibGit2(path), stage));
+}
+
+void Index::removeAll(const StrArray &pathspecs)
+{
+    qGitThrow(git_index_remove_all(data(), pathspecs.data(), NULL, 0));
 }
 
 void Index::add(const IndexEntry &source_entry)

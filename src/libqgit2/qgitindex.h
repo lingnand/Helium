@@ -26,6 +26,7 @@
 #include "git2.h"
 
 #include "libqgit2_config.h"
+#include "qgitstrarray.h"
 
 namespace LibQGit2
 {
@@ -136,6 +137,17 @@ namespace LibQGit2
              */
             void addByPath(const QString& path);
 
+
+            enum AddFlag {
+                Default = GIT_INDEX_ADD_DEFAULT,
+                Force = GIT_INDEX_ADD_FORCE,
+                DisablePathspecMatch = GIT_INDEX_ADD_DISABLE_PATHSPEC_MATCH,
+                CheckPathspec = GIT_INDEX_ADD_CHECK_PATHSPEC,
+            };
+
+            Q_DECLARE_FLAGS(AddFlags, AddFlag)
+
+            void addAll(const StrArray &pathspecs = StrArray(), AddFlag flags = Default);
             /**
              * Remove an entry from the index given the path
              *
@@ -144,6 +156,7 @@ namespace LibQGit2
              */
             void remove(const QString& path, int stage);
 
+            void removeAll(const StrArray &pathspecs = StrArray());
             /**
              * Insert an entry into the index.
              * A full copy (including the 'path' string) of the given
@@ -194,6 +207,8 @@ namespace LibQGit2
             typedef QSharedPointer<git_index> ptr_type;
             ptr_type d;
     };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Index::AddFlags)
 
     /**@}*/
 }

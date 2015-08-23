@@ -8,7 +8,6 @@
 #include <bb/cascades/Page>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Container>
-#include <bb/cascades/ProgressIndicator>
 #include <bb/cascades/StackLayoutProperties>
 #include <bb/cascades/TextArea>
 #include <bb/cascades/KeyEvent>
@@ -31,6 +30,7 @@
 #include <Utility.h>
 #include <SettingsPage.h>
 #include <Project.h>
+#include <AutoHideProgressIndicator.h>
 #include <ShortcutHelp.h>
 
 using namespace bb::cascades;
@@ -71,10 +71,7 @@ View::View(Project *project, Buffer *buffer):
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))
         .bottomMargin(0)),
-    _progressIndicator(ProgressIndicator::create()
-        .visible(false)
-        .vertical(VerticalAlignment::Bottom)
-        .topMargin(0)),
+    _progressIndicator(new AutoHideProgressIndicator),
     _pageKeyListener(KeyListener::create()
         .onKeyPressed(this, SLOT(onPageKeyPressed(bb::cascades::KeyEvent *)))),
     _page(Page::create()
@@ -301,7 +298,7 @@ void View::setBuffer(Buffer *buffer)
                 this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)));
 
             conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
-                this, SLOT(onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
+                _progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
 
             emit bufferFilepathChanged(_buffer->filepath());
             conn(_buffer, SIGNAL(filepathChanged(const QString&)),
@@ -523,21 +520,6 @@ void View::onBufferStateChanged(const StateChangeContext &ctx, const BufferState
             }
         }
     }
-}
-
-void View::onBufferProgressChanged(float progress, ProgressIndicatorState::Type state, const QString &msg)
-{
-    qDebug() << "received progress change" << progress;
-    _progressIndicator->setState(state);
-    _progressIndicator->setValue(progress);
-    _progressIndicator->setVisible(progress > 0 && progress < 1);
-    if (!msg.isNull())
-        Utility::toast(msg, tr("OK"), this, SLOT(onProgressMessageDismissed(bb::system::SystemUiResult::Type)));
-}
-
-void View::onProgressMessageDismissed(bb::system::SystemUiResult::Type)
-{
-    _progressIndicator->setVisible(false);
 }
 
 void View::onTranslatorChanged()

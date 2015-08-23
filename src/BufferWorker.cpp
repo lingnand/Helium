@@ -14,7 +14,7 @@ BufferWorker::BufferWorker():
 {
 }
 
-void BufferWorker::setHighlightType(StateChangeContext &ctx, BufferState &state, const HighlightType &highlightType, Progress &progress)
+void BufferWorker::setHighlightType(StateChangeContext &ctx, BufferState &state, const HighlightType &highlightType, Progress progress)
 {
     QMutexLocker locker(&_mut);
     _setHighlightType(highlightType);
@@ -42,7 +42,7 @@ void BufferWorker::_setHighlightType(const HighlightType &type)
 }
 
 // the orthogonal highlighting procedure: compare the start state and if different, keep on highlighting
-void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, Progress &progress)
+void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData::ptr highlightState, HighlightStateData::ptr oldHighlightState, Progress progress)
 {
     float progressInc = (progress.cap-progress.current) / qMax(state.size()-index, 1);
     if (state.highlightType() != _highlightType) {
@@ -61,7 +61,7 @@ void BufferWorker::_highlight(BufferState &state, int index, HighlightStateData:
             emit progressChanged(progress.current+=progressInc);
         }
     }
-    emit progressChanged(progress.current=progress.cap);
+    emit progressChanged(progress.cap);
 }
 
 HighlightStateData::ptr BufferWorker::highlightLine(BufferLineState &lineState, HighlightStateData::ptr highlightState)
@@ -99,19 +99,19 @@ BufferStateChange BufferWorker::_parseBufferChange(BufferState &state, const QSt
     return _bufferChangeParser.parseBufferChange(content, start, cursorPosition);
 }
 
-void BufferWorker::parseAndMergeChange(StateChangeContext &ctx, BufferState &state, const QString &content, ParserPosition start, int cursorPosition, Progress &progress)
+void BufferWorker::parseAndMergeChange(StateChangeContext &ctx, BufferState &state, const QString &content, ParserPosition start, int cursorPosition, Progress progress)
 {
     QMutexLocker locker(&_mut);
     _mergeChange(ctx, state, _parseBufferChange(state, content, start, cursorPosition), progress);
 }
 
-void BufferWorker::mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, Progress &progress)
+void BufferWorker::mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, Progress progress)
 {
     QMutexLocker locker(&_mut);
     _mergeChange(ctx, state, change, progress);
 }
 
-void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, Progress &progress)
+void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, const BufferStateChange &change, Progress progress)
 {
     // if the filetype is empty then we don't need to track progress
     float progressInc = (progress.cap-progress.current) / (change.size()+1);
@@ -155,7 +155,7 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
         while (bufferIndex < state.size()) {
             state.removeLast();
         }
-        emit progressChanged(progress.current=progress.cap);
+        emit progressChanged(progress.cap);
     } else {
         qDebug() << "continuing to highlight additional lines";
         _highlight(state, bufferIndex, currentHighlightData, lastEndHighlightData, progress);
@@ -173,7 +173,7 @@ void BufferWorker::_mergeChange(StateChangeContext &ctx, BufferState &state, con
 
 // TODO: set cursorPosition of the state to the end of last Replacement
 // potentially needing to record a second counter
-void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QList<Replacement> &replaces, Progress &progress)
+void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QList<Replacement> &replaces, Progress progress)
 {
     QMutexLocker locker(&_mut);
     float progressInc = (progress.cap-progress.current) / (replaces.size()+1);
@@ -297,7 +297,7 @@ void BufferWorker::replace(StateChangeContext &ctx, BufferState &state, const QL
     emit occurrenceReplaced(ctx, state);
 }
 
-void BufferWorker::rehighlight(StateChangeContext &ctx, BufferState &state, int index, Progress &progress)
+void BufferWorker::rehighlight(StateChangeContext &ctx, BufferState &state, int index, Progress progress)
 {
     QMutexLocker locker(&_mut);
     _highlight(state, index, index == 0 ? _mainStateData : state[index-1].endHighlightState, HighlightStateData::ptr(), progress);
@@ -320,7 +320,7 @@ void writeLineWithTabToSpaceConversion(const BufferLine &line, QTextStream &outp
     }
 }
 
-void BufferWorker::saveStateToFile(const BufferState &state, const QString &filename, Progress &progress)
+void BufferWorker::saveStateToFile(const BufferState &state, const QString &filename, Progress progress)
 {
     QFile file(filename);
     qDebug() << "preparing to write to" << filename;
@@ -358,11 +358,11 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
             }
         }
     }
-    emit progressChanged(progress.current=progress.cap);
+    emit progressChanged(progress.cap);
     emit stateSavedToFile(filename);
 }
 
-void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &filename, bool autodetectFiletype, Progress &progress)
+void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &filename, bool autodetectFiletype, Progress progress)
 {
     QFile file(filename);
     qDebug() << "preparing to open" << filename;

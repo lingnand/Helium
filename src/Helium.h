@@ -54,7 +54,7 @@ public:
     }
     Q_SLOT void reloadTranslator();
     Q_SLOT void goToAppWorld();
-//    bool notify(QObject *, QEvent *);
+    bool notify(QObject *, QEvent *);
 Q_SIGNALS:
     void translatorChanged();
 private:

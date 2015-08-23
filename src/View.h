@@ -38,6 +38,7 @@ class NormalMode;
 class FindMode;
 class Filetype;
 class Project;
+class AutoHideProgressIndicator;
 
 class View : public bb::cascades::Tab
 {
@@ -110,7 +111,7 @@ private:
     bb::cascades::pickers::FilePicker *_fpicker;
     bb::cascades::Header *_header;
     bb::cascades::TextArea *_textArea;
-    bb::cascades::ProgressIndicator *_progressIndicator;
+    AutoHideProgressIndicator *_progressIndicator;
     bb::cascades::KeyListener *_pageKeyListener;
     bb::cascades::Page *_page;
     bb::cascades::NavigationPane *_content;
@@ -136,8 +137,6 @@ private:
     Q_SLOT void onTextAreaCursorPositionChanged();
     Q_SLOT void onBufferFiletypeChanged(Filetype *change, Filetype *old=NULL);
     Q_SLOT void onBufferStateChanged(const StateChangeContext &, const BufferState &);
-    Q_SLOT void onBufferProgressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
-    Q_SLOT void onProgressMessageDismissed(bb::system::SystemUiResult::Type);
     Q_SLOT void onUnsavedChangeDialogFinishedWhenClosing(bb::system::SystemUiResult::Type);
     Q_SLOT void onTopChanged(bb::cascades::Page *);
 };
