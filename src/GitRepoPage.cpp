@@ -390,6 +390,8 @@ void GitRepoPage::showDiffSelection()
 
 void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
 {
+    if (indexPath.size() < 2)
+        return;
     qDebug() << "DIFFING SELECTION" << indexPath;
     const StatusDiffDelta &sdelta = _statusDataModel.data(indexPath)
             .value<StatusDiffDelta>();

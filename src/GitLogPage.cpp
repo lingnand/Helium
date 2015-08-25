@@ -84,6 +84,8 @@ void GitLogPage::reloadTitle()
 
 void GitLogPage::showCommitIndexPath(const QVariantList &ip)
 {
+    if (ip.size() < 2)
+        return;
     // push a dedicated commit page
     GitCommitInfoPage *page = _repoPage->commitInfoPage();
     page->setCommit(_commitDataModel.data(ip).value<LibQGit2::Commit>());
