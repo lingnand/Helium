@@ -71,9 +71,14 @@ size_t StrArray::count() const
     return m_data.count;
 }
 
-const git_strarray& StrArray::data() const
+git_strarray* StrArray::data()
 {
-    return m_data;
+    return &m_data;
+}
+
+const git_strarray* StrArray::constData() const
+{
+    return &m_data;
 }
 
 void StrArray::updateNative()

@@ -15,7 +15,7 @@
 
 using namespace bb::cascades;
 
-StatusActionSet::StatusActionSet(GitRepoPage *page, const StatusDiffDelta &sdelta):
+StatusActionSet::StatusActionSet(GitRepoPage *page, StatusDiffType type):
     _repoPage(page),
     _diff(ActionItem::create()
         .onTriggered(page, SLOT(showDiffSelection()))),
@@ -24,7 +24,7 @@ StatusActionSet::StatusActionSet(GitRepoPage *page, const StatusDiffDelta &sdelt
 {
     add(_diff);
     const char *method = NULL;
-    switch (sdelta.type) {
+    switch (type) {
         case HeadToIndex:
             add(_reset = ActionItem::create()
                 .onTriggered(page, SLOT(resetSelections())));

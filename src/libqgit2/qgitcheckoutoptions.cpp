@@ -83,7 +83,7 @@ public:
     void setPaths(const QList<QString> &paths)
     {
         m_paths.set(paths);
-        native.paths = m_paths.data();
+        native.paths = *m_paths.constData();
     }
 
     git_checkout_options native;

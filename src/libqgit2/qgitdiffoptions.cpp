@@ -34,7 +34,7 @@ public:
     void setPaths(const QList<QString> &paths)
     {
         m_paths.set(paths);
-        native.pathspec = m_paths.data();
+        native.pathspec = *m_paths.constData();
     }
 
     git_diff_options native;

@@ -30,9 +30,14 @@ size_t StrArray::count() const
     return m_arr->count();
 }
 
-const git_strarray* StrArray::data() const
+git_strarray* StrArray::data() const
 {
-    return &m_arr->data();
+    return m_arr->data();
+}
+
+const git_strarray* StrArray::constData() const
+{
+    return m_arr->constData();
 }
 
 } /* namespace LibQGit2 */

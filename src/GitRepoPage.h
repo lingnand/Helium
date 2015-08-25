@@ -12,6 +12,7 @@
 #include <bb/cascades/DataModel>
 #include <libqgit2/qgitstatuslist.h>
 #include <GitWorker.h>
+#include <StatusActionSet.h>
 #include <PushablePage.h>
 
 namespace bb {
@@ -43,8 +44,10 @@ public:
     virtual ~GitRepoPage();
     LibQGit2::Repository *repo();
     Q_SLOT void reload(); // refresh the view
-    Q_SLOT void addAll(const QList<QString> &pathspecs=QList<QString>());
-    Q_SLOT void resetAll(const QList<QString> &pathspecs=QList<QString>());
+    Q_SLOT void addPaths(const QList<QString> &pathspecs=QList<QString>());
+    Q_SLOT void addAll();
+    Q_SLOT void resetPaths(const QList<QString> &pathspecs=QList<QString>());
+    Q_SLOT void resetAll();
     Q_SLOT bool commit(const QString &);
     GitDiffPage *diffPage();
     GitCommitInfoPage *commitInfoPage();
@@ -53,6 +56,12 @@ public:
     bb::cascades::ListView *statusListView() const;
     Q_SLOT void selectAllOnIndex();
     Q_SLOT void selectAllOnWorkdir();
+    struct StatusDiffDelta {
+        StatusDiffType type;
+        LibQGit2::DiffDelta delta;
+        StatusDiffDelta(StatusDiffType t=HeadToIndex, const LibQGit2::DiffDelta &d=LibQGit2::DiffDelta()):
+            type(t), delta(d) {}
+    };
 Q_SIGNALS:
     void translatorChanged();
     void workerFetchStatusList();
@@ -73,7 +82,8 @@ private:
         bool hasChildren(const QVariantList &);
         QString itemType(const QVariantList &);
         QVariant data(const QVariantList &);
-        size_t validDiffDeltasToAdd() const;
+        bool hasValidDiffDeltasInWorkdir() const;
+        bool hasValidDiffDeltasInIndex() const;
         const LibQGit2::StatusList &statusList() const { return _statusList; }
         void setStatusList(const LibQGit2::StatusList &);
         // reset, but keep the cached views untouched (stale)
@@ -130,5 +140,7 @@ private:
     Q_SLOT void handleStatusList(const LibQGit2::StatusList &);
     Q_SLOT void onProjectPathChanged();
 };
+
+Q_DECLARE_METATYPE(GitRepoPage::StatusDiffDelta)
 
 #endif /* GITREPOPAGE_H_ */

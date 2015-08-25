@@ -534,7 +534,7 @@ void Repository::fetch(const QString& name, const QString& head, const Signature
         refs.set(QList<QByteArray>() << refspec.toLatin1());
     }
 
-    qGitThrow(git_remote_fetch(remote.data(), refs.count() > 0 ? &refs.data() : NULL, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+    qGitThrow(git_remote_fetch(remote.data(), refs.count() > 0 ? refs.constData() : NULL, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
 }
 
 
@@ -607,6 +607,11 @@ void Repository::reset(const Object &target, ResetType type, const Signature &si
     }
 
     qGitThrow(git_reset(SAFE_DATA, target.data(), resetType, NULL, const_cast<git_signature*>(signature.data()), message.isNull() ? NULL : message.toUtf8().constData()));
+}
+
+void Repository::resetDefault(const Object &target, const StrArray &pathspecs)
+{
+    qGitThrow(git_reset_default(SAFE_DATA, target.data(), pathspecs.data()));
 }
 
 Rebase Repository::rebase(const Reference &branch, const Reference &upstream, const Reference &onto, const RebaseOptions &opts, const Signature &signature)

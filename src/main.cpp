@@ -32,6 +32,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
             "bb::cascades::ProgressIndicatorState::Type");
     qRegisterMetaType<HighlightType>("HighlightType");
     qRegisterMetaType<BufferState>("BufferState&");
+    qRegisterMetaType<BufferState>("BufferState");
     qRegisterMetaType<BufferStateChange>("BufferStateChange");
     qRegisterMetaType<StateChangeContext>("StateChangeContext&");
     qRegisterMetaType<Progress>("Progress");

@@ -39,7 +39,9 @@ public:
 
     size_t count() const;
 
-    const git_strarray& data() const;
+    git_strarray *data();
+
+    const git_strarray *constData() const;
 
 private:
     QList<QByteArray> m_strings;

@@ -42,6 +42,7 @@
 #include "qgitcherrypickoptions.h"
 #include "qgitrebase.h"
 #include "qgitrebaseoptions.h"
+#include "qgitstrarray.h"
 
 namespace LibQGit2
 {
@@ -676,6 +677,8 @@ namespace LibQGit2
              * @throws LibQGit2::Exception
              */
             void reset(const Object &target, ResetType type = Mixed, const Signature &signature = Signature(), const QString &message = QString());
+
+            void resetDefault(const Object &target, const StrArray &pathspecs);
 
             /**
              * Initializes a rebase object for rebasing the changes in \a branch

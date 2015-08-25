@@ -21,20 +21,11 @@ class GitRepoPage;
 
 enum StatusDiffType { HeadToIndex, IndexToWorkdir };
 
-struct StatusDiffDelta {
-    StatusDiffType type;
-    LibQGit2::DiffDelta delta;
-    StatusDiffDelta(StatusDiffType t=HeadToIndex, const LibQGit2::DiffDelta &d=LibQGit2::DiffDelta()):
-        type(t), delta(d) {}
-};
-
-Q_DECLARE_METATYPE(StatusDiffDelta)
-
 class StatusActionSet : public bb::cascades::ActionSet
 {
     Q_OBJECT
 public:
-    StatusActionSet(GitRepoPage *, const StatusDiffDelta &);
+    StatusActionSet(GitRepoPage *, StatusDiffType);
     Q_SLOT void onTranslatorChanged();
 private:
     GitRepoPage *_repoPage;
