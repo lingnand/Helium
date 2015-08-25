@@ -30,6 +30,7 @@
 #include <GitDiffPage.h>
 #include <GitLogPage.h>
 #include <GitCommitPage.h>
+#include <GitCommitInfoPage.h>
 #include <StatusActionSet.h>
 #include <Project.h>
 #include <Segment.h>
@@ -88,6 +89,7 @@ GitRepoPage::GitRepoPage(Project *project):
     _diffPage(NULL), _diffAddAction(NULL), _diffResetAction(NULL),
     _logPage(NULL),
     _commitPage(NULL),
+    _commitInfoPage(NULL),
     _worker(project->gitRepo())
 {
     _statusListView->setMultiSelectAction(MultiSelectActionItem::create());
@@ -128,6 +130,11 @@ GitRepoPage::~GitRepoPage()
 {
     _workerThread.quit();
     _workerThread.wait();
+}
+
+LibQGit2::Repository *GitRepoPage::repo()
+{
+    return _project->gitRepo();
 }
 
 void GitRepoPage::reloadMultiSelectActionsEnabled()
@@ -273,7 +280,7 @@ void GitRepoPage::branches()
 void GitRepoPage::log()
 {
     if (!_logPage) {
-        _logPage = new GitLogPage(_project->gitRepo());
+        _logPage = new GitLogPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _logPage, SLOT(onTranslatorChanged()));
     }
@@ -405,11 +412,15 @@ void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
         }
     }
     if (diff.numDeltas() == 0) {
-        Utility::toast("No diff available");
+        Utility::toast(tr("No diff available"));
         return;
     }
-    qDebug() << "NUM DIFF DELTAS" << diff.numDeltas();
-    diffPage()->setPatch(diff.patch(0));
+    const LibQGit2::Patch &p = diff.patch(0);
+    if (p.numHunks() == 0) {
+        Utility::toast(tr("No hunk details available"));
+        return;
+    }
+    diffPage()->setPatch(p);
     diffPage()->hideAllActions();
     switch (sdelta.type) {
         case HeadToIndex:
@@ -420,6 +431,16 @@ void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
             break;
     }
     parent()->push(diffPage());
+}
+
+GitCommitInfoPage *GitRepoPage::commitInfoPage()
+{
+    if (!_commitInfoPage) {
+        _commitInfoPage = new GitCommitInfoPage(this);
+        conn(this, SIGNAL(translatorChanged()),
+            _commitInfoPage, SLOT(onTranslatorChanged()));
+    }
+    return _commitInfoPage;
 }
 
 ListView *GitRepoPage::statusListView() const {
@@ -578,7 +599,7 @@ void GitRepoPage::StatusItemProvider::updateItem(ListView *list, VisualNode *lis
         ((Header *) listItem)->setTitle(data.toString());
     } else if (type == "item" && indexPath.size() > 1) {
         StandardListItem *li = (StandardListItem *) listItem;
-        StatusDiffDelta sdelta = data.value<StatusDiffDelta>();
+        const StatusDiffDelta &sdelta = data.value<StatusDiffDelta>();
         li->setVisible(true);
         switch (sdelta.delta.type()) {
             case LibQGit2::DiffDelta::Unknown:
@@ -632,6 +653,8 @@ void GitRepoPage::onPagePopped(Page *page)
         _statusDataModel.resetStatusList();
     else if (page == _diffPage)
         _diffPage->resetPatch();
+    else if (page == _commitInfoPage)
+        _commitInfoPage->resetCommit();
 }
 
 void GitRepoPage::onProjectPathChanged()

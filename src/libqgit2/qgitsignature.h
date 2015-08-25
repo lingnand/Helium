@@ -90,4 +90,6 @@ namespace LibQGit2
     /**@}*/
 }
 
+Q_DECLARE_METATYPE(LibQGit2::Signature)
+
 #endif // LIBQGIT2_SIGNATURE_H

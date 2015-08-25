@@ -24,11 +24,16 @@ namespace bb {
     }
 }
 
+namespace LibQGit2 {
+    class Repository;
+}
+
 class Project;
 class Segment;
 class GitDiffPage;
 class GitLogPage;
 class GitCommitPage;
+class GitCommitInfoPage;
 
 class GitRepoPage : public PushablePage
 {
@@ -36,10 +41,13 @@ class GitRepoPage : public PushablePage
 public:
     GitRepoPage(Project *);
     virtual ~GitRepoPage();
+    LibQGit2::Repository *repo();
     Q_SLOT void reload(); // refresh the view
     Q_SLOT void addAll(const QList<QString> &pathspecs=QList<QString>());
     Q_SLOT void resetAll(const QList<QString> &pathspecs=QList<QString>());
     Q_SLOT bool commit(const QString &);
+    GitDiffPage *diffPage();
+    GitCommitInfoPage *commitInfoPage();
     Q_SLOT void onPagePopped(bb::cascades::Page *);
     void onTranslatorChanged(bool reload=true);
     bb::cascades::ListView *statusListView() const;
@@ -90,6 +98,7 @@ private:
     bb::cascades::ActionItem *_diffResetAction;
     GitLogPage *_logPage;
     GitCommitPage *_commitPage;
+    GitCommitInfoPage *_commitInfoPage;
 
     GitWorker _worker;
 
@@ -100,7 +109,6 @@ private:
     Q_SLOT void clone();
     Q_SLOT void branches();
     Q_SLOT void log();
-    GitDiffPage *diffPage();
     bb::cascades::ActionItem *diffAddAction();
     Q_SLOT void reloadDiffAddActionTitle();
     Q_SLOT void diffPageAddFile();

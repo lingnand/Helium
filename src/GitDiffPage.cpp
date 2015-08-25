@@ -97,7 +97,7 @@ void GitDiffPage::reloadContent()
         view->text->setText(text);
     }
     // delete all the unused content
-    for (; i < _content->count(); i++) {
+    while (i < _content->count()) {
         Control *con = _content->at(i);
         _content->remove(con);
         con->deleteLater();

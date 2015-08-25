@@ -14,22 +14,20 @@
 #include <libqgit2/qgitcommit.h>
 #include <PushablePage.h>
 
-namespace LibQGit2 {
-    class Repository;
-}
+class GitRepoPage;
 
 class GitLogPage : public PushablePage
 {
     Q_OBJECT
 public:
-    GitLogPage(LibQGit2::Repository *);
+    GitLogPage(GitRepoPage *);
     // this should always be a valid reference
     void setReference(const LibQGit2::Reference &);
     void resetReference();
     void onTranslatorChanged();
 private:
     void reloadTitle();
-    LibQGit2::Repository *_repo;
+    GitRepoPage *_repoPage;
     LibQGit2::Reference _reference;
     class CommitDataModel : public bb::cascades::DataModel {
     public:

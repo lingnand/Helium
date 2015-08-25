@@ -76,4 +76,6 @@ private:
 
 }
 
+Q_DECLARE_METATYPE(LibQGit2::DiffDelta)
+
 #endif // LIBQGIT2_DIFFDELTA_H

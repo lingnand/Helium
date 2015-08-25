@@ -575,6 +575,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/CmdRunProfileManager.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.cpp) \
         $$quote($$BASEDIR/src/Defaults.cpp) \
+        $$quote($$BASEDIR/src/DiffActionSet.cpp) \
         $$quote($$BASEDIR/src/FilePropertiesPage.cpp) \
         $$quote($$BASEDIR/src/Filetype.cpp) \
         $$quote($$BASEDIR/src/FiletypeMap.cpp) \
@@ -584,6 +585,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
+        $$quote($$BASEDIR/src/GitCommitInfoPage.cpp) \
         $$quote($$BASEDIR/src/GitCommitPage.cpp) \
         $$quote($$BASEDIR/src/GitDiffPage.cpp) \
         $$quote($$BASEDIR/src/GitLogPage.cpp) \
@@ -750,6 +752,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/CmdRunProfileManager.h) \
         $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.h) \
         $$quote($$BASEDIR/src/Defaults.h) \
+        $$quote($$BASEDIR/src/DiffActionSet.h) \
         $$quote($$BASEDIR/src/FilePropertiesPage.h) \
         $$quote($$BASEDIR/src/Filetype.h) \
         $$quote($$BASEDIR/src/FiletypeMap.h) \
@@ -760,6 +763,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettings.h) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.h) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
+        $$quote($$BASEDIR/src/GitCommitInfoPage.h) \
         $$quote($$BASEDIR/src/GitCommitPage.h) \
         $$quote($$BASEDIR/src/GitDiffPage.h) \
         $$quote($$BASEDIR/src/GitLogPage.h) \

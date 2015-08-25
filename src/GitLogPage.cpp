@@ -9,16 +9,19 @@
 #include <bb/cascades/ListView>
 #include <bb/cascades/Header>
 #include <bb/cascades/StandardListItem>
+#include <bb/cascades/NavigationPane>
 #include <libqgit2/qgitrevwalk.h>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitexception.h>
 #include <GitLogPage.h>
+#include <GitRepoPage.h>
+#include <GitCommitInfoPage.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-GitLogPage::GitLogPage(LibQGit2::Repository *repo):
-    _repo(repo)
+GitLogPage::GitLogPage(GitRepoPage *repoPage):
+    _repoPage(repoPage)
 {
     ListView *list = ListView::create()
         .dataModel(&_commitDataModel)
@@ -35,7 +38,7 @@ void GitLogPage::setReference(const LibQGit2::Reference &reference)
 {
     _reference = reference;
     try {
-        LibQGit2::RevWalk walk(*_repo);
+        LibQGit2::RevWalk walk(*_repoPage->repo());
         walk.setSorting(LibQGit2::RevWalk::Topological |
                 LibQGit2::RevWalk::Time);
         walk.push(_reference);
@@ -65,8 +68,8 @@ void GitLogPage::setReference(const LibQGit2::Reference &reference)
 
 void GitLogPage::resetReference()
 {
-    _reference = LibQGit2::Reference();
     _commitDataModel.clear();
+    _reference = LibQGit2::Reference();
 }
 
 void GitLogPage::reloadTitle()
@@ -79,10 +82,12 @@ void GitLogPage::reloadTitle()
     }
 }
 
-void GitLogPage::showCommitIndexPath(const QVariantList &indexPath)
+void GitLogPage::showCommitIndexPath(const QVariantList &ip)
 {
     // push a dedicated commit page
-    qDebug() << "SHOW commit for index path:" << indexPath;
+    GitCommitInfoPage *page = _repoPage->commitInfoPage();
+    page->setCommit(_commitDataModel.data(ip).value<LibQGit2::Commit>());
+    parent()->push(page);
 }
 
 void GitLogPage::onTranslatorChanged()
