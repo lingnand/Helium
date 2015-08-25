@@ -205,7 +205,12 @@ void GitRepoPage::reload()
             titleBar()->setTitle(tr("No commit"));
             _logAction->setEnabled(false);
         } else {
-            titleBar()->setTitle(_project->gitRepo()->head().name());
+            if (_project->gitRepo()->isHeadDetached()) {
+                titleBar()->setTitle(tr("Detached at %1").arg(
+                        QString(_project->gitRepo()->head().peelToCommit().oid().nformat(7))));
+            } else {
+                titleBar()->setTitle(_project->gitRepo()->head().name());
+            }
             _logAction->setEnabled(true);
         }
         // actions
@@ -260,8 +265,22 @@ bool GitRepoPage::commit(const QString &message)
         LibQGit2::OId oid = repo->createCommit(repo->lookupTree(repo->index().createTree()),
                 parents, sig, sig, message, "HEAD");
         Utility::toast(tr("Commited %1").arg(QString(oid.nformat(7))));
-        // rewrite index
-        repo->index().write();
+    } catch (const LibQGit2::Exception &e) {
+        Utility::toast(e.what());
+        return false;
+    }
+    reload();
+    return true;
+}
+
+bool GitRepoPage::checkout(const LibQGit2::Object &treeish)
+{
+    try {
+        _project->gitRepo()->checkoutTree(treeish,
+                LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
+        const LibQGit2::OId &oid = treeish.oid();
+        _project->gitRepo()->setHeadDetached(oid);
+        Utility::toast(tr("HEAD detached at %1").arg(QString(oid.nformat(7))));
     } catch (const LibQGit2::Exception &e) {
         Utility::toast(e.what());
         return false;

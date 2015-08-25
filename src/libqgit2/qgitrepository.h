@@ -680,6 +680,7 @@ namespace LibQGit2
 
             void resetDefault(const Object &target, const StrArray &pathspecs);
 
+            void setHeadDetached(const OId &commitish, const Signature &signature = Signature(), const QString &message = QString());
             /**
              * Initializes a rebase object for rebasing the changes in \a branch
              * relative to \a upstream onto another branch.

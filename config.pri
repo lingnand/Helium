@@ -574,6 +574,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/CmdRunProfile.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.cpp) \
+        $$quote($$BASEDIR/src/CommitActionSet.cpp) \
         $$quote($$BASEDIR/src/Defaults.cpp) \
         $$quote($$BASEDIR/src/DiffActionSet.cpp) \
         $$quote($$BASEDIR/src/FilePropertiesPage.cpp) \
@@ -751,6 +752,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/CmdRunProfile.h) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.h) \
         $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.h) \
+        $$quote($$BASEDIR/src/CommitActionSet.h) \
         $$quote($$BASEDIR/src/Defaults.h) \
         $$quote($$BASEDIR/src/DiffActionSet.h) \
         $$quote($$BASEDIR/src/FilePropertiesPage.h) \

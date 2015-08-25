@@ -10,26 +10,31 @@
 #include <bb/cascades/Header>
 #include <bb/cascades/StandardListItem>
 #include <bb/cascades/NavigationPane>
+#include <bb/cascades/ActionItem>
+#include <bb/cascades/Shortcut>
 #include <libqgit2/qgitrevwalk.h>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitexception.h>
 #include <GitLogPage.h>
 #include <GitRepoPage.h>
 #include <GitCommitInfoPage.h>
+#include <CommitActionSet.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
 GitLogPage::GitLogPage(GitRepoPage *repoPage):
-    _repoPage(repoPage)
-{
-    ListView *list = ListView::create()
+    _repoPage(repoPage),
+    _commitItemProvider(this),
+    _commitList(ListView::create()
         .dataModel(&_commitDataModel)
-        .listItemProvider(&_commitItemProvider);
-    conn(list, SIGNAL(triggered(QVariantList)),
-        this, SLOT(showCommitIndexPath(const QVariantList &)));
+        .listItemProvider(&_commitItemProvider)),
+    _commitInfoCheckoutAction(NULL)
+{
+    conn(_commitList, SIGNAL(triggered(QVariantList)),
+        this, SLOT(showCommitInfoIndexPath(const QVariantList &)));
     setTitleBar(TitleBar::create());
-    setContent(list);
+    setContent(_commitList);
 
     onTranslatorChanged();
 }
@@ -82,20 +87,59 @@ void GitLogPage::reloadTitle()
     }
 }
 
-void GitLogPage::showCommitIndexPath(const QVariantList &ip)
+void GitLogPage::showCommitInfoSelection()
+{
+    showCommitInfoIndexPath(_commitList->selected());
+}
+
+void GitLogPage::showCommitInfoIndexPath(const QVariantList &ip)
 {
     if (ip.size() < 2)
         return;
     // push a dedicated commit page
     GitCommitInfoPage *page = _repoPage->commitInfoPage();
     page->setCommit(_commitDataModel.data(ip).value<LibQGit2::Commit>());
+    page->hideAllActions();
+    page->addAction(commitInfoCheckoutAction(), ActionBarPlacement::Signature);
     parent()->push(page);
+}
+
+ActionItem *GitLogPage::commitInfoCheckoutAction()
+{
+    if (!_commitInfoCheckoutAction) {
+        _commitInfoCheckoutAction = ActionItem::create()
+            .addShortcut(Shortcut::create().key("c"))
+            .onTriggered(this, SLOT(commitInfoPageCheckout()));
+        reloadCommitInfoCheckoutActionTitle();
+        conn(this, SIGNAL(translatorChanged()),
+            this, SLOT(reloadCommitInfoCheckoutActionTitle()));
+    }
+    return _commitInfoCheckoutAction;
+}
+
+void GitLogPage::reloadCommitInfoCheckoutActionTitle()
+{
+    _commitInfoCheckoutAction->setTitle(tr("Checkout"));
+}
+
+void GitLogPage::checkoutSelection()
+{
+    if (_repoPage->checkout(_commitDataModel
+            .data(_commitList->selected()).value<LibQGit2::Commit>()))
+        pop(); // pop to repo page
+}
+
+void GitLogPage::commitInfoPageCheckout()
+{
+    if (_repoPage->checkout(_repoPage->commitInfoPage()->commit()))
+        parent()->navigateTo(this); // return to log page
 }
 
 void GitLogPage::onTranslatorChanged()
 {
     PushablePage::onTranslatorChanged();
     reloadTitle();
+    emit translatorChanged();
 }
 
 int GitLogPage::CommitDataModel::childCount(const QVariantList &ip)
@@ -156,7 +200,8 @@ VisualNode *GitLogPage::CommitItemProvider::createItem(ListView *, const QString
 {
     if (type == "header")
         return Header::create();
-    return StandardListItem::create();
+    return StandardListItem::create()
+        .actionSet(new CommitActionSet(_page));
 }
 
 void GitLogPage::CommitItemProvider::updateItem(ListView *, bb::cascades::VisualNode *listItem, const QString &type,
@@ -170,7 +215,5 @@ void GitLogPage::CommitItemProvider::updateItem(ListView *, bb::cascades::Visual
         li->setTitle(commit.message());
         li->setDescription(commit.author().name());
         li->setStatus(commit.dateTime().time().toString());
-        // TODO: actionSet
-        // add checkout action
     }
 }

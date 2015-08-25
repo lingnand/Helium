@@ -59,6 +59,11 @@ void GitCommitInfoPage::setCommit(const LibQGit2::Commit &commit)
     _dataModel.setCommit(commit, diffs);
 }
 
+const LibQGit2::Commit &GitCommitInfoPage::commit() const
+{
+    return _dataModel.commit();
+}
+
 void GitCommitInfoPage::resetCommit()
 {
     _dataModel.clear();
@@ -85,6 +90,12 @@ void GitCommitInfoPage::showDiffIndexPath(const QVariantList &ip)
     page->hideAllActions();
     page->setPatch(p);
     parent()->push(page);
+}
+
+void GitCommitInfoPage::hideAllActions()
+{
+    while (actionCount() > 0)
+        removeAction(actionAt(0));
 }
 
 void GitCommitInfoPage::onTranslatorChanged()

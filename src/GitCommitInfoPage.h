@@ -31,7 +31,9 @@ public:
     GitCommitInfoPage(GitRepoPage *);
     void setCommit(const LibQGit2::Commit &commit);
     void resetCommit();
+    const LibQGit2::Commit &commit() const;
     Q_SLOT void showDiffSelection();
+    void hideAllActions();
     void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();

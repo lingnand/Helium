@@ -614,6 +614,11 @@ void Repository::resetDefault(const Object &target, const StrArray &pathspecs)
     qGitThrow(git_reset_default(SAFE_DATA, target.data(), pathspecs.data()));
 }
 
+void Repository::setHeadDetached(const OId &commitish, const Signature &signature, const QString &message)
+{
+    qGitThrow(git_repository_set_head_detached(SAFE_DATA, commitish.constData(), signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+}
+
 Rebase Repository::rebase(const Reference &branch, const Reference &upstream, const Reference &onto, const RebaseOptions &opts, const Signature &signature)
 {
     git_rebase *rebase;

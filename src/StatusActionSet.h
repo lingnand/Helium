@@ -9,7 +9,6 @@
 #define STATUSACTIONSET_H_
 
 #include <bb/cascades/ActionSet>
-#include <libqgit2/qgitdiffdelta.h>
 
 namespace bb {
     namespace cascades {

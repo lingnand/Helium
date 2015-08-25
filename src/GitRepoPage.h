@@ -11,6 +11,8 @@
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
 #include <libqgit2/qgitstatuslist.h>
+#include <libqgit2/qgitdiffdelta.h>
+#include <libqgit2/qgitobject.h>
 #include <GitWorker.h>
 #include <StatusActionSet.h>
 #include <PushablePage.h>
@@ -49,6 +51,7 @@ public:
     Q_SLOT void resetPaths(const QList<QString> &pathspecs=QList<QString>());
     Q_SLOT void resetAll();
     Q_SLOT bool commit(const QString &);
+    Q_SLOT bool checkout(const LibQGit2::Object &);
     GitDiffPage *diffPage();
     GitCommitInfoPage *commitInfoPage();
     Q_SLOT void onPagePopped(bb::cascades::Page *);
