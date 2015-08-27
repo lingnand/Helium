@@ -81,9 +81,12 @@ GitRepoPage::GitRepoPage(Project *project):
     _addAllAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(addAll()))),
-    _resetAllAction(ActionItem::create()
+    _resetMixedAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("r"))
-        .onTriggered(this, SLOT(resetAll()))),
+        .onTriggered(this, SLOT(resetMixed()))),
+    _resetHardAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("e"))
+        .onTriggered(this, SLOT(safeResetHard()))),
     _statusItemProvider(this),
     _statusListView(ListView::create()
         .scrollRole(ScrollRole::Main)
@@ -173,7 +176,8 @@ void GitRepoPage::lockRepoContent()
     _branchesAction->setEnabled(false);
     _logAction->setEnabled(false);
     _addAllAction->setEnabled(false);
-    _resetAllAction->setEnabled(false);
+    _resetMixedAction->setEnabled(false);
+    _resetHardAction->setEnabled(false);
     _reloadAction->setEnabled(false);
 }
 
@@ -188,12 +192,14 @@ void GitRepoPage::handleStatusList(const LibQGit2::StatusList &list)
     // XXX: assumes that we are with repoContent
     _statusDataModel.setStatusList(list);
     _statusListView->setEnabled(true);
-    bool hasValidDiffDeltasToReset = _statusDataModel.hasValidDiffDeltasInIndex();
-    _commitAction->setEnabled(hasValidDiffDeltasToReset);
+    bool validDeltasInIndex = _statusDataModel.hasValidDiffDeltasInIndex();
+    bool validDeltasInWorkdir = _statusDataModel.hasValidDiffDeltasInWorkdir();
+    _commitAction->setEnabled(validDeltasInIndex);
     _branchesAction->setEnabled(true);
     _logAction->setEnabled(!_project->gitRepo()->isHeadUnborn());
-    _addAllAction->setEnabled(_statusDataModel.hasValidDiffDeltasInWorkdir());
-    _resetAllAction->setEnabled(hasValidDiffDeltasToReset);
+    _addAllAction->setEnabled(validDeltasInWorkdir);
+    _resetMixedAction->setEnabled(validDeltasInIndex);
+    _resetHardAction->setEnabled(validDeltasInIndex || validDeltasInWorkdir);
     _reloadAction->setEnabled(true);
 }
 
@@ -219,7 +225,8 @@ void GitRepoPage::reload()
         addAction(_branchesAction, ActionBarPlacement::OnBar);
         addAction(_logAction, ActionBarPlacement::OnBar);
         addAction(_addAllAction);
-        addAction(_resetAllAction);
+        addAction(_resetMixedAction);
+        addAction(_resetHardAction);
         addAction(_reloadAction);
         lockRepoContent();
         emit workerFetchStatusList();
@@ -257,7 +264,7 @@ bool GitRepoPage::commit(const QString &message)
         // pop open a new page to record the commit message
         QList<LibQGit2::Commit> parents;
         if (!repo->isHeadUnborn()) {
-            parents.append(repo->head().resolve().peelToCommit());
+            parents.append(repo->head().peelToCommit());
         }
         // obtain the signature directly from global config
         GitSettings *git = Helium::instance()->git();
@@ -358,15 +365,29 @@ void GitRepoPage::resetSelections()
     resetPaths(paths);
 }
 
-void GitRepoPage::resetAll()
+void GitRepoPage::resetMixed()
 {
-    QList<QString> paths;
-    for (size_t i = 0, size = _statusDataModel.statusList().entryCount(); i < size; i++) {
-        const LibQGit2::DiffDelta &delta = _statusDataModel.statusList().entryByIndex(i).headToIndex();
-        if (validDiffDelta(delta))
-            paths << delta.newFile().path();
-    }
-    resetPaths(paths);
+    _project->gitRepo()->reset(_project->gitRepo()->head().peelToCommit());
+    reload();
+}
+
+void GitRepoPage::safeResetHard()
+{
+    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm reset"),
+            tr("Hard reset will wipe the changes in your working directory."),
+            this, SLOT(onResetHardDialogFinished(bb::system::SystemUiResult::Type)));
+}
+
+void GitRepoPage::onResetHardDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        resetHard();
+}
+
+void GitRepoPage::resetHard()
+{
+    _project->gitRepo()->reset(_project->gitRepo()->head().peelToCommit(), LibQGit2::Repository::Hard);
+    reload();
 }
 
 void GitRepoPage::resetPaths(const QList<QString> &paths)
@@ -495,10 +516,6 @@ GitCommitInfoPage *GitRepoPage::commitInfoPage()
     return _commitInfoPage;
 }
 
-ListView *GitRepoPage::statusListView() const {
-    return _statusListView;
-}
-
 void GitRepoPage::selectAllOnIndex()
 {
     selectAllChildren(QVariantList() << QVariant(0));
@@ -544,7 +561,8 @@ void GitRepoPage::onTranslatorChanged(bool reload)
     _branchesAction->setTitle(tr("Branches"));
     _logAction->setTitle(tr("Log"));
     _addAllAction->setTitle(tr("Add All"));
-    _resetAllAction->setTitle(tr("Reset All"));
+    _resetMixedAction->setTitle(tr("Reset (Mixed)"));
+    _resetHardAction->setTitle(tr("Reset (Hard)"));
     _multiAddAction->setTitle(tr("Add"));
     _multiResetAction->setTitle(tr("Reset"));
     if (reload)
@@ -653,10 +671,14 @@ VisualNode *GitRepoPage::StatusItemProvider::createItem(ListView *, const QStrin
         return Header::create();
     if (type == "headToIndexItem")
         return StandardListItem::create()
-            .actionSet(new StatusActionSet(_gitRepoPage, HeadToIndex));
+            .actionSet(new StatusActionSet(_gitRepoPage, SIGNAL(translatorChanged()),
+                    SLOT(showDiffSelection()), NULL,
+                    SLOT(resetSelections()), SLOT(onSelectAllOnIndexTriggered())));
     if (type == "indexToWorkdirItem")
         return StandardListItem::create()
-            .actionSet(new StatusActionSet(_gitRepoPage, IndexToWorkdir));
+            .actionSet(new StatusActionSet(_gitRepoPage, SIGNAL(translatorChanged()),
+                    SLOT(showDiffSelection()), SLOT(addSelections()),
+                    NULL, SLOT(onSelectAllOnWorkdirTriggered())));
     return NULL;
 }
 
@@ -730,4 +752,16 @@ void GitRepoPage::onProjectPathChanged()
         parent()->navigateTo(this);
         reload();
     }
+}
+
+void GitRepoPage::onSelectAllOnIndexTriggered()
+{
+    _statusListView->multiSelectHandler()->setActive(true);
+    QTimer::singleShot(0, this, SLOT(selectAllOnIndex()));
+}
+
+void GitRepoPage::onSelectAllOnWorkdirTriggered()
+{
+    _statusListView->multiSelectHandler()->setActive(true);
+    QTimer::singleShot(0, this, SLOT(selectAllOnWorkdir()));
 }

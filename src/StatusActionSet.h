@@ -16,22 +16,17 @@ namespace bb {
     }
 }
 
-class GitRepoPage;
-
-enum StatusDiffType { HeadToIndex, IndexToWorkdir };
-
 class StatusActionSet : public bb::cascades::ActionSet
 {
     Q_OBJECT
 public:
-    StatusActionSet(GitRepoPage *, StatusDiffType);
+    StatusActionSet(QObject *receiver, const char *translatorChangedSignal,
+            const char *diffAction, const char *addAction,
+            const char *resetAction, const char *selectAllAction);
     Q_SLOT void onTranslatorChanged();
 private:
-    GitRepoPage *_repoPage;
     bb::cascades::ActionItem *_diff, *_reset, *_add;
     bb::cascades::ActionItem *_selectAll;
-    Q_SLOT void onSelectAllOnIndexTriggered();
-    Q_SLOT void onSelectAllOnWorkdirTriggered();
 };
 
 #endif /* STATUSACTIONSET_H_ */

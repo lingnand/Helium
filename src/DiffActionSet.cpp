@@ -7,23 +7,25 @@
 
 #include <bb/cascades/ActionItem>
 #include <DiffActionSet.h>
-#include <GitCommitInfoPage.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-DiffActionSet::DiffActionSet(GitCommitInfoPage *page):
-    _diff(ActionItem::create()
-        .onTriggered(page, SLOT(showDiffSelection())))
+DiffActionSet::DiffActionSet(QObject *receiver, const char *translatorChangedSignal,
+            const char *diffAction):
+    _diff(NULL)
 {
-    add(_diff);
+    if (diffAction)
+        add(_diff = ActionItem::create()
+            .onTriggered(receiver, diffAction));
     onTranslatorChanged();
-    conn(page, SIGNAL(translatorChanged()),
+    conn(receiver, translatorChangedSignal,
         this, SLOT(onTranslatorChanged()));
 }
 
 void DiffActionSet::onTranslatorChanged()
 {
-    _diff->setTitle(tr("View Diff"));
+    if (_diff)
+        _diff->setTitle(tr("View Diff"));
 }
 

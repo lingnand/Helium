@@ -16,13 +16,12 @@ namespace bb {
     }
 }
 
-class GitLogPage;
-
 class CommitActionSet : public bb::cascades::ActionSet
 {
     Q_OBJECT
 public:
-    CommitActionSet(GitLogPage *);
+    CommitActionSet(QObject *receiver, const char *translatorChangedSignal,
+            const char *infoAction, const char *checkoutAction);
     Q_SLOT void onTranslatorChanged();
 private:
     bb::cascades::ActionItem *_info, *_checkout;

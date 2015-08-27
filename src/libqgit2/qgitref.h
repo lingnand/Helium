@@ -75,6 +75,8 @@ namespace LibQGit2
              */
             OId target() const;
 
+            OId peelToTarget() const;
+
             /**
              * Get full name to the reference pointed by this reference
              *
@@ -83,7 +85,6 @@ namespace LibQGit2
              * @return a pointer to the name if available, NULL otherwise
              */
             QString symbolicTarget() const;
-
             /**
              * Return true if the reference is direct (i.e. a reference to an OID)
              */

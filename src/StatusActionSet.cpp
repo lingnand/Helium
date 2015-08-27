@@ -5,65 +5,44 @@
  *      Author: lingnan
  */
 
-#include <QTimer>
 #include <bb/cascades/ActionItem>
-#include <bb/cascades/MultiSelectActionItem>
-#include <bb/cascades/ListView>
 #include <StatusActionSet.h>
-#include <GitRepoPage.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-StatusActionSet::StatusActionSet(GitRepoPage *page, StatusDiffType type):
-    _repoPage(page),
-    _diff(ActionItem::create()
-        .onTriggered(page, SLOT(showDiffSelection()))),
-    _reset(NULL), _add(NULL),
-    _selectAll(NULL)
+StatusActionSet::StatusActionSet(QObject *receiver, const char *translatorChangedSignal,
+            const char *diffAction, const char *addAction,
+            const char *resetAction, const char *selectAllAction):
+    _diff(NULL), _add(NULL),
+    _reset(NULL),_selectAll(NULL)
 {
-    add(_diff);
-    const char *method = NULL;
-    switch (type) {
-        case HeadToIndex:
-            add(_reset = ActionItem::create()
-                .onTriggered(page, SLOT(resetSelections())));
-            method = SLOT(onSelectAllOnIndexTriggered());
-            break;
-        case IndexToWorkdir:
-            add(_add = ActionItem::create()
-                .onTriggered(page, SLOT(addSelections())));
-            method = SLOT(onSelectAllOnWorkdirTriggered());
-            break;
-    }
-    if (method != NULL) {
+    if (diffAction)
+        add(_diff = ActionItem::create()
+            .onTriggered(receiver, diffAction));
+    if (addAction)
+        add(_add = ActionItem::create()
+            .onTriggered(receiver, addAction));
+    if (resetAction)
+        add(_reset = ActionItem::create()
+            .onTriggered(receiver, resetAction));
+    if (selectAllAction)
         add(_selectAll = ActionItem::create()
             .imageSource(QUrl("asset:///images/ic_select_all.png"))
-            .onTriggered(this, method));
-    }
+            .onTriggered(receiver, selectAllAction));
     onTranslatorChanged();
-    conn(page, SIGNAL(translatorChanged()),
+    conn(receiver, translatorChangedSignal,
             this, SLOT(onTranslatorChanged()));
 }
 
 void StatusActionSet::onTranslatorChanged()
 {
-    _diff->setTitle(tr("View Diff"));
+    if (_diff)
+        _diff->setTitle(tr("View Diff"));
     if (_add)
         _add->setTitle(tr("Add"));
     if (_reset)
         _reset->setTitle(tr("Reset"));
-    _selectAll->setTitle(tr("Select All"));
-}
-
-void StatusActionSet::onSelectAllOnIndexTriggered()
-{
-    _repoPage->statusListView()->multiSelectHandler()->setActive(true);
-    QTimer::singleShot(0, _repoPage, SLOT(selectAllOnIndex()));
-}
-
-void StatusActionSet::onSelectAllOnWorkdirTriggered()
-{
-    _repoPage->statusListView()->multiSelectHandler()->setActive(true);
-    QTimer::singleShot(0, _repoPage, SLOT(selectAllOnWorkdir()));
+    if (_selectAll)
+        _selectAll->setTitle(tr("Select All"));
 }

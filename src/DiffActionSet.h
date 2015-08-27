@@ -16,13 +16,12 @@ namespace bb {
     }
 }
 
-class GitCommitInfoPage;
-
 class DiffActionSet : public bb::cascades::ActionSet
 {
     Q_OBJECT
 public:
-    DiffActionSet(GitCommitInfoPage *);
+    DiffActionSet(QObject *receiver, const char *translatorChangedSignal,
+            const char *diffAction);
     Q_SLOT void onTranslatorChanged();
 private:
     bb::cascades::ActionItem *_diff;

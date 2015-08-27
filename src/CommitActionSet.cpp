@@ -7,27 +7,31 @@
 
 #include <bb/cascades/ActionItem>
 #include <CommitActionSet.h>
-#include <GitLogPage.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-CommitActionSet::CommitActionSet(GitLogPage *page):
-    _info(ActionItem::create()
-        .onTriggered(page, SLOT(showCommitInfoSelection()))),
-    _checkout(ActionItem::create()
-        .onTriggered(page, SLOT(checkoutSelection())))
+CommitActionSet::CommitActionSet(QObject *receiver, const char *translatorChangedSignal,
+            const char *infoAction, const char *checkoutAction):
+    _info(NULL),
+    _checkout(NULL)
 {
-    add(_info);
-    add(_checkout);
+    if (infoAction)
+        add(_info = ActionItem::create()
+            .onTriggered(receiver, infoAction));
+    if (checkoutAction)
+        add(_checkout = ActionItem::create()
+            .onTriggered(receiver, checkoutAction));
     onTranslatorChanged();
-    conn(page, SIGNAL(translatorChanged()),
+    conn(receiver, translatorChangedSignal,
             this, SLOT(onTranslatorChanged()));
 }
 
 void CommitActionSet::onTranslatorChanged()
 {
-    _info->setTitle(tr("View Info"));
-    _checkout->setTitle(tr("Checkout"));
+    if (_info)
+        _info->setTitle(tr("View Info"));
+    if (_checkout)
+        _checkout->setTitle(tr("Checkout"));
 }
 

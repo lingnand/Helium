@@ -201,7 +201,8 @@ VisualNode *GitLogPage::CommitItemProvider::createItem(ListView *, const QString
     if (type == "header")
         return Header::create();
     return StandardListItem::create()
-        .actionSet(new CommitActionSet(_page));
+        .actionSet(new CommitActionSet(_page, SIGNAL(translatorChanged()),
+                SLOT(showCommitInfoSelection()), SLOT(checkoutSelection())));
 }
 
 void GitLogPage::CommitItemProvider::updateItem(ListView *, bb::cascades::VisualNode *listItem, const QString &type,

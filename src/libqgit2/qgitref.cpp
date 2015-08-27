@@ -47,6 +47,11 @@ OId Reference::target() const
     return OId(git_reference_target(d.data()));
 }
 
+OId Reference::peelToTarget() const
+{
+    return OId(git_reference_target_peel(d.data()));
+}
+
 QString Reference::symbolicTarget() const
 {
     return QString::fromUtf8(git_reference_symbolic_target(d.data()));

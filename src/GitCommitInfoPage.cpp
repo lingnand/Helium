@@ -213,8 +213,9 @@ VisualNode *GitCommitInfoPage::DiffItemProvider::createItem(ListView *, const QS
     if (type == "sigitem")
         return StandardListItem::create();
     if (type == "diffitem")
-        return StandardListItem::create()
-            .actionSet(new DiffActionSet(_page));
+        return StandardListItem::create().actionSet(
+                new DiffActionSet(_page, SIGNAL(translatorChanged()),
+                    SLOT(showDiffSelection())));
     return NULL;
 }
 
