@@ -38,6 +38,7 @@ class GitDiffPage;
 class GitLogPage;
 class GitCommitPage;
 class GitCommitInfoPage;
+class GitBranchPage;
 
 class GitRepoPage : public PushablePage
 {
@@ -55,6 +56,7 @@ public:
     Q_SLOT bool commit(const QString &);
     Q_SLOT bool checkout(const LibQGit2::Object &);
     GitDiffPage *diffPage();
+    GitLogPage *logPage();
     GitCommitInfoPage *commitInfoPage();
     Q_SLOT void onPagePopped(bb::cascades::Page *);
     void onTranslatorChanged(bool reload=true);
@@ -114,6 +116,7 @@ private:
     GitLogPage *_logPage;
     GitCommitPage *_commitPage;
     GitCommitInfoPage *_commitInfoPage;
+    GitBranchPage *_branchPage;
 
     GitWorker _worker;
 

@@ -146,9 +146,8 @@ int GitLogPage::CommitDataModel::childCount(const QVariantList &ip)
 {
     if (ip.empty())
         return _commits.size();
-    if (ip.size() == 1) {
+    if (ip.size() == 1)
         return _commits[ip[0].toInt()].size();
-    }
     return 0;
 }
 
@@ -156,10 +155,8 @@ bool GitLogPage::CommitDataModel::hasChildren(const QVariantList &ip)
 {
     if (ip.empty())
         return true;
-    if (ip.size() == 1) {
-        if (ip[0].toInt() < _commits.size())
-            return true;
-    }
+    if (ip.size() == 1)
+        return ip[0].toInt() < _commits.size();
     return false;
 }
 

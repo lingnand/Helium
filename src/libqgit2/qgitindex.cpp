@@ -26,6 +26,7 @@
 #include "qgitrepository.h"
 
 #include "private/pathcodec.h"
+#include "private/strarray.h"
 
 namespace LibQGit2
 {
@@ -84,9 +85,10 @@ void Index::addByPath(const QString& path)
     qGitThrow(git_index_add_bypath(data(), PathCodec::toLibGit2(path)));
 }
 
-void Index::addAll(const StrArray &pathspecs, AddFlag flags)
+void Index::addAll(const QList<QString> &pathspecs, AddFlags flags)
 {
-    qGitThrow(git_index_add_all(data(), pathspecs.data(), flags, NULL, 0));
+    internal::StrArray arr(pathspecs);
+    qGitThrow(git_index_add_all(data(), arr.data(), flags, NULL, 0));
 }
 
 void Index::remove(const QString& path, int stage)
@@ -94,9 +96,10 @@ void Index::remove(const QString& path, int stage)
     qGitThrow(git_index_remove(data(), PathCodec::toLibGit2(path), stage));
 }
 
-void Index::removeAll(const StrArray &pathspecs)
+void Index::removeAll(const QList<QString> &pathspecs)
 {
-    qGitThrow(git_index_remove_all(data(), pathspecs.data(), NULL, 0));
+    internal::StrArray arr(pathspecs);
+    qGitThrow(git_index_remove_all(data(), arr.data(), NULL, 0));
 }
 
 void Index::add(const IndexEntry &source_entry)

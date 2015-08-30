@@ -102,6 +102,9 @@ namespace LibQGit2
              */
             QString name() const;
 
+            QString branchName() const;
+
+            bool branchIsHead() const;
             /**
              * Resolve a symbolic reference
              *
@@ -189,5 +192,7 @@ namespace LibQGit2
 
     /**@}*/
 }
+
+Q_DECLARE_METATYPE(LibQGit2::Reference)
 
 #endif // LIBQGIT2_REF_H

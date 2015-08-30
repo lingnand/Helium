@@ -29,41 +29,31 @@ StrArray::StrArray()
     m_data.strings = NULL;
 }
 
-StrArray::StrArray(const QList<QByteArray> &list) :
-    m_strings(list)
+StrArray::StrArray(const QList<QString> &strings)
 {
-    m_data.count = 0;
     m_data.strings = NULL;
-
-    updateNative();
-}
-
-StrArray::StrArray(const QList<QString> &paths)
-{
-    m_data.count = 0;
-    m_data.strings = NULL;
-    set(paths);
+    set(strings);
 }
 
 StrArray::~StrArray()
 {
-    free(m_data.strings);
+    git_strarray_free(&m_data);
 }
 
-void StrArray::set(const QList<QByteArray> &list)
+void StrArray::set(const QList<QString> &strings)
 {
-    m_strings = list;
-    updateNative();
-}
-
-void StrArray::set(const QList<QString> &paths)
-{
-    QList<QByteArray> pathByteArrays;
-    pathByteArrays.reserve(paths.size());
-    foreach (const QString &path, paths) {
-        pathByteArrays.append(PathCodec::toLibGit2(path));
+    m_data.count = strings.size();
+    if (m_data.count == 0) {
+        git_strarray_free(&m_data);
+        return;
     }
-    set(pathByteArrays);
+
+    m_data.strings = (char **) realloc(m_data.strings, m_data.count * sizeof(char *));
+    for (size_t i = 0; i < m_data.count; ++i) {
+        QByteArray arr = strings[i].toLocal8Bit();
+        m_data.strings[i] = (char *) malloc(arr.size()+1);
+        strcpy(m_data.strings[i], arr.data());
+    }
 }
 
 size_t StrArray::count() const
@@ -81,20 +71,13 @@ const git_strarray* StrArray::constData() const
     return &m_data;
 }
 
-void StrArray::updateNative()
+QList<QString> StrArray::toStringList() const
 {
-    const size_t newCount = m_strings.size();
-    if (newCount == 0) {
-        free(m_data.strings);
-        m_data.strings = NULL;
-    } else if (newCount > m_data.count) {
-        m_data.strings = (char**)realloc(m_data.strings, newCount * sizeof(char*));
+    QList<QString> list;
+    for (size_t i = 0; i < m_data.count; i++) {
+        list.append(QString::fromLocal8Bit(m_data.strings[i]));
     }
-    m_data.count = newCount;
-
-    for (size_t i = 0; i < newCount; ++i) {
-        m_data.strings[i] = m_strings[i].data();
-    }
+    return list;
 }
 
 }

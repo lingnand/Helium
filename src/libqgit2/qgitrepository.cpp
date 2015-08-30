@@ -30,7 +30,6 @@
 #include "qgitexception.h"
 #include "qgitstatus.h"
 #include "qgitremote.h"
-#include "qgitcredentials.h"
 #include "qgitdiff.h"
 #include "private/annotatedcommit.h"
 #include "private/qbuffer.h"
@@ -51,7 +50,6 @@ class Repository::Private : public internal::RemoteListener
 public:
     typedef QSharedPointer<git_repository> ptr_type;
     ptr_type d;
-    QMap<QString, Credentials> m_remote_credentials;
     Repository &m_owner;
 
     Private(git_repository *repository, bool own, Repository &owner) :
@@ -62,7 +60,6 @@ public:
 
     Private(const Private &other, Repository &owner) :
         d(other.d),
-        m_remote_credentials(other.m_remote_credentials),
         m_owner(owner)
     {
     }
@@ -336,6 +333,24 @@ OId Repository::createBlobFromBuffer(const QByteArray& buffer)
     return oid;
 }
 
+QList<Repository::Branch> Repository::listBranches(BranchType type) const
+{
+    git_branch_iterator *it = NULL;
+    qGitThrow(git_branch_iterator_new(&it, SAFE_DATA, (git_branch_t) type));
+    QList<Branch> branches;
+    git_reference *ref = NULL;
+    git_branch_t t;
+    while (true) {
+        int ret = git_branch_next(&ref, &t, it);
+        if (ret == GIT_ITEROVER)
+            break;
+        qGitThrow(ret);
+        branches.append((Branch) { (BranchType) t, Reference(ref) });
+    }
+    git_branch_iterator_free(it);
+    return branches;
+}
+
 Reference Repository::createBranch(const QString &branchName, const Commit &target, bool force, const Signature &signature, const QString &message)
 {
     Commit usedTarget(target);
@@ -363,28 +378,16 @@ void Repository::cherryPick(const Commit &commit, const CherryPickOptions &opts)
 
 QStringList Repository::listTags(const QString& pattern) const
 {
-    git_strarray tags;
-    qGitThrow(git_tag_list_match(&tags, qPrintable(pattern), SAFE_DATA));
-    QStringList list;
-    for (size_t i = 0; i < tags.count; ++i)
-    {
-        list << QString(tags.strings[i]);
-    }
-    git_strarray_free(&tags);
-    return list;
+    internal::StrArray tags;
+    qGitThrow(git_tag_list_match(tags.data(), qPrintable(pattern), SAFE_DATA));
+    return QStringList(tags.toStringList());
 }
 
 QStringList Repository::listReferences() const
 {
-    git_strarray refs;
-    qGitThrow(git_reference_list(&refs, SAFE_DATA));
-    QStringList list;
-    for (size_t i = 0; i < refs.count; ++i)
-    {
-        list << QString(refs.strings[i]);
-    }
-    git_strarray_free(&refs);
-    return list;
+    internal::StrArray refs;
+    qGitThrow(git_reference_list(refs.data(), SAFE_DATA));
+    return QStringList(refs.toStringList());
 }
 
 Database Repository::database() const
@@ -464,16 +467,10 @@ const git_repository* Repository::constData() const
 }
 
 
-void Repository::setRemoteCredentials(const QString& remoteName, Credentials credentials)
-{
-    d_ptr->m_remote_credentials[remoteName] = credentials;
-}
-
-
-void Repository::clone(const QString& url, const QString& path, const Signature &signature)
+void Repository::clone(const QString& url, const QString& path, const Credentials &credentials, const Signature &signature)
 {
     const QString remoteName("origin");
-    internal::RemoteCallbacks remoteCallbacks(d_ptr.data(), d_ptr->m_remote_credentials.value(remoteName));
+    internal::RemoteCallbacks remoteCallbacks(d_ptr.data(), credentials);
 
     git_repository *repo = 0;
     git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
@@ -486,85 +483,27 @@ void Repository::clone(const QString& url, const QString& path, const Signature 
 }
 
 
-void Repository::remoteAdd(const QString& name, const QString& url, bool changeUrlIfExists)
+Remote *Repository::createRemote(const QString& name, const QString& url, const Credentials &credentials, QObject *parent)
 {
     git_remote *r = NULL;
-    switch (git_remote_lookup(&r, SAFE_DATA, name.toLatin1())) {
-    case GIT_ENOTFOUND:
-        r = NULL;
-        qGitThrow(git_remote_create(&r, SAFE_DATA, name.toLatin1(), url.toLatin1()));
-        break;
-
-    case GIT_OK:
-        if (QString::fromLatin1(git_remote_url(r)) != url) {
-            if (changeUrlIfExists) {
-                qGitThrow(git_remote_set_url(r, url.toLatin1()));
-                qGitThrow(git_remote_save(r));
-            } else {
-                THROW("remote already exists");
-            }
-        }
-        break;
-
-    default:
-        throw Exception();
-        break;
-    }
+    qGitThrow(git_remote_create(&r, SAFE_DATA, name.toLatin1(), url.toLatin1()));
+    return new Remote(r, credentials, parent);
 }
 
 
-Remote* Repository::remote(const QString &remoteName, QObject *parent) const
+Remote *Repository::remote(const QString &remoteName, const Credentials &credentials, QObject *parent) const
 {
     git_remote *r = NULL;
     qGitThrow(git_remote_lookup(&r, SAFE_DATA, remoteName.toLatin1()));
-    return new Remote(r, d_ptr->m_remote_credentials.value(remoteName), parent);
+    return new Remote(r, credentials, parent);
 }
 
-
-void Repository::fetch(const QString& name, const QString& head, const Signature &signature, const QString &message)
+QStringList Repository::listRemotes() const
 {
-    git_remote *_remote = NULL;
-    qGitThrow(git_remote_lookup(&_remote, SAFE_DATA, name.toLatin1()));
-    Remote remote(_remote, d_ptr->m_remote_credentials.value(name));
-    connect(&remote, SIGNAL(transferProgress(int)), this, SIGNAL(fetchProgress(int)));
-
-    internal::StrArray refs;
-    if (!head.isEmpty()) {
-        const QString refspec = QString("refs/heads/%2:refs/remotes/%1/%2").arg(name).arg(head);
-        refs.set(QList<QByteArray>() << refspec.toLatin1());
-    }
-
-    qGitThrow(git_remote_fetch(remote.data(), refs.count() > 0 ? refs.constData() : NULL, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+    internal::StrArray arr;
+    qGitThrow(git_remote_list(arr.data(), SAFE_DATA));
+    return QStringList(arr.toStringList());
 }
-
-
-QStringList Repository::remoteBranches(const QString& remoteName)
-{
-    git_remote *_remote = NULL;
-    qGitThrow(git_remote_lookup(&_remote, SAFE_DATA, remoteName.toLatin1()));
-    Remote remote(_remote, d_ptr->m_remote_credentials.value(remoteName));
-
-    qGitThrow(git_remote_connect(remote.data(), GIT_DIRECTION_FETCH));
-    qGitEnsureValue(1, git_remote_connected(remote.data()));
-
-    /* List the heads on the remote */
-    const git_remote_head** remote_heads = NULL;
-    size_t count = 0;
-    qGitThrow(git_remote_ls(&remote_heads, &count, remote.data()));
-    QStringList heads;
-    for (size_t i = 0; i < count; ++i) {
-        const git_remote_head* head = remote_heads[i];
-        if (head && head->name) {
-            QString ref = QString::fromLatin1(head->name);
-            if (ref.startsWith("refs/heads/")) {
-                heads << ref.replace("refs/heads/", "");
-            }
-        }
-    }
-
-    return heads;
-}
-
 
 void Repository::checkoutTree(const Object &treeish, const CheckoutOptions &opts)
 {
@@ -585,7 +524,6 @@ void Repository::checkoutRemote(const QString& branch, const CheckoutOptions &op
 
     qGitThrow(git_repository_set_head(SAFE_DATA, refspec.toLatin1(), signature.data(), message.toUtf8()));
 }
-
 
 void Repository::reset(const Object &target, ResetType type, const Signature &signature, const QString &message)
 {
@@ -609,9 +547,9 @@ void Repository::reset(const Object &target, ResetType type, const Signature &si
     qGitThrow(git_reset(SAFE_DATA, target.data(), resetType, NULL, const_cast<git_signature*>(signature.data()), message.isNull() ? NULL : message.toUtf8().constData()));
 }
 
-void Repository::resetDefault(const Object &target, const StrArray &pathspecs)
+void Repository::resetDefault(const Object &target, const QStringList &pathspecs)
 {
-    qGitThrow(git_reset_default(SAFE_DATA, target.data(), pathspecs.data()));
+    qGitThrow(git_reset_default(SAFE_DATA, target.data(), internal::StrArray(pathspecs).data()));
 }
 
 void Repository::setHeadDetached(const OId &commitish, const Signature &signature, const QString &message)

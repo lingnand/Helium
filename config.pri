@@ -586,6 +586,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/FindMode.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.cpp) \
+        $$quote($$BASEDIR/src/GitBranchPage.cpp) \
         $$quote($$BASEDIR/src/GitCommitInfoPage.cpp) \
         $$quote($$BASEDIR/src/GitCommitPage.cpp) \
         $$quote($$BASEDIR/src/GitDiffPage.cpp) \
@@ -659,6 +660,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitrebase.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebaseoptions.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitref.cpp) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrefspec.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitremote.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitrepository.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitrevwalk.cpp) \
@@ -667,7 +669,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitstatusentry.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatuslist.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatusoptions.cpp) \
-        $$quote($$BASEDIR/src/libqgit2/qgitstrarray.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgittag.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgittree.cpp) \
         $$quote($$BASEDIR/src/libqgit2/qgittreeentry.cpp) \
@@ -765,6 +766,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GeneralSettings.h) \
         $$quote($$BASEDIR/src/GeneralSettingsPage.h) \
         $$quote($$BASEDIR/src/GeneralSettingsStorage.h) \
+        $$quote($$BASEDIR/src/GitBranchPage.h) \
         $$quote($$BASEDIR/src/GitCommitInfoPage.h) \
         $$quote($$BASEDIR/src/GitCommitPage.h) \
         $$quote($$BASEDIR/src/GitDiffPage.h) \
@@ -838,12 +840,14 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitindexentry.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitindexmodel.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitmergeoptions.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitnet.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitobject.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitoid.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitpatch.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebase.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitrebaseoptions.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitref.h) \
+        $$quote($$BASEDIR/src/libqgit2/qgitrefspec.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitremote.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitrepository.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitrevwalk.h) \
@@ -852,7 +856,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/libqgit2/qgitstatusentry.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatuslist.h) \
         $$quote($$BASEDIR/src/libqgit2/qgitstatusoptions.h) \
-        $$quote($$BASEDIR/src/libqgit2/qgitstrarray.h) \
         $$quote($$BASEDIR/src/libqgit2/qgittag.h) \
         $$quote($$BASEDIR/src/libqgit2/qgittree.h) \
         $$quote($$BASEDIR/src/libqgit2/qgittreeentry.h) \

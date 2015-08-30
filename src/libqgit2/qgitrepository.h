@@ -42,7 +42,7 @@
 #include "qgitcherrypickoptions.h"
 #include "qgitrebase.h"
 #include "qgitrebaseoptions.h"
-#include "qgitstrarray.h"
+#include "qgitcredentials.h"
 
 namespace LibQGit2
 {
@@ -404,6 +404,18 @@ namespace LibQGit2
              */
             OId createBlobFromBuffer(const QByteArray& buffer);
 
+            enum BranchType {
+                BranchLocal = GIT_BRANCH_LOCAL,
+                BranchRemote = GIT_BRANCH_REMOTE,
+                BranchAll = GIT_BRANCH_ALL,
+            };
+
+            struct Branch {
+                BranchType type;
+                Reference reference;
+            };
+            QList<Branch> listBranches(BranchType = BranchLocal) const;
+
             /**
              * Creates a new branch to this repository.
              * @param branchName The name of the new branch.
@@ -566,19 +578,6 @@ namespace LibQGit2
             Index mergeTrees(const Tree &our, const Tree &their, const Tree &ancestor = Tree(), const MergeOptions &opts = MergeOptions());
 
             /**
-             * @brief Sets a \c Credentials object to be used for a named remote.
-             *
-             * Some remotes require authentication when communicating with them. Authentication
-             * is performed by using \c Credentials objects. Each named remote can have its own
-             * \c Credentials object. The credentials for a remote must be set using this method
-             * before trying to communicate with it.
-             *
-             * @param remoteName the name of the remote
-             * @param credentials the \c Credentials to be used for the remote
-             */
-            void setRemoteCredentials(const QString& remoteName, Credentials credentials);
-
-            /**
             * Clone a git repository.
             *
             * Signal cloneProgress(int) is emitted with progress in percent.
@@ -588,7 +587,7 @@ namespace LibQGit2
             * @param signature The identity used when updating the reflog
             * @throws LibQGit2::Exception
             */
-            void clone(const QString& url, const QString& path, const Signature &signature = Signature());
+            void clone(const QString& url, const QString& path, const Credentials &credentials = Credentials(), const Signature &signature = Signature());
 
             /**
             * Add remote repository.
@@ -599,33 +598,18 @@ namespace LibQGit2
             * if true changes the remote's URL, if false throws an exception.
             * @throws LibQGit2::Exception
             */
-            void remoteAdd(const QString& name, const QString& url, bool changeUrlIfExists = false);
+            Remote *createRemote(const QString& name,  const QString& url,
+                    const Credentials &crendentials = Credentials(), QObject *parent = 0);
 
             /**
-             * Gets a named remote from this repository. The caller is responsible for
-             * managing the returned object.
+             * Gets a named remote from this repository.
              * @param remoteName the name of the remote
              * @param parent the parent for the object that is returned
              * @throws LibQGit2::Exception
              */
-            Remote* remote(const QString &remoteName, QObject *parent = 0) const;
+            Remote *remote(const QString &remoteName, const Credentials &crendentials = Credentials(), QObject *parent = 0) const;
 
-            /**
-            * Fetch from known remote repository.
-            *
-            * @param remote Name of the remote repository (e.g. "origin")
-            * @param head Name of head to fetch (e.g. "master"). If left as the default
-            *        the fetch heads configured for the remote are used.
-            * @param signature The identity to use when updating reflogs
-            * @param message The message to insert into the reflogs. If left as the
-            *        default (a null string), a message "fetch <name>" is used , where <name>
-            *        is the name of the remote (or its url, for in-memory remotes).
-            * @throws LibQGit2::Exception
-            */
-            void fetch(const QString& remote, const QString& head = QString(), const Signature &signature = Signature(), const QString &message = QString());
-
-            QStringList remoteBranches(const QString& remoteName);
-
+            QStringList listRemotes() const;
 
             /**
              * Checkout a treeish, i.e. a Commit, Tag or Tree.
@@ -678,7 +662,7 @@ namespace LibQGit2
              */
             void reset(const Object &target, ResetType type = Mixed, const Signature &signature = Signature(), const QString &message = QString());
 
-            void resetDefault(const Object &target, const StrArray &pathspecs);
+            void resetDefault(const Object &target, const QStringList &pathspecs);
 
             void setHeadDetached(const OId &commitish, const Signature &signature = Signature(), const QString &message = QString());
             /**
@@ -713,7 +697,6 @@ namespace LibQGit2
 
         signals:
             void cloneProgress(int);
-            void fetchProgress(int);
 
         private:
             class Private;

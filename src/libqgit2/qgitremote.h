@@ -22,6 +22,8 @@
 #include "libqgit2_config.h"
 #include "qgitsignature.h"
 #include "qgitcredentials.h"
+#include "qgitoid.h"
+#include "qgitrefspec.h"
 
 #include <QtCore/QSharedPointer>
 
@@ -40,6 +42,7 @@ class LIBQGIT2_EXPORT Remote : public QObject
     Q_OBJECT
 
 public:
+
     /**
      * @param remote The raw remote pointer. This needs to be initialized beforehand.
      *        This object takes ownership of this pointer and frees it when this object is destructed.
@@ -48,10 +51,21 @@ public:
      */
     explicit Remote(git_remote *remote, const Credentials &credentials = Credentials(), QObject *parent = 0);
 
+    QString name() const;
+
     /**
      * Gets the URL specified for this remote.
      */
     QString url() const;
+
+    // call save() afterwards
+    void setUrl(const QString &);
+
+    void save();
+
+    size_t refspecCount() const;
+
+    Refspec refspec(size_t n) const;
 
     /**
      * Perform a push on this Remote.
@@ -62,6 +76,26 @@ public:
      * @throws LibQGit2::Exception
      */
     void push(const QList<QString> &refSpecs = QList<QString>(), const Signature &signature = Signature(), const QString &message = QString());
+
+    /**
+    * Fetch from remote.
+    *
+    * @param head Name of head to fetch (e.g. "master"). If left as the default
+    *        the fetch heads configured for the remote are used.
+    * @param signature The identity to use when updating reflogs
+    * @param message The message to insert into the reflogs. If left as the
+    *        default (a null string), a message "fetch <name>" is used , where <name>
+    *        is the name of the remote (or its url, for in-memory remotes).
+    * @throws LibQGit2::Exception
+    */
+    void fetch(const QString& head = QString(), const Signature &signature = Signature(), const QString &message = QString());
+
+    struct Head {
+        bool availableLocally;
+        OId id, localId;
+        QString name, symbolicTarget;
+    };
+    QList<Head> list();
 
     git_remote* data() const;
 
@@ -78,5 +112,7 @@ private:
 /** @} */
 
 }
+
+Q_DECLARE_METATYPE(LibQGit2::Remote *)
 
 #endif // LIBQGIT2_REMOTE_H

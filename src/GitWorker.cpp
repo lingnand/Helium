@@ -40,7 +40,7 @@ void GitWorker::addPathsAndFetchNewStatusList(const QList<QString> &paths, Progr
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
-        _repo->index().addAll(LibQGit2::StrArray(paths));
+        _repo->index().addAll(paths);
         emit progressChanged(progress.current+=initInc*2);
         fetchStatusList(progress);
     } catch (const LibQGit2::Exception &e) {
@@ -55,7 +55,7 @@ void GitWorker::resetPathsAndFetchNewStatusList(const QList<QString> &paths, Pro
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(initInc);
     try {
-        _repo->index().removeAll(LibQGit2::StrArray(paths));
+        _repo->index().removeAll(paths);
         emit progressChanged(progress.current+=initInc*2);
         fetchStatusList(progress);
     } catch (const LibQGit2::Exception &e) {

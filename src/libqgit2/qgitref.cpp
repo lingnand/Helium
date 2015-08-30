@@ -72,6 +72,18 @@ QString Reference::name() const
     return QString::fromUtf8(git_reference_name(d.data()));
 }
 
+QString Reference::branchName() const
+{
+    const char *name = NULL;
+    qGitThrow(git_branch_name(&name, d.data()));
+    return QString(name);
+}
+
+bool Reference::branchIsHead() const
+{
+    return qGitThrow(git_branch_is_head(d.data()));
+}
+
 Reference Reference::resolve() const
 {
     git_reference *ref;

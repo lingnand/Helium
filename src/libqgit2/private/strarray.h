@@ -29,13 +29,10 @@ class StrArray
 {
 public:
     explicit StrArray();
-    explicit StrArray(const QList<QByteArray> &list);
-    explicit StrArray(const QList<QString> &paths);
+    explicit StrArray(const QList<QString> &strings);
     ~StrArray();
 
-    void set(const QList<QByteArray> &list);
-
-    void set(const QList<QString> &paths);
+    void set(const QList<QString> &strings);
 
     size_t count() const;
 
@@ -43,11 +40,9 @@ public:
 
     const git_strarray *constData() const;
 
+    QList<QString> toStringList() const;
 private:
-    QList<QByteArray> m_strings;
     git_strarray m_data;
-
-    void updateNative();
 };
 
 }

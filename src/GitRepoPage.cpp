@@ -31,6 +31,7 @@
 #include <GitLogPage.h>
 #include <GitCommitPage.h>
 #include <GitCommitInfoPage.h>
+#include <GitBranchPage.h>
 #include <Project.h>
 #include <Segment.h>
 #include <SignalBlocker.h>
@@ -102,6 +103,7 @@ GitRepoPage::GitRepoPage(Project *project):
     _logPage(NULL),
     _commitPage(NULL),
     _commitInfoPage(NULL),
+    _branchPage(NULL),
     _worker(project->gitRepo())
 {
     _statusListView->setMultiSelectAction(MultiSelectActionItem::create());
@@ -215,7 +217,7 @@ void GitRepoPage::reload()
                 titleBar()->setTitle(tr("Detached at %1").arg(
                         QString(_project->gitRepo()->head().peelToCommit().oid().nformat(7))));
             } else {
-                titleBar()->setTitle(_project->gitRepo()->head().name());
+                titleBar()->setTitle(_project->gitRepo()->head().branchName());
             }
             _logAction->setEnabled(true);
         }
@@ -272,6 +274,7 @@ bool GitRepoPage::commit(const QString &message)
         LibQGit2::OId oid = repo->createCommit(repo->lookupTree(repo->index().createTree()),
                 parents, sig, sig, message, "HEAD");
         Utility::toast(tr("Commited %1").arg(QString(oid.nformat(7))));
+        repo->index().write();
     } catch (const LibQGit2::Exception &e) {
         Utility::toast(e.what());
         return false;
@@ -309,18 +312,29 @@ void GitRepoPage::showCommitPage()
 
 void GitRepoPage::branches()
 {
-
+    if (!_branchPage) {
+        _branchPage = new GitBranchPage(this);
+        conn(this, SIGNAL(translatorChanged()),
+            _branchPage, SLOT(onTranslatorChanged()));
+    }
+    _branchPage->reload();
+    parent()->push(_branchPage);
 }
 
-void GitRepoPage::log()
+GitLogPage *GitRepoPage::logPage()
 {
     if (!_logPage) {
         _logPage = new GitLogPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _logPage, SLOT(onTranslatorChanged()));
     }
-    _logPage->setReference(_project->gitRepo()->head());
-    parent()->push(_logPage);
+    return _logPage;
+}
+
+void GitRepoPage::log()
+{
+    logPage()->setReference(_project->gitRepo()->head());
+    parent()->push(logPage());
 }
 
 void GitRepoPage::addSelections()
@@ -743,6 +757,8 @@ void GitRepoPage::onPagePopped(Page *page)
         _diffPage->resetPatch();
     else if (page == _commitInfoPage)
         _commitInfoPage->resetCommit();
+    else if (page == _branchPage)
+        _branchPage->reset();
 }
 
 void GitRepoPage::onProjectPathChanged()

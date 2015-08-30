@@ -54,21 +54,74 @@ Remote::Remote(git_remote *remote, const Credentials &credentials, QObject *pare
 {
 }
 
+QString Remote::name() const
+{
+    return QString(git_remote_name(data()));
+}
+
 QString Remote::url() const
 {
-    return QString::fromLatin1(git_remote_url(data()));
+    return QString(git_remote_url(data()));
+}
+
+void Remote::setUrl(const QString &url)
+{
+    qGitThrow(git_remote_set_url(data(), url.toLatin1()));
+}
+
+void Remote::save()
+{
+    qGitThrow(git_remote_save(data()));
+}
+
+size_t Remote::refspecCount() const
+{
+    return git_remote_refspec_count(data());
+}
+
+Refspec Remote::refspec(size_t n) const
+{
+    return Refspec(git_remote_get_refspec(data(), n));
 }
 
 void Remote::push(const QList<QString> &refSpecs, const Signature &signature, const QString &message)
 {
-    QList<QByteArray> baRefSpecs;
-    foreach (const QString &ref, refSpecs) {
-        baRefSpecs.append(ref.toLatin1());
-    }
-    internal::StrArray refspecs(baRefSpecs);
+    internal::StrArray refspecs(refSpecs);
 
     git_push_options opts = GIT_PUSH_OPTIONS_INIT;
     qGitThrow(git_remote_push(data(), refspecs.constData(), &opts, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+}
+
+void Remote::fetch(const QString& head, const Signature &signature, const QString &message)
+{
+    internal::StrArray refs;
+    if (!head.isEmpty()) {
+        refs.set(QList<QString>() << QString("refs/heads/%2:refs/remotes/%1/%2").arg(name()).arg(head));
+    }
+
+    qGitThrow(git_remote_fetch(data(), refs.count() > 0 ? refs.constData() : NULL, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+}
+
+QList<Remote::Head> Remote::list()
+{
+    qGitThrow(git_remote_connect(data(), GIT_DIRECTION_FETCH));
+    qGitEnsureValue(1, git_remote_connected(data()));
+
+    /* List the heads on the remote */
+    const git_remote_head** remote_heads = NULL;
+    size_t count = 0;
+    qGitThrow(git_remote_ls(&remote_heads, &count, data()));
+    QList<Remote::Head> heads;
+    for (size_t i = 0; i < count; ++i) {
+        const git_remote_head* head = remote_heads[i];
+        if (head) {
+            heads << (Head) { head->local,
+                    OId(&head->oid), OId(&head->loid),
+                    QString(head->name), QString(head->symref_target) };
+        }
+    }
+
+    return heads;
 }
 
 git_remote* Remote::data() const
