@@ -33,10 +33,10 @@ public:
     Q_SLOT bool modOff(); // turn off sticky mod
 
     template <typename BuilderType, typename BuiltType>
-    class TBuilder : public BaseObject::TBuilder<BuilderType, BuiltType>
+    class TBuilder : public bb::cascades::KeyListener::TBuilder<BuilderType, BuiltType>
     {
     protected:
-          TBuilder(BuiltType* node) : BaseObject::TBuilder<BuilderType, BuiltType>(node)
+          TBuilder(BuiltType* node) : bb::cascades::KeyListener::TBuilder<BuilderType, BuiltType>(node)
           {
           }
     public:

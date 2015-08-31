@@ -16,14 +16,19 @@
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitdifffile.h>
 #include <GitDiffPage.h>
+#include <GitRepoPage.h>
 #include <Helium.h>
 #include <AppearanceSettings.h>
+#include <LocaleAwareActionItem.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-GitDiffPage::GitDiffPage():
-    _content(Segment::create())
+GitDiffPage::GitDiffPage(GitRepoPage *repoPage):
+    _repoPage(repoPage),
+    _content(Segment::create()),
+    _addAction(NULL),
+    _resetAction(NULL)
 {
     setTitleBar(TitleBar::create());
     setContent(ScrollView::create(_content)
@@ -109,10 +114,44 @@ void GitDiffPage::resetPatch()
     _patch = LibQGit2::Patch();
 }
 
-void GitDiffPage::hideAllActions()
+void GitDiffPage::setActions(Actions actions)
 {
     while (actionCount() > 0)
         removeAction(actionAt(0));
+    if (actions.testFlag(Add)) {
+        if (!_addAction)
+            _addAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Add"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("a"))
+                .onTriggered(this, SLOT(addFile()));
+        addAction(_addAction, ActionBarPlacement::Signature);
+    }
+    if (actions.testFlag(Reset)) {
+        if (!_resetAction)
+            _resetAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Reset"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("r"))
+                .onTriggered(this, SLOT(resetFile()));
+        addAction(_resetAction, ActionBarPlacement::Signature);
+    }
+}
+
+void GitDiffPage::addFile()
+{
+    _repoPage->addPaths(QList<QString>() << _patch.delta().newFile().path());
+    pop(); // pop the diff page
+}
+
+void GitDiffPage::resetFile()
+{
+    _repoPage->resetPaths(QList<QString>() << _patch.delta().newFile().path());
+    pop(); // pop the diff page
+}
+
+void GitDiffPage::onTranslatorChanged()
+{
+    PushablePage::onTranslatorChanged();
+    emit translatorChanged();
 }
 
 GitDiffPage::HunkView::HunkView():

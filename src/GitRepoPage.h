@@ -10,12 +10,18 @@
 
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
+#include <bb/cascades/ActionBarPlacement>
 #include <bb/system/SystemUiResult>
 #include <libqgit2/qgitstatuslist.h>
 #include <libqgit2/qgitdiffdelta.h>
 #include <libqgit2/qgitobject.h>
+#include <libqgit2/qgitpatch.h>
+#include <libqgit2/qgitcommit.h>
+#include <libqgit2/qgitref.h>
 #include <GitWorker.h>
-#include <StatusActionSet.h>
+#include <GitDiffPage.h>
+#include <GitCommitInfoPage.h>
+#include <GitLogPage.h>
 #include <PushablePage.h>
 
 namespace bb {
@@ -34,10 +40,7 @@ namespace LibQGit2 {
 
 class Project;
 class Segment;
-class GitDiffPage;
-class GitLogPage;
 class GitCommitPage;
-class GitCommitInfoPage;
 class GitBranchPage;
 
 class GitRepoPage : public PushablePage
@@ -55,9 +58,9 @@ public:
     Q_SLOT void safeResetHard();
     Q_SLOT bool commit(const QString &);
     Q_SLOT bool checkout(const LibQGit2::Object &);
-    GitDiffPage *diffPage();
-    GitLogPage *logPage();
-    GitCommitInfoPage *commitInfoPage();
+    void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
+    void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
+    void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
     Q_SLOT void onPagePopped(bb::cascades::Page *);
     void onTranslatorChanged(bool reload=true);
     Q_SLOT void selectAllOnIndex();
@@ -111,8 +114,6 @@ private:
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
     // lazily instantiated
     GitDiffPage *_diffPage;
-    bb::cascades::ActionItem *_diffAddAction;
-    bb::cascades::ActionItem *_diffResetAction;
     GitLogPage *_logPage;
     GitCommitPage *_commitPage;
     GitCommitInfoPage *_commitInfoPage;
@@ -127,12 +128,6 @@ private:
     Q_SLOT void clone();
     Q_SLOT void branches();
     Q_SLOT void log();
-    bb::cascades::ActionItem *diffAddAction();
-    Q_SLOT void reloadDiffAddActionTitle();
-    Q_SLOT void diffPageAddFile();
-    bb::cascades::ActionItem *diffResetAction();
-    Q_SLOT void reloadDiffResetActionTitle();
-    Q_SLOT void diffPageResetFile();
     Q_SLOT void showCommitPage();
     Q_SLOT void showDiffSelection();
     Q_SLOT void showDiffIndexPath(const QVariantList &);

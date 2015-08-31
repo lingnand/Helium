@@ -39,9 +39,7 @@ void GitBranchPage::showBranchLogIndexPath(const QVariantList &ip)
 {
     if (ip.size() < 2)
         return;
-    GitLogPage *page = _repoPage->logPage();
-    page->setReference(_dataModel.data(ip).value<LibQGit2::Reference>());
-    parent()->push(page);
+    _repoPage->pushLogPage(_dataModel.data(ip).value<LibQGit2::Reference>());
 }
 
 void GitBranchPage::showRemoteInfo()

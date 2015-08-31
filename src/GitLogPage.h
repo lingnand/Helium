@@ -31,6 +31,11 @@ public:
     // this should always be a valid reference
     void setReference(const LibQGit2::Reference &);
     void resetReference();
+    enum Action {
+
+    };
+    Q_DECLARE_FLAGS(Actions, Action)
+    void setActions(Actions=Actions());
     Q_SLOT void showCommitInfoSelection();
     Q_SLOT void checkoutSelection();
     void onTranslatorChanged();
@@ -63,11 +68,7 @@ private:
         GitLogPage *_page;
     } _commitItemProvider;
     bb::cascades::ListView *_commitList;
-    bb::cascades::ActionItem *_commitInfoCheckoutAction;
 
-    bb::cascades::ActionItem *commitInfoCheckoutAction();
-    Q_SLOT void commitInfoPageCheckout();
-    Q_SLOT void reloadCommitInfoCheckoutActionTitle();
     Q_SLOT void showCommitInfoIndexPath(const QVariantList &);
 };
 

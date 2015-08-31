@@ -11,7 +11,6 @@
 #include <libqgit2/qgitpatch.h>
 #include <PushablePage.h>
 #include <Segment.h>
-#include <StatusActionSet.h>
 
 namespace bb {
     namespace cascades {
@@ -21,17 +20,30 @@ namespace bb {
     }
 }
 
+class GitRepoPage;
+
 class GitDiffPage : public PushablePage
 {
     Q_OBJECT
 public:
-    GitDiffPage();
+    GitDiffPage(GitRepoPage *);
     void setPatch(const LibQGit2::Patch &);
-    const LibQGit2::Patch &patch() const { return _patch; }
     Q_SLOT void resetPatch(); // reset the patch
-    void hideAllActions();
+    enum Action {
+        Add = 1u << 0,
+        Reset = 1u << 1,
+    };
+    Q_DECLARE_FLAGS(Actions, Action)
+    void setActions(Actions=Actions());
+    Q_SLOT void addFile();
+    Q_SLOT void resetFile();
+    void onTranslatorChanged();
+Q_SIGNALS:
+    void translatorChanged();
 private:
+    GitRepoPage *_repoPage;
     Segment *_content;
+    bb::cascades::ActionItem *_addAction, *_resetAction;
     LibQGit2::Patch _patch;
     struct HunkView : public Segment {
         bb::cascades::Header *header;
@@ -41,5 +53,7 @@ private:
 
     Q_SLOT void reloadContent();
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(GitDiffPage::Actions)
 
 #endif /* GITDIFFPAGE_H_ */

@@ -19,6 +19,7 @@ namespace bb {
     namespace cascades {
         class Label;
         class ListView;
+        class ActionItem;
     }
 }
 
@@ -31,9 +32,12 @@ public:
     GitCommitInfoPage(GitRepoPage *);
     void setCommit(const LibQGit2::Commit &commit);
     void resetCommit();
-    const LibQGit2::Commit &commit() const;
-    Q_SLOT void showDiffSelection();
-    void hideAllActions();
+    enum Action {
+        Checkout = 1u << 0,
+    };
+    Q_DECLARE_FLAGS(Actions, Action)
+    void setActions(Actions=Actions());
+    Q_SLOT void checkout();
     void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
@@ -74,8 +78,10 @@ private:
         GitCommitInfoPage *_page;
     } _itemProvider;
     bb::cascades::ListView *_listView;
+    bb::cascades::ActionItem *_checkoutAction;
 
     Q_SLOT void showDiffIndexPath(const QVariantList &);
+    Q_SLOT void showDiffSelection();
 };
 
 #endif /* GITCOMMITINFOPAGE_H_ */

@@ -12,13 +12,14 @@
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/Shortcut>
+#include <bb/cascades/ActionSet>
 #include <libqgit2/qgitrevwalk.h>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitexception.h>
 #include <GitLogPage.h>
 #include <GitRepoPage.h>
 #include <GitCommitInfoPage.h>
-#include <CommitActionSet.h>
+#include <LocaleAwareActionItem.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -28,8 +29,7 @@ GitLogPage::GitLogPage(GitRepoPage *repoPage):
     _commitItemProvider(this),
     _commitList(ListView::create()
         .dataModel(&_commitDataModel)
-        .listItemProvider(&_commitItemProvider)),
-    _commitInfoCheckoutAction(NULL)
+        .listItemProvider(&_commitItemProvider))
 {
     conn(_commitList, SIGNAL(triggered(QVariantList)),
         this, SLOT(showCommitInfoIndexPath(const QVariantList &)));
@@ -77,6 +77,13 @@ void GitLogPage::resetReference()
     _reference = LibQGit2::Reference();
 }
 
+void GitLogPage::setActions(Actions actions)
+{
+    while (actionCount() > 0)
+        removeAction(actionAt(0));
+    // add the actions
+}
+
 void GitLogPage::reloadTitle()
 {
     if (_reference.isNull()) {
@@ -96,30 +103,8 @@ void GitLogPage::showCommitInfoIndexPath(const QVariantList &ip)
 {
     if (ip.size() < 2)
         return;
-    // push a dedicated commit page
-    GitCommitInfoPage *page = _repoPage->commitInfoPage();
-    page->setCommit(_commitDataModel.data(ip).value<LibQGit2::Commit>());
-    page->hideAllActions();
-    page->addAction(commitInfoCheckoutAction(), ActionBarPlacement::Signature);
-    parent()->push(page);
-}
-
-ActionItem *GitLogPage::commitInfoCheckoutAction()
-{
-    if (!_commitInfoCheckoutAction) {
-        _commitInfoCheckoutAction = ActionItem::create()
-            .addShortcut(Shortcut::create().key("c"))
-            .onTriggered(this, SLOT(commitInfoPageCheckout()));
-        reloadCommitInfoCheckoutActionTitle();
-        conn(this, SIGNAL(translatorChanged()),
-            this, SLOT(reloadCommitInfoCheckoutActionTitle()));
-    }
-    return _commitInfoCheckoutAction;
-}
-
-void GitLogPage::reloadCommitInfoCheckoutActionTitle()
-{
-    _commitInfoCheckoutAction->setTitle(tr("Checkout"));
+    _repoPage->pushCommitInfoPage(_commitDataModel.data(ip).value<LibQGit2::Commit>(),
+            GitCommitInfoPage::Checkout);
 }
 
 void GitLogPage::checkoutSelection()
@@ -127,12 +112,6 @@ void GitLogPage::checkoutSelection()
     if (_repoPage->checkout(_commitDataModel
             .data(_commitList->selected()).value<LibQGit2::Commit>()))
         pop(); // pop to repo page
-}
-
-void GitLogPage::commitInfoPageCheckout()
-{
-    if (_repoPage->checkout(_repoPage->commitInfoPage()->commit()))
-        parent()->navigateTo(this); // return to log page
 }
 
 void GitLogPage::onTranslatorChanged()
@@ -198,8 +177,13 @@ VisualNode *GitLogPage::CommitItemProvider::createItem(ListView *, const QString
     if (type == "header")
         return Header::create();
     return StandardListItem::create()
-        .actionSet(new CommitActionSet(_page, SIGNAL(translatorChanged()),
-                SLOT(showCommitInfoSelection()), SLOT(checkoutSelection())));
+        .actionSet(ActionSet::create()
+            .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Info"))
+                .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                .onTriggered(_page, SLOT(showCommitInfoSelection())))
+            .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout"))
+                .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                .onTriggered(_page, SLOT(checkoutSelection()))));
 }
 
 void GitLogPage::CommitItemProvider::updateItem(ListView *, bb::cascades::VisualNode *listItem, const QString &type,

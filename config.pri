@@ -574,9 +574,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/CmdRunProfile.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.cpp) \
         $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.cpp) \
-        $$quote($$BASEDIR/src/CommitActionSet.cpp) \
         $$quote($$BASEDIR/src/Defaults.cpp) \
-        $$quote($$BASEDIR/src/DiffActionSet.cpp) \
         $$quote($$BASEDIR/src/FilePropertiesPage.cpp) \
         $$quote($$BASEDIR/src/Filetype.cpp) \
         $$quote($$BASEDIR/src/FiletypeMap.cpp) \
@@ -597,6 +595,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/HelpPage.cpp) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.cpp) \
         $$quote($$BASEDIR/src/HtmlParser.cpp) \
+        $$quote($$BASEDIR/src/LocaleAwareActionItem.cpp) \
         $$quote($$BASEDIR/src/ModKeyListener.cpp) \
         $$quote($$BASEDIR/src/MultiViewPane.cpp) \
         $$quote($$BASEDIR/src/NormalMode.cpp) \
@@ -611,7 +610,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/Segment.cpp) \
         $$quote($$BASEDIR/src/SettingsPage.cpp) \
         $$quote($$BASEDIR/src/ShortcutHelp.cpp) \
-        $$quote($$BASEDIR/src/StatusActionSet.cpp) \
         $$quote($$BASEDIR/src/Utility.cpp) \
         $$quote($$BASEDIR/src/Versioner.cpp) \
         $$quote($$BASEDIR/src/View.cpp) \
@@ -753,9 +751,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/CmdRunProfile.h) \
         $$quote($$BASEDIR/src/CmdRunProfileManager.h) \
         $$quote($$BASEDIR/src/CmdRunProfileSettingsUI.h) \
-        $$quote($$BASEDIR/src/CommitActionSet.h) \
         $$quote($$BASEDIR/src/Defaults.h) \
-        $$quote($$BASEDIR/src/DiffActionSet.h) \
         $$quote($$BASEDIR/src/FilePropertiesPage.h) \
         $$quote($$BASEDIR/src/Filetype.h) \
         $$quote($$BASEDIR/src/FiletypeMap.h) \
@@ -780,6 +776,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/HighlightType.h) \
         $$quote($$BASEDIR/src/HtmlBufferChangeParser.h) \
         $$quote($$BASEDIR/src/HtmlParser.h) \
+        $$quote($$BASEDIR/src/LocaleAwareActionItem.h) \
         $$quote($$BASEDIR/src/ModKeyListener.h) \
         $$quote($$BASEDIR/src/MultiViewPane.h) \
         $$quote($$BASEDIR/src/NormalMode.h) \
@@ -797,7 +794,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/ShortcutHelp.h) \
         $$quote($$BASEDIR/src/SignalBlocker.h) \
         $$quote($$BASEDIR/src/StateChangeContext.h) \
-        $$quote($$BASEDIR/src/StatusActionSet.h) \
         $$quote($$BASEDIR/src/Utility.h) \
         $$quote($$BASEDIR/src/Versioner.h) \
         $$quote($$BASEDIR/src/View.h) \

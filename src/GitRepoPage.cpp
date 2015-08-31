@@ -8,6 +8,7 @@
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/MultiSelectActionItem>
 #include <bb/cascades/ActionItem>
+#include <bb/cascades/ActionSet>
 #include <bb/cascades/Shortcut>
 #include <bb/cascades/ScrollView>
 #include <bb/cascades/ListView>
@@ -22,20 +23,17 @@
 #include <libqgit2/qgitdifffile.h>
 #include <libqgit2/qgitdiffdelta.h>
 #include <libqgit2/qgitdiff.h>
-#include <libqgit2/qgitpatch.h>
 #include <Helium.h>
 #include <GitSettings.h>
 #include <Defaults.h>
 #include <GitRepoPage.h>
-#include <GitDiffPage.h>
-#include <GitLogPage.h>
 #include <GitCommitPage.h>
-#include <GitCommitInfoPage.h>
 #include <GitBranchPage.h>
 #include <Project.h>
 #include <Segment.h>
 #include <SignalBlocker.h>
 #include <AutoHideProgressIndicator.h>
+#include <LocaleAwareActionItem.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -99,7 +97,7 @@ GitRepoPage::GitRepoPage(Project *project):
     _multiResetAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(resetSelections()))),
-    _diffPage(NULL), _diffAddAction(NULL), _diffResetAction(NULL),
+    _diffPage(NULL),
     _logPage(NULL),
     _commitPage(NULL),
     _commitInfoPage(NULL),
@@ -321,20 +319,21 @@ void GitRepoPage::branches()
     parent()->push(_branchPage);
 }
 
-GitLogPage *GitRepoPage::logPage()
+void GitRepoPage::pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions actions)
 {
     if (!_logPage) {
         _logPage = new GitLogPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _logPage, SLOT(onTranslatorChanged()));
     }
-    return _logPage;
+    _logPage->setReference(ref);
+    _logPage->setActions(actions);
+    parent()->push(_logPage);
 }
 
 void GitRepoPage::log()
 {
-    logPage()->setReference(_project->gitRepo()->head());
-    parent()->push(logPage());
+    pushLogPage(_project->gitRepo()->head());
 }
 
 void GitRepoPage::addSelections()
@@ -410,62 +409,16 @@ void GitRepoPage::resetPaths(const QList<QString> &paths)
     emit workerResetPaths(paths);
 }
 
-GitDiffPage *GitRepoPage::diffPage()
+void GitRepoPage::pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions actions)
 {
     if (!_diffPage) {
-        _diffPage = new GitDiffPage;
+        _diffPage = new GitDiffPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _diffPage, SLOT(onTranslatorChanged()));
     }
-    return _diffPage;
-}
-
-ActionItem *GitRepoPage::diffAddAction()
-{
-    if (!_diffAddAction) {
-        _diffAddAction = ActionItem::create()
-            .addShortcut(Shortcut::create().key("a"))
-            .onTriggered(this, SLOT(diffPageAddFile()));
-        reloadDiffAddActionTitle();
-        conn(this, SIGNAL(translatorChanged()),
-            this, SLOT(reloadDiffAddActionTitle()));
-    }
-    return _diffAddAction;
-}
-
-void GitRepoPage::reloadDiffAddActionTitle()
-{
-    _diffAddAction->setTitle(tr("Add"));
-}
-
-void GitRepoPage::diffPageAddFile()
-{
-    addPaths(QList<QString>() << _diffPage->patch().delta().newFile().path());
-    parent()->navigateTo(this); // pop the diff page
-}
-
-ActionItem *GitRepoPage::diffResetAction()
-{
-    if (!_diffResetAction) {
-        _diffResetAction = ActionItem::create()
-            .addShortcut(Shortcut::create().key("r"))
-            .onTriggered(this, SLOT(diffPageResetFile()));
-        reloadDiffResetActionTitle();
-        conn(this, SIGNAL(translatorChanged()),
-            this, SLOT(reloadDiffResetActionTitle()));
-    }
-    return _diffResetAction;
-}
-
-void GitRepoPage::reloadDiffResetActionTitle()
-{
-    _diffResetAction->setTitle(tr("Reset"));
-}
-
-void GitRepoPage::diffPageResetFile()
-{
-    resetPaths(QList<QString>() << _diffPage->patch().delta().newFile().path());
-    parent()->navigateTo(this); // pop the diff page
+    _diffPage->setPatch(patch);
+    _diffPage->setActions(actions);
+    parent()->push(_diffPage);
 }
 
 void GitRepoPage::showDiffSelection()
@@ -507,27 +460,26 @@ void GitRepoPage::showDiffIndexPath(const QVariantList &indexPath)
         Utility::toast(tr("No hunk details available"));
         return;
     }
-    diffPage()->setPatch(p);
-    diffPage()->hideAllActions();
     switch (sdelta.type) {
         case HeadToIndex:
-            diffPage()->addAction(diffResetAction(), ActionBarPlacement::Signature);
+            pushDiffPage(p, GitDiffPage::Reset);
             break;
         case IndexToWorkdir:
-            diffPage()->addAction(diffAddAction(), ActionBarPlacement::Signature);
+            pushDiffPage(p, GitDiffPage::Add);
             break;
     }
-    parent()->push(diffPage());
 }
 
-GitCommitInfoPage *GitRepoPage::commitInfoPage()
+void GitRepoPage::pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions actions)
 {
     if (!_commitInfoPage) {
         _commitInfoPage = new GitCommitInfoPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _commitInfoPage, SLOT(onTranslatorChanged()));
     }
-    return _commitInfoPage;
+    _commitInfoPage->setCommit(commit);
+    _commitInfoPage->setActions(actions);
+    parent()->push(_commitInfoPage);
 }
 
 void GitRepoPage::selectAllOnIndex()
@@ -685,14 +637,28 @@ VisualNode *GitRepoPage::StatusItemProvider::createItem(ListView *, const QStrin
         return Header::create();
     if (type == "headToIndexItem")
         return StandardListItem::create()
-            .actionSet(new StatusActionSet(_gitRepoPage, SIGNAL(translatorChanged()),
-                    SLOT(showDiffSelection()), NULL,
-                    SLOT(resetSelections()), SLOT(onSelectAllOnIndexTriggered())));
+            .actionSet(ActionSet::create()
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Diff"))
+                        .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .onTriggered(_gitRepoPage, SLOT(showDiffSelection())))
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Reset"))
+                        .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .onTriggered(_gitRepoPage, SLOT(resetSelections())))
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Select All"))
+                        .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .onTriggered(_gitRepoPage, SLOT(onSelectAllOnIndexTriggered()))));
     if (type == "indexToWorkdirItem")
         return StandardListItem::create()
-            .actionSet(new StatusActionSet(_gitRepoPage, SIGNAL(translatorChanged()),
-                    SLOT(showDiffSelection()), SLOT(addSelections()),
-                    NULL, SLOT(onSelectAllOnWorkdirTriggered())));
+            .actionSet(ActionSet::create()
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Diff"))
+                        .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .onTriggered(_gitRepoPage, SLOT(showDiffSelection())))
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Add"))
+                        .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .onTriggered(_gitRepoPage, SLOT(addSelections())))
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Select All"))
+                        .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .onTriggered(_gitRepoPage, SLOT(onSelectAllOnWorkdirTriggered()))));
     return NULL;
 }
 

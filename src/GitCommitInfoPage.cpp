@@ -12,16 +12,18 @@
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/ListView>
+#include <bb/cascades/ActionSet>
+#include <bb/cascades/Shortcut>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitdifffile.h>
 #include <libqgit2/qgitpatch.h>
 #include <GitCommitInfoPage.h>
 #include <GitRepoPage.h>
 #include <GitDiffPage.h>
-#include <DiffActionSet.h>
 #include <Segment.h>
 #include <Defaults.h>
 #include <Utility.h>
+#include <LocaleAwareActionItem.h>
 
 using namespace bb::cascades;
 
@@ -30,7 +32,8 @@ GitCommitInfoPage::GitCommitInfoPage(GitRepoPage *page):
     _itemProvider(this),
     _listView(ListView::create()
         .dataModel(&_dataModel)
-        .listItemProvider(&_itemProvider))
+        .listItemProvider(&_itemProvider)),
+    _checkoutAction(NULL)
 {
     conn(_listView, SIGNAL(triggered(QVariantList)),
         this, SLOT(showDiffIndexPath(const QVariantList &)));
@@ -59,11 +62,6 @@ void GitCommitInfoPage::setCommit(const LibQGit2::Commit &commit)
     _dataModel.setCommit(commit, diffs);
 }
 
-const LibQGit2::Commit &GitCommitInfoPage::commit() const
-{
-    return _dataModel.commit();
-}
-
 void GitCommitInfoPage::resetCommit()
 {
     _dataModel.clear();
@@ -86,16 +84,27 @@ void GitCommitInfoPage::showDiffIndexPath(const QVariantList &ip)
         Utility::toast(tr("No hunk details available"));
         return;
     }
-    GitDiffPage *page = _repoPage->diffPage();
-    page->hideAllActions();
-    page->setPatch(p);
-    parent()->push(page);
+    _repoPage->pushDiffPage(p);
 }
 
-void GitCommitInfoPage::hideAllActions()
+void GitCommitInfoPage::checkout()
+{
+    if (_repoPage->checkout(_dataModel.commit()))
+        pop();
+}
+
+void GitCommitInfoPage::setActions(Actions actions)
 {
     while (actionCount() > 0)
         removeAction(actionAt(0));
+    if (actions.testFlag(Checkout)) {
+        if (!_checkoutAction)
+            _checkoutAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("c"))
+                .onTriggered(this, SLOT(checkout()));
+        addAction(_checkoutAction, ActionBarPlacement::Signature);
+    }
 }
 
 void GitCommitInfoPage::onTranslatorChanged()
@@ -213,9 +222,11 @@ VisualNode *GitCommitInfoPage::DiffItemProvider::createItem(ListView *, const QS
     if (type == "sigitem")
         return StandardListItem::create();
     if (type == "diffitem")
-        return StandardListItem::create().actionSet(
-                new DiffActionSet(_page, SIGNAL(translatorChanged()),
-                    SLOT(showDiffSelection())));
+        return StandardListItem::create()
+                .actionSet(ActionSet::create()
+                    .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Diff"))
+                        .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                        .onTriggered(_page, SLOT(showDiffSelection()))));
     return NULL;
 }
 
