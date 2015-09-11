@@ -100,6 +100,9 @@ GitRepoPage::GitRepoPage(Project *project):
     _rebaseAbortAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(this, SLOT(rebaseAbort()))),
+    _mergeAbortAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SLOT(mergeAbort()))),
     _diffPage(NULL),
     _logPage(NULL),
     _commitPage(NULL),
@@ -151,6 +154,8 @@ GitRepoPage::GitRepoPage(Project *project):
         &_worker, SLOT(checkoutBranch(const LibQGit2::Reference&)));
     conn(this, SIGNAL(workerMerge(const LibQGit2::Reference&)),
         &_worker, SLOT(merge(const LibQGit2::Reference&)));
+    conn(this, SIGNAL(workerCleanupState()),
+        &_worker, SLOT(cleanupState()));
 
     conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
         progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
@@ -274,58 +279,61 @@ void GitRepoPage::reloadContent()
     } else {
         title = _project->gitRepo()->head().branchName();
     }
-    QString message = _project->gitRepo()->message();
-    if (!message.isEmpty())
-        title += QString(" (%1)").arg(message);
-    titleBar()->setTitle(title);
     // actions
     hideAllActions();
+    bool validDeltasInIndex = _statusDataModel.hasValidDiffDeltasInIndex();
+    bool validDeltasInWorkdir = _statusDataModel.hasValidDiffDeltasInWorkdir();
     switch (_project->gitRepo()->state()) {
         case LibQGit2::Repository::StateNone: {
-            bool validDeltasInIndex = _statusDataModel.hasValidDiffDeltasInIndex();
-            bool validDeltasInWorkdir = _statusDataModel.hasValidDiffDeltasInWorkdir();
             _commitAction->setEnabled(validDeltasInIndex);
             _branchesAction->setEnabled(true);
             _logAction->setEnabled(!_project->gitRepo()->isHeadUnborn());
-            _addAllAction->setEnabled(validDeltasInWorkdir);
-            _resetMixedAction->setEnabled(validDeltasInIndex);
-            _resetHardAction->setEnabled(validDeltasInIndex || validDeltasInWorkdir);
             addAction(_commitAction, ActionBarPlacement::Signature);
             addAction(_branchesAction, ActionBarPlacement::OnBar);
             addAction(_logAction, ActionBarPlacement::OnBar);
-            addAction(_addAllAction);
-            addAction(_resetMixedAction);
-            addAction(_resetHardAction);
             break;
         }
         case LibQGit2::Repository::StateMerge:
-            qDebug() << "GOT STATE Merge";
+            title += tr(" (merge in progress)");
+            _commitAction->setEnabled(validDeltasInIndex);
+            _mergeAbortAction->setEnabled(true);
+            addAction(_commitAction, ActionBarPlacement::Signature);
+            addAction(_mergeAbortAction, ActionBarPlacement::OnBar);
             break;
         case LibQGit2::Repository::StateRevert:
-            qDebug() << "GOT STATE Revert";
+            title += tr(" (revert in progress)");
             break;
         case LibQGit2::Repository::StateCherrypick:
-            qDebug() << "GOT STATE Cherrypick";
+            title += tr(" (cherrypick in progress)");
             break;
         case LibQGit2::Repository::StateBisect:
-            qDebug() << "GOT STATE Bisect";
+            title += tr(" (bisect in progress)");
             break;
         case LibQGit2::Repository::StateRebaseMerge:
         case LibQGit2::Repository::StateRebase:
+            title += tr(" (rebase in progress)");
             _rebaseNextAction->setEnabled(true);
             _rebaseAbortAction->setEnabled(true);
             addAction(_rebaseNextAction, ActionBarPlacement::Signature);
             addAction(_rebaseAbortAction, ActionBarPlacement::OnBar);
             break;
         case LibQGit2::Repository::StateInteractive:
-            qDebug() << "GOT STATE Interactive";
+            title += tr(" (interactive)");
             break;
         case LibQGit2::Repository::StateApplyMailbox:
-            qDebug() << "GOT STATE Apply Mailbox";
+            title += tr(" (apply mailbox)");
             break;
     }
+    _addAllAction->setEnabled(validDeltasInWorkdir);
+    _resetMixedAction->setEnabled(validDeltasInIndex);
+    _resetHardAction->setEnabled(validDeltasInIndex || validDeltasInWorkdir);
     _reloadAction->setEnabled(true);
+    addAction(_addAllAction);
+    addAction(_resetMixedAction);
+    addAction(_resetHardAction);
     addAction(_reloadAction);
+    // title
+    titleBar()->setTitle(title);
     // content
     _statusListView->setEnabled(true);
     setContent(_repoContent);
@@ -365,6 +373,12 @@ void GitRepoPage::merge(const LibQGit2::Reference &theirHead)
 {
     lockContent();
     emit workerMerge(theirHead);
+}
+
+void GitRepoPage::mergeAbort()
+{
+    lockContent();
+    emit workerCleanupState();
 }
 
 void GitRepoPage::rebase(const LibQGit2::Reference &upstream)
@@ -609,6 +623,8 @@ void GitRepoPage::onTranslatorChanged(bool reload)
     // rebase
     _rebaseNextAction->setTitle(tr("Next"));
     _rebaseAbortAction->setTitle(tr("Abort"));
+    // merge
+    _mergeAbortAction->setTitle(tr("Abort"));
     if (reload)
         this->reload();
     emit translatorChanged();

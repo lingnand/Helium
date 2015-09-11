@@ -505,6 +505,11 @@ void Repository::merge(const QList<Reference> &theirHeads, const MergeOptions &m
     qGitThrow(git_merge(SAFE_DATA, theads, theadsLen, mergeOpts.data(), checkoutOpts.data()));
 }
 
+void Repository::cleanupState()
+{
+    qGitThrow(git_repository_state_cleanup(SAFE_DATA));
+}
+
 git_repository* Repository::data() const
 {
     return d_ptr->d.data();

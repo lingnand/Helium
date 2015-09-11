@@ -35,6 +35,7 @@ public:
     Q_SLOT void checkoutCommit(const LibQGit2::Object &, Progress progress=Progress());
     Q_SLOT void checkoutBranch(const LibQGit2::Reference &, Progress progress=Progress());
     Q_SLOT void merge(const LibQGit2::Reference &, Progress progress=Progress());
+    Q_SLOT void cleanupState(Progress progress=Progress());
     Q_SLOT void setAuthorName(const QString &);
     Q_SLOT void setAuthorEmail(const QString &);
 Q_SIGNALS:

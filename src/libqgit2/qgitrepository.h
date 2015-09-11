@@ -609,6 +609,9 @@ namespace LibQGit2
             MergeAnalysisType mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType preference=MergePreferenceNone);
 
             void merge(const QList<Reference> &theirHeads, const MergeOptions &mergeOpts = MergeOptions(), const CheckoutOptions &checkoutOpts = CheckoutOptions());
+
+            void cleanupState();
+
             /**
             * Clone a git repository.
             *

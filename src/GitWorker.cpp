@@ -182,6 +182,8 @@ void GitWorker::commit(const QString &message, Progress progress)
                 parents, sig, sig, message, "HEAD");
         _repo->index().write();
         emit progressChanged(progress.current+=initInc*2);
+        _repo->cleanupState();
+        emit progressChanged(progress.current+=initInc);
         Utility::toast(tr("Commited %1").arg(QString(oid.nformat(7))));
         _fetchStatusList(progress);
     } catch (const LibQGit2::Exception &e) {
@@ -282,6 +284,22 @@ void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
         }
     } catch (const LibQGit2::Exception &e) {
         qDebug() << "::::LIBQGIT2 ERROR when merging branch::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
+    emit progressFinished();
+}
+
+void GitWorker::cleanupState(Progress progress)
+{
+    float initInc = (progress.cap-progress.current)/8;
+    emit progressChanged(progress.current+=initInc);
+    try {
+        _repo->cleanupState();
+        emit progressChanged(progress.current+=initInc*2);
+        _fetchStatusList(progress);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when cleaning up state::::" << e.what();
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }

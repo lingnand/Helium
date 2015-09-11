@@ -89,6 +89,7 @@ Q_SIGNALS:
     void workerCheckoutCommit(const LibQGit2::Object &);
     void workerCheckoutBranch(const LibQGit2::Reference &);
     void workerMerge(const LibQGit2::Reference &);
+    void workerCleanupState();
 private:
     Project *_project;
     // UIs that apply when there is no repo
@@ -125,6 +126,7 @@ private:
     bb::cascades::ListView *_statusListView;
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
     bb::cascades::ActionItem *_rebaseNextAction, *_rebaseAbortAction;
+    bb::cascades::ActionItem *_mergeAbortAction;
     // lazily instantiated
     GitDiffPage *_diffPage;
     GitLogPage *_logPage;
@@ -160,6 +162,8 @@ private:
     Q_SLOT void onSelectAllOnWorkdirTriggered();
 
     Q_SLOT void onResetHardDialogFinished(bb::system::SystemUiResult::Type);
+
+    Q_SLOT void mergeAbort();
 
     Q_SLOT void rebaseNext();
     Q_SLOT void rebaseAbort();
