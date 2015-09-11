@@ -129,7 +129,7 @@ QString Repository::discover(const QString& startPath, bool acrossFs, const QStr
     QByteArray joinedCeilingDirs = PathCodec::toLibGit2(ceilingDirs.join(QChar(GIT_PATH_LIST_SEPARATOR)));
     qGitThrow(git_repository_discover(repoPath.data(), PathCodec::toLibGit2(startPath), acrossFs, joinedCeilingDirs));
 
-    return repoPath.asPath();
+    return repoPath.toString();
 }
 
 void Repository::init(const QString& path, bool isBare)
@@ -149,11 +149,31 @@ void Repository::discoverAndOpen(const QString &startPath,
     open(discover(startPath, acrossFs, ceilingDirs));
 }
 
+Repository::State Repository::state() const
+{
+    return (State) git_repository_state(SAFE_DATA);
+}
+
+QString Repository::message() const
+{
+    internal::Buffer message;
+    int ret = git_repository_message(message.data(), SAFE_DATA);
+    if (ret == GIT_ENOTFOUND)
+        return QString();
+    qGitThrow(ret);
+    return message.toString();
+}
+
 Reference Repository::head() const
 {
     git_reference *ref = 0;
     qGitThrow(git_repository_head(&ref, SAFE_DATA));
     return Reference(ref);
+}
+
+bool Repository::isNull() const
+{
+    return d_ptr->d.isNull();
 }
 
 bool Repository::isHeadDetached() const
@@ -456,6 +476,35 @@ Index Repository::mergeTrees(const Tree &our, const Tree &their, const Tree &anc
     return Index(index);
 }
 
+Repository::MergeAnalysisType Repository::mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType pref)
+{
+    MergeAnalysisType analysis;
+    int theadsLen = theirHeads.size();
+    const git_annotated_commit *theads[theadsLen];
+    QList<internal::AnnotatedCommit> commits;
+    for (int i = 0; i < theadsLen; ++i) {
+        internal::AnnotatedCommit commit(*this, theirHeads[i]);
+        commits.append(commit);
+        theads[i] = commit.constData();
+    }
+    git_merge_analysis((git_merge_analysis_t *) &analysis, (git_merge_preference_t *) pref,
+            SAFE_DATA, theads, theadsLen);
+    return analysis;
+}
+
+void Repository::merge(const QList<Reference> &theirHeads, const MergeOptions &mergeOpts, const CheckoutOptions &checkoutOpts)
+{
+    int theadsLen = theirHeads.size();
+    const git_annotated_commit *theads[theadsLen];
+    QList<internal::AnnotatedCommit> commits;
+    for (int i = 0; i < theadsLen; ++i) {
+        internal::AnnotatedCommit commit(*this, theirHeads[i]);
+        commits.append(commit);
+        theads[i] = commit.constData();
+    }
+    qGitThrow(git_merge(SAFE_DATA, theads, theadsLen, mergeOpts.data(), checkoutOpts.data()));
+}
+
 git_repository* Repository::data() const
 {
     return d_ptr->d.data();
@@ -510,7 +559,6 @@ void Repository::checkoutTree(const Object &treeish, const CheckoutOptions &opts
     qGitThrow(git_checkout_tree(SAFE_DATA, treeish.constData(), opts.data()));
 }
 
-
 void Repository::checkoutHead(const CheckoutOptions &opts)
 {
     qGitThrow(git_checkout_head(SAFE_DATA, opts.data()));
@@ -552,6 +600,11 @@ void Repository::resetDefault(const Object &target, const QStringList &pathspecs
     qGitThrow(git_reset_default(SAFE_DATA, target.data(), internal::StrArray(pathspecs).data()));
 }
 
+void Repository::setHead(const QString &refname, const Signature &signature, const QString &message)
+{
+    qGitThrow(git_repository_set_head(SAFE_DATA, refname.toLocal8Bit(), signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+}
+
 void Repository::setHeadDetached(const OId &commitish, const Signature &signature, const QString &message)
 {
     qGitThrow(git_repository_set_head_detached(SAFE_DATA, commitish.constData(), signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
@@ -563,7 +616,14 @@ Rebase Repository::rebase(const Reference &branch, const Reference &upstream, co
     internal::AnnotatedCommit commitBranch(*this, branch);
     internal::AnnotatedCommit commitUpstream(*this, upstream);
     internal::AnnotatedCommit commitOnto(*this, onto);
-    qGitThrow(git_rebase_init(&rebase, data(), commitBranch.constData(), commitUpstream.constData(), commitOnto.constData(), signature.data(), opts.constData()));
+    qGitThrow(git_rebase_init(&rebase, SAFE_DATA, commitBranch.constData(), commitUpstream.constData(), commitOnto.constData(), signature.data(), opts.constData()));
+    return Rebase(rebase, opts);
+}
+
+Rebase Repository::openRebase(const RebaseOptions &opts)
+{
+    git_rebase *rebase;
+    git_rebase_open(&rebase, SAFE_DATA);
     return Rebase(rebase, opts);
 }
 

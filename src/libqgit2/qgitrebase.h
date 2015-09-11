@@ -37,6 +37,7 @@ class RebaseOptions;
 class LIBQGIT2_EXPORT Rebase
 {
 public:
+    explicit Rebase();
     /**
      * Create a wrapper for a libgit2 rebase object. Constructed object
      * takes ownership of \a rebase and frees it in the destructor.
@@ -44,6 +45,8 @@ public:
      * @param opts Specifies how the rebase is to be conducted
      */
     explicit Rebase(git_rebase *rebase, const RebaseOptions &opts);
+
+    bool isNull() const;
 
     /**
      * Aborts a rebase that is currently in progress, resetting the repository
@@ -71,6 +74,8 @@ public:
      * @throws LibQGit2::Exception
      */
     bool next();
+
+    size_t operationCount() const;
 
     /**
      * Commits the current patch.  You must have resolved any conflicts that

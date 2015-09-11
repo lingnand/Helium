@@ -169,12 +169,29 @@ namespace LibQGit2
                                  bool acrossFs = false,
                                  const QStringList &ceilingDirs = QStringList());
 
+            enum State {
+                StateNone = GIT_REPOSITORY_STATE_NONE,
+                StateMerge = GIT_REPOSITORY_STATE_MERGE,
+                StateRevert = GIT_REPOSITORY_STATE_REVERT,
+                StateCherrypick = GIT_REPOSITORY_STATE_CHERRYPICK,
+                StateBisect = GIT_REPOSITORY_STATE_BISECT,
+                StateRebase = GIT_REPOSITORY_STATE_REBASE,
+                StateInteractive = GIT_REPOSITORY_STATE_REBASE_INTERACTIVE,
+                StateRebaseMerge = GIT_REPOSITORY_STATE_REBASE_MERGE,
+                StateApplyMailbox = GIT_REPOSITORY_STATE_APPLY_MAILBOX,
+            };
+            State state() const;
+
+            QString message() const;
+
             /**
              * Retrieve and resolve the reference pointed at by HEAD.
              *
              * @throws LibQGit2::Exception
              */
             Reference head() const;
+
+            bool isNull() const;
 
             /**
              * Check if a repository's HEAD is detached
@@ -577,6 +594,21 @@ namespace LibQGit2
              */
             Index mergeTrees(const Tree &our, const Tree &their, const Tree &ancestor = Tree(), const MergeOptions &opts = MergeOptions());
 
+            enum MergeAnalysisType {
+                MergeAnalysisNone = GIT_MERGE_ANALYSIS_NONE,
+                MergeAnalysisNormal = GIT_MERGE_ANALYSIS_NORMAL,
+                MergeAnalysisUpToDate = GIT_MERGE_ANALYSIS_UP_TO_DATE,
+                MergeAnalysisFastforward = GIT_MERGE_ANALYSIS_FASTFORWARD,
+                MergeAnalysisUnborn = GIT_MERGE_ANALYSIS_UNBORN,
+            };
+            enum MergePreferenceType {
+                MergePreferenceNone = GIT_MERGE_PREFERENCE_NONE,
+                MergePreferenceNoFastforward = GIT_MERGE_PREFERENCE_NO_FASTFORWARD,
+                MergePreferenceFastforwardOnly = GIT_MERGE_PREFERENCE_FASTFORWARD_ONLY,
+            };
+            MergeAnalysisType mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType preference=MergePreferenceNone);
+
+            void merge(const QList<Reference> &theirHeads, const MergeOptions &mergeOpts = MergeOptions(), const CheckoutOptions &checkoutOpts = CheckoutOptions());
             /**
             * Clone a git repository.
             *
@@ -664,6 +696,8 @@ namespace LibQGit2
 
             void resetDefault(const Object &target, const QStringList &pathspecs);
 
+            void setHead(const QString &refname, const Signature &signature = Signature(), const QString &message = QString());
+
             void setHeadDetached(const OId &commitish, const Signature &signature = Signature(), const QString &message = QString());
             /**
              * Initializes a rebase object for rebasing the changes in \a branch
@@ -680,6 +714,8 @@ namespace LibQGit2
              * @throws LibQGit2::Exception
              */
             Rebase rebase(const Reference &branch, const Reference &upstream, const Reference &onto, const RebaseOptions &opts, const Signature &signature = Signature());
+
+            Rebase openRebase(const RebaseOptions &opts);
 
             /**
              * Checks if the repository's ignore rules would ignore the given \a path.

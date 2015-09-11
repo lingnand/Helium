@@ -8,6 +8,8 @@
 #ifndef GITSETTINGS_H_
 #define GITSETTINGS_H_
 
+#include <libqgit2/qgitsignature.h>
+
 class GitSettings : public QObject
 {
     Q_OBJECT
@@ -27,6 +29,9 @@ public:
             _email = em;
             emit emailChanged(_email);
         }
+    }
+    LibQGit2::Signature signature() const {
+        return LibQGit2::Signature(_name, _email);
     }
 Q_SIGNALS:
     void nameChanged(const QString &);

@@ -330,8 +330,8 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
     if (success) {
         emit progressChanged(progress.current);
     } else {
-        emit progressChanged(progress.current,
-                bb::cascades::ProgressIndicatorState::Error, tr("Error opening file"));
+        emit progressChanged(progress.current, bb::cascades::ProgressIndicatorState::Error);
+        Utility::toast(tr("Error opening file"), tr("OK"), this, SIGNAL(progressDismissed()));
         return;
     }
     if (!state.empty()) {
@@ -371,8 +371,8 @@ void BufferWorker::loadStateFromFile(StateChangeContext &ctx, const QString &fil
     if (success) {
         emit progressChanged(progress.current);
     } else {
-        emit progressChanged(progress.current,
-                bb::cascades::ProgressIndicatorState::Error, tr("Error opening file"));
+        emit progressChanged(progress.current, bb::cascades::ProgressIndicatorState::Error);
+        Utility::toast(tr("Error opening file"), tr("OK"), this, SIGNAL(progressDismissed()));
         return;
     }
     if (autodetectFiletype) {

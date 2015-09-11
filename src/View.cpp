@@ -297,8 +297,10 @@ void View::setBuffer(Buffer *buffer)
             conn(_buffer, SIGNAL(filetypeChanged(Filetype*, Filetype*)),
                 this, SLOT(onBufferFiletypeChanged(Filetype*, Filetype*)));
 
-            conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
-                _progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
+            conn(_buffer, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
+                _progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
+            conn(_buffer, SIGNAL(progressDismissed()),
+                _progressIndicator, SLOT(hide()));
 
             emit bufferFilepathChanged(_buffer->filepath());
             conn(_buffer, SIGNAL(filepathChanged(const QString&)),

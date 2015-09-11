@@ -16,9 +16,8 @@ class AutoHideProgressIndicator : public bb::cascades::ProgressIndicator
     Q_OBJECT
 public:
     AutoHideProgressIndicator();
-    Q_SLOT void displayProgress(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
-private:
-    Q_SLOT void onProgressMessageDismissed();
+    Q_SLOT void displayProgress(float, bb::cascades::ProgressIndicatorState::Type);
+    Q_SLOT void hide();
 };
 
 #endif /* AUTOHIDEPROGRESSINDICATOR_H_ */

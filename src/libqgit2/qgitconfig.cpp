@@ -61,7 +61,7 @@ QString Config::findGlobal()
     internal::Buffer buffer;
     qGitThrow(git_config_find_global(buffer.data()));
 
-    return buffer.asPath();
+    return buffer.toString();
 }
 
 QString Config::findSystem()
@@ -69,7 +69,7 @@ QString Config::findSystem()
     internal::Buffer buffer;
     qGitThrow(git_config_find_system(buffer.data()));
 
-    return buffer.asPath();
+    return buffer.toString();
 }
 
 bool Config::append(const QString &path, git_config_level_t level, int force)

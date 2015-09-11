@@ -109,9 +109,9 @@ void GitLogPage::showCommitInfoIndexPath(const QVariantList &ip)
 
 void GitLogPage::checkoutSelection()
 {
-    if (_repoPage->checkout(_commitDataModel
-            .data(_commitList->selected()).value<LibQGit2::Commit>()))
-        pop(); // pop to repo page
+    _repoPage->checkoutCommit(_commitDataModel
+            .data(_commitList->selected()).value<LibQGit2::Commit>());
+    pop(); // pop to repo page
 }
 
 void GitLogPage::onTranslatorChanged()

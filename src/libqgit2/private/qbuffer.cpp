@@ -34,9 +34,9 @@ Buffer::~Buffer()
     git_buf_free(&d);
 }
 
-QString Buffer::asPath() const
+QString Buffer::toString() const
 {
-    return PathCodec::fromLibGit2(d.ptr);
+    return QString::fromLocal8Bit(d.ptr);
 }
 
 git_buf* Buffer::data()

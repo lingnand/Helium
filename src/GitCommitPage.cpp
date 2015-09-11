@@ -65,10 +65,18 @@ void GitCommitPage::focus()
     _textArea->requestFocus();
 }
 
+void GitCommitPage::setHintMessage(const QString &hint)
+{
+    _textArea->setHintText(hint);
+}
+
 void GitCommitPage::commit()
 {
-    if (_repoPage->commit(_textArea->text()))
-        pop();
+    _repoPage->commit(_textArea->text());
+    // TODO: maybe put up a progressIndicator and wait for progress
+    // finish from GitRepoPage?
+    _textArea->resetText();
+    pop();
 }
 
 void GitCommitPage::showSigSettings()
@@ -111,7 +119,6 @@ void GitCommitPage::onTranslatorChanged()
     PushablePage::onTranslatorChanged();
     titleBar()->acceptAction()->setTitle(tr("Commit"));
     titleBar()->dismissAction()->setTitle(tr("Cancel"));
-    _textArea->setHintText(tr("Commit message"));
     _settingsAction->setTitle(tr("Settings"));
 }
 

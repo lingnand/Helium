@@ -32,7 +32,7 @@ public:
     Buffer();
     ~Buffer();
 
-    QString asPath() const;
+    QString toString() const;
 
     git_buf* data();
 

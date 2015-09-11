@@ -14,16 +14,14 @@ AutoHideProgressIndicator::AutoHideProgressIndicator()
     setVisible(false);
 }
 
-void AutoHideProgressIndicator::displayProgress(float progress, bb::cascades::ProgressIndicatorState::Type state, const QString &msg)
+void AutoHideProgressIndicator::displayProgress(float progress, bb::cascades::ProgressIndicatorState::Type state)
 {
     setState(state);
     setValue(progress);
     setVisible(progress > 0 && progress < 1);
-    if (!msg.isNull())
-        Utility::toast(msg, tr("OK"), this, SLOT(onProgressMessageDismissed()));
 }
 
-void AutoHideProgressIndicator::onProgressMessageDismissed()
+void AutoHideProgressIndicator::hide()
 {
     setVisible(false);
 }

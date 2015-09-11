@@ -79,6 +79,11 @@ QString Reference::branchName() const
     return QString(name);
 }
 
+void Reference::branchDelete()
+{
+    qGitThrow(git_branch_delete(d.data()));
+}
+
 bool Reference::branchIsHead() const
 {
     return qGitThrow(git_branch_is_head(d.data()));
@@ -98,6 +103,12 @@ Tree Reference::peelToTree() const
     return Tree((git_tree *) obj);
 }
 
+Object Reference::peelToObject() const
+{
+    git_object *obj;
+    qGitThrow(git_reference_peel(&obj, d.data(), GIT_OBJ_ANY));
+    return Object(obj);
+}
 
 Commit Reference::peelToCommit() const
 {

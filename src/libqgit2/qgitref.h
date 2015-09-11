@@ -105,6 +105,8 @@ namespace LibQGit2
             QString branchName() const;
 
             bool branchIsHead() const;
+
+            void branchDelete();
             /**
              * Resolve a symbolic reference
              *
@@ -127,6 +129,9 @@ namespace LibQGit2
             Tag peelToTag() const;
 
             Blob peelToBlob() const;
+
+            // peel to a non-tag object
+            Object peelToObject() const;
 
             /**
              * Get the repository where a reference resides

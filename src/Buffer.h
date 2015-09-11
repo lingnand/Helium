@@ -86,7 +86,8 @@ Q_SIGNALS:
     void stateChanged(const StateChangeContext &, const BufferState &);
     // this happens when a long-running operation is triggered
     // note that the progress will reset to 0 when the task is finished
-    void progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString &msg);
+    void progressChanged(float, bb::cascades::ProgressIndicatorState::Type);
+    void progressDismissed();
     void hasUndosChanged(bool hasUndos);
     void hasRedosChanged(bool hasRedos);
     // worker

@@ -12,12 +12,9 @@
 #include <bb/cascades/DataModel>
 #include <bb/cascades/ActionBarPlacement>
 #include <bb/system/SystemUiResult>
-#include <libqgit2/qgitstatuslist.h>
 #include <libqgit2/qgitdiffdelta.h>
-#include <libqgit2/qgitobject.h>
 #include <libqgit2/qgitpatch.h>
-#include <libqgit2/qgitcommit.h>
-#include <libqgit2/qgitref.h>
+#include <libqgit2/qgitrepository.h>
 #include <GitWorker.h>
 #include <GitDiffPage.h>
 #include <GitCommitInfoPage.h>
@@ -56,11 +53,15 @@ public:
     Q_SLOT void resetPaths(const QList<QString> &pathspecs=QList<QString>());
     Q_SLOT void resetMixed();
     Q_SLOT void safeResetHard();
-    Q_SLOT bool commit(const QString &);
-    Q_SLOT bool checkout(const LibQGit2::Object &);
-    void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
-    void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
-    void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
+    Q_SLOT void commit(const QString &);
+    Q_SLOT void checkoutCommit(const LibQGit2::Object &);
+    Q_SLOT void checkoutBranch(const LibQGit2::Reference &);
+    Q_SLOT void merge(const LibQGit2::Reference &);
+    Q_SLOT void rebase(const LibQGit2::Reference &upstream);
+    Q_SLOT void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
+    Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
+    Q_SLOT void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
+    Q_SLOT void pushCommitPage(const QString &hintMessage=QString());
     Q_SLOT void onPagePopped(bb::cascades::Page *);
     void onTranslatorChanged(bool reload=true);
     Q_SLOT void selectAllOnIndex();
@@ -74,9 +75,20 @@ public:
     };
 Q_SIGNALS:
     void translatorChanged();
+    void progressChanged(float, bb::cascades::ProgressIndicatorState::Type);
+    void progressDismissed();
+    void progressFinished();
     void workerFetchStatusList();
     void workerAddPaths(const QList<QString> &);
     void workerResetPaths(const QList<QString> &);
+    void workerRebase(const LibQGit2::Reference &);
+    void workerRebaseNext();
+    void workerRebaseAbort();
+    void workerCommit(const QString &);
+    void workerReset(LibQGit2::Repository::ResetType);
+    void workerCheckoutCommit(const LibQGit2::Object &);
+    void workerCheckoutBranch(const LibQGit2::Reference &);
+    void workerMerge(const LibQGit2::Reference &);
 private:
     Project *_project;
     // UIs that apply when there is no repo
@@ -112,6 +124,7 @@ private:
     } _statusItemProvider;
     bb::cascades::ListView *_statusListView;
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
+    bb::cascades::ActionItem *_rebaseNextAction, *_rebaseAbortAction;
     // lazily instantiated
     GitDiffPage *_diffPage;
     GitLogPage *_logPage;
@@ -128,7 +141,6 @@ private:
     Q_SLOT void clone();
     Q_SLOT void branches();
     Q_SLOT void log();
-    Q_SLOT void showCommitPage();
     Q_SLOT void showDiffSelection();
     Q_SLOT void showDiffIndexPath(const QVariantList &);
     Q_SLOT void addSelections();
@@ -139,15 +151,18 @@ private:
     void selectAllChildren(const QVariantList &);
     Q_SLOT void reloadMultiSelectActionsEnabled();
 
-    void lockRepoContent();
+    void lockContent();
+    Q_SLOT void reloadContent();
     Q_SLOT void handleStatusList(const LibQGit2::StatusList &);
     Q_SLOT void onProjectPathChanged();
 
     Q_SLOT void onSelectAllOnIndexTriggered();
     Q_SLOT void onSelectAllOnWorkdirTriggered();
 
-    void resetHard();
     Q_SLOT void onResetHardDialogFinished(bb::system::SystemUiResult::Type);
+
+    Q_SLOT void rebaseNext();
+    Q_SLOT void rebaseAbort();
 };
 
 Q_DECLARE_METATYPE(GitRepoPage::StatusDiffDelta)

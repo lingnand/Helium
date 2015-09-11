@@ -62,6 +62,11 @@ struct Rebase::Private {
         }
     }
 
+    size_t operationCount()
+    {
+        return git_rebase_operation_entrycount(data());
+    }
+
     git_rebase *data() const
     {
         return mRebase.data();
@@ -77,9 +82,18 @@ private:
     const RebaseOptions mOpts;
 };
 
+Rebase::Rebase()
+{
+}
+
 Rebase::Rebase(git_rebase *rebase, const RebaseOptions &opts)
     : d_ptr(new Private(rebase, opts))
 {
+}
+
+bool Rebase::isNull() const
+{
+    return d_ptr.isNull();
 }
 
 void Rebase::abort(const Signature &signature)
@@ -100,6 +114,11 @@ void Rebase::finish(const Signature &signature)
 bool Rebase::next()
 {
     return d_ptr->next();
+}
+
+size_t Rebase::operationCount() const
+{
+    return d_ptr->operationCount();
 }
 
 git_rebase *Rebase::data() const

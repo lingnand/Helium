@@ -10,11 +10,15 @@
 #include <bb/cascades/TitleBar>
 #include <bb/cascades/StandardListItem>
 #include <bb/cascades/NavigationPane>
+#include <bb/cascades/ActionSet>
+#include <bb/cascades/Container>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitremote.h>
 #include <GitBranchPage.h>
 #include <GitRepoPage.h>
 #include <GitLogPage.h>
+#include <LocaleAwareActionItem.h>
+#include <AutoHideProgressIndicator.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -30,7 +34,17 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
     conn(_branchList, SIGNAL(triggered(QVariantList)),
         this, SLOT(showBranchLogIndexPath(const QVariantList &)));
     setTitleBar(TitleBar::create());
-    setContent(_branchList);
+    AutoHideProgressIndicator *progressIndicator = new AutoHideProgressIndicator;
+    setContent(Container::create()
+        .add(_branchList)
+        .add(progressIndicator));
+
+    conn(page, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
+        progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
+    conn(page, SIGNAL(progressDismissed()),
+        progressIndicator, SLOT(hide()));
+    conn(page, SIGNAL(progressFinished()),
+        this, SLOT(reload()));
 
     onTranslatorChanged(false);
 }
@@ -40,6 +54,64 @@ void GitBranchPage::showBranchLogIndexPath(const QVariantList &ip)
     if (ip.size() < 2)
         return;
     _repoPage->pushLogPage(_dataModel.data(ip).value<LibQGit2::Reference>());
+}
+
+void GitBranchPage::showBranchLogSelection()
+{
+    showBranchLogIndexPath(_branchList->selected());
+}
+
+void GitBranchPage::checkoutBranchSelection()
+{
+    _repoPage->checkoutBranch(_dataModel.data(_branchList->selected())
+            .value<LibQGit2::Reference>());
+}
+
+void GitBranchPage::mergeBranchSelection()
+{
+    _repoPage->merge(_dataModel.data(_branchList->selected())
+            .value<LibQGit2::Reference>());
+    // no change in branch; no need to reload
+}
+
+void GitBranchPage::rebaseBranchSelection()
+{
+    _repoPage->rebase(_dataModel.data(_branchList->selected())
+            .value<LibQGit2::Reference>());
+    // no change in branch; no need to reload
+}
+
+void GitBranchPage::deleteBranchSelection()
+{
+    _tempTarget = _dataModel.data(_branchList->selected()).value<LibQGit2::Reference>();
+    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm deletion"),
+            tr("Are you sure you want to delete branch %1?")
+                .arg(_tempTarget.branchName()),
+            this, SLOT(onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type)));
+}
+
+void GitBranchPage::onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        _tempTarget.branchDelete();
+        reload();
+    }
+    _tempTarget = LibQGit2::Reference();
+}
+
+void GitBranchPage::fetchBranchSelection()
+{
+    qDebug() << "FETCHING BRANCH for" << _branchList->selected();
+}
+
+void GitBranchPage::pullBranchSelection()
+{
+    qDebug() << "PULLING BRANCH for" << _branchList->selected();
+}
+
+void GitBranchPage::pushBranchSelection()
+{
+    qDebug() << "PUSHING BRANCH for" << _branchList->selected();
 }
 
 void GitBranchPage::showRemoteInfo()
@@ -63,12 +135,18 @@ void GitBranchPage::reset()
     _dataModel.clear();
 }
 
+void GitBranchPage::onRemoteTransferProgress(int progress)
+{
+    qDebug() << "transfer progress changed" << progress;
+}
+
 void GitBranchPage::onTranslatorChanged(bool reload)
 {
     PushablePage::onTranslatorChanged();
     titleBar()->setTitle(tr("Branches"));
     if (reload)
         this->reload();
+    emit translatorChanged();
 }
 
 int GitBranchPage::BranchDataModel::childCount(const QVariantList &ip)
@@ -171,11 +249,6 @@ void GitBranchPage::BranchDataModel::reload()
     emit itemsChanged(DataModelChangeType::Init);
 }
 
-void GitBranchPage::onRemoteTransferProgress(int progress)
-{
-    qDebug() << "transfer progress changed" << progress;
-}
-
 void GitBranchPage::BranchDataModel::clear()
 {
     _localBranches.clear();
@@ -191,50 +264,86 @@ VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *list, const 
     if (type == "localHeader")
         return Header::create().mode(HeaderMode::Interactive);
     if (type == "localItem")
-        // TODO: add actionset
-        return StandardListItem::create();
+        return StandardListItem::create()
+            .actionSet(ActionSet::create()
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Log"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(showBranchLogSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(checkoutBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Merge"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(mergeBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Rebase"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(rebaseBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Delete"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(deleteBranchSelection()))));
     if (type == "remoteHeader") {
         RemoteHeader *header = new RemoteHeader;
         header->setMode(HeaderMode::Interactive);
-        header->setSubtitle(tr("Info"));
+        header->setSubtitle(tr("More"));
         conn(header, SIGNAL(clicked()),
             _page, SLOT(showRemoteInfo()));
         return header;
     }
     if (type == "remoteItem")
         // TODO: add actionset
-        return StandardListItem::create();
+        return StandardListItem::create()
+            .actionSet(ActionSet::create()
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Log"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(showBranchLogSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(checkoutBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Merge"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(mergeBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Rebase"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(rebaseBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Fetch"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(fetchBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Pull"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(pullBranchSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Push"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(pushBranchSelection()))));
 }
 
 void GitBranchPage::BranchItemProvider::updateItem(ListView *list, VisualNode *item, const QString &type,
     const QVariantList &ip, const QVariant &data)
 {
-    if (ip.empty())
-        return;
-    switch (ip[0].toInt()) {
-        case 0: {
-            if (ip.size() == 1) {
-                ((Header *) item)->setTitle(data.toString());
-            } else {
-                StandardListItem *it = (StandardListItem *) item;
-                const LibQGit2::Reference ref = data.value<LibQGit2::Reference>();
-                it->setTitle(ref.branchName());
-                if (ref.branchIsHead())
-                    it->setStatus(tr("HEAD"));
-            }
-            break;
+    if (type == "localHeader")
+        ((Header *) item)->setTitle(data.toString());
+    else if (type == "localItem") {
+        StandardListItem *it = (StandardListItem *) item;
+        const LibQGit2::Reference ref = data.value<LibQGit2::Reference>();
+        it->setTitle(ref.branchName());
+        bool isHead = ref.branchIsHead();
+        if (isHead) {
+            it->setStatus(tr("HEAD"));
+        } else {
+            it->resetStatus();
         }
-        default: {
-            if (ip.size() == 1) {
-                RemoteHeader *it = (RemoteHeader *) item;
-                it->setTitle(data.value<LibQGit2::Remote *>()->name());
-                it->setIndexPath(ip);
-            } else {
-                StandardListItem *it = (StandardListItem *) item;
-                const LibQGit2::Reference ref = data.value<LibQGit2::Reference>();
-                it->setTitle(ref.branchName());
-            }
-            break;
+        ActionSet *set = it->actionSetAt(0);
+        // XXX: the first action would be view log,
+        // and all the others are ones that don't apply to head
+        for (int i = 1; i < set->count(); i++) {
+            set->at(i)->setEnabled(!isHead);
         }
+    } else if (type == "remoteHeader") {
+        RemoteHeader *it = (RemoteHeader *) item;
+        it->setTitle(data.value<LibQGit2::Remote *>()->name());
+        it->setIndexPath(ip);
+    } else if (type == "remoteItem") {
+        StandardListItem *it = (StandardListItem *) item;
+        const LibQGit2::Reference ref = data.value<LibQGit2::Reference>();
+        it->setTitle(ref.branchName());
     }
 }

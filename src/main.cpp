@@ -17,7 +17,7 @@
 #include <Qt/qdeclarativedebug.h>
 #include <bb/cascades/ProgressIndicatorState>
 #include <libqgit2/qgitglobal.h>
-#include <libqgit2/qgitstatuslist.h>
+#include <libqgit2/qgitrepository.h>
 #include <Helium.h>
 #include <HighlightType.h>
 #include <BufferState.h>
@@ -40,6 +40,9 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     qRegisterMetaType<QList<QString> >("QList<QString>");
     qRegisterMetaType<ParserPosition>("ParserPosition");
     qRegisterMetaType<LibQGit2::StatusList>("LibQGit2::StatusList");
+    qRegisterMetaType<LibQGit2::Repository::ResetType>("LibQGit2::Repository::ResetType");
+    qRegisterMetaType<LibQGit2::Object>("LibQGit2::Object");
+    qRegisterMetaType<LibQGit2::Reference>();
 
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
     // init LibQGit2

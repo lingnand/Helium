@@ -11,6 +11,7 @@
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
 #include <bb/cascades/Header>
+#include <bb/system/SystemUiResult>
 #include <libqgit2/qgitref.h>
 #include <PushablePage.h>
 
@@ -35,6 +36,8 @@ public:
     Q_SLOT void reload();
     Q_SLOT void reset();
     void onTranslatorChanged(bool reload=true);
+Q_SIGNALS:
+    void translatorChanged();
 private:
     GitRepoPage *_repoPage;
     class BranchDataModel : public bb::cascades::DataModel {
@@ -80,8 +83,18 @@ private:
     bb::cascades::ListView *_branchList;
 
     Q_SLOT void showBranchLogIndexPath(const QVariantList &);
+    Q_SLOT void showBranchLogSelection();
+    Q_SLOT void deleteBranchSelection();
+    Q_SLOT void checkoutBranchSelection();
+    Q_SLOT void mergeBranchSelection();
+    Q_SLOT void rebaseBranchSelection();
+    Q_SLOT void fetchBranchSelection();
+    Q_SLOT void pullBranchSelection();
+    Q_SLOT void pushBranchSelection();
     Q_SLOT void showRemoteInfo();
     Q_SLOT void onRemoteTransferProgress(int);
+    LibQGit2::Reference _tempTarget;
+    Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
 };
 
 #endif /* GITBRANCHPAGE_H_ */

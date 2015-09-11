@@ -25,6 +25,8 @@ class GitCommitPage : public PushablePage
     Q_OBJECT
 public:
     GitCommitPage(GitRepoPage *);
+    // the hint message in the commit box
+    Q_SLOT void setHintMessage(const QString &);
     // focus the message field
     void focus();
     void onTranslatorChanged();

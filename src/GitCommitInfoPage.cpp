@@ -89,8 +89,8 @@ void GitCommitInfoPage::showDiffIndexPath(const QVariantList &ip)
 
 void GitCommitInfoPage::checkout()
 {
-    if (_repoPage->checkout(_dataModel.commit()))
-        pop();
+    _repoPage->checkoutCommit(_dataModel.commit());
+    pop();
 }
 
 void GitCommitInfoPage::setActions(Actions actions)

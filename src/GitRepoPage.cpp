@@ -17,11 +17,8 @@
 #include <bb/cascades/StandardListItem>
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/Container>
-#include <bb/cascades/ProgressIndicator>
-#include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitexception.h>
 #include <libqgit2/qgitdifffile.h>
-#include <libqgit2/qgitdiffdelta.h>
 #include <libqgit2/qgitdiff.h>
 #include <Helium.h>
 #include <GitSettings.h>
@@ -70,7 +67,7 @@ GitRepoPage::GitRepoPage(Project *project):
             .add(_noRepoLabel))),
     _commitAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("c"))
-        .onTriggered(this, SLOT(showCommitPage()))),
+        .onTriggered(this, SLOT(pushCommitPage()))),
     _branchesAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("h"))
         .onTriggered(this, SLOT(branches()))),
@@ -97,6 +94,12 @@ GitRepoPage::GitRepoPage(Project *project):
     _multiResetAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(resetSelections()))),
+    _rebaseNextAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("n"))
+        .onTriggered(this, SLOT(rebaseNext()))),
+    _rebaseAbortAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("x"))
+        .onTriggered(this, SLOT(rebaseAbort()))),
     _diffPage(NULL),
     _logPage(NULL),
     _commitPage(NULL),
@@ -118,18 +121,53 @@ GitRepoPage::GitRepoPage(Project *project):
         this, SLOT(reloadMultiSelectActionsEnabled()));
     setTitleBar(TitleBar::create());
 
+    GitSettings *git = Helium::instance()->git();
+    _worker.setAuthorName(git->name());
+    _worker.setAuthorEmail(git->email());
+    conn(git, SIGNAL(nameChanged(const QString&)),
+        &_worker, SLOT(setAuthorName(const QString&)));
+    conn(git, SIGNAL(emailChanged(const QString&)),
+        &_worker, SLOT(setAuthorEmail(const QString&)));
     _worker.moveToThread(&_workerThread);
     conn(this, SIGNAL(workerFetchStatusList()),
         &_worker, SLOT(fetchStatusList()));
     conn(this, SIGNAL(workerAddPaths(const QList<QString>&)),
-        &_worker, SLOT(addPathsAndFetchNewStatusList(const QList<QString>&)));
+        &_worker, SLOT(addPaths(const QList<QString>&)));
     conn(this, SIGNAL(workerResetPaths(const QList<QString>&)),
-        &_worker, SLOT(resetPathsAndFetchNewStatusList(const QList<QString>&)));
+        &_worker, SLOT(resetPaths(const QList<QString>&)));
+    conn(this, SIGNAL(workerRebase(const LibQGit2::Reference&)),
+        &_worker, SLOT(rebase(const LibQGit2::Reference&)));
+    conn(this, SIGNAL(workerRebaseNext()),
+        &_worker, SLOT(rebaseNext()));
+    conn(this, SIGNAL(workerRebaseAbort()),
+        &_worker, SLOT(rebaseAbort()));
+    conn(this, SIGNAL(workerCommit(const QString&)),
+        &_worker, SLOT(commit(const QString&)));
+    conn(this, SIGNAL(workerReset(LibQGit2::Repository::ResetType)),
+        &_worker, SLOT(reset(LibQGit2::Repository::ResetType)));
+    conn(this, SIGNAL(workerCheckoutCommit(const LibQGit2::Object&)),
+        &_worker, SLOT(checkoutCommit(const LibQGit2::Object&)));
+    conn(this, SIGNAL(workerCheckoutBranch(const LibQGit2::Reference&)),
+        &_worker, SLOT(checkoutBranch(const LibQGit2::Reference&)));
+    conn(this, SIGNAL(workerMerge(const LibQGit2::Reference&)),
+        &_worker, SLOT(merge(const LibQGit2::Reference&)));
 
-    conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
-        progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
+    conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
+        progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
+    conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
+        this, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)));
+    conn(&_worker, SIGNAL(progressDismissed()),
+        progressIndicator, SLOT(hide()));
+    conn(&_worker, SIGNAL(progressDismissed()),
+        this, SIGNAL(progressDismissed()));
+    conn(&_worker, SIGNAL(progressFinished()),
+        this, SLOT(reloadContent()));
+    conn(&_worker, SIGNAL(progressFinished()),
+        this, SIGNAL(progressFinished()));
     conn(&_worker, SIGNAL(statusListFetched(const LibQGit2::StatusList&)),
         this, SLOT(handleStatusList(const LibQGit2::StatusList&)));
+    conn(&_worker, SIGNAL(pushCommitPage(const QString&)),
+        this, SLOT(pushCommitPage(const QString&)))
     _workerThread.start();
 
     conn(_project, SIGNAL(pathChanged(const QString&)),
@@ -169,16 +207,12 @@ void GitRepoPage::reloadMultiSelectActionsEnabled()
     }
 }
 
-void GitRepoPage::lockRepoContent()
+void GitRepoPage::lockContent()
 {
     _statusListView->setEnabled(false);
-    _commitAction->setEnabled(false);
-    _branchesAction->setEnabled(false);
-    _logAction->setEnabled(false);
-    _addAllAction->setEnabled(false);
-    _resetMixedAction->setEnabled(false);
-    _resetHardAction->setEnabled(false);
-    _reloadAction->setEnabled(false);
+    for (int i = 0; i < actionCount(); i++) {
+        actionAt(i)->setEnabled(false);
+    }
 }
 
 void GitRepoPage::hideAllActions()
@@ -189,67 +223,119 @@ void GitRepoPage::hideAllActions()
 
 void GitRepoPage::handleStatusList(const LibQGit2::StatusList &list)
 {
-    // XXX: assumes that we are with repoContent
     _statusDataModel.setStatusList(list);
-    _statusListView->setEnabled(true);
-    bool validDeltasInIndex = _statusDataModel.hasValidDiffDeltasInIndex();
-    bool validDeltasInWorkdir = _statusDataModel.hasValidDiffDeltasInWorkdir();
-    _commitAction->setEnabled(validDeltasInIndex);
-    _branchesAction->setEnabled(true);
-    _logAction->setEnabled(!_project->gitRepo()->isHeadUnborn());
-    _addAllAction->setEnabled(validDeltasInWorkdir);
-    _resetMixedAction->setEnabled(validDeltasInIndex);
-    _resetHardAction->setEnabled(validDeltasInIndex || validDeltasInWorkdir);
-    _reloadAction->setEnabled(true);
+}
+
+void GitRepoPage::rebaseNext()
+{
+    lockContent();
+    emit workerRebaseNext();
+}
+
+void GitRepoPage::rebaseAbort()
+{
+    lockContent();
+    emit workerRebaseAbort();
 }
 
 void GitRepoPage::reload()
 {
-    try {
-        // title
-        if (_project->gitRepo()->isHeadUnborn()) {
-            titleBar()->setTitle(tr("No commit"));
-            _logAction->setEnabled(false);
-        } else {
-            if (_project->gitRepo()->isHeadDetached()) {
-                titleBar()->setTitle(tr("Detached at %1").arg(
-                        QString(_project->gitRepo()->head().peelToCommit().oid().nformat(7))));
-            } else {
-                titleBar()->setTitle(_project->gitRepo()->head().branchName());
-            }
-            _logAction->setEnabled(true);
-        }
-        // actions
-        hideAllActions();
-        addAction(_commitAction, ActionBarPlacement::Signature);
-        addAction(_branchesAction, ActionBarPlacement::OnBar);
-        addAction(_logAction, ActionBarPlacement::OnBar);
-        addAction(_addAllAction);
-        addAction(_resetMixedAction);
-        addAction(_resetHardAction);
-        addAction(_reloadAction);
-        lockRepoContent();
+    reloadContent();
+    if (!_project->gitRepo()->isNull()) {
+        lockContent();
         emit workerFetchStatusList();
-        // content
-        setContent(_repoContent);
-    } catch (const LibQGit2::Exception &e) {
-        qDebug() << "::::LIBQGIT2 ERROR when reloading RepoPage::::" << e.what();
+    }
+}
+
+void GitRepoPage::reloadContent()
+{
+    if (_project->gitRepo()->isNull()) {
         // title
         titleBar()->setTitle(tr("No Repository"));
         // actions
         hideAllActions();
+        _initAction->setEnabled(true);
+        _cloneAction->setEnabled(true);
+        _reloadAction->setEnabled(true);
         addAction(_initAction, ActionBarPlacement::Signature);
         addAction(_cloneAction, ActionBarPlacement::OnBar);
         addAction(_reloadAction, ActionBarPlacement::OnBar);
         // content
         setContent(_noRepoContent);
+        return;
     }
+    // title
+    QString title;
+    if (_project->gitRepo()->isHeadUnborn()) {
+        title = tr("No commit");
+    } else if (_project->gitRepo()->isHeadDetached()) {
+        title = tr("Detached at %1").arg(
+            QString(_project->gitRepo()->head().peelToCommit().oid().nformat(7)));
+    } else {
+        title = _project->gitRepo()->head().branchName();
+    }
+    QString message = _project->gitRepo()->message();
+    if (!message.isEmpty())
+        title += QString(" (%1)").arg(message);
+    titleBar()->setTitle(title);
+    // actions
+    hideAllActions();
+    switch (_project->gitRepo()->state()) {
+        case LibQGit2::Repository::StateNone: {
+            bool validDeltasInIndex = _statusDataModel.hasValidDiffDeltasInIndex();
+            bool validDeltasInWorkdir = _statusDataModel.hasValidDiffDeltasInWorkdir();
+            _commitAction->setEnabled(validDeltasInIndex);
+            _branchesAction->setEnabled(true);
+            _logAction->setEnabled(!_project->gitRepo()->isHeadUnborn());
+            _addAllAction->setEnabled(validDeltasInWorkdir);
+            _resetMixedAction->setEnabled(validDeltasInIndex);
+            _resetHardAction->setEnabled(validDeltasInIndex || validDeltasInWorkdir);
+            addAction(_commitAction, ActionBarPlacement::Signature);
+            addAction(_branchesAction, ActionBarPlacement::OnBar);
+            addAction(_logAction, ActionBarPlacement::OnBar);
+            addAction(_addAllAction);
+            addAction(_resetMixedAction);
+            addAction(_resetHardAction);
+            break;
+        }
+        case LibQGit2::Repository::StateMerge:
+            qDebug() << "GOT STATE Merge";
+            break;
+        case LibQGit2::Repository::StateRevert:
+            qDebug() << "GOT STATE Revert";
+            break;
+        case LibQGit2::Repository::StateCherrypick:
+            qDebug() << "GOT STATE Cherrypick";
+            break;
+        case LibQGit2::Repository::StateBisect:
+            qDebug() << "GOT STATE Bisect";
+            break;
+        case LibQGit2::Repository::StateRebaseMerge:
+        case LibQGit2::Repository::StateRebase:
+            _rebaseNextAction->setEnabled(true);
+            _rebaseAbortAction->setEnabled(true);
+            addAction(_rebaseNextAction, ActionBarPlacement::Signature);
+            addAction(_rebaseAbortAction, ActionBarPlacement::OnBar);
+            break;
+        case LibQGit2::Repository::StateInteractive:
+            qDebug() << "GOT STATE Interactive";
+            break;
+        case LibQGit2::Repository::StateApplyMailbox:
+            qDebug() << "GOT STATE Apply Mailbox";
+            break;
+    }
+    _reloadAction->setEnabled(true);
+    addAction(_reloadAction);
+    // content
+    _statusListView->setEnabled(true);
+    setContent(_repoContent);
 }
 
 void GitRepoPage::init()
 {
     _project->gitRepo()->init(_project->path());
-    reload();
+    lockContent();
+    emit workerFetchStatusList();
 }
 
 void GitRepoPage::clone()
@@ -257,53 +343,45 @@ void GitRepoPage::clone()
 
 }
 
-bool GitRepoPage::commit(const QString &message)
+void GitRepoPage::commit(const QString &message)
 {
-    try {
-        LibQGit2::Repository *repo = _project->gitRepo();
-        // pop open a new page to record the commit message
-        QList<LibQGit2::Commit> parents;
-        if (!repo->isHeadUnborn()) {
-            parents.append(repo->head().peelToCommit());
-        }
-        // obtain the signature directly from global config
-        GitSettings *git = Helium::instance()->git();
-        LibQGit2::Signature sig(git->name(), git->email());
-        LibQGit2::OId oid = repo->createCommit(repo->lookupTree(repo->index().createTree()),
-                parents, sig, sig, message, "HEAD");
-        Utility::toast(tr("Commited %1").arg(QString(oid.nformat(7))));
-        repo->index().write();
-    } catch (const LibQGit2::Exception &e) {
-        Utility::toast(e.what());
-        return false;
-    }
-    reload();
-    return true;
+    lockContent();
+    emit workerCommit(message);
 }
 
-bool GitRepoPage::checkout(const LibQGit2::Object &treeish)
+void GitRepoPage::checkoutCommit(const LibQGit2::Object &commit)
 {
-    try {
-        _project->gitRepo()->checkoutTree(treeish,
-                LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
-        const LibQGit2::OId &oid = treeish.oid();
-        _project->gitRepo()->setHeadDetached(oid);
-        Utility::toast(tr("HEAD detached at %1").arg(QString(oid.nformat(7))));
-    } catch (const LibQGit2::Exception &e) {
-        Utility::toast(e.what());
-        return false;
-    }
-    reload();
-    return true;
+    lockContent();
+    emit workerCheckoutCommit(commit);
 }
 
-void GitRepoPage::showCommitPage()
+void GitRepoPage::checkoutBranch(const LibQGit2::Reference &branch)
+{
+    lockContent();
+    emit workerCheckoutBranch(branch);
+}
+
+void GitRepoPage::merge(const LibQGit2::Reference &theirHead)
+{
+    lockContent();
+    emit workerMerge(theirHead);
+}
+
+void GitRepoPage::rebase(const LibQGit2::Reference &upstream)
+{
+    lockContent();
+    emit workerRebase(upstream);
+}
+
+void GitRepoPage::pushCommitPage(const QString &hintMessage)
 {
     if (!_commitPage) {
         _commitPage = new GitCommitPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _commitPage, SLOT(onTranslatorChanged()));
     }
+    _commitPage->setHintMessage(hintMessage.isNull() ?
+            tr("Commit message") : hintMessage);
     parent()->push(_commitPage);
     _commitPage->focus();
 }
@@ -351,7 +429,7 @@ void GitRepoPage::addSelections()
 // add progress bar
 void GitRepoPage::addPaths(const QList<QString> &paths)
 {
-    lockRepoContent();
+    lockContent();
     emit workerAddPaths(paths);
 }
 
@@ -380,8 +458,8 @@ void GitRepoPage::resetSelections()
 
 void GitRepoPage::resetMixed()
 {
-    _project->gitRepo()->reset(_project->gitRepo()->head().peelToCommit());
-    reload();
+    lockContent();
+    emit workerReset(LibQGit2::Repository::Mixed);
 }
 
 void GitRepoPage::safeResetHard()
@@ -393,19 +471,15 @@ void GitRepoPage::safeResetHard()
 
 void GitRepoPage::onResetHardDialogFinished(bb::system::SystemUiResult::Type type)
 {
-    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
-        resetHard();
-}
-
-void GitRepoPage::resetHard()
-{
-    _project->gitRepo()->reset(_project->gitRepo()->head().peelToCommit(), LibQGit2::Repository::Hard);
-    reload();
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
+        lockContent();
+        emit workerReset(LibQGit2::Repository::Hard);
+    }
 }
 
 void GitRepoPage::resetPaths(const QList<QString> &paths)
 {
-    lockRepoContent();
+    lockContent();
     emit workerResetPaths(paths);
 }
 
@@ -523,6 +597,7 @@ void GitRepoPage::onTranslatorChanged(bool reload)
     _reloadAction->setTitle(tr("Reload"));
     _noRepoLabel->setText(tr("<br/>No repository found.<br/><br/>Use <b>Init</b> or <b>Clone</b> to create a git repository in<br/><em>%1</em>")
             .arg(_project->path()));
+    // repo
     _commitAction->setTitle(tr("Commit"));
     _branchesAction->setTitle(tr("Branches"));
     _logAction->setTitle(tr("Log"));
@@ -531,6 +606,9 @@ void GitRepoPage::onTranslatorChanged(bool reload)
     _resetHardAction->setTitle(tr("Reset (Hard)"));
     _multiAddAction->setTitle(tr("Add"));
     _multiResetAction->setTitle(tr("Reset"));
+    // rebase
+    _rebaseNextAction->setTitle(tr("Next"));
+    _rebaseAbortAction->setTitle(tr("Abort"));
     if (reload)
         this->reload();
     emit translatorChanged();
@@ -569,7 +647,6 @@ bool GitRepoPage::StatusDataModel::hasValidDiffDeltasInIndex() const
     }
     return false;
 }
-
 
 int GitRepoPage::StatusDataModel::childCount(const QVariantList &indexPath)
 {

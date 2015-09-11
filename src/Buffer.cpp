@@ -51,8 +51,10 @@ Buffer::Buffer(int historyLimit, QObject *parent):
     conn(this, SIGNAL(workerLoadStateFromFile(StateChangeContext&, const QString&, bool, Progress)),
          &_worker, SLOT(loadStateFromFile(StateChangeContext&, const QString&, bool, Progress)));
 
-    conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)),
-            this, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type, const QString&)));
+    conn(&_worker, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
+            this, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)));
+    conn(&_worker, SIGNAL(progressDismissed()),
+            this, SIGNAL(progressDismissed()));
     conn(&_worker, SIGNAL(highlightTypeChanged(const StateChangeContext&, const BufferState&)),
             this, SLOT(handleStateChangeResult(const StateChangeContext&, const BufferState&)));
     conn(&_worker, SIGNAL(changeMerged(const StateChangeContext&, const BufferState&)),
