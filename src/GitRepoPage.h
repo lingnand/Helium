@@ -11,11 +11,11 @@
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
 #include <bb/cascades/ActionBarPlacement>
+#include <bb/cascades/ProgressIndicatorState>
 #include <bb/system/SystemUiResult>
 #include <libqgit2/qgitdiffdelta.h>
 #include <libqgit2/qgitpatch.h>
 #include <libqgit2/qgitrepository.h>
-#include <GitWorker.h>
 #include <GitDiffPage.h>
 #include <GitCommitInfoPage.h>
 #include <GitLogPage.h>
@@ -39,14 +39,16 @@ class Project;
 class Segment;
 class GitCommitPage;
 class GitBranchPage;
+class AutoHideProgressIndicator;
 
 class GitRepoPage : public PushablePage
 {
     Q_OBJECT
 public:
-    GitRepoPage(Project *);
-    virtual ~GitRepoPage();
+    GitRepoPage();
     LibQGit2::Repository *repo();
+    Q_SLOT void setProject(Project *);
+    Q_SLOT void resetProject(); // detach from a project
     Q_SLOT void reload(); // refresh the view
     Q_SLOT void addPaths(const QList<QString> &pathspecs=QList<QString>());
     Q_SLOT void addAll();
@@ -73,11 +75,13 @@ public:
         StatusDiffDelta(StatusDiffType t=HeadToIndex, const LibQGit2::DiffDelta &d=LibQGit2::DiffDelta()):
             type(t), delta(d) {}
     };
+    // git worker export
+    bool inProgress();
 Q_SIGNALS:
     void translatorChanged();
+    void inProgressChanged(bool);
     void progressChanged(float, bb::cascades::ProgressIndicatorState::Type);
     void progressDismissed();
-    void progressFinished();
     void workerFetchStatusList();
     void workerAddPaths(const QList<QString> &);
     void workerResetPaths(const QList<QString> &);
@@ -124,6 +128,7 @@ private:
         GitRepoPage *_gitRepoPage;
     } _statusItemProvider;
     bb::cascades::ListView *_statusListView;
+    AutoHideProgressIndicator *_progressIndicator;
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
     bb::cascades::ActionItem *_rebaseNextAction, *_rebaseAbortAction;
     bb::cascades::ActionItem *_mergeAbortAction;
@@ -134,10 +139,7 @@ private:
     GitCommitInfoPage *_commitInfoPage;
     GitBranchPage *_branchPage;
 
-    GitWorker _worker;
-
     bb::cascades::Control *_repoContent;
-    QThread _workerThread;
 
     Q_SLOT void init();
     Q_SLOT void clone();
@@ -153,9 +155,9 @@ private:
     void selectAllChildren(const QVariantList &);
     Q_SLOT void reloadMultiSelectActionsEnabled();
 
-    void lockContent();
     Q_SLOT void reloadContent();
     Q_SLOT void handleStatusList(const LibQGit2::StatusList &);
+    Q_SLOT void onGitWorkerInProgressChanged(bool);
     Q_SLOT void onProjectPathChanged();
 
     Q_SLOT void onSelectAllOnIndexTriggered();

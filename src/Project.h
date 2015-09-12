@@ -11,6 +11,7 @@
 #include <bb/cascades/Tab>
 #include <libqgit2/qgitrepository.h>
 #include <Zipper.h>
+#include <GitWorker.h>
 
 class View;
 class Buffer;
@@ -40,7 +41,8 @@ public:
     void openFilesAt(int, const QStringList &);
     void resetViewHeaderSubtitles(int index, int total);
     // returns the git repo
-    LibQGit2::Repository *gitRepo() { return &_repo; };
+    LibQGit2::Repository *gitRepo() { return &_repo; }
+    GitWorker *gitWorker() { return &_worker; }
 Q_SIGNALS:
     void pathChanged(const QString &);
     void viewInserted(int index, View *);
@@ -60,6 +62,8 @@ private:
 
     // git
     LibQGit2::Repository _repo;
+    GitWorker _worker;
+    QThread _workerThread;
 
     void insertNewView(int index, Buffer *);
     void resetViewHeaderSubtitles();

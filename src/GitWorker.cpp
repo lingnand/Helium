@@ -5,6 +5,7 @@
  *      Author: lingnan
  */
 
+#include <QMutexLocker>
 #include <QDebug>
 #include <libqgit2/qgitexception.h>
 #include <libqgit2/qgitstatusoptions.h>
@@ -15,8 +16,23 @@
 using namespace bb::cascades;
 
 GitWorker::GitWorker(LibQGit2::Repository *repo):
-    _repo(repo)
+    _repo(repo), _inProgress(false)
 {
+}
+
+bool GitWorker::inProgress()
+{
+    QMutexLocker lock(&_inProgressMut);
+    return _inProgress;
+}
+
+void GitWorker::setInProgress(bool inProgress)
+{
+    QMutexLocker lock(&_inProgressMut);
+    if (inProgress != _inProgress) {
+        _inProgress = inProgress;
+        emit inProgressChanged(_inProgress);
+    }
 }
 
 void GitWorker::setAuthorName(const QString &name)
@@ -27,12 +43,6 @@ void GitWorker::setAuthorName(const QString &name)
 void GitWorker::setAuthorEmail(const QString &email)
 {
     _email = email;
-}
-
-void GitWorker::fetchStatusList(Progress progress)
-{
-    _fetchStatusList(progress);
-    emit progressFinished();
 }
 
 void GitWorker::_fetchStatusList(Progress progress)
@@ -54,8 +64,24 @@ void GitWorker::_fetchStatusList(Progress progress)
     }
 }
 
+LibQGit2::Rebase &GitWorker::rebaseObj()
+{
+    if (_rebase.isNull())
+        _rebase = _repo->openRebase(
+            LibQGit2::RebaseOptions(LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe)));
+    return _rebase;
+}
+
+void GitWorker::fetchStatusList(Progress progress)
+{
+    setInProgress(true);
+    _fetchStatusList(progress);
+    setInProgress(false);
+}
+
 void GitWorker::addPaths(const QList<QString> &paths, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -67,11 +93,12 @@ void GitWorker::addPaths(const QList<QString> &paths, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::resetPaths(const QList<QString> &paths, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -83,11 +110,12 @@ void GitWorker::resetPaths(const QList<QString> &paths, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::reset(LibQGit2::Repository::ResetType type, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -99,19 +127,12 @@ void GitWorker::reset(LibQGit2::Repository::ResetType type, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
-}
-
-LibQGit2::Rebase &GitWorker::rebaseObj()
-{
-    if (_rebase.isNull())
-        _rebase = _repo->openRebase(
-            LibQGit2::RebaseOptions(LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe)));
-    return _rebase;
+    setInProgress(false);
 }
 
 void GitWorker::rebase(const LibQGit2::Reference &upstream, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -124,11 +145,12 @@ void GitWorker::rebase(const LibQGit2::Reference &upstream, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::rebaseNext(Progress progress)
 {
+    setInProgress(true);
     LibQGit2::Rebase &rebase = rebaseObj();
     LibQGit2::Signature sig = LibQGit2::Signature(_name, _email);
     float inc = (progress.cap-progress.current)/(rebase.operationCount()*1.5+2);
@@ -147,11 +169,12 @@ void GitWorker::rebaseNext(Progress progress)
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
     _fetchStatusList(progress);
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::rebaseAbort(Progress progress)
 {
+    setInProgress(true);
     LibQGit2::Rebase &rebase = rebaseObj();
     LibQGit2::Signature sig = LibQGit2::Signature(_name, _email);
     float initInc = (progress.cap-progress.current)/8;
@@ -165,11 +188,12 @@ void GitWorker::rebaseAbort(Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::commit(const QString &message, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -191,11 +215,12 @@ void GitWorker::commit(const QString &message, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::checkoutCommit(const LibQGit2::Object &commit, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -212,11 +237,12 @@ void GitWorker::checkoutCommit(const LibQGit2::Object &commit, Progress progress
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::checkoutBranch(const LibQGit2::Reference &branch, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -232,11 +258,12 @@ void GitWorker::checkoutBranch(const LibQGit2::Reference &branch, Progress progr
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -287,11 +314,12 @@ void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }
 
 void GitWorker::cleanupState(Progress progress)
 {
+    setInProgress(true);
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -303,5 +331,5 @@ void GitWorker::cleanupState(Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    emit progressFinished();
+    setInProgress(false);
 }

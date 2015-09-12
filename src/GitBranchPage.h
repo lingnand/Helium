@@ -93,6 +93,7 @@ private:
     Q_SLOT void pushBranchSelection();
     Q_SLOT void showRemoteInfo();
     Q_SLOT void onRemoteTransferProgress(int);
+    Q_SLOT void onGitRepoPageInProgressChanged(bool);
     LibQGit2::Reference _tempTarget;
     Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
 };

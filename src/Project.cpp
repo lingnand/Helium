@@ -11,17 +11,29 @@
 #include <View.h>
 #include <Buffer.h>
 #include <Helium.h>
+#include <GitSettings.h>
 #include <BufferStore.h>
 
 using namespace bb::cascades;
 
 Project::Project(Zipper<Project *> *projects, const QString &path):
         _projects(projects),
-        _activeView(NULL)
+        _activeView(NULL),
+        _worker(&_repo)
 {
     setPath(path);
     unselect();
     createEmptyViewAt(0);
+
+    GitSettings *git = Helium::instance()->git();
+    _worker.setAuthorName(git->name());
+    _worker.setAuthorEmail(git->email());
+    conn(git, SIGNAL(nameChanged(const QString&)),
+        &_worker, SLOT(setAuthorName(const QString&)));
+    conn(git, SIGNAL(emailChanged(const QString&)),
+        &_worker, SLOT(setAuthorEmail(const QString&)));
+    _worker.moveToThread(&_workerThread);
+    _workerThread.start();
 }
 
 Project::~Project()
@@ -30,6 +42,8 @@ Project::~Project()
     // removed from a MultiViewPane (which should be the case)
     for (int i = 0; i < _views.size(); i++)
         _views[i]->deleteLater();
+    _workerThread.quit();
+    _workerThread.wait();
 }
 
 bool Project::setActiveViewIndex(int index)

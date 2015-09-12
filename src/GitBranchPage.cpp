@@ -43,8 +43,9 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
         progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
     conn(page, SIGNAL(progressDismissed()),
         progressIndicator, SLOT(hide()));
-    conn(page, SIGNAL(progressFinished()),
-        this, SLOT(reload()));
+    onGitRepoPageInProgressChanged(page->inProgress());
+    conn(page, SIGNAL(inProgressChanged(bool)),
+        this, SLOT(onGitRepoPageInProgressChanged(bool)));
 
     onTranslatorChanged(false);
 }
@@ -140,6 +141,22 @@ void GitBranchPage::onRemoteTransferProgress(int progress)
     qDebug() << "transfer progress changed" << progress;
 }
 
+void GitBranchPage::onGitRepoPageInProgressChanged(bool inProgress)
+{
+    if (inProgress) {
+        // lock the content
+        _branchList->setEnabled(false);
+        for (int i = 0; i < actionCount(); i++)
+            actionAt(i)->setEnabled(false);
+    } else {
+        // unlock the content
+        _branchList->setEnabled(true);
+        for (int i = 0; i < actionCount(); i++)
+            actionAt(i)->setEnabled(true);
+        reload();
+    }
+}
+
 void GitBranchPage::onTranslatorChanged(bool reload)
 {
     PushablePage::onTranslatorChanged();
@@ -215,6 +232,7 @@ void GitBranchPage::BranchDataModel::reload()
     // load all the remotes
     QStringList remotes = _repo->listRemotes();
     for (int i = 0; i < remotes.size(); ++i) {
+        // TODO: use proper credentials
         LibQGit2::Remote *remote = _repo->remote(remotes[i], LibQGit2::Credentials(), this);
         conn(remote, SIGNAL(transferProgress(int)),
                 _page, SLOT(onRemoteTransferProgress(int)));
@@ -259,7 +277,7 @@ void GitBranchPage::BranchDataModel::clear()
     }
 }
 
-VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *list, const QString &type)
+VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *, const QString &type)
 {
     if (type == "localHeader")
         return Header::create().mode(HeaderMode::Interactive);
@@ -314,6 +332,7 @@ VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *list, const 
                 .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Push"))
                     .reloadTitleOn(_page, SIGNAL(translatorChanged()))
                     .onTriggered(_page, SLOT(pushBranchSelection()))));
+    return NULL;
 }
 
 void GitBranchPage::BranchItemProvider::updateItem(ListView *list, VisualNode *item, const QString &type,

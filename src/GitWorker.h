@@ -8,6 +8,7 @@
 #ifndef GITWORKER_H_
 #define GITWORKER_H_
 
+#include <QMutex>
 #include <bb/cascades/ProgressIndicatorState>
 #include <libqgit2/qgitstatuslist.h>
 #include <libqgit2/qgitrebase.h>
@@ -24,6 +25,7 @@ class GitWorker : public QObject
     Q_OBJECT
 public:
     GitWorker(LibQGit2::Repository *);
+    bool inProgress(); // whether an operation is running with the current worker
     Q_SLOT void fetchStatusList(Progress progress=Progress());
     Q_SLOT void addPaths(const QList<QString> &, Progress progress=Progress());
     Q_SLOT void resetPaths(const QList<QString> &, Progress progress=Progress());
@@ -39,16 +41,20 @@ public:
     Q_SLOT void setAuthorName(const QString &);
     Q_SLOT void setAuthorEmail(const QString &);
 Q_SIGNALS:
+    void inProgressChanged(bool);
     void progressChanged(float progress, bb::cascades::ProgressIndicatorState::Type state=bb::cascades::ProgressIndicatorState::Progress);
-    void statusListFetched(const LibQGit2::StatusList &);
-    void progressFinished();
     void progressDismissed();
+    void statusListFetched(const LibQGit2::StatusList &);
     void pushCommitPage(const QString &);
 private:
     LibQGit2::Repository *_repo;
+    QMutex _inProgressMut;
+    bool _inProgress;
+
     LibQGit2::Rebase _rebase;
     QString _name, _email;  // for signature
 
+    void setInProgress(bool);
     LibQGit2::Rebase &rebaseObj();
 
     void _fetchStatusList(Progress progress);
