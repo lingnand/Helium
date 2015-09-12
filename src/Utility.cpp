@@ -85,7 +85,7 @@ bb::system::SystemPrompt *Utility::prompt()
         conn(_prompt, SIGNAL(finished(bb::system::SystemUiResult::Type)),
             this, SLOT(onPromptFinished(bb::system::SystemUiResult::Type)));
     }
-    disconnect(SIGNAL(promptFinished(bb::system::SystemUiResult::Type, const QString&)));
+    QObject::disconnect(SIGNAL(promptFinished(bb::system::SystemUiResult::Type, const QString&)));
     return _prompt;
 }
 

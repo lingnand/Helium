@@ -60,6 +60,8 @@ public:
     Q_SLOT void checkoutBranch(const LibQGit2::Reference &);
     Q_SLOT void merge(const LibQGit2::Reference &);
     Q_SLOT void rebase(const LibQGit2::Reference &upstream);
+    Q_SLOT void deleteBranch(const LibQGit2::Reference &);
+    Q_SLOT void createBranch(const QString &);
     Q_SLOT void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
     Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
     Q_SLOT void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
@@ -94,6 +96,8 @@ Q_SIGNALS:
     void workerCheckoutBranch(const LibQGit2::Reference &);
     void workerMerge(const LibQGit2::Reference &);
     void workerCleanupState();
+    void workerDeleteBranch(LibQGit2::Reference);
+    void workerCreateBranch(const QString &);
 private:
     Project *_project;
     // UIs that apply when there is no repo

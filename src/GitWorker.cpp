@@ -333,3 +333,34 @@ void GitWorker::cleanupState(Progress progress)
     }
     setInProgress(false);
 }
+
+void GitWorker::deleteBranch(LibQGit2::Reference branch, Progress progress)
+{
+    setInProgress(true);
+    emit progressChanged(progress.current=(progress.cap+progress.current)/2);
+    try {
+        branch.branchDelete();
+        emit progressChanged(progress.cap);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when deleting branch::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
+    setInProgress(false);
+}
+
+void GitWorker::createBranch(const QString &name, Progress progress)
+{
+    setInProgress(true);
+    emit progressChanged(progress.current=(progress.cap+progress.current)/2);
+    try {
+        _repo->createBranch(name);
+        emit progressChanged(progress.cap);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when creating branch::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
+    setInProgress(false);
+
+}

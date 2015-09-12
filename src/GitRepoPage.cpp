@@ -163,6 +163,10 @@ void GitRepoPage::setProject(Project *project)
                 _project->gitWorker(), SLOT(merge(const LibQGit2::Reference&)));
             conn(this, SIGNAL(workerCleanupState()),
                 _project->gitWorker(), SLOT(cleanupState()));
+            conn(this, SIGNAL(workerDeleteBranch(LibQGit2::Reference)),
+                _project->gitWorker(), SLOT(deleteBranch(LibQGit2::Reference)));
+            conn(this, SIGNAL(workerCreateBranch(const QString&)),
+                _project->gitWorker(), SLOT(createBranch(const QString&)));
 
             onGitWorkerInProgressChanged(_project->gitWorker()->inProgress());
             conn(_project->gitWorker(), SIGNAL(inProgressChanged(bool)),
@@ -379,6 +383,16 @@ void GitRepoPage::rebase(const LibQGit2::Reference &upstream)
     emit workerRebase(upstream);
 }
 
+void GitRepoPage::deleteBranch(const LibQGit2::Reference &branch)
+{
+    emit workerDeleteBranch(branch);
+}
+
+void GitRepoPage::createBranch(const QString &branchName)
+{
+    emit workerCreateBranch(branchName);
+}
+
 void GitRepoPage::pushCommitPage(const QString &hintMessage)
 {
     if (!_commitPage) {
@@ -399,6 +413,7 @@ void GitRepoPage::branches()
         conn(this, SIGNAL(translatorChanged()),
             _branchPage, SLOT(onTranslatorChanged()));
     }
+    _branchPage->connectToRepoPage();
     _branchPage->reload();
     parent()->push(_branchPage);
 }
@@ -802,8 +817,10 @@ void GitRepoPage::onPagePopped(Page *page)
         _diffPage->resetPatch();
     else if (page == _commitInfoPage)
         _commitInfoPage->resetCommit();
-    else if (page == _branchPage)
+    else if (page == _branchPage) {
         _branchPage->reset();
+        _branchPage->disconnectFromRepoPage();
+    }
 }
 
 void GitRepoPage::onGitWorkerInProgressChanged(bool inProgress)

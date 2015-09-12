@@ -12,6 +12,7 @@
 #include <bb/cascades/NavigationPane>
 #include <bb/cascades/ActionSet>
 #include <bb/cascades/Container>
+#include <bb/cascades/Shortcut>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitremote.h>
 #include <GitBranchPage.h>
@@ -25,29 +26,42 @@ using namespace bb::cascades;
 
 GitBranchPage::GitBranchPage(GitRepoPage *page):
     _repoPage(page),
+    _addBranchAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("a"))
+        .onTriggered(this, SLOT(addBranch()))),
     _dataModel(this, page->repo()),
     _itemProvider(this),
     _branchList(ListView::create()
         .dataModel(&_dataModel)
-        .listItemProvider(&_itemProvider))
+        .listItemProvider(&_itemProvider)),
+    _progressIndicator(new AutoHideProgressIndicator)
 {
     conn(_branchList, SIGNAL(triggered(QVariantList)),
         this, SLOT(showBranchLogIndexPath(const QVariantList &)));
     setTitleBar(TitleBar::create());
-    AutoHideProgressIndicator *progressIndicator = new AutoHideProgressIndicator;
     setContent(Container::create()
         .add(_branchList)
-        .add(progressIndicator));
-
-    conn(page, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
-        progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
-    conn(page, SIGNAL(progressDismissed()),
-        progressIndicator, SLOT(hide()));
-    onGitRepoPageInProgressChanged(page->inProgress());
-    conn(page, SIGNAL(inProgressChanged(bool)),
-        this, SLOT(onGitRepoPageInProgressChanged(bool)));
+        .add(_progressIndicator));
+    addAction(_addBranchAction, ActionBarPlacement::Signature);
 
     onTranslatorChanged(false);
+}
+
+void GitBranchPage::connectToRepoPage()
+{
+    conn(_repoPage, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
+        _progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
+    conn(_repoPage, SIGNAL(progressDismissed()),
+        _progressIndicator, SLOT(hide()));
+    onGitRepoPageInProgressChanged(_repoPage->inProgress());
+    conn(_repoPage, SIGNAL(inProgressChanged(bool)),
+        this, SLOT(onGitRepoPageInProgressChanged(bool)));
+}
+
+void GitBranchPage::disconnectFromRepoPage()
+{
+    _repoPage->disconnect(_progressIndicator);
+    _repoPage->disconnect(this);
 }
 
 void GitBranchPage::showBranchLogIndexPath(const QVariantList &ip)
@@ -93,10 +107,8 @@ void GitBranchPage::deleteBranchSelection()
 
 void GitBranchPage::onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type type)
 {
-    if (type == bb::system::SystemUiResult::ConfirmButtonSelection) {
-        _tempTarget.branchDelete();
-        reload();
-    }
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        _repoPage->deleteBranch(_tempTarget);
     _tempTarget = LibQGit2::Reference();
 }
 
@@ -124,6 +136,20 @@ void GitBranchPage::showRemoteInfo()
         return;
     }
     qDebug() << "SHOWING REMOTE INFO for" << remote->name();
+}
+
+void GitBranchPage::addBranch()
+{
+    Utility::prompt(tr("Continue"), tr("Cancel"),
+            tr("Add Branch"), tr("Enter the branch name to add"),
+            QString(), tr("branch name"), this,
+            SLOT(onAddBranchPromptFinished(bb::system::SystemUiResult::Type, const QString&)));
+}
+
+void GitBranchPage::onAddBranchPromptFinished(bb::system::SystemUiResult::Type type, const QString &text)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        _repoPage->createBranch(text);
 }
 
 void GitBranchPage::reload()
@@ -161,6 +187,7 @@ void GitBranchPage::onTranslatorChanged(bool reload)
 {
     PushablePage::onTranslatorChanged();
     titleBar()->setTitle(tr("Branches"));
+    _addBranchAction->setTitle(tr("Add Branch"));
     if (reload)
         this->reload();
     emit translatorChanged();

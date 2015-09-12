@@ -18,6 +18,7 @@
 namespace bb {
     namespace cascades {
         class ListView;
+        class AcitonItem;
     }
 }
 
@@ -27,6 +28,7 @@ namespace LibQGit2 {
 }
 
 class GitRepoPage;
+class AutoHideProgressIndicator;
 
 class GitBranchPage : public PushablePage
 {
@@ -35,11 +37,14 @@ public:
     GitBranchPage(GitRepoPage *);
     Q_SLOT void reload();
     Q_SLOT void reset();
+    void connectToRepoPage();
+    void disconnectFromRepoPage();
     void onTranslatorChanged(bool reload=true);
 Q_SIGNALS:
     void translatorChanged();
 private:
     GitRepoPage *_repoPage;
+    bb::cascades::ActionItem *_addBranchAction;
     class BranchDataModel : public bb::cascades::DataModel {
     public:
         BranchDataModel(GitBranchPage *page, LibQGit2::Repository *repo):
@@ -81,6 +86,7 @@ private:
         GitBranchPage *_page;
     } _itemProvider;
     bb::cascades::ListView *_branchList;
+    AutoHideProgressIndicator *_progressIndicator;
 
     Q_SLOT void showBranchLogIndexPath(const QVariantList &);
     Q_SLOT void showBranchLogSelection();
@@ -92,6 +98,8 @@ private:
     Q_SLOT void pullBranchSelection();
     Q_SLOT void pushBranchSelection();
     Q_SLOT void showRemoteInfo();
+    Q_SLOT void addBranch();
+    Q_SLOT void onAddBranchPromptFinished(bb::system::SystemUiResult::Type, const QString &);
     Q_SLOT void onRemoteTransferProgress(int);
     Q_SLOT void onGitRepoPageInProgressChanged(bool);
     LibQGit2::Reference _tempTarget;
