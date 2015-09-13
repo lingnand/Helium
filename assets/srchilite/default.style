@@ -70,3 +70,24 @@ label teal b ;
 // for errors
 error purple ;
 warning darkgreen ;
+
+// for feature (Cucumber) files
+cuketag green ;
+gherken blue ;
+given red ;
+when cyan ;
+then yellow ;
+and_but pink ;
+table gray ;
+
+// for JSON
+key bg:black;
+keyquote bg:black;
+valquote red;
+colon cyan;
+
+// for R
+libsource "#489191";
+costant darkgreen ;
+assignment teal ;
+special_fun purple ;

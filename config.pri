@@ -464,6 +464,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/cpp.lang) \
         $$quote($$BASEDIR/assets/srchilite/csharp.lang) \
         $$quote($$BASEDIR/assets/srchilite/css.lang) \
+        $$quote($$BASEDIR/assets/srchilite/cucumber.lang) \
         $$quote($$BASEDIR/assets/srchilite/d.lang) \
         $$quote($$BASEDIR/assets/srchilite/default.lang) \
         $$quote($$BASEDIR/assets/srchilite/default.style) \
@@ -480,6 +481,8 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/fortran.lang) \
         $$quote($$BASEDIR/assets/srchilite/function.lang) \
         $$quote($$BASEDIR/assets/srchilite/glsl.lang) \
+        $$quote($$BASEDIR/assets/srchilite/go.lang) \
+        $$quote($$BASEDIR/assets/srchilite/groovy.lang) \
         $$quote($$BASEDIR/assets/srchilite/haskell.lang) \
         $$quote($$BASEDIR/assets/srchilite/haskell_literate.lang) \
         $$quote($$BASEDIR/assets/srchilite/haxe.lang) \
@@ -492,6 +495,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/javalog.lang) \
         $$quote($$BASEDIR/assets/srchilite/javascript.lang) \
         $$quote($$BASEDIR/assets/srchilite/jellyx.style) \
+        $$quote($$BASEDIR/assets/srchilite/json.lang) \
         $$quote($$BASEDIR/assets/srchilite/key_string.lang) \
         $$quote($$BASEDIR/assets/srchilite/lang.map) \
         $$quote($$BASEDIR/assets/srchilite/langdef.lang) \
@@ -522,7 +526,9 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/properties.lang) \
         $$quote($$BASEDIR/assets/srchilite/proto.lang) \
         $$quote($$BASEDIR/assets/srchilite/python.lang) \
+        $$quote($$BASEDIR/assets/srchilite/r.lang) \
         $$quote($$BASEDIR/assets/srchilite/ruby.lang) \
+        $$quote($$BASEDIR/assets/srchilite/s.lang) \
         $$quote($$BASEDIR/assets/srchilite/scala.lang) \
         $$quote($$BASEDIR/assets/srchilite/scheme.lang) \
         $$quote($$BASEDIR/assets/srchilite/script_comment.lang) \
@@ -558,7 +564,8 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/srchilite/xhtml.outlang) \
         $$quote($$BASEDIR/assets/srchilite/xhtml_common.outlang) \
         $$quote($$BASEDIR/assets/srchilite/xml.lang) \
-        $$quote($$BASEDIR/assets/srchilite/xorg.lang)
+        $$quote($$BASEDIR/assets/srchilite/xorg.lang) \
+        $$quote($$BASEDIR/assets/srchilite/zsh.lang)
 }
 
 config_pri_source_group1 {

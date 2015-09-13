@@ -65,3 +65,24 @@ warning "#FFDFDF" ;
 // for git
 diffadd "#AFDF87" ;
 diffdel "#DF8787" ;
+
+// for feature (Cucumber) files
+cuketag "#AFDF87" ; // preproc
+gherken "#87AFDF" ; // keyword
+given "#DFAFDF" ; // function
+when "#DFAFDF" ; // function
+then "#DFAFDF" ; // function
+and_but "#AFAFDF" ; // type
+table "#808080" ; // comment
+
+// for JSON
+key "#87AFDF"; // keyword
+keyquote "#DF8787"; // symbol
+valquote "#DF8787"; // symbol
+// colon "#DF8787";
+
+// for R
+libsource "#87AFDF"; // keyword
+costant "#FFFFAF" ; // string
+assignment "#DF8787" ; // symbol
+special_fun "#DFAFDF" ; // function

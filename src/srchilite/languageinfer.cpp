@@ -17,7 +17,9 @@
 #include "languageinfer.h"
 #include "fileutil.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <vector>
 
 using namespace std;
 
@@ -39,6 +41,30 @@ const string LanguageInfer::infer(const string &filename) {
     return result;
 }
 
+const string guessEmacsMode(const string &modeline) {
+    vector<string> strv;
+
+    boost::split(strv, modeline, boost::is_any_of(";"));
+    for (vector<string>::iterator it = strv.begin(); it != strv.end(); ++it) {
+        boost::trim(*it);
+
+        vector<string> tokens;
+        boost::split(tokens, *it, boost::is_any_of(":"));
+        boost::trim(tokens[0]);
+
+        // A single token is considered a language definition
+        if (tokens.size() == 1)
+            return tokens[0];
+
+        // otherwise, look for -*- mode: lang -*-
+        boost::trim(tokens[1]);
+        if (tokens[0] == "mode")
+            return tokens[1];
+    }
+
+    return "";
+}
+
 const string LanguageInfer::infer(istream &stream) {
     // the regular expression for finding the language specification in a script file
     // this such as #! /bin/bash
@@ -55,7 +81,7 @@ const string LanguageInfer::infer(istream &stream) {
     // the regular expression for finding the language specification in a script file
     // according to Emacs convention: # -*- language -*-
     static boost::regex
-            langRegExEmacs("-\\*-[[:blank:]]*([[:alnum:]]+).*-\\*-");
+            langRegExEmacs("-\\*-[[:blank:]]*([[:print:]]+).*-\\*-");
 
     // the Emacs specification has the precedence in order to correctly infer
     // that scripts of the shape
@@ -86,14 +112,20 @@ const string LanguageInfer::infer(istream &stream) {
     boost::regex_search(secondLine, whatEmacs, langRegExEmacs,
             boost::match_default);
 
-    if (whatEmacs[1].matched)
-        return whatEmacs[1];
-    else {
-        // try also on the first line
-        boost::regex_search(firstLine, whatEmacs, langRegExEmacs,
-                boost::match_default);
-        if (whatEmacs[1].matched)
-            return whatEmacs[1];
+    if (whatEmacs[1].matched) {
+        string guess = guessEmacsMode(whatEmacs[1]);
+        if (guess != "")
+            return guess;
+    }
+
+    // try also on the first line
+    boost::regex_search(firstLine, whatEmacs, langRegExEmacs,
+             boost::match_default);
+
+    if (whatEmacs[1].matched) {
+        string guess = guessEmacsMode(whatEmacs[1]);
+        if (guess != "")
+            return guess;
     }
 
     // try also the env specification

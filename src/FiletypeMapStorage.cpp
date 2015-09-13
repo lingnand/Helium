@@ -157,6 +157,7 @@ FiletypeMap *FiletypeMapStorage::read()
         << new Filetype("cpp", true, false, 4, NULL, this)
         << new Filetype("csharp", true, false, 4, NULL, this)
         << new Filetype("css", true, false, 4, NULL, this)
+        << new Filetype("cucumber", true, false, 4, NULL, this)
         << new Filetype("d", true, false, 4, NULL, this)
         << new Filetype("desktop", true, false, 4, NULL, this)
         << new Filetype("diff", true, false, 4, NULL, this)
@@ -166,6 +167,8 @@ FiletypeMap *FiletypeMapStorage::read()
         << new Filetype("flex", true, false, 4, NULL, this)
         << new Filetype("fortran", true, false, 4, NULL, this)
         << new Filetype("glsl", true, false, 4, NULL, this)
+        << new Filetype("go", true, false, 4, NULL, this)
+        << new Filetype("groovy", true, false, 4, NULL, this)
         << new Filetype("haskell", true, false, 4, NULL, this)
         << new Filetype("haskell_literate", true, false, 4, NULL, this)
         << new Filetype("haxe", true, false, 4, NULL, this)
@@ -177,6 +180,7 @@ FiletypeMap *FiletypeMapStorage::read()
         << new Filetype("javascript", true, false, 4,
                 new WebRunProfileManager(WebRunProfile::Javascript), this)
 //            << new Filetype("langdef", true, false, 4, NULL, this)
+        << new Filetype("json", true, false, 4, NULL, this)
         << new Filetype("latex", true, false, 4, NULL, this)
         << new Filetype("ldap", true, false, 4, NULL, this)
         << new Filetype("lilypond", true, false, 4, NULL, this)
@@ -203,7 +207,9 @@ FiletypeMap *FiletypeMapStorage::read()
         << new Filetype("python", true, false, 4,
                 new CmdRunProfileManager("cd '%dir%'; exec /base/usr/bin/python3.2 -u '%name%'"),
                 this)
+        << new Filetype("r", true, false, 4, NULL, this)
         << new Filetype("ruby", true, false, 4, NULL, this)
+        << new Filetype("s", true, false, 4, NULL, this)
         << new Filetype("scala", true, false, 4, NULL, this)
         << new Filetype("scheme", true, false, 4, NULL, this)
         << new Filetype("sh", true, false, 4,
@@ -223,7 +229,8 @@ FiletypeMap *FiletypeMapStorage::read()
         << new Filetype("xml", true, false, 4,
                 new WebRunProfileManager(WebRunProfile::Html), this)
         << new Filetype("markdown", true, false, 4,
-                new WebRunProfileManager(WebRunProfile::Markdown), this);
+                new WebRunProfileManager(WebRunProfile::Markdown), this)
+        << new Filetype("zsh", true, false, 4, NULL, this);
 //            << new Filetype("xorg", true, NULL, this);
     for (int i = 0; i < defaults.size(); i++) {
         Filetype *filetype = defaults[i];

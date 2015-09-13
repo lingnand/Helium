@@ -1,8 +1,8 @@
 keyword "#F5871F" ; // for language keywords
 type "#EAB700" ; // for basic types
 usertype "#EAB700" ; // for user defined types
-string "#718c00" ; // for strings and chars
-regexp "#718c00" ; // for strings and chars
+string "#718C00" ; // for strings and chars
+regexp "#718C00" ; // for strings and chars
 specialchar "#4D4D4C" ; // for special chars, e.g., \n, \t, \\
 comment "#8E908C" noref; // for comments
 number "#F5871F" ; // for literal numbers
@@ -11,7 +11,7 @@ symbol "#3E999F" ; // for simbols (e.g. <, >, +)
 function "#4271AE" ; // for function calls and declarations
 cbracket "#4D4D4C" ; // for block brackets (e.g. {, })
 todo "#EAB700" b ; // for TODO and FIXME
-code "#718c00" ; // for code snippets
+code "#718C00" ; // for code snippets
 
 //Predefined variables and functions (for instance glsl)
 predef_var "#C82829" ;
@@ -43,16 +43,16 @@ bibtex "#F5871F" ;
 
 // for diffs
 oldfile "#F5871F" ;
-newfile "#718c00" ;
+newfile "#718C00" ;
 difflines "#C82829" ; 
 
 // for css
 selector "#F5871F" ;
 property "#C82829" ;
-value "#718c00" ;
+value "#718C00" ;
 
 // for file system
-path "#718c00" ;
+path "#718C00" ;
 
 // for C (or other language) labels
 label "#8959A8" b ;
@@ -64,3 +64,24 @@ warning "#8959A8" ;
 // for git
 diffadd "#718C00" ;
 diffdel "#C82829" ;
+
+// for feature (Cucumber) files
+cuketag "#8959A8" ; // preproc
+gherken "#F5871F" ; // keyword
+given "#4271AE" ; // function
+when "#4271AE" ; // function
+then "#4271AE" ; // function
+and_but "#EAB700" ; // type
+table "#8E908C" ; // comment
+
+// for JSON
+key "#F5871F"; // keyword
+keyquote "#3E999F"; // symbol
+valquote "#3E999F"; // symbol
+// colon "#3E999F";
+
+// for R
+libsource "#F5871F"; // keyword
+costant "#F5871F" ; // string
+assignment "#3E999F" ; // symbol
+special_fun "#4271AE" ; // function
