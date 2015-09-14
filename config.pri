@@ -165,6 +165,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/cpp.png) \
         $$quote($$BASEDIR/assets/images/filetype/csharp.png) \
         $$quote($$BASEDIR/assets/images/filetype/css.png) \
+        $$quote($$BASEDIR/assets/images/filetype/cucumber.png) \
         $$quote($$BASEDIR/assets/images/filetype/d.png) \
         $$quote($$BASEDIR/assets/images/filetype/desktop.png) \
         $$quote($$BASEDIR/assets/images/filetype/diff.png) \
@@ -174,6 +175,8 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/flex.png) \
         $$quote($$BASEDIR/assets/images/filetype/fortran.png) \
         $$quote($$BASEDIR/assets/images/filetype/glsl.png) \
+        $$quote($$BASEDIR/assets/images/filetype/go.png) \
+        $$quote($$BASEDIR/assets/images/filetype/groovy.png) \
         $$quote($$BASEDIR/assets/images/filetype/haskell.png) \
         $$quote($$BASEDIR/assets/images/filetype/haskell_literate.png) \
         $$quote($$BASEDIR/assets/images/filetype/haxe.png) \
@@ -182,6 +185,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/java.png) \
         $$quote($$BASEDIR/assets/images/filetype/javalog.png) \
         $$quote($$BASEDIR/assets/images/filetype/javascript.png) \
+        $$quote($$BASEDIR/assets/images/filetype/json.png) \
         $$quote($$BASEDIR/assets/images/filetype/langdef.png) \
         $$quote($$BASEDIR/assets/images/filetype/latex.png) \
         $$quote($$BASEDIR/assets/images/filetype/ldap.png) \
@@ -208,7 +212,9 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/filetype/properties.png) \
         $$quote($$BASEDIR/assets/images/filetype/proto.png) \
         $$quote($$BASEDIR/assets/images/filetype/python.png) \
+        $$quote($$BASEDIR/assets/images/filetype/r.png) \
         $$quote($$BASEDIR/assets/images/filetype/ruby.png) \
+        $$quote($$BASEDIR/assets/images/filetype/s.png) \
         $$quote($$BASEDIR/assets/images/filetype/scala.png) \
         $$quote($$BASEDIR/assets/images/filetype/scheme.png) \
         $$quote($$BASEDIR/assets/images/filetype/sh.png) \
