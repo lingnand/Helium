@@ -10,13 +10,15 @@
 #include <libqgit2/qgitexception.h>
 #include <libqgit2/qgitstatusoptions.h>
 #include <libqgit2/qgitrepository.h>
+#include <libqgit2/qgitremote.h>
 #include <GitWorker.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
 GitWorker::GitWorker(LibQGit2::Repository *repo):
-    _repo(repo), _inProgress(false)
+    _repo(repo), _inProgress(false),
+    _currentProgress(NULL), _progressStart(0), _progressInc(0)
 {
 }
 
@@ -362,5 +364,35 @@ void GitWorker::createBranch(const QString &name, Progress progress)
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
     setInProgress(false);
+}
 
+void GitWorker::fetch(LibQGit2::Remote *remote, const QString &head, Progress progress)
+{
+    setInProgress(true);
+    _currentProgress = &progress.current;
+    _progressStart = progress.current;
+    _progressInc = (progress.cap-progress.current)*0.8/100;
+    conn(remote, SIGNAL(transferProgress(int)),
+            this, SLOT(onRemoteTransferProgress(int)));
+    try {
+        // assuming that this is run on the same thread
+        remote->fetch(head);
+        _fetchStatusList(progress);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when fetching::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
+    remote->disconnect(this);
+    _currentProgress = NULL;
+    _progressStart = _progressInc = 0;
+    setInProgress(false);
+}
+
+void GitWorker::onRemoteTransferProgress(int progress)
+{
+    if (_currentProgress) {
+        *_currentProgress = _progressStart + progress*_progressInc;
+        emit progressChanged(*_currentProgress);
+    }
 }

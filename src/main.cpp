@@ -18,6 +18,7 @@
 #include <bb/cascades/ProgressIndicatorState>
 #include <libqgit2/qgitglobal.h>
 #include <libqgit2/qgitrepository.h>
+#include <libqgit2/qgitremote.h>
 #include <Helium.h>
 #include <HighlightType.h>
 #include <BufferState.h>
@@ -43,6 +44,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     qRegisterMetaType<LibQGit2::Repository::ResetType>("LibQGit2::Repository::ResetType");
     qRegisterMetaType<LibQGit2::Object>("LibQGit2::Object");
     qRegisterMetaType<LibQGit2::Reference>();
+    qRegisterMetaType<LibQGit2::Remote *>();
 
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
     // init LibQGit2

@@ -114,7 +114,17 @@ void GitBranchPage::onDeleteBranchDialogFinished(bb::system::SystemUiResult::Typ
 
 void GitBranchPage::fetchBranchSelection()
 {
-    qDebug() << "FETCHING BRANCH for" << _branchList->selected();
+    QVariantList selection = _branchList->selected();
+    Q_ASSERT(selection.size() == 2);
+    LibQGit2::Remote *remote = _dataModel.data(QVariantList() << selection[0])
+            .value<LibQGit2::Remote *>();
+    if (!remote) {
+        qWarning() << "What? no remote for selection" << selection;
+        return;
+    }
+    _repoPage->fetch(remote,
+            _dataModel.data(selection).value<LibQGit2::Reference>().branchName()
+                .split('/').last());
 }
 
 void GitBranchPage::pullBranchSelection()

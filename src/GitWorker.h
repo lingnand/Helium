@@ -18,6 +18,7 @@
 
 namespace LibQGit2 {
     class Repository;
+    class Remote;
 }
 
 class GitWorker : public QObject
@@ -40,6 +41,7 @@ public:
     Q_SLOT void cleanupState(Progress progress=Progress());
     Q_SLOT void deleteBranch(LibQGit2::Reference, Progress progress=Progress());
     Q_SLOT void createBranch(const QString &name, Progress progress=Progress());
+    Q_SLOT void fetch(LibQGit2::Remote *, const QString &head, Progress progress=Progress());
     Q_SLOT void setAuthorName(const QString &);
     Q_SLOT void setAuthorEmail(const QString &);
 Q_SIGNALS:
@@ -55,6 +57,10 @@ private:
 
     LibQGit2::Rebase _rebase;
     QString _name, _email;  // for signature
+
+    // for remote
+    float *_currentProgress, _progressStart, _progressInc;
+    Q_SLOT void onRemoteTransferProgress(int);
 
     void setInProgress(bool);
     LibQGit2::Rebase &rebaseObj();

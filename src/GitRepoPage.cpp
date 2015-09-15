@@ -167,6 +167,8 @@ void GitRepoPage::setProject(Project *project)
                 _project->gitWorker(), SLOT(deleteBranch(LibQGit2::Reference)));
             conn(this, SIGNAL(workerCreateBranch(const QString&)),
                 _project->gitWorker(), SLOT(createBranch(const QString&)));
+            conn(this, SIGNAL(workerFetch(LibQGit2::Remote*, const QString&)),
+                _project->gitWorker(), SLOT(fetch(LibQGit2::Remote*, const QString&)));
 
             onGitWorkerInProgressChanged(_project->gitWorker()->inProgress());
             conn(_project->gitWorker(), SIGNAL(inProgressChanged(bool)),
@@ -391,6 +393,11 @@ void GitRepoPage::deleteBranch(const LibQGit2::Reference &branch)
 void GitRepoPage::createBranch(const QString &branchName)
 {
     emit workerCreateBranch(branchName);
+}
+
+void GitRepoPage::fetch(LibQGit2::Remote *remote, const QString &head)
+{
+    emit workerFetch(remote, head);
 }
 
 void GitRepoPage::pushCommitPage(const QString &hintMessage)
