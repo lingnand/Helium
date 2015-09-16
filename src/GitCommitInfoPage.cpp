@@ -48,6 +48,7 @@ GitCommitInfoPage::GitCommitInfoPage(GitRepoPage *page):
 
 void GitCommitInfoPage::setCommit(const LibQGit2::Commit &commit)
 {
+    titleBar()->setTitle(QString("Commit %1").arg(QString(commit.oid().nformat(7))));
     QList<Diff> diffs;
     const LibQGit2::Tree &t = commit.tree();
     unsigned int i = 0;
@@ -110,7 +111,6 @@ void GitCommitInfoPage::setActions(Actions actions)
 void GitCommitInfoPage::onTranslatorChanged()
 {
     PushablePage::onTranslatorChanged();
-    titleBar()->setTitle(tr("Commit Details"));
     _dataModel.refresh();
     emit translatorChanged();
 }
