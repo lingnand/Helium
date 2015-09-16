@@ -476,9 +476,8 @@ Index Repository::mergeTrees(const Tree &our, const Tree &their, const Tree &anc
     return Index(index);
 }
 
-Repository::MergeAnalysisType Repository::mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType pref)
+Repository::MergeAnalysisFlags Repository::mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType pref)
 {
-    MergeAnalysisType analysis;
     int theadsLen = theirHeads.size();
     const git_annotated_commit *theads[theadsLen];
     QList<internal::AnnotatedCommit> commits;
@@ -487,9 +486,10 @@ Repository::MergeAnalysisType Repository::mergeAnalysis(const QList<Reference> &
         commits.append(commit);
         theads[i] = commit.constData();
     }
-    git_merge_analysis((git_merge_analysis_t *) &analysis, (git_merge_preference_t *) pref,
-            SAFE_DATA, theads, theadsLen);
-    return analysis;
+    git_merge_analysis_t analysis;
+    qGitThrow(git_merge_analysis(&analysis, (git_merge_preference_t *) &pref,
+            SAFE_DATA, theads, theadsLen));
+    return (MergeAnalysisFlags) analysis;
 }
 
 void Repository::merge(const QList<Reference> &theirHeads, const MergeOptions &mergeOpts, const CheckoutOptions &checkoutOpts)

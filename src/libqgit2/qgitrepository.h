@@ -594,19 +594,21 @@ namespace LibQGit2
              */
             Index mergeTrees(const Tree &our, const Tree &their, const Tree &ancestor = Tree(), const MergeOptions &opts = MergeOptions());
 
-            enum MergeAnalysisType {
+            enum MergeAnalysisFlag {
                 MergeAnalysisNone = GIT_MERGE_ANALYSIS_NONE,
                 MergeAnalysisNormal = GIT_MERGE_ANALYSIS_NORMAL,
                 MergeAnalysisUpToDate = GIT_MERGE_ANALYSIS_UP_TO_DATE,
                 MergeAnalysisFastforward = GIT_MERGE_ANALYSIS_FASTFORWARD,
                 MergeAnalysisUnborn = GIT_MERGE_ANALYSIS_UNBORN,
             };
+            Q_DECLARE_FLAGS(MergeAnalysisFlags, MergeAnalysisFlag)
+
             enum MergePreferenceType {
                 MergePreferenceNone = GIT_MERGE_PREFERENCE_NONE,
                 MergePreferenceNoFastforward = GIT_MERGE_PREFERENCE_NO_FASTFORWARD,
                 MergePreferenceFastforwardOnly = GIT_MERGE_PREFERENCE_FASTFORWARD_ONLY,
             };
-            MergeAnalysisType mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType preference=MergePreferenceNone);
+            MergeAnalysisFlags mergeAnalysis(const QList<Reference> &theirHeads, MergePreferenceType preference=MergePreferenceNone);
 
             void merge(const QList<Reference> &theirHeads, const MergeOptions &mergeOpts = MergeOptions(), const CheckoutOptions &checkoutOpts = CheckoutOptions());
 
@@ -742,6 +744,8 @@ namespace LibQGit2
             QSharedPointer<Private> d_ptr;
             Q_DECLARE_PRIVATE()
     };
+
+    Q_DECLARE_OPERATORS_FOR_FLAGS(Repository::MergeAnalysisFlags)
 
     /**@}*/
 }

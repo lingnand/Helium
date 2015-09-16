@@ -271,45 +271,48 @@ void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
     try {
         QList<LibQGit2::Reference> theirHeads;
         theirHeads.append(theirHead);
-        switch (_repo->mergeAnalysis(theirHeads)) {
-            case LibQGit2::Repository::MergeAnalysisNormal:
-                _repo->merge(theirHeads, LibQGit2::MergeOptions(),
-                        LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
-                emit progressChanged(progress.current+=initInc*2);
-                if (_repo->index().hasConflicts()) {
-                    emit progressChanged(progress.current, ProgressIndicatorState::Error);
-                    Utility::toast(tr("Conflicts detected: fix them and run \"Commit\""),
-                            tr("OK"), this, SIGNAL(progressDismissed()));
-                } else
-                    emit pushCommitPage(tr("Commit message for merging %1")
-                            .arg(QString(theirHead.name())));
-                _fetchStatusList(progress);
-                break;
-            case LibQGit2::Repository::MergeAnalysisFastforward:
-                // checkout the tree of theirHead
-                _repo->checkoutTree(theirHead.peelToObject(),
-                        LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
-                emit progressChanged(progress.current+=initInc*2);
-                // update the current branch to point to what theirHead points to
-                _repo->head().resolve().setTarget(theirHead.target());
-                emit progressChanged(progress.current+=initInc);
-                Utility::toast(tr("Fast-forwarded to %1").arg(QString(theirHead.target().nformat(7))));
-                _fetchStatusList(progress); // TODO: do we really need to fetch status list?
-                break;
-            case LibQGit2::Repository::MergeAnalysisUpToDate:
-                Utility::toast(tr("Merge input is reachable from HEAD: no merge required!"));
-                emit progressDismissed();
-                break;
-            case LibQGit2::Repository::MergeAnalysisUnborn:
+        LibQGit2::Repository::MergeAnalysisFlags analysis = _repo->mergeAnalysis(theirHeads);
+        qDebug() << "OBTAINED merge anlysis result" << analysis;
+        if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisUpToDate)) {
+            qDebug() << "Up to date merge detected";
+            Utility::toast(tr("Merge input is reachable from HEAD: no merge required!"));
+            emit progressDismissed();
+        } else if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisFastforward)) {
+            qDebug() << "Fast forward merge detected";
+            // checkout the tree of theirHead
+            qDebug() << "START checking out of tree";
+            _repo->checkoutTree(theirHead.peelToObject(),
+                    LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
+            qDebug() << "FINISHED checking out of tree";
+            emit progressChanged(progress.current+=initInc*2);
+            // update the current branch to point to what theirHead points to
+            _repo->head().resolve().setTarget(theirHead.target());
+            emit progressChanged(progress.current+=initInc);
+            Utility::toast(tr("Fast-forwarded to %1").arg(QString(theirHead.target().nformat(7))));
+            _fetchStatusList(progress); // TODO: do we really need to fetch status list?
+        } else if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisNormal)) {
+            qDebug() << "Normal merge detected";
+            qDebug() << "START merging";
+            _repo->merge(theirHeads, LibQGit2::MergeOptions(),
+                    LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
+            qDebug() << "FINISHED merging";
+            emit progressChanged(progress.current+=initInc*2);
+            if (_repo->index().hasConflicts()) {
                 emit progressChanged(progress.current, ProgressIndicatorState::Error);
-                Utility::toast(tr("HEAD is unborn and doesn't point to a valid commit: no merge can be performed!"),
+                Utility::toast(tr("Conflicts detected: fix them and run \"Commit\""),
                         tr("OK"), this, SIGNAL(progressDismissed()));
-                break;
-            case LibQGit2::Repository::MergeAnalysisNone:
-                emit progressChanged(progress.current, ProgressIndicatorState::Error);
-                Utility::toast(tr("No merge is possible!"), tr("OK"),
-                        this, SIGNAL(progressDismissed()));
-                break;
+            } else
+                emit pushCommitPage(tr("Commit message for merging %1")
+                        .arg(QString(theirHead.name())));
+            _fetchStatusList(progress);
+        } else if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisUnborn)) {
+            emit progressChanged(progress.current, ProgressIndicatorState::Error);
+            Utility::toast(tr("HEAD is unborn and doesn't point to a valid commit: no merge can be performed!"),
+                    tr("OK"), this, SIGNAL(progressDismissed()));
+        } else {
+            emit progressChanged(progress.current, ProgressIndicatorState::Error);
+            Utility::toast(tr("No merge is possible!"), tr("OK"),
+                    this, SIGNAL(progressDismissed()));
         }
     } catch (const LibQGit2::Exception &e) {
         qDebug() << "::::LIBQGIT2 ERROR when merging branch::::" << e.what();
@@ -366,7 +369,7 @@ void GitWorker::createBranch(const QString &name, Progress progress)
     setInProgress(false);
 }
 
-void GitWorker::fetch(LibQGit2::Remote *remote, const QString &head, Progress progress)
+void GitWorker::fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branch, Progress progress)
 {
     setInProgress(true);
     _currentProgress = &progress.current;
@@ -375,9 +378,17 @@ void GitWorker::fetch(LibQGit2::Remote *remote, const QString &head, Progress pr
     conn(remote, SIGNAL(transferProgress(int)),
             this, SLOT(onRemoteTransferProgress(int)));
     try {
+        LibQGit2::OId targetBeforeFetch = branch.resolve().target();
         // assuming that this is run on the same thread
-        remote->fetch(head);
-        _fetchStatusList(progress);
+        remote->fetch(branch.branchName().split('/').last());
+        LibQGit2::OId targetAfterFetch = branch.resolve().target();
+        if (targetBeforeFetch == targetAfterFetch) {
+            Utility::toast(tr("Already up-to-date"));
+            emit progressChanged(progress.cap);
+        } else {
+            Utility::toast(tr("Fetched till %1").arg(QString(targetAfterFetch.nformat(7))));
+            _fetchStatusList(progress);
+        }
     } catch (const LibQGit2::Exception &e) {
         qDebug() << "::::LIBQGIT2 ERROR when fetching::::" << e.what();
         emit progressChanged(progress.current, ProgressIndicatorState::Error);

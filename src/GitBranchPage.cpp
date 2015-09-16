@@ -123,8 +123,7 @@ void GitBranchPage::fetchBranchSelection()
         return;
     }
     _repoPage->fetch(remote,
-            _dataModel.data(selection).value<LibQGit2::Reference>().branchName()
-                .split('/').last());
+            _dataModel.data(selection).value<LibQGit2::Reference>());
 }
 
 void GitBranchPage::pullBranchSelection()
@@ -270,7 +269,10 @@ void GitBranchPage::BranchDataModel::reload()
     QStringList remotes = _repo->listRemotes();
     for (int i = 0; i < remotes.size(); ++i) {
         // TODO: use proper credentials
-        LibQGit2::Remote *remote = _repo->remote(remotes[i], LibQGit2::Credentials(), this);
+        LibQGit2::Remote *remote = _repo->remote(remotes[i],
+                LibQGit2::Credentials::ssh("/accounts/1000/removable/sdcard/dev/id_rsa",
+                        "/accounts/1000/removable/sdcard/dev/id_rsa.pub",
+                        QByteArray("git")), this);
         conn(remote, SIGNAL(transferProgress(int)),
                 _page, SLOT(onRemoteTransferProgress(int)));
         _remoteInfos.append(RemoteInfo(remote));

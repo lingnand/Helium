@@ -52,10 +52,7 @@ void GitLogPage::setReference(const LibQGit2::Reference &reference)
         LibQGit2::Commit commit;
         QDate last, current;
         int i = 0;
-        qDebug() << "START loading commits";
         while (walk.next(commit)) {
-            qDebug("=== Loading commit %d ===", i++);
-            qDebug() << "message" << commit.message();
             current = commit.dateTime().date();
             if (current != last) {
                 last = current;
@@ -63,7 +60,6 @@ void GitLogPage::setReference(const LibQGit2::Reference &reference)
             }
             commits.last().append(commit);
         }
-        qDebug() << "FINISHED loading commits";
         _commitDataModel.setCommits(commits);
     } catch (const LibQGit2::Exception &e) {
         qDebug() << "::::LIBQGIT2 ERROR when loading commits::::" << e.what();
@@ -160,10 +156,6 @@ QVariant GitLogPage::CommitDataModel::data(const QVariantList &ip)
 void GitLogPage::CommitDataModel::setCommits(const GitLogPage::CommitDataModel::DateSortedCommits &commits)
 {
     _commits = commits;
-    qDebug() << "set commits of length" << _commits.size();
-    for (int i = 0; i < _commits.size(); i++) {
-        qDebug() << "commits" << i << "has length" << _commits[i].size();
-    }
     emit itemsChanged(DataModelChangeType::Init);
 }
 
