@@ -11,6 +11,7 @@
 #include <bb/cascades/ListItemProvider>
 #include <bb/cascades/DataModel>
 #include <bb/cascades/Header>
+#include <bb/cascades/ContextMenuVisualState>
 #include <bb/system/SystemUiResult>
 #include <libqgit2/qgitref.h>
 #include <PushablePage.h>
@@ -72,24 +73,18 @@ private:
         bb::cascades::VisualNode *createItem(bb::cascades::ListView *list, const QString &type);
         void updateItem(bb::cascades::ListView *list, bb::cascades::VisualNode *listItem, const QString &type,
             const QVariantList &indexPath, const QVariant &data);
-        // a Header designed for Remote (which remembers its current position)
-        class RemoteHeader : public bb::cascades::Header {
-        public:
-            const QVariantList &indexPath() const { return _ip; }
-            void setIndexPath(const QVariantList &ip) {
-                _ip = ip;
-            }
-        private:
-            QVariantList _ip;
-        };
     private:
         GitBranchPage *_page;
     } _itemProvider;
     bb::cascades::ListView *_branchList;
     AutoHideProgressIndicator *_progressIndicator;
 
-    Q_SLOT void showBranchLogIndexPath(const QVariantList &);
+    Q_SLOT void onBranchListTriggered(const QVariantList &);
     Q_SLOT void showBranchLogSelection();
+    Q_SLOT void onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type);
+    Q_SLOT void showRemoteInfoSelection();
+    void showRemoteInfo(const QVariantList &);
+    Q_SLOT void fetchAllSelection();
     Q_SLOT void deleteBranchSelection();
     Q_SLOT void checkoutBranchSelection();
     Q_SLOT void mergeBranchSelection();
@@ -97,7 +92,6 @@ private:
     Q_SLOT void fetchBranchSelection();
     Q_SLOT void pullBranchSelection();
     Q_SLOT void pushBranchSelection();
-    Q_SLOT void showRemoteInfo();
     Q_SLOT void addBranch();
     Q_SLOT void onAddBranchPromptFinished(bb::system::SystemUiResult::Type, const QString &);
     Q_SLOT void onRemoteTransferProgress(int);

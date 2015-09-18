@@ -13,6 +13,7 @@
 #include <bb/cascades/ActionSet>
 #include <bb/cascades/Container>
 #include <bb/cascades/Shortcut>
+#include <bb/cascades/ContextMenuHandler>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitremote.h>
 #include <GitBranchPage.h>
@@ -37,7 +38,7 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
     _progressIndicator(new AutoHideProgressIndicator)
 {
     conn(_branchList, SIGNAL(triggered(QVariantList)),
-        this, SLOT(showBranchLogIndexPath(const QVariantList &)));
+        this, SLOT(onBranchListTriggered(const QVariantList &)));
     setTitleBar(TitleBar::create());
     setContent(Container::create()
         .add(_branchList)
@@ -64,16 +65,62 @@ void GitBranchPage::disconnectFromRepoPage()
     _repoPage->disconnect(this);
 }
 
-void GitBranchPage::showBranchLogIndexPath(const QVariantList &ip)
+void GitBranchPage::onBranchListTriggered(const QVariantList &ip)
 {
-    if (ip.size() < 2)
+    switch (ip.size()) {
+        case 1:
+            if (ip[0].toInt() > 0)
+                showRemoteInfo(ip);
+            break;
+        case 2:
+            _repoPage->pushLogPage(_dataModel.data(ip).value<LibQGit2::Reference>());
+            break;
+    }
+}
+
+void GitBranchPage::onRemoteHeaderContextMenuVisualStateChanged(ContextMenuVisualState::Type type)
+{
+    // XXX: when it reaches VisibleCompact we would be getting the current selection
+    // a bit of a hack
+    if (type == ContextMenuVisualState::VisibleCompact) {
+        QVariantList selection = _branchList->selected();
+        if (selection.size() == 1 && selection[0].toInt() > 0) {
+            for (int i = _dataModel.childCount(selection); i >= 0; i--)
+                _branchList->select(QVariantList(selection) << i);
+        }
+    }
+}
+
+void GitBranchPage::showRemoteInfoSelection()
+{
+    showRemoteInfo(_branchList->selected());
+}
+
+void GitBranchPage::showRemoteInfo(const QVariantList &ip)
+{
+    LibQGit2::Remote *remote = _dataModel.data(ip).value<LibQGit2::Remote *>();
+    if (!remote) {
+        qWarning() << "What? no remote for ip" << ip;
         return;
-    _repoPage->pushLogPage(_dataModel.data(ip).value<LibQGit2::Reference>());
+    }
+    // push the remote configuration page
+    qDebug() << "SHOWING REMOTE INFO for" << remote->name();
+}
+
+void GitBranchPage::fetchAllSelection()
+{
+    LibQGit2::Remote *remote = _dataModel.data(_branchList->selected())
+            .value<LibQGit2::Remote *>();
+    if (!remote) {
+        qWarning() << "What? no remote for selection" << _branchList->selected();
+        return;
+    }
+    qDebug() << "FETCHING REMOTE ALL for" << remote->name();
 }
 
 void GitBranchPage::showBranchLogSelection()
 {
-    showBranchLogIndexPath(_branchList->selected());
+    onBranchListTriggered(_branchList->selected());
 }
 
 void GitBranchPage::checkoutBranchSelection()
@@ -134,17 +181,6 @@ void GitBranchPage::pullBranchSelection()
 void GitBranchPage::pushBranchSelection()
 {
     qDebug() << "PUSHING BRANCH for" << _branchList->selected();
-}
-
-void GitBranchPage::showRemoteInfo()
-{
-    const QVariantList &ip = ((BranchItemProvider::RemoteHeader *) sender())->indexPath();
-    LibQGit2::Remote *remote = _dataModel.data(ip).value<LibQGit2::Remote *>();
-    if (!remote) {
-        qWarning() << "What? no remote to show for index path" << ip;
-        return;
-    }
-    qDebug() << "SHOWING REMOTE INFO for" << remote->name();
 }
 
 void GitBranchPage::addBranch()
@@ -240,8 +276,6 @@ QString GitBranchPage::BranchDataModel::itemType(const QVariantList &ip)
     }
 }
 
-// NOTE: this function safeguards against invalid ips (unlike many other datamodel)
-// reason: GitBranchPage might access data using stale ips (in showRemoteInfo)
 QVariant GitBranchPage::BranchDataModel::data(const QVariantList &ip)
 {
     if (ip.empty())
@@ -251,12 +285,12 @@ QVariant GitBranchPage::BranchDataModel::data(const QVariantList &ip)
         case 0:
             if (ip.size() == 1)
                 return tr("Local"); // plain header with no configuration
-            return QVariant::fromValue(_localBranches.value(ip[1].toInt()));
+            return QVariant::fromValue(_localBranches[ip[1].toInt()]);
         default: {
             const RemoteInfo ri = _remoteInfos.value(i0-1);
             if (ip.size() == 1)
                 return QVariant::fromValue(ri.remote);
-            return QVariant::fromValue(ri.branches.value(ip[1].toInt()));
+            return QVariant::fromValue(ri.branches[ip[1].toInt()]);
         }
     }
     return QVariant();
@@ -319,7 +353,7 @@ void GitBranchPage::BranchDataModel::clear()
 VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *, const QString &type)
 {
     if (type == "localHeader")
-        return Header::create().mode(HeaderMode::Interactive);
+        return Header::create();
     if (type == "localItem")
         return StandardListItem::create()
             .actionSet(ActionSet::create()
@@ -339,12 +373,17 @@ VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *, const QStr
                     .reloadTitleOn(_page, SIGNAL(translatorChanged()))
                     .onTriggered(_page, SLOT(deleteBranchSelection()))));
     if (type == "remoteHeader") {
-        RemoteHeader *header = new RemoteHeader;
-        header->setMode(HeaderMode::Interactive);
-        header->setSubtitle(tr("More"));
-        conn(header, SIGNAL(clicked()),
-            _page, SLOT(showRemoteInfo()));
-        return header;
+        return Header::create()
+            .subtitle(tr("Config >"))
+            .actionSet(ActionSet::create()
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Info"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(showRemoteInfoSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Fetch All"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(fetchAllSelection()))))
+            .contextMenuHandler(ContextMenuHandler::create()
+                .onVisualStateChanged(_page, SLOT(onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type))));
     }
     if (type == "remoteItem")
         // TODO: add actionset
@@ -396,9 +435,8 @@ void GitBranchPage::BranchItemProvider::updateItem(ListView *list, VisualNode *i
             set->at(i)->setEnabled(!isHead);
         }
     } else if (type == "remoteHeader") {
-        RemoteHeader *it = (RemoteHeader *) item;
+        Header *it = (Header *) item;
         it->setTitle(data.value<LibQGit2::Remote *>()->name());
-        it->setIndexPath(ip);
     } else if (type == "remoteItem") {
         StandardListItem *it = (StandardListItem *) item;
         const LibQGit2::Reference ref = data.value<LibQGit2::Reference>();
