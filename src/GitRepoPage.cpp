@@ -55,6 +55,9 @@ GitRepoPage::GitRepoPage():
         .imageSource(QUrl("asset:///images/ic_reload.png"))
         .addShortcut(Shortcut::create().key("l"))
         .onTriggered(this, SLOT(reload()))),
+    _settingsAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_settings.png"))
+        .onTriggered(this, SLOT(pushSettingsPage()))),
     _noRepoLabel(Label::create().multiline(true)
         .format(TextFormat::Html)
         .preferredWidth(0)
@@ -525,6 +528,11 @@ void GitRepoPage::onResetHardDialogFinished(bb::system::SystemUiResult::Type typ
 void GitRepoPage::resetPaths(const QList<QString> &paths)
 {
     emit workerResetPaths(paths);
+}
+
+void GitRepoPage::pushSettingsPage()
+{
+    qDebug() << "PUSHING SETTINGS Page";
 }
 
 void GitRepoPage::pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions actions)

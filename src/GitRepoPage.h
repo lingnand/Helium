@@ -67,6 +67,7 @@ public:
     Q_SLOT void fetchBaseAndPrune(LibQGit2::Remote *);
     Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
     Q_SLOT void push(LibQGit2::Remote *, const QString &branch);
+    Q_SLOT void pushSettingsPage();
     Q_SLOT void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
     Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
     Q_SLOT void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
@@ -110,7 +111,7 @@ Q_SIGNALS:
 private:
     Project *_project;
     // UIs that apply when there is no repo
-    bb::cascades::ActionItem *_initAction, *_cloneAction, *_reloadAction;
+    bb::cascades::ActionItem *_initAction, *_cloneAction, *_reloadAction, *_settingsAction;
     bb::cascades::Label *_noRepoLabel;
     bb::cascades::Control *_noRepoContent;
     // UIs for an existing repo
