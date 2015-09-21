@@ -287,12 +287,13 @@ void GitWorker::_merge(const LibQGit2::Reference &theirHead, Progress progress)
             qDebug() << "Fast forward merge detected";
             // checkout the tree of theirHead
             qDebug() << "START checking out of tree";
-            _repo->checkoutTree(theirHead.peelToObject(),
+            LibQGit2::Reference ref = theirHead.resolve();
+            _repo->checkoutTree(ref.peelToObject(),
                     LibQGit2::CheckoutOptions(LibQGit2::CheckoutOptions::Safe));
             qDebug() << "FINISHED checking out of tree";
             emit progressChanged(progress.current+=initInc*2);
             // update the current branch to point to what theirHead points to
-            LibQGit2::OId target = theirHead.resolve().target();
+            LibQGit2::OId target = ref.target();
             _repo->head().resolve().setTarget(target);
             emit progressChanged(progress.current+=initInc);
             Utility::toast(tr("Fast-forwarded to %1").arg(QString(target.nformat(7))));
