@@ -274,9 +274,11 @@ void GitRepoPage::reloadContent()
         _initAction->setEnabled(true);
         _cloneAction->setEnabled(true);
         _reloadAction->setEnabled(true);
+        _settingsAction->setEnabled(true);
         addAction(_initAction, ActionBarPlacement::Signature);
         addAction(_cloneAction, ActionBarPlacement::OnBar);
         addAction(_reloadAction, ActionBarPlacement::OnBar);
+        addAction(_settingsAction);
         // content
         _noRepoLabel->setText(tr("<br/>No repository found.<br/><br/>Use <b>Init</b> or <b>Clone</b> to create a git repository in<br/><em>%1</em>")
                 .arg(_project->path()));
@@ -342,10 +344,12 @@ void GitRepoPage::reloadContent()
     _resetMixedAction->setEnabled(validDeltasInIndex);
     _resetHardAction->setEnabled(validDeltasInIndex || validDeltasInWorkdir);
     _reloadAction->setEnabled(true);
+    _settingsAction->setEnabled(true);
     addAction(_addAllAction);
     addAction(_resetMixedAction);
     addAction(_resetHardAction);
     addAction(_reloadAction);
+    addAction(_settingsAction);
     // title
     titleBar()->setTitle(title);
     // content
@@ -647,6 +651,7 @@ void GitRepoPage::onTranslatorChanged(bool reload)
     _initAction->setTitle(tr("Init"));
     _cloneAction->setTitle(tr("Clone"));
     _reloadAction->setTitle(tr("Reload"));
+    _settingsAction->setTitle(tr("Settings"));
     // repo
     _commitAction->setTitle(tr("Commit"));
     _branchesAction->setTitle(tr("Branches"));
