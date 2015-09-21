@@ -17,7 +17,9 @@ class GitSettings : public QObject
 public:
     GitSettings(const QString &name, const QString &email,
             const QString &sshPrivateKeyPath, const QString &sshPublicKeyPath,
-            const QString &sshUsername, const QString &sshPassphrase):
+            const QString &sshUsername, const QString &sshPassphrase,
+            QObject *parent=NULL):
+        QObject(parent),
         _name(name), _email(email),
         _sshPrivateKeyPath(sshPrivateKeyPath), _sshPublicKeyPath(sshPublicKeyPath),
         _sshUsername(sshUsername), _sshPassphrase(sshPassphrase) {}
