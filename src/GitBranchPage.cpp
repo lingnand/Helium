@@ -16,6 +16,8 @@
 #include <bb/cascades/ContextMenuHandler>
 #include <libqgit2/qgitrepository.h>
 #include <libqgit2/qgitremote.h>
+#include <Helium.h>
+#include <GitSettings.h>
 #include <GitBranchPage.h>
 #include <GitRepoPage.h>
 #include <GitLogPage.h>
@@ -379,15 +381,14 @@ void GitBranchPage::BranchDataModel::reload()
     clear();
     // load all the remotes
     QStringList remotes = _repo->listRemotes();
-    for (int i = 0; i < remotes.size(); ++i) {
-        // TODO: use proper credentials
-        LibQGit2::Remote *remote = _repo->remote(remotes[i],
-                LibQGit2::Credentials::ssh("/accounts/1000/removable/sdcard/dev/id_rsa",
-                        "/accounts/1000/removable/sdcard/dev/id_rsa.pub",
-                        QByteArray("git")), this);
-        conn(remote, SIGNAL(transferProgress(int)),
-                _page, SLOT(onRemoteTransferProgress(int)));
-        _remoteInfos.append(RemoteInfo(remote));
+    if (!remotes.isEmpty()) {
+        LibQGit2::Credentials cred = Helium::instance()->git()->sshCredentials();
+        for (int i = 0; i < remotes.size(); ++i) {
+            LibQGit2::Remote *remote = _repo->remote(remotes[i], cred, this);
+            conn(remote, SIGNAL(transferProgress(int)),
+                    _page, SLOT(onRemoteTransferProgress(int)));
+            _remoteInfos.append(RemoteInfo(remote));
+        }
     }
     // load all the branches
     QList<LibQGit2::Repository::Branch> branches = _repo->listBranches(LibQGit2::Repository::BranchAll);

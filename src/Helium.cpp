@@ -82,7 +82,10 @@ Helium::Helium(int &argc, char **argv):
     _filetypeMap = (new FiletypeMapStorage("filetypes", this))->read();
     _general = (new GeneralSettingsStorage("general_settings", this))->read();
     _appearance = (new AppearanceSettingsStorage("appearance_settings", this))->read();
-    _git = new GitSettings("Lingnan Dai", "lingnan.d@gmail.com");
+    _git = new GitSettings("Lingnan Dai", "lingnan.d@gmail.com",
+            "/accounts/1000/removable/sdcard/dev/id_rsa",
+            "/accounts/1000/removable/sdcard/dev/id_rsa.pub",
+            QString(), QString());
 
     // UI
     reloadTranslator();

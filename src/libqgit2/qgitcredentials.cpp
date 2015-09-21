@@ -62,14 +62,16 @@ struct SSHCredentialsPrivate : public CredentialsPrivate {
     }
 
 protected:
-    int create(git_cred **cred, const char*, const char*, unsigned int allowedTypes)
+    int create(git_cred **cred, const char*, const char *username, unsigned int allowedTypes)
     {
+        if (!username)
+            username = m_user_name.data();
         if (allowedTypes & GIT_CREDTYPE_USERNAME) {
-            return git_cred_username_new(cred, m_user_name.data());
+            return git_cred_username_new(cred, username);
         }
 
         if (allowedTypes & GIT_CREDTYPE_SSH_KEY) {
-            return git_cred_ssh_key_new(cred, m_user_name.data(), m_public_key_path.data(), m_private_key_path.data(), m_passphrase.data());
+            return git_cred_ssh_key_new(cred, username, m_public_key_path.data(), m_private_key_path.data(), m_passphrase.data());
         }
 
         return -1;
