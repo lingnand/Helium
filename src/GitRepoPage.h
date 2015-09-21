@@ -33,6 +33,7 @@ namespace bb {
 
 namespace LibQGit2 {
     class Repository;
+    class Remote;
 }
 
 class Project;
@@ -63,6 +64,9 @@ public:
     Q_SLOT void deleteBranch(const LibQGit2::Reference &);
     Q_SLOT void createBranch(const QString &);
     Q_SLOT void fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch);
+    Q_SLOT void fetchBaseAndPrune(LibQGit2::Remote *);
+    Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
+    Q_SLOT void push(LibQGit2::Remote *, const QString &branch);
     Q_SLOT void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
     Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
     Q_SLOT void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
@@ -100,6 +104,9 @@ Q_SIGNALS:
     void workerDeleteBranch(LibQGit2::Reference);
     void workerCreateBranch(const QString &);
     void workerFetch(LibQGit2::Remote *, const LibQGit2::Reference &branch);
+    void workerFetchBaseAndPrune(LibQGit2::Remote *);
+    void workerPull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
+    void workerPush(LibQGit2::Remote *, const QString &branch);
 private:
     Project *_project;
     // UIs that apply when there is no repo

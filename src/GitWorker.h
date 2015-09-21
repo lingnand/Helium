@@ -42,6 +42,9 @@ public:
     Q_SLOT void deleteBranch(LibQGit2::Reference, Progress progress=Progress());
     Q_SLOT void createBranch(const QString &name, Progress progress=Progress());
     Q_SLOT void fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress progress=Progress());
+    Q_SLOT void fetchBaseAndPrune(LibQGit2::Remote *, Progress progress=Progress());
+    Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress progress=Progress());
+    Q_SLOT void push(LibQGit2::Remote *, const QString &branch, Progress progress=Progress());
     Q_SLOT void setAuthorName(const QString &);
     Q_SLOT void setAuthorEmail(const QString &);
 Q_SIGNALS:
@@ -66,6 +69,8 @@ private:
     LibQGit2::Rebase &rebaseObj();
 
     void _fetchStatusList(Progress progress);
+    void _merge(const LibQGit2::Reference &, Progress progress);
+    bool _fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress progress);
 };
 
 #endif /* GITWORKER_H_ */

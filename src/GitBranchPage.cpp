@@ -30,12 +30,19 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
     _addBranchAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(addBranch()))),
+    _addRemoteAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("m"))
+        .onTriggered(this, SLOT(addRemote()))),
+    _reloadAction(ActionItem::create()
+        .addShortcut(Shortcut::create().key("l"))
+        .onTriggered(this, SLOT(reload()))),
     _dataModel(this, page->repo()),
     _itemProvider(this),
     _branchList(ListView::create()
         .dataModel(&_dataModel)
         .listItemProvider(&_itemProvider)),
-    _progressIndicator(new AutoHideProgressIndicator)
+    _progressIndicator(new AutoHideProgressIndicator),
+    _tempRemote(NULL)
 {
     conn(_branchList, SIGNAL(triggered(QVariantList)),
         this, SLOT(onBranchListTriggered(const QVariantList &)));
@@ -44,6 +51,8 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
         .add(_branchList)
         .add(_progressIndicator));
     addAction(_addBranchAction, ActionBarPlacement::Signature);
+    addAction(_addRemoteAction, ActionBarPlacement::OnBar);
+    addAction(_reloadAction);
 
     onTranslatorChanged(false);
 }
@@ -91,7 +100,7 @@ void GitBranchPage::onRemoteHeaderContextMenuVisualStateChanged(ContextMenuVisua
     }
 }
 
-void GitBranchPage::showRemoteInfoSelection()
+void GitBranchPage::showInfoRemoteSelection()
 {
     showRemoteInfo(_branchList->selected());
 }
@@ -107,7 +116,7 @@ void GitBranchPage::showRemoteInfo(const QVariantList &ip)
     qDebug() << "SHOWING REMOTE INFO for" << remote->name();
 }
 
-void GitBranchPage::fetchAllSelection()
+void GitBranchPage::refreshRemoteSelection()
 {
     LibQGit2::Remote *remote = _dataModel.data(_branchList->selected())
             .value<LibQGit2::Remote *>();
@@ -115,7 +124,29 @@ void GitBranchPage::fetchAllSelection()
         qWarning() << "What? no remote for selection" << _branchList->selected();
         return;
     }
-    qDebug() << "FETCHING REMOTE ALL for" << remote->name();
+    _repoPage->fetchBaseAndPrune(remote);
+}
+
+void GitBranchPage::pushToBranchRemoteSelection()
+{
+    LibQGit2::Remote *remote = _dataModel.data(_branchList->selected())
+            .value<LibQGit2::Remote *>();
+    if (!remote) {
+        qWarning() << "What? no remote for selection" << _branchList->selected();
+        return;
+    }
+    _tempRemote = remote;
+    Utility::prompt(tr("Push"), tr("Cancel"),
+            tr("Push to Branch"), tr("Enter the branch name to push to"),
+            _repoPage->repo()->head().branchName(), tr("Branch name"), this,
+            SLOT(onPushToBranchPromptFinished(bb::system::SystemUiResult::Type, const QString&)));
+}
+
+void GitBranchPage::onPushToBranchPromptFinished(bb::system::SystemUiResult::Type type, const QString &branch)
+{
+    if (_tempRemote && type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        _repoPage->push(_tempRemote, branch);
+    _tempRemote = NULL;
 }
 
 void GitBranchPage::showBranchLogSelection()
@@ -146,7 +177,7 @@ void GitBranchPage::rebaseBranchSelection()
 void GitBranchPage::deleteBranchSelection()
 {
     _tempTarget = _dataModel.data(_branchList->selected()).value<LibQGit2::Reference>();
-    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm deletion"),
+    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm Deletion"),
             tr("Are you sure you want to delete branch %1?")
                 .arg(_tempTarget.branchName()),
             this, SLOT(onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type)));
@@ -175,19 +206,57 @@ void GitBranchPage::fetchBranchSelection()
 
 void GitBranchPage::pullBranchSelection()
 {
-    qDebug() << "PULLING BRANCH for" << _branchList->selected();
+    QVariantList selection = _branchList->selected();
+    Q_ASSERT(selection.size() == 2);
+    LibQGit2::Remote *remote = _dataModel.data(QVariantList() << selection[0])
+            .value<LibQGit2::Remote *>();
+    if (!remote) {
+        qWarning() << "What? no remote for selection" << selection;
+        return;
+    }
+    _repoPage->pull(remote,
+            _dataModel.data(selection).value<LibQGit2::Reference>());
 }
 
 void GitBranchPage::pushBranchSelection()
 {
-    qDebug() << "PUSHING BRANCH for" << _branchList->selected();
+    QVariantList selection = _branchList->selected();
+    Q_ASSERT(selection.size() == 2);
+    LibQGit2::Remote *remote = _dataModel.data(QVariantList() << selection[0])
+            .value<LibQGit2::Remote *>();
+    if (!remote) {
+        qWarning() << "What? no remote for selection" << selection;
+        return;
+    }
+    QString branch = _dataModel.data(selection).value<LibQGit2::Reference>()
+                .branchName().split('/').last();
+    // check if the current branch has the same name as the one to be pushed into
+    // if not, ask for confirmation
+    QString currentBranch = _repoPage->repo()->head().branchName();
+    if (currentBranch != branch) {
+        _tempRemote = remote;
+        _tempBranch = branch;
+        Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm Push"),
+            tr("Upstream branch does not have the same name as the current branch."),
+            this, SLOT(onPushDialogFinished(bb::system::SystemUiResult::Type)));
+    } else {
+        _repoPage->push(remote, branch);
+    }
+}
+
+void GitBranchPage::onPushDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (_tempRemote && type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        _repoPage->push(_tempRemote, _tempBranch);
+    _tempRemote = NULL;
+    _tempBranch.clear();
 }
 
 void GitBranchPage::addBranch()
 {
     Utility::prompt(tr("Continue"), tr("Cancel"),
             tr("Add Branch"), tr("Enter the branch name to add"),
-            QString(), tr("branch name"), this,
+            QString(), tr("Branch name"), this,
             SLOT(onAddBranchPromptFinished(bb::system::SystemUiResult::Type, const QString&)));
 }
 
@@ -195,6 +264,13 @@ void GitBranchPage::onAddBranchPromptFinished(bb::system::SystemUiResult::Type t
 {
     if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
         _repoPage->createBranch(text);
+}
+
+void GitBranchPage::addRemote()
+{
+    qDebug() << "ADD REMOTE triggered";
+    // TODO: add remoteInfo page, and pushes a remoteInfo page to allow the user
+    // to confirm the details
 }
 
 void GitBranchPage::reload()
@@ -233,6 +309,8 @@ void GitBranchPage::onTranslatorChanged(bool reload)
     PushablePage::onTranslatorChanged();
     titleBar()->setTitle(tr("Branches"));
     _addBranchAction->setTitle(tr("Add Branch"));
+    _addRemoteAction->setTitle(tr("Add Remote"));
+    _reloadAction->setTitle(tr("Reload"));
     if (reload)
         this->reload();
     emit translatorChanged();
@@ -378,10 +456,13 @@ VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *, const QStr
             .actionSet(ActionSet::create()
                 .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Info"))
                     .reloadTitleOn(_page, SIGNAL(translatorChanged()))
-                    .onTriggered(_page, SLOT(showRemoteInfoSelection())))
-                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Fetch All"))
+                    .onTriggered(_page, SLOT(showInfoRemoteSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Refresh"))
                     .reloadTitleOn(_page, SIGNAL(translatorChanged()))
-                    .onTriggered(_page, SLOT(fetchAllSelection()))))
+                    .onTriggered(_page, SLOT(refreshRemoteSelection())))
+                .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Push to Branch"))
+                    .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .onTriggered(_page, SLOT(pushToBranchRemoteSelection()))))
             .contextMenuHandler(ContextMenuHandler::create()
                 .onVisualStateChanged(_page, SLOT(onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type))));
     }
@@ -440,6 +521,6 @@ void GitBranchPage::BranchItemProvider::updateItem(ListView *list, VisualNode *i
     } else if (type == "remoteItem") {
         StandardListItem *it = (StandardListItem *) item;
         const LibQGit2::Reference ref = data.value<LibQGit2::Reference>();
-        it->setTitle(ref.branchName());
+        it->setTitle(ref.branchName().split('/').last());
     }
 }

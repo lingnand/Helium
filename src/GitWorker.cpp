@@ -266,6 +266,12 @@ void GitWorker::checkoutBranch(const LibQGit2::Reference &branch, Progress progr
 void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
 {
     setInProgress(true);
+    _merge(theirHead, progress);
+    setInProgress(false);
+}
+
+void GitWorker::_merge(const LibQGit2::Reference &theirHead, Progress progress)
+{
     float initInc = (progress.cap-progress.current)/8;
     emit progressChanged(progress.current+=initInc);
     try {
@@ -276,7 +282,7 @@ void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
         if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisUpToDate)) {
             qDebug() << "Up to date merge detected";
             Utility::toast(tr("Merge input is reachable from HEAD: no merge required!"));
-            emit progressDismissed();
+            emit progressChanged(progress.cap);
         } else if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisFastforward)) {
             qDebug() << "Fast forward merge detected";
             // checkout the tree of theirHead
@@ -319,7 +325,6 @@ void GitWorker::merge(const LibQGit2::Reference &theirHead, Progress progress)
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
-    setInProgress(false);
 }
 
 void GitWorker::cleanupState(Progress progress)
@@ -372,9 +377,43 @@ void GitWorker::createBranch(const QString &name, Progress progress)
 void GitWorker::fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branch, Progress progress)
 {
     setInProgress(true);
+    _fetch(remote, branch, progress);
+    setInProgress(false);
+}
+
+void GitWorker::fetchBaseAndPrune(LibQGit2::Remote *remote, Progress progress)
+{
+    setInProgress(true);
+    emit progressChanged(progress.current+=(progress.cap-progress.current)/10);
     _currentProgress = &progress.current;
     _progressStart = progress.current;
-    _progressInc = (progress.cap-progress.current)*0.8/100;
+    _progressInc = (progress.cap-progress.current)*0.7/100;
+    conn(remote, SIGNAL(transferProgress(int)),
+            this, SLOT(onRemoteTransferProgress(int)));
+    try {
+        // use the default fetch refspecs
+        remote->fetch();
+        remote->prune();
+        emit progressChanged(progress.cap);
+        Utility::toast(tr("Fetch-and-pruned for remote %1").arg(remote->name()));
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when fetching all::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
+    remote->disconnect(this);
+    _currentProgress = NULL;
+    _progressStart = _progressInc = 0;
+    setInProgress(false);
+}
+
+bool GitWorker::_fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branch, Progress progress)
+{
+    bool changed = true;
+    emit progressChanged(progress.current+=(progress.cap-progress.current)/10);
+    _currentProgress = &progress.current;
+    _progressStart = progress.current;
+    _progressInc = (progress.cap-progress.current)/100;
     conn(remote, SIGNAL(transferProgress(int)),
             this, SLOT(onRemoteTransferProgress(int)));
     try {
@@ -384,13 +423,47 @@ void GitWorker::fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branc
         LibQGit2::OId targetAfterFetch = branch.resolve().target();
         if (targetBeforeFetch == targetAfterFetch) {
             Utility::toast(tr("Already up-to-date"));
-            emit progressChanged(progress.cap);
+            changed = false;
         } else {
             Utility::toast(tr("Fetched till %1").arg(QString(targetAfterFetch.nformat(7))));
-            _fetchStatusList(progress);
         }
+        emit progressChanged(progress.cap);
     } catch (const LibQGit2::Exception &e) {
         qDebug() << "::::LIBQGIT2 ERROR when fetching::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+        changed = false;
+    }
+    remote->disconnect(this);
+    _currentProgress = NULL;
+    _progressStart = _progressInc = 0;
+    return changed;
+}
+
+void GitWorker::pull(LibQGit2::Remote *remote, const LibQGit2::Reference &branch, Progress progress)
+{
+    setInProgress(true);
+    float mid = progress.current+(progress.cap-progress.current)*0.7;
+    _fetch(remote, branch, Progress(progress.current, mid));
+    _merge(branch, Progress(mid, progress.cap));
+    setInProgress(false);
+}
+
+void GitWorker::push(LibQGit2::Remote *remote, const QString &branch, Progress progress)
+{
+    setInProgress(true);
+    emit progressChanged(progress.current+=(progress.cap-progress.current)/10);
+    _currentProgress = &progress.current;
+    _progressStart = progress.current;
+    _progressInc = (progress.cap-progress.current)/100;
+    conn(remote, SIGNAL(transferProgress(int)),
+            this, SLOT(onRemoteTransferProgress(int)));
+    try {
+        remote->push(branch);
+        Utility::toast(tr("Pushed to %1").arg(branch));
+        emit progressChanged(progress.cap);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when pushing::::" << e.what();
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
@@ -402,6 +475,7 @@ void GitWorker::fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branc
 
 void GitWorker::onRemoteTransferProgress(int progress)
 {
+    qDebug() << "REMOTE TRANSFER PROGRESS" << progress;
     if (_currentProgress) {
         *_currentProgress = _progressStart + progress*_progressInc;
         emit progressChanged(*_currentProgress);

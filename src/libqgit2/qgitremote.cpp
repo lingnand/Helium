@@ -84,12 +84,15 @@ Refspec Remote::refspec(size_t n) const
     return Refspec(git_remote_get_refspec(data(), n));
 }
 
-void Remote::push(const QList<QString> &refSpecs, const Signature &signature, const QString &message)
+void Remote::push(const QString &branch, const Signature &signature, const QString &message)
 {
-    internal::StrArray refspecs(refSpecs);
+    internal::StrArray refs;
+    if (!branch.isEmpty()) {
+        refs.set(QList<QString>() << QString("HEAD:refs/heads/%1").arg(branch));
+    }
 
     git_push_options opts = GIT_PUSH_OPTIONS_INIT;
-    qGitThrow(git_remote_push(data(), refspecs.constData(), &opts, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+    qGitThrow(git_remote_push(data(), refs.constData(), &opts, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
 }
 
 void Remote::fetch(const QString& head, const Signature &signature, const QString &message)
@@ -100,6 +103,11 @@ void Remote::fetch(const QString& head, const Signature &signature, const QStrin
     }
 
     qGitThrow(git_remote_fetch(data(), refs.count() > 0 ? refs.constData() : NULL, signature.data(), message.isNull() ? NULL : message.toUtf8().constData()));
+}
+
+void Remote::prune()
+{
+    qGitThrow(git_remote_prune(data()));
 }
 
 QList<Remote::Head> Remote::list()

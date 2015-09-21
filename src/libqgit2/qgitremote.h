@@ -68,14 +68,14 @@ public:
     Refspec refspec(size_t n) const;
 
     /**
-     * Perform a push on this Remote.
-     * @param refSpecs The refspecs to use for pushing. If left empty the configured refspecs will be used.
+     * Pushes HEAD to branch on this remote.
+     * @param branch The local branch name to push to remote
      * @param signature The identity to use when updating reflogs.
      * @param message The message to insert into the reflogs. If left as the
      *        default (a null string), a message "update by push" is used.
      * @throws LibQGit2::Exception
      */
-    void push(const QList<QString> &refSpecs = QList<QString>(), const Signature &signature = Signature(), const QString &message = QString());
+    void push(const QString &branch, const Signature &signature = Signature(), const QString &message = QString());
 
     /**
     * Fetch from remote.
@@ -88,7 +88,9 @@ public:
     *        is the name of the remote (or its url, for in-memory remotes).
     * @throws LibQGit2::Exception
     */
-    void fetch(const QString& head = QString(), const Signature &signature = Signature(), const QString &message = QString());
+    void fetch(const QString &head = QString(), const Signature &signature = Signature(), const QString &message = QString());
+
+    void prune();
 
     struct Head {
         bool availableLocally;

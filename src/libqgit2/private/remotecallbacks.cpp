@@ -53,6 +53,7 @@ git_remote_callbacks RemoteCallbacks::rawCallbacks() const
 
     if (m_listener) {
         remoteCallbacks.transfer_progress = &transferProgressCallback;
+        remoteCallbacks.push_transfer_progress = &pushTransferProgressCallback;
     }
 
     if (!m_credentials.isEmpty()) {
@@ -70,6 +71,23 @@ int RemoteCallbacks::transferProgressCallback(const git_transfer_progress* stats
         RemoteCallbacks* cb = static_cast<RemoteCallbacks*>(data);
 
         int percent = (int)(0.5 + 100.0 * ((double)stats->received_objects) / ((double)stats->total_objects));
+        if (percent != cb->m_transferProgress) {
+            cb->m_transferProgress = percent;
+            ret = cb->m_listener->progress(percent);
+        }
+    }
+
+    return ret;
+}
+
+int RemoteCallbacks::pushTransferProgressCallback(unsigned int current, unsigned int total, size_t bytes, void* data)
+{
+    int ret = 0;
+
+    if (data) {
+        RemoteCallbacks* cb = static_cast<RemoteCallbacks*>(data);
+
+        int percent = (int)(0.5 + 100.0 * (double)current / (double)total);
         if (percent != cb->m_transferProgress) {
             cb->m_transferProgress = percent;
             ret = cb->m_listener->progress(percent);

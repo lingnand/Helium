@@ -53,6 +53,7 @@ public:
 
 private:
     static int transferProgressCallback(const git_transfer_progress* stats, void* data);
+    static int pushTransferProgressCallback(unsigned int current, unsigned int total, size_t bytes, void* data);
     static int acquireCredentialsCallback(git_cred **cred, const char *url, const char *usernameFromUrl, unsigned int allowedTypes, void *data);
 
     RemoteListener *m_listener;

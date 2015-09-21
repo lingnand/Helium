@@ -169,6 +169,12 @@ void GitRepoPage::setProject(Project *project)
                 _project->gitWorker(), SLOT(createBranch(const QString&)));
             conn(this, SIGNAL(workerFetch(LibQGit2::Remote*, const LibQGit2::Reference&)),
                 _project->gitWorker(), SLOT(fetch(LibQGit2::Remote*, const LibQGit2::Reference&)));
+            conn(this, SIGNAL(workerFetchBaseAndPrune(LibQGit2::Remote*)),
+                _project->gitWorker(), SLOT(fetchBaseAndPrune(LibQGit2::Remote*)));
+            conn(this, SIGNAL(workerPull(LibQGit2::Remote*, const LibQGit2::Reference&)),
+                _project->gitWorker(), SLOT(pull(LibQGit2::Remote*, const LibQGit2::Reference&)));
+            conn(this, SIGNAL(workerPush(LibQGit2::Remote*, const QString&)),
+                _project->gitWorker(), SLOT(push(LibQGit2::Remote*, const QString&)));
 
             onGitWorkerInProgressChanged(_project->gitWorker()->inProgress());
             conn(_project->gitWorker(), SIGNAL(inProgressChanged(bool)),
@@ -400,6 +406,21 @@ void GitRepoPage::fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &bra
     emit workerFetch(remote, branch);
 }
 
+void GitRepoPage::fetchBaseAndPrune(LibQGit2::Remote *remote)
+{
+    emit workerFetchBaseAndPrune(remote);
+}
+
+void GitRepoPage::pull(LibQGit2::Remote *remote, const LibQGit2::Reference &branch)
+{
+    emit workerPull(remote, branch);
+}
+
+void GitRepoPage::push(LibQGit2::Remote *remote, const QString &branch)
+{
+    emit workerPush(remote, branch);
+}
+
 void GitRepoPage::pushCommitPage(const QString &hintMessage)
 {
     if (!_commitPage) {
@@ -490,7 +511,7 @@ void GitRepoPage::resetMixed()
 
 void GitRepoPage::safeResetHard()
 {
-    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm reset"),
+    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm Reset"),
             tr("Hard reset will wipe the changes in your working directory."),
             this, SLOT(onResetHardDialogFinished(bb::system::SystemUiResult::Type)));
 }

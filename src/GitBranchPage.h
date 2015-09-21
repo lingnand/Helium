@@ -45,7 +45,7 @@ Q_SIGNALS:
     void translatorChanged();
 private:
     GitRepoPage *_repoPage;
-    bb::cascades::ActionItem *_addBranchAction;
+    bb::cascades::ActionItem *_addBranchAction, *_addRemoteAction, *_reloadAction;
     class BranchDataModel : public bb::cascades::DataModel {
     public:
         BranchDataModel(GitBranchPage *page, LibQGit2::Repository *repo):
@@ -78,26 +78,32 @@ private:
     } _itemProvider;
     bb::cascades::ListView *_branchList;
     AutoHideProgressIndicator *_progressIndicator;
+    LibQGit2::Reference _tempTarget;
+    LibQGit2::Remote *_tempRemote;
+    QString _tempBranch;
 
     Q_SLOT void onBranchListTriggered(const QVariantList &);
     Q_SLOT void showBranchLogSelection();
     Q_SLOT void onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type);
-    Q_SLOT void showRemoteInfoSelection();
+    Q_SLOT void showInfoRemoteSelection();
     void showRemoteInfo(const QVariantList &);
-    Q_SLOT void fetchAllSelection();
+    Q_SLOT void refreshRemoteSelection();
+    Q_SLOT void pushToBranchRemoteSelection();
+    Q_SLOT void onPushToBranchPromptFinished(bb::system::SystemUiResult::Type, const QString &);
     Q_SLOT void deleteBranchSelection();
+    Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void checkoutBranchSelection();
     Q_SLOT void mergeBranchSelection();
     Q_SLOT void rebaseBranchSelection();
     Q_SLOT void fetchBranchSelection();
     Q_SLOT void pullBranchSelection();
     Q_SLOT void pushBranchSelection();
+    Q_SLOT void onPushDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void addBranch();
+    Q_SLOT void addRemote();
     Q_SLOT void onAddBranchPromptFinished(bb::system::SystemUiResult::Type, const QString &);
     Q_SLOT void onRemoteTransferProgress(int);
     Q_SLOT void onGitRepoPageInProgressChanged(bool);
-    LibQGit2::Reference _tempTarget;
-    Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
 };
 
 #endif /* GITBRANCHPAGE_H_ */
