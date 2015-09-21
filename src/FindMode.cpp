@@ -34,9 +34,19 @@ using namespace bb::cascades;
 FindMode::FindMode(View *view):
     ViewMode(view),
     _findField(TextField::create().vertical(VerticalAlignment::Center)
+        .inputFlags(TextInputFlag::SpellCheckOff
+                    | TextInputFlag::AutoCorrectionOff
+                    | TextInputFlag::AutoCapitalizationOff
+                    | TextInputFlag::AutoPeriodOff)
+        .contentFlags(TextContentFlag::ActiveTextOff)
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create().spaceQuota(1))),
     _replaceField(TextField::create().vertical(VerticalAlignment::Center)
+        .inputFlags(TextInputFlag::SpellCheckOff
+                    | TextInputFlag::AutoCorrectionOff
+                    | TextInputFlag::AutoCapitalizationOff
+                    | TextInputFlag::AutoPeriodOff)
+        .contentFlags(TextContentFlag::ActiveTextOff)
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create().spaceQuota(1))),
     _goToFindFieldAction(ActionItem::create()
