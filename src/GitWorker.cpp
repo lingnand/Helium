@@ -292,9 +292,10 @@ void GitWorker::_merge(const LibQGit2::Reference &theirHead, Progress progress)
             qDebug() << "FINISHED checking out of tree";
             emit progressChanged(progress.current+=initInc*2);
             // update the current branch to point to what theirHead points to
-            _repo->head().resolve().setTarget(theirHead.target());
+            LibQGit2::OId target = theirHead.resolve().target();
+            _repo->head().resolve().setTarget(target);
             emit progressChanged(progress.current+=initInc);
-            Utility::toast(tr("Fast-forwarded to %1").arg(QString(theirHead.target().nformat(7))));
+            Utility::toast(tr("Fast-forwarded to %1").arg(QString(target.nformat(7))));
             _fetchStatusList(progress); // TODO: do we really need to fetch status list?
         } else if (analysis.testFlag(LibQGit2::Repository::MergeAnalysisNormal)) {
             qDebug() << "Normal merge detected";
