@@ -603,6 +603,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GitDiffPage.cpp) \
         $$quote($$BASEDIR/src/GitLogPage.cpp) \
         $$quote($$BASEDIR/src/GitRepoPage.cpp) \
+        $$quote($$BASEDIR/src/GitSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GitSettingsStorage.cpp) \
         $$quote($$BASEDIR/src/GitWorker.cpp) \
         $$quote($$BASEDIR/src/Helium.cpp) \
@@ -783,6 +784,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GitLogPage.h) \
         $$quote($$BASEDIR/src/GitRepoPage.h) \
         $$quote($$BASEDIR/src/GitSettings.h) \
+        $$quote($$BASEDIR/src/GitSettingsPage.h) \
         $$quote($$BASEDIR/src/GitSettingsStorage.h) \
         $$quote($$BASEDIR/src/GitWorker.h) \
         $$quote($$BASEDIR/src/Helium.h) \

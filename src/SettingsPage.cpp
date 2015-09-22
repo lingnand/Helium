@@ -15,17 +15,21 @@
 #include <GeneralSettingsPage.h>
 #include <AppearanceSettingsPage.h>
 #include <FiletypeMapSettingsPage.h>
+#include <GitSettingsPage.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
 
-SettingsPage::SettingsPage(GeneralSettings *generalSettings, AppearanceSettings *appearanceSettings, FiletypeMap *filetypeMap):
+SettingsPage::SettingsPage(GeneralSettings *generalSettings, AppearanceSettings *appearanceSettings,
+        FiletypeMap *filetypeMap, GitSettings *gitSettings):
     _generalSettings(generalSettings),
     _generalSettingsPage(NULL),
     _appearanceSettings(appearanceSettings),
     _appearanceSettingsPage(NULL),
     _filetypeMap(filetypeMap),
     _filetypeMapSettingsPage(NULL),
+    _gitSettings(gitSettings),
+    _gitSettingsPage(NULL),
     _base(Page::create()
         .titleBar(TitleBar::create()
             .dismissAction(ActionItem::create()
@@ -67,6 +71,12 @@ void SettingsPage::onTriggered(QVariantList indexPath)
             }
             push(_filetypeMapSettingsPage);
             break;
+        case 3:
+            if (!_gitSettingsPage) {
+                _gitSettingsPage = new GitSettingsPage(_gitSettings);
+            }
+            push(_gitSettingsPage);
+            break;
     }
 }
 
@@ -75,16 +85,16 @@ void SettingsPage::onTranslatorChanged()
     _base->titleBar()->setTitle(tr("Settings"));
     _base->titleBar()->dismissAction()->setTitle(tr("Close"));
     _model.clear();
-    _model.append(tr("General"));
-    _model.append(tr("Appearance"));
-    _model.append(tr("Filetypes"));
-    if (_generalSettingsPage) {
+    _model << tr("General")
+           << tr("Appearance")
+           << tr("Filetypes")
+           << tr("Git");
+    if (_generalSettingsPage)
         _generalSettingsPage->onTranslatorChanged();
-    }
-    if (_appearanceSettingsPage) {
+    if (_appearanceSettingsPage)
         _appearanceSettingsPage->onTranslatorChanged();
-    }
-    if (_filetypeMapSettingsPage) {
+    if (_filetypeMapSettingsPage)
         _filetypeMapSettingsPage->onTranslatorChanged();
-    }
+    if (_gitSettingsPage)
+        _gitSettingsPage->onTranslatorChanged();
 }

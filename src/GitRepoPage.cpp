@@ -24,11 +24,13 @@
 #include <GitRepoPage.h>
 #include <GitCommitPage.h>
 #include <GitBranchPage.h>
+#include <GitSettingsPage.h>
 #include <Project.h>
 #include <Segment.h>
 #include <SignalBlocker.h>
 #include <AutoHideProgressIndicator.h>
 #include <LocaleAwareActionItem.h>
+#include <Helium.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -109,7 +111,8 @@ GitRepoPage::GitRepoPage():
     _logPage(NULL),
     _commitPage(NULL),
     _commitInfoPage(NULL),
-    _branchPage(NULL)
+    _branchPage(NULL),
+    _settingsPage(NULL)
 {
     _statusListView->setMultiSelectAction(MultiSelectActionItem::create());
     _statusListView->multiSelectHandler()->addAction(_multiAddAction);
@@ -536,7 +539,12 @@ void GitRepoPage::resetPaths(const QList<QString> &paths)
 
 void GitRepoPage::pushSettingsPage()
 {
-    qDebug() << "PUSHING SETTINGS Page";
+    if (!_settingsPage) {
+        _settingsPage = new GitSettingsPage(Helium::instance()->git());
+        conn(this, SIGNAL(translatorChanged()),
+            _settingsPage, SLOT(onTranslatorChanged()));
+    }
+    parent()->push(_settingsPage);
 }
 
 void GitRepoPage::pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions actions)

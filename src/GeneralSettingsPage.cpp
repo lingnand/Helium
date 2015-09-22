@@ -27,9 +27,11 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings):
     _highlightRangePicker(new NumberPicker(0, 40)),
     _highlightRangeHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
-    _chooseDefaultProjectDirOption(Option::create()
-        .onSelectedChanged(this, SLOT(onChooseDefaultProjectDirSelectedChanged(bool)))),
+    _chooseDefaultProjectDirOption(Option::create()),
     _currentDefaultProjectDirOption(Option::create()),
+    _defaultProjectDirSelect(DropDown::create()
+        .add(_chooseDefaultProjectDirOption)
+        .add(_currentDefaultProjectDirOption)),
     _defaultProjectDirHelp(Label::create().multiline(true)
         .textStyle(Defaults::helpText())),
     _fpicker(NULL)
@@ -42,10 +44,9 @@ GeneralSettingsPage::GeneralSettingsPage(GeneralSettings *generalSettings):
     conn(_settings, SIGNAL(highlightRangeChanged(int)),
         _highlightRangePicker, SLOT(setSelectedNumber(int)));
 
-    _defaultProjectDirSelect = DropDown::create()
-        .add(_chooseDefaultProjectDirOption)
-        .add(_currentDefaultProjectDirOption);
     resetDefaultProjectDirSelection();
+    conn(_chooseDefaultProjectDirOption, SIGNAL(selectedChanged(bool)),
+        this, SLOT(onChooseDefaultProjectDirSelectedChanged(bool)));
     onDefaultProjectDirectoryChanged(_settings->defaultProjectDirectory());
     conn(_settings, SIGNAL(defaultProjectDirectoryChanged(const QString&)),
         this, SLOT(onDefaultProjectDirectoryChanged(const QString&)));
@@ -66,12 +67,12 @@ void GeneralSettingsPage::onChooseDefaultProjectDirSelectedChanged(bool selected
     if (selected) {
         if (!_fpicker) {
             _fpicker = new pickers::FilePicker(this);
+            _fpicker->setMode(pickers::FilePickerMode::SaverMultiple);
             conn(_fpicker, SIGNAL(fileSelected(const QStringList&)),
                 this, SLOT(onDefaultProjectDirSelected(const QStringList&)));
             conn(_fpicker, SIGNAL(pickerClosed()),
                 this, SLOT(resetDefaultProjectDirSelection()));
         }
-        _fpicker->setMode(pickers::FilePickerMode::SaverMultiple);
         _fpicker->open();
     }
 }
@@ -99,6 +100,6 @@ void GeneralSettingsPage::onTranslatorChanged()
     _highlightRangeHelp->setText(tr("Highlight range controls the number of lines to be highlighted on each side of the cursor. "
             "Adjusting this value down will improve performance and vice versa."));
     _defaultProjectDirSelect->setTitle(tr("Default Project Directory"));
-    _chooseDefaultProjectDirOption->setText(tr("<Choose a directory>"));
+    _chooseDefaultProjectDirOption->setText(tr("<Choose a Directory>"));
     _defaultProjectDirHelp->setText(tr("The default directory for a new project"));
 }

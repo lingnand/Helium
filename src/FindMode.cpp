@@ -27,6 +27,7 @@
 #include <SignalBlocker.h>
 #include <Filetype.h>
 #include <Utility.h>
+#include <Defaults.h>
 #include <Segment.h>
 
 using namespace bb::cascades;
@@ -34,19 +35,13 @@ using namespace bb::cascades;
 FindMode::FindMode(View *view):
     ViewMode(view),
     _findField(TextField::create().vertical(VerticalAlignment::Center)
-        .inputFlags(TextInputFlag::SpellCheckOff
-                    | TextInputFlag::AutoCorrectionOff
-                    | TextInputFlag::AutoCapitalizationOff
-                    | TextInputFlag::AutoPeriodOff)
-        .contentFlags(TextContentFlag::ActiveTextOff)
+        .inputFlags(Defaults::codeInputFlags())
+        .contentFlags(Defaults::codeContentFlags())
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create().spaceQuota(1))),
     _replaceField(TextField::create().vertical(VerticalAlignment::Center)
-        .inputFlags(TextInputFlag::SpellCheckOff
-                    | TextInputFlag::AutoCorrectionOff
-                    | TextInputFlag::AutoCapitalizationOff
-                    | TextInputFlag::AutoPeriodOff)
-        .contentFlags(TextContentFlag::ActiveTextOff)
+        .inputFlags(Defaults::codeInputFlags())
+        .contentFlags(Defaults::codeContentFlags())
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create().spaceQuota(1))),
     _goToFindFieldAction(ActionItem::create()

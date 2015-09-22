@@ -34,9 +34,9 @@ private:
     GeneralSettings *_settings;
     NumberPicker *_highlightRangePicker;
     bb::cascades::Label *_highlightRangeHelp;
-    bb::cascades::DropDown *_defaultProjectDirSelect;
     bb::cascades::Option *_chooseDefaultProjectDirOption;
     bb::cascades::Option *_currentDefaultProjectDirOption;
+    bb::cascades::DropDown *_defaultProjectDirSelect;
     bb::cascades::Label *_defaultProjectDirHelp;
     bb::cascades::pickers::FilePicker *_fpicker;
     Q_SLOT void resetDefaultProjectDirSelection();

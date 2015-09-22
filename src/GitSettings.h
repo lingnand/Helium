@@ -22,7 +22,9 @@ public:
         QObject(parent),
         _name(name), _email(email),
         _sshPrivateKeyPath(sshPrivateKeyPath), _sshPublicKeyPath(sshPublicKeyPath),
-        _sshUsername(sshUsername), _sshPassphrase(sshPassphrase) {}
+        _sshUsername(sshUsername), _sshPassphrase(sshPassphrase) {
+        reloadSshCredentials();
+    }
     const QString &name() const { return _name; }
     const QString &email() const { return _email; }
     Q_SLOT void setName(const QString &n) {
@@ -44,32 +46,33 @@ public:
     const QString &sshPublicKeyPath() const { return _sshPublicKeyPath; }
     const QString &sshUsername() const { return _sshUsername; }
     const QString &sshPassphrase() const { return _sshPassphrase; }
-    LibQGit2::Credentials sshCredentials() const {
-        return LibQGit2::Credentials::ssh(_sshPrivateKeyPath, _sshPublicKeyPath,
-                _sshUsername.toLocal8Bit(), _sshPassphrase.toLocal8Bit());
-    }
+    const LibQGit2::Credentials &sshCredentials() const { return _cred; }
     Q_SLOT void setSshPrivateKeyPath(const QString &p) {
         if (p != _sshPrivateKeyPath) {
             _sshPrivateKeyPath = p;
             emit sshPrivateKeyPathChanged(_sshPrivateKeyPath);
+            reloadSshCredentials();
         }
     }
     Q_SLOT void setSshPublicKeyPath(const QString &p) {
         if (p != _sshPublicKeyPath) {
             _sshPublicKeyPath = p;
             emit sshPublicKeyPathChanged(_sshPublicKeyPath);
+            reloadSshCredentials();
         }
     }
     Q_SLOT void setSshUsername(const QString &u) {
         if (u != _sshUsername) {
             _sshUsername = u;
             emit sshUsernameChanged(_sshUsername);
+            reloadSshCredentials();
         }
     }
     Q_SLOT void setSshPassphrase(const QString &p) {
         if (p != _sshPassphrase) {
             _sshPassphrase = p;
             emit sshPassphraseChanged(_sshPassphrase);
+            reloadSshCredentials();
         }
     }
 Q_SIGNALS:
@@ -79,10 +82,18 @@ Q_SIGNALS:
     void sshPublicKeyPathChanged(const QString &);
     void sshUsernameChanged(const QString &);
     void sshPassphraseChanged(const QString &);
+    void sshCredentialsChanged(const LibQGit2::Credentials &);
 private:
     QString _name, _email;
     QString _sshPrivateKeyPath, _sshPublicKeyPath;
     QString _sshUsername, _sshPassphrase;
+    LibQGit2::Credentials _cred;
+
+    void reloadSshCredentials() {
+        _cred = LibQGit2::Credentials::ssh(_sshPrivateKeyPath, _sshPublicKeyPath,
+                _sshUsername.toLocal8Bit(), _sshPassphrase.toLocal8Bit());
+        emit sshCredentialsChanged(_cred);
+    }
 };
 
 #endif /* GITSETTINGS_H_ */

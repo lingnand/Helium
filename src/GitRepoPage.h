@@ -40,6 +40,7 @@ class Project;
 class Segment;
 class GitCommitPage;
 class GitBranchPage;
+class GitSettingsPage;
 class AutoHideProgressIndicator;
 
 class GitRepoPage : public PushablePage
@@ -152,6 +153,7 @@ private:
     GitCommitPage *_commitPage;
     GitCommitInfoPage *_commitInfoPage;
     GitBranchPage *_branchPage;
+    GitSettingsPage *_settingsPage;
 
     bb::cascades::Control *_repoContent;
 

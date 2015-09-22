@@ -23,13 +23,15 @@ class AppearanceSettings;
 class AppearanceSettingsPage;
 class FiletypeMap;
 class FiletypeMapSettingsPage;
+class GitSettings;
+class GitSettingsPage;
 
 // the Settings Page for the entire app
 class SettingsPage : public bb::cascades::NavigationPane
 {
     Q_OBJECT
 public:
-    SettingsPage(GeneralSettings *, AppearanceSettings *, FiletypeMap *);
+    SettingsPage(GeneralSettings *, AppearanceSettings *, FiletypeMap *, GitSettings *);
     Q_SLOT void onTranslatorChanged();
 private:
     GeneralSettings *_generalSettings;
@@ -40,6 +42,9 @@ private:
 
     FiletypeMap *_filetypeMap;
     FiletypeMapSettingsPage *_filetypeMapSettingsPage;
+
+    GitSettings *_gitSettings;
+    GitSettingsPage *_gitSettingsPage;
 
     bb::cascades::Page *_base;
     bb::cascades::QListDataModel<QString> _model;

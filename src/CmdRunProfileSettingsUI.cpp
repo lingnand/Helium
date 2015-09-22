@@ -20,7 +20,10 @@ using namespace bb::cascades;
 
 CmdRunProfileSettingsUI::CmdRunProfileSettingsUI(CmdRunProfileManager *manager):
     _header(Header::create()),
-    _field(TextField::create().text(manager->cmd())),
+    _field(TextField::create()
+        .inputFlags(Defaults::codeInputFlags())
+        .contentFlags(Defaults::codeContentFlags())
+        .text(manager->cmd())),
     _help(Label::create().multiline(true)
         .textStyle(Defaults::helpText()))
 
@@ -41,6 +44,7 @@ CmdRunProfileSettingsUI::CmdRunProfileSettingsUI(CmdRunProfileManager *manager):
 void CmdRunProfileSettingsUI::onTranslatorChanged()
 {
     _header->setTitle(tr("Command Settings"));
+    _field->setHintText(tr("Command"));
     _help->setText(tr(
         "The command to pass to /bin/sh\n"
         "\n"

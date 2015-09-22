@@ -83,11 +83,7 @@ Helium::Helium(int &argc, char **argv):
     _filetypeMap = (new FiletypeMapStorage("filetypes", this))->read();
     _general = (new GeneralSettingsStorage("general_settings", this))->read();
     _appearance = (new AppearanceSettingsStorage("appearance_settings", this))->read();
-//    _git = (new GitSettingsStorage("git_settings", this))->read();
-    _git = new GitSettings("Lingnan Dai", "lingnan.d@gmail.com",
-            "/accounts/1000/removable/sdcard/dev/id_rsa",
-            "/accounts/1000/removable/sdcard/dev/id_rsa.pub",
-            QString(), QString(), this);
+    _git = (new GitSettingsStorage("git_settings", this))->read();
 
     // UI
     reloadTranslator();
@@ -320,7 +316,7 @@ void Helium::pushOnSheet(AbstractPane *page)
 void Helium::showSettings()
 {
     if (!_settingsPage) {
-        _settingsPage = new SettingsPage(_general, _appearance, _filetypeMap);
+        _settingsPage = new SettingsPage(_general, _appearance, _filetypeMap, _git);
         conn(this, SIGNAL(translatorChanged()),
             _settingsPage, SLOT(onTranslatorChanged()));
     }

@@ -57,6 +57,9 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
     addAction(_reloadAction);
 
     onTranslatorChanged(false);
+
+    conn(Helium::instance()->git(), SIGNAL(sshCredentialsChanged(const LibQGit2::Credentials&)),
+        this, SLOT(reload()));
 }
 
 void GitBranchPage::connectToRepoPage()
@@ -382,7 +385,7 @@ void GitBranchPage::BranchDataModel::reload()
     // load all the remotes
     QStringList remotes = _repo->listRemotes();
     if (!remotes.isEmpty()) {
-        LibQGit2::Credentials cred = Helium::instance()->git()->sshCredentials();
+        const LibQGit2::Credentials &cred = Helium::instance()->git()->sshCredentials();
         for (int i = 0; i < remotes.size(); ++i) {
             LibQGit2::Remote *remote = _repo->remote(remotes[i], cred, this);
             conn(remote, SIGNAL(transferProgress(int)),

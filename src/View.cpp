@@ -32,6 +32,7 @@
 #include <Project.h>
 #include <AutoHideProgressIndicator.h>
 #include <ShortcutHelp.h>
+#include <Defaults.h>
 
 using namespace bb::cascades;
 
@@ -62,11 +63,8 @@ View::View(Project *project, Buffer *buffer):
     _textArea(TextArea::create()
         .topMargin(0)
         .format(TextFormat::Html)
-        .inputFlags(TextInputFlag::SpellCheckOff
-                    | TextInputFlag::AutoCorrectionOff
-                    | TextInputFlag::AutoCapitalizationOff
-                    | TextInputFlag::AutoPeriodOff)
-        .contentFlags(TextContentFlag::ActiveTextOff)
+        .inputFlags(Defaults::codeInputFlags())
+        .contentFlags(Defaults::codeContentFlags())
         .focusPolicy(FocusPolicy::Touch)
         .layoutProperties(StackLayoutProperties::create()
             .spaceQuota(1))

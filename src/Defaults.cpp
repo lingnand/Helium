@@ -35,6 +35,19 @@ TextStyle Defaults::centeredBodyText()
     return style;
 }
 
+TextInputFlag::Types Defaults::codeInputFlags()
+{
+    return TextInputFlag::SpellCheckOff
+            | TextInputFlag::AutoCorrectionOff
+            | TextInputFlag::AutoCapitalizationOff
+            | TextInputFlag::AutoPeriodOff;
+}
+
+TextContentFlag::Types Defaults::codeContentFlags()
+{
+    return TextContentFlag::ActiveTextOff;
+}
+
 float Defaults::space()
 {
     return 20;
