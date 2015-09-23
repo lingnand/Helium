@@ -80,6 +80,9 @@ void GitDiffPage::reloadContent()
                     case LibQGit2::DiffLine::Deletion:
                         elem = "diffdel"; break;
                     case LibQGit2::DiffLine::Context:
+                    case LibQGit2::DiffLine::AddEOFNL:
+                    case LibQGit2::DiffLine::DelEOFNL:
+                    case LibQGit2::DiffLine::ContextEOFNL:
                         break;
                     default:
                         print = false;
