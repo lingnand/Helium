@@ -357,6 +357,9 @@ void BufferWorker::saveStateToFile(const BufferState &state, const QString &file
                 emit progressChanged(progress.current+=progressInc);
             }
         }
+        // NOTE: write newline at the end of file
+        // http://stackoverflow.com/questions/729692/why-should-files-end-with-a-newline
+        out << '\n';
     }
     emit progressChanged(progress.cap);
     emit stateSavedToFile(filename);
