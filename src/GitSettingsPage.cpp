@@ -57,6 +57,8 @@ GitSettingsPage::GitSettingsPage(GitSettings *settings):
         .textStyle(Defaults::helpText())),
     _fpicker(NULL)
 {
+    setTitleBar(TitleBar::create());
+
     _sshPassphraseField->input()->setSubmitKey(SubmitKey::Done);
     _sshPassphraseField->input()->setSubmitKeyFocusBehavior(SubmitKeyFocusBehavior::Lose);
     conn(_nameField, SIGNAL(textChanged(const QString&)),
@@ -108,6 +110,7 @@ GitSettingsPage::GitSettingsPage(GitSettings *settings):
 void GitSettingsPage::onTranslatorChanged()
 {
     PushablePage::onTranslatorChanged();
+    titleBar()->setTitle(tr("Git Settings"));
     _authorHeader->setTitle(tr("Author"));
     _nameField->setHintText(tr("Name"));
     _emailField->setHintText(tr("Email"));

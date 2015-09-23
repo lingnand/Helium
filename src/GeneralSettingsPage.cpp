@@ -95,7 +95,7 @@ void GeneralSettingsPage::onDefaultProjectDirectoryChanged(const QString &direct
 void GeneralSettingsPage::onTranslatorChanged()
 {
     PushablePage::onTranslatorChanged();
-    titleBar()->setTitle(tr("General"));
+    titleBar()->setTitle(tr("General Settings"));
     _highlightRangePicker->setTitle(tr("Highlight Range"));
     _highlightRangeHelp->setText(tr("Highlight range controls the number of lines to be highlighted on each side of the cursor. "
             "Adjusting this value down will improve performance and vice versa."));
