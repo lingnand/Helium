@@ -27,24 +27,25 @@ class GitWorker : public QObject
 public:
     GitWorker(LibQGit2::Repository *);
     bool inProgress(); // whether an operation is running with the current worker
-    Q_SLOT void fetchStatusList(Progress progress=Progress());
-    Q_SLOT void addPaths(const QList<QString> &, Progress progress=Progress());
-    Q_SLOT void resetPaths(const QList<QString> &, Progress progress=Progress());
-    Q_SLOT void reset(LibQGit2::Repository::ResetType, Progress progress=Progress());
-    Q_SLOT void rebase(const LibQGit2::Reference &, Progress progress=Progress());
-    Q_SLOT void rebaseNext(Progress progress=Progress());
-    Q_SLOT void rebaseAbort(Progress progress=Progress());
-    Q_SLOT void commit(const QString &, Progress progress=Progress());
-    Q_SLOT void checkoutCommit(const LibQGit2::Object &, Progress progress=Progress());
-    Q_SLOT void checkoutBranch(const LibQGit2::Reference &, Progress progress=Progress());
-    Q_SLOT void merge(const LibQGit2::Reference &, Progress progress=Progress());
-    Q_SLOT void cleanupState(Progress progress=Progress());
-    Q_SLOT void deleteBranch(LibQGit2::Reference, Progress progress=Progress());
-    Q_SLOT void createBranch(const QString &name, Progress progress=Progress());
-    Q_SLOT void fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress progress=Progress());
-    Q_SLOT void fetchBaseAndPrune(LibQGit2::Remote *, Progress progress=Progress());
-    Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress progress=Progress());
-    Q_SLOT void push(LibQGit2::Remote *, const QString &branch, Progress progress=Progress());
+    Q_SLOT void fetchStatusList(Progress=Progress());
+    Q_SLOT void addPaths(const QList<QString> &, Progress=Progress());
+    Q_SLOT void resetPaths(const QList<QString> &, Progress=Progress());
+    Q_SLOT void reset(LibQGit2::Repository::ResetType, Progress=Progress());
+    Q_SLOT void rebase(const LibQGit2::Reference &, Progress=Progress());
+    Q_SLOT void rebaseNext(Progress=Progress());
+    Q_SLOT void rebaseAbort(Progress=Progress());
+    Q_SLOT void commit(const QString &, Progress=Progress());
+    Q_SLOT void checkoutCommit(const LibQGit2::Object &, Progress=Progress());
+    Q_SLOT void checkoutBranch(const LibQGit2::Reference &, Progress=Progress());
+    Q_SLOT void merge(const LibQGit2::Reference &, Progress=Progress());
+    Q_SLOT void cleanupState(Progress=Progress());
+    Q_SLOT void deleteBranch(LibQGit2::Reference, Progress=Progress());
+    Q_SLOT void createBranch(const QString &name, Progress=Progress());
+    Q_SLOT void fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress=Progress());
+    Q_SLOT void fetchBaseAndPrune(LibQGit2::Remote *, Progress=Progress());
+    Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress=Progress());
+    Q_SLOT void push(LibQGit2::Remote *, const QString &branch, Progress=Progress());
+    Q_SLOT void createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &, Progress=Progress());
     Q_SLOT void setAuthorName(const QString &);
     Q_SLOT void setAuthorEmail(const QString &);
 Q_SIGNALS:
@@ -68,9 +69,10 @@ private:
     void setInProgress(bool);
     LibQGit2::Rebase &rebaseObj();
 
-    void _fetchStatusList(Progress progress);
-    void _merge(const LibQGit2::Reference &, Progress progress);
-    bool _fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress progress);
+    void _fetchStatusList(Progress);
+    void _merge(const LibQGit2::Reference &, Progress);
+    bool _fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress);
+    void _fetchBaseAndPrune(LibQGit2::Remote *, Progress);
 };
 
 #endif /* GITWORKER_H_ */

@@ -15,6 +15,7 @@
 #include <bb/system/SystemUiResult>
 #include <libqgit2/qgitref.h>
 #include <PushablePage.h>
+#include <GitRemoteInfoPage.h>
 
 namespace bb {
     namespace cascades {
@@ -38,6 +39,7 @@ public:
     GitBranchPage(GitRepoPage *);
     Q_SLOT void reload();
     Q_SLOT void reset();
+    Q_SLOT void createRemote(const QString &name, const QString &url);
     void connectToRepoPage();
     void disconnectFromRepoPage();
     void onTranslatorChanged(bool reload=true);
@@ -78,10 +80,10 @@ private:
     } _itemProvider;
     bb::cascades::ListView *_branchList;
     AutoHideProgressIndicator *_progressIndicator;
-    LibQGit2::Reference _tempTarget;
+    GitRemoteInfoPage *_remoteInfoPage;
     LibQGit2::Remote *_tempRemote;
-    QString _tempBranch;
 
+    Q_SLOT void pushRemoteInfoPage(LibQGit2::Remote *remote=NULL, GitRemoteInfoPage::Actions=GitRemoteInfoPage::Actions());
     Q_SLOT void onBranchListTriggered(const QVariantList &);
     Q_SLOT void showBranchLogSelection();
     Q_SLOT void onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type);
@@ -91,18 +93,15 @@ private:
     Q_SLOT void pushToBranchRemoteSelection();
     Q_SLOT void onPushToBranchPromptFinished(bb::system::SystemUiResult::Type, const QString &);
     Q_SLOT void deleteBranchSelection();
-    Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void checkoutBranchSelection();
     Q_SLOT void mergeBranchSelection();
     Q_SLOT void rebaseBranchSelection();
     Q_SLOT void fetchBranchSelection();
     Q_SLOT void pullBranchSelection();
     Q_SLOT void pushBranchSelection();
-    Q_SLOT void onPushDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void addBranch();
     Q_SLOT void addRemote();
     Q_SLOT void onAddBranchPromptFinished(bb::system::SystemUiResult::Type, const QString &);
-    Q_SLOT void onRemoteTransferProgress(int);
     Q_SLOT void onGitRepoPageInProgressChanged(bool);
 };
 

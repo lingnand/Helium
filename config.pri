@@ -602,6 +602,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GitCommitPage.cpp) \
         $$quote($$BASEDIR/src/GitDiffPage.cpp) \
         $$quote($$BASEDIR/src/GitLogPage.cpp) \
+        $$quote($$BASEDIR/src/GitRemoteInfoPage.cpp) \
         $$quote($$BASEDIR/src/GitRepoPage.cpp) \
         $$quote($$BASEDIR/src/GitSettingsPage.cpp) \
         $$quote($$BASEDIR/src/GitSettingsStorage.cpp) \
@@ -782,6 +783,7 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/GitCommitPage.h) \
         $$quote($$BASEDIR/src/GitDiffPage.h) \
         $$quote($$BASEDIR/src/GitLogPage.h) \
+        $$quote($$BASEDIR/src/GitRemoteInfoPage.h) \
         $$quote($$BASEDIR/src/GitRepoPage.h) \
         $$quote($$BASEDIR/src/GitSettings.h) \
         $$quote($$BASEDIR/src/GitSettingsPage.h) \

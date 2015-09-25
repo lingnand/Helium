@@ -537,18 +537,22 @@ void Repository::clone(const QString& url, const QString& path, const Credential
 }
 
 
-Remote *Repository::createRemote(const QString& name, const QString& url, const Credentials &credentials, QObject *parent)
+Remote *Repository::createRemote(const QString &name,  const QString &url, const Credentials &credentials, QObject *parent)
 {
     git_remote *r = NULL;
     qGitThrow(git_remote_create(&r, SAFE_DATA, name.toLatin1(), url.toLatin1()));
     return new Remote(r, credentials, parent);
 }
 
+void Repository::deleteRemote(const QString &name)
+{
+    qGitThrow(git_remote_delete(SAFE_DATA, name.toLocal8Bit()));
+}
 
 Remote *Repository::remote(const QString &remoteName, const Credentials &credentials, QObject *parent) const
 {
     git_remote *r = NULL;
-    qGitThrow(git_remote_lookup(&r, SAFE_DATA, remoteName.toLatin1()));
+    qGitThrow(git_remote_lookup(&r, SAFE_DATA, remoteName.toLocal8Bit()));
     return new Remote(r, credentials, parent);
 }
 

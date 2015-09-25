@@ -63,14 +63,17 @@ public:
     Q_SLOT void merge(const LibQGit2::Reference &);
     Q_SLOT void rebase(const LibQGit2::Reference &upstream);
     Q_SLOT void deleteBranch(const LibQGit2::Reference &);
+    Q_SLOT void safeDeleteBranch(const LibQGit2::Reference &);
     Q_SLOT void createBranch(const QString &);
     Q_SLOT void fetch(LibQGit2::Remote *, const LibQGit2::Reference &branch);
     Q_SLOT void fetchBaseAndPrune(LibQGit2::Remote *);
     Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
     Q_SLOT void push(LibQGit2::Remote *, const QString &branch);
+    Q_SLOT void safePush(LibQGit2::Remote *, const QString &branch);
+    Q_SLOT void createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &);
     Q_SLOT void pushSettingsPage();
     Q_SLOT void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
-    Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions=GitLogPage::Actions());
+    Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, LibQGit2::Remote *remote=NULL, GitLogPage::Actions=GitLogPage::Actions());
     Q_SLOT void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
     Q_SLOT void pushCommitPage(const QString &hintMessage=QString());
     Q_SLOT void onPagePopped(bb::cascades::Page *);
@@ -109,6 +112,7 @@ Q_SIGNALS:
     void workerFetchBaseAndPrune(LibQGit2::Remote *);
     void workerPull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
     void workerPush(LibQGit2::Remote *, const QString &branch);
+    void workerCreateRemote(const QString &name, const QString &url, const LibQGit2::Credentials &);
 private:
     Project *_project;
     // UIs that apply when there is no repo
@@ -154,6 +158,9 @@ private:
     GitCommitInfoPage *_commitInfoPage;
     GitBranchPage *_branchPage;
     GitSettingsPage *_settingsPage;
+    LibQGit2::Reference _tempTarget;
+    LibQGit2::Remote *_tempRemote;
+    QString _tempBranch;
 
     bb::cascades::Control *_repoContent;
 
@@ -180,6 +187,8 @@ private:
     Q_SLOT void onSelectAllOnWorkdirTriggered();
 
     Q_SLOT void onResetHardDialogFinished(bb::system::SystemUiResult::Type);
+    Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
+    Q_SLOT void onPushDialogFinished(bb::system::SystemUiResult::Type);
 
     Q_SLOT void mergeAbort();
 

@@ -26,10 +26,18 @@ using namespace bb::cascades;
 
 GitLogPage::GitLogPage(GitRepoPage *repoPage):
     _repoPage(repoPage),
+    _remote(NULL),
     _commitItemProvider(this),
     _commitList(ListView::create()
         .dataModel(&_commitDataModel)
-        .listItemProvider(&_commitItemProvider))
+        .listItemProvider(&_commitItemProvider)),
+    _checkoutBranchAction(NULL),
+    _deleteBranchAction(NULL),
+    _mergeBranchAction(NULL),
+    _rebaseBranchAction(NULL),
+    _fetchBranchAction(NULL),
+    _pullBranchAction(NULL),
+    _pushBranchAction(NULL)
 {
     conn(_commitList, SIGNAL(triggered(QVariantList)),
         this, SLOT(showCommitInfoIndexPath(const QVariantList &)));
@@ -39,9 +47,10 @@ GitLogPage::GitLogPage(GitRepoPage *repoPage):
     onTranslatorChanged();
 }
 
-void GitLogPage::setReference(const LibQGit2::Reference &reference)
+void GitLogPage::setReference(const LibQGit2::Reference &reference, LibQGit2::Remote *remote)
 {
     _reference = reference;
+    _remote = remote;
     try {
         LibQGit2::RevWalk walk(*_repoPage->repo());
         walk.setSorting(LibQGit2::RevWalk::Topological |
@@ -71,13 +80,124 @@ void GitLogPage::resetReference()
 {
     _commitDataModel.clear();
     _reference = LibQGit2::Reference();
+    _remote = NULL;
 }
 
 void GitLogPage::setActions(Actions actions)
 {
     while (actionCount() > 0)
         removeAction(actionAt(0));
-    // add the actions
+    QList<ActionItem *> list;
+    if (actions.testFlag(PullBranch)) {
+        if (!_pullBranchAction)
+            _pullBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Pull Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("u"))
+                .onTriggered(this, SLOT(pullBranch()));
+        list.append(_pullBranchAction);
+    }
+    if (actions.testFlag(FetchBranch)) {
+        if (!_fetchBranchAction)
+            _fetchBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Fetch Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("f"))
+                .onTriggered(this, SLOT(fetchBranch()));
+        list.append(_fetchBranchAction);
+    }
+    if (actions.testFlag(PushBranch)) {
+        if (!_pushBranchAction)
+            _pushBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Push to Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("p"))
+                .onTriggered(this, SLOT(pushBranch()));
+        list.append(_pushBranchAction);
+    }
+    if (actions.testFlag(CheckoutBranch)) {
+        if (!_checkoutBranchAction)
+            _checkoutBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("c"))
+                .onTriggered(this, SLOT(checkoutBranch()));
+        list.append(_checkoutBranchAction);
+    }
+    if (actions.testFlag(MergeBranch)) {
+        if (!_mergeBranchAction)
+            _mergeBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Merge Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("m"))
+                .onTriggered(this, SLOT(mergeBranch()));
+        list.append(_mergeBranchAction);
+    }
+    if (actions.testFlag(RebaseBranch)) {
+        if (!_rebaseBranchAction)
+            _rebaseBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Rebase Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("r"))
+                .onTriggered(this, SLOT(rebaseBranch()));
+        list.append(_rebaseBranchAction);
+    }
+    if (actions.testFlag(DeleteBranch)) {
+        if (!_deleteBranchAction)
+            _deleteBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Delete Branch"))
+                .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .addShortcut(Shortcut::create().key("Backspace"))
+                .onTriggered(this, SLOT(deleteBranch()));
+        list.append(_deleteBranchAction);
+    }
+    for (int i = 0; i < list.size(); i++) {
+        switch (i) {
+            case 0:
+                addAction(list[i], ActionBarPlacement::Signature);
+                break;
+            case 1: case 2:
+                addAction(list[i], ActionBarPlacement::OnBar);
+                break;
+            default:
+                addAction(list[i]);
+        }
+    }
+}
+
+void GitLogPage::checkoutBranch()
+{
+    _repoPage->checkoutBranch(_reference);
+    pop();
+}
+
+void GitLogPage::deleteBranch()
+{
+    _repoPage->safeDeleteBranch(_reference);
+    pop();
+}
+
+void GitLogPage::mergeBranch()
+{
+    _repoPage->merge(_reference);
+    pop();
+}
+
+void GitLogPage::rebaseBranch()
+{
+    _repoPage->rebase(_reference);
+    pop();
+}
+
+void GitLogPage::fetchBranch()
+{
+    _repoPage->fetch(_remote, _reference);
+    pop();
+}
+
+void GitLogPage::pullBranch()
+{
+    _repoPage->pull(_remote, _reference);
+    pop();
+}
+
+void GitLogPage::pushBranch()
+{
+    _repoPage->safePush(_remote, _reference.branchName().split('/').last());
+    pop();
 }
 
 void GitLogPage::reloadTitle()

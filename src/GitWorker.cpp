@@ -386,6 +386,12 @@ void GitWorker::fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branc
 void GitWorker::fetchBaseAndPrune(LibQGit2::Remote *remote, Progress progress)
 {
     setInProgress(true);
+    _fetchBaseAndPrune(remote, progress);
+    setInProgress(false);
+}
+
+void GitWorker::_fetchBaseAndPrune(LibQGit2::Remote *remote, Progress progress)
+{
     emit progressChanged(progress.current+=(progress.cap-progress.current)/10);
     _currentProgress = &progress.current;
     _progressStart = progress.current;
@@ -406,7 +412,6 @@ void GitWorker::fetchBaseAndPrune(LibQGit2::Remote *remote, Progress progress)
     remote->disconnect(this);
     _currentProgress = NULL;
     _progressStart = _progressInc = 0;
-    setInProgress(false);
 }
 
 bool GitWorker::_fetch(LibQGit2::Remote *remote, const LibQGit2::Reference &branch, Progress progress)
@@ -472,6 +477,24 @@ void GitWorker::push(LibQGit2::Remote *remote, const QString &branch, Progress p
     remote->disconnect(this);
     _currentProgress = NULL;
     _progressStart = _progressInc = 0;
+    setInProgress(false);
+}
+
+void GitWorker::createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &credentials, Progress progress)
+{
+    setInProgress(true);
+    float initInc = (progress.cap-progress.current)/10;
+    emit progressChanged(progress.current+=initInc);
+    try {
+        LibQGit2::Remote *remote = _repo->createRemote(name, url, credentials);
+        emit progressChanged(progress.current+=initInc*2);
+        _fetchBaseAndPrune(remote, progress);
+        remote->deleteLater(); // don't need this remote anymore
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when creating remote::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
     setInProgress(false);
 }
 

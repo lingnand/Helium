@@ -43,6 +43,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     qRegisterMetaType<LibQGit2::StatusList>("LibQGit2::StatusList");
     qRegisterMetaType<LibQGit2::Repository::ResetType>("LibQGit2::Repository::ResetType");
     qRegisterMetaType<LibQGit2::Object>("LibQGit2::Object");
+    qRegisterMetaType<LibQGit2::Credentials>("LibQGit2::Credentials");
     qRegisterMetaType<LibQGit2::Reference>();
     qRegisterMetaType<LibQGit2::Remote *>();
 

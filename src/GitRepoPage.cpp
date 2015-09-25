@@ -112,7 +112,8 @@ GitRepoPage::GitRepoPage():
     _commitPage(NULL),
     _commitInfoPage(NULL),
     _branchPage(NULL),
-    _settingsPage(NULL)
+    _settingsPage(NULL),
+    _tempRemote(NULL)
 {
     _statusListView->setMultiSelectAction(MultiSelectActionItem::create());
     _statusListView->multiSelectHandler()->addAction(_multiAddAction);
@@ -181,6 +182,8 @@ void GitRepoPage::setProject(Project *project)
                 _project->gitWorker(), SLOT(pull(LibQGit2::Remote*, const LibQGit2::Reference&)));
             conn(this, SIGNAL(workerPush(LibQGit2::Remote*, const QString&)),
                 _project->gitWorker(), SLOT(push(LibQGit2::Remote*, const QString&)));
+            conn(this, SIGNAL(workerCreateRemote(const QString&, const QString&, const LibQGit2::Credentials&)),
+                _project->gitWorker(), SLOT(createRemote(const QString&, const QString&, const LibQGit2::Credentials&)));
 
             onGitWorkerInProgressChanged(_project->gitWorker()->inProgress());
             conn(_project->gitWorker(), SIGNAL(inProgressChanged(bool)),
@@ -406,6 +409,22 @@ void GitRepoPage::deleteBranch(const LibQGit2::Reference &branch)
     emit workerDeleteBranch(branch);
 }
 
+void GitRepoPage::safeDeleteBranch(const LibQGit2::Reference &branch)
+{
+    _tempTarget = branch;
+    Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm Deletion"),
+            tr("Are you sure you want to delete branch %1?")
+                .arg(_tempTarget.branchName()),
+            this, SLOT(onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type)));
+}
+
+void GitRepoPage::onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        deleteBranch(_tempTarget);
+    _tempTarget = LibQGit2::Reference();
+}
+
 void GitRepoPage::createBranch(const QString &branchName)
 {
     emit workerCreateBranch(branchName);
@@ -429,6 +448,35 @@ void GitRepoPage::pull(LibQGit2::Remote *remote, const LibQGit2::Reference &bran
 void GitRepoPage::push(LibQGit2::Remote *remote, const QString &branch)
 {
     emit workerPush(remote, branch);
+}
+
+void GitRepoPage::safePush(LibQGit2::Remote *remote, const QString &branch)
+{
+    // check if the current branch has the same name as the one to be pushed into
+    // if not, ask for confirmation
+    QString currentBranch = _project->gitRepo()->head().branchName();
+    if (currentBranch != branch) {
+        _tempRemote = remote;
+        _tempBranch = branch;
+        Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm Push"),
+            tr("Upstream branch does not have the same name as the current branch."),
+            this, SLOT(onPushDialogFinished(bb::system::SystemUiResult::Type)));
+    } else {
+        push(remote, branch);
+    }
+}
+
+void GitRepoPage::onPushDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (_tempRemote && type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        push(_tempRemote, _tempBranch);
+    _tempRemote = NULL;
+    _tempBranch.clear();
+}
+
+void GitRepoPage::createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &cred)
+{
+    emit workerCreateRemote(name, url, cred);
 }
 
 void GitRepoPage::pushCommitPage(const QString &hintMessage)
@@ -456,14 +504,14 @@ void GitRepoPage::branches()
     parent()->push(_branchPage);
 }
 
-void GitRepoPage::pushLogPage(const LibQGit2::Reference &ref, GitLogPage::Actions actions)
+void GitRepoPage::pushLogPage(const LibQGit2::Reference &ref, LibQGit2::Remote *remote, GitLogPage::Actions actions)
 {
     if (!_logPage) {
         _logPage = new GitLogPage(this);
         conn(this, SIGNAL(translatorChanged()),
             _logPage, SLOT(onTranslatorChanged()));
     }
-    _logPage->setReference(ref);
+    _logPage->setReference(ref, remote);
     _logPage->setActions(actions);
     parent()->push(_logPage);
 }

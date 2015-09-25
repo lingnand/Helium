@@ -631,12 +631,12 @@ namespace LibQGit2
             *
             * @param name name of the remote
             * @param url URL of the remote git repository
-            * @param changeUrlIfExists affects the behaviour if the remote already exists:
-            * if true changes the remote's URL, if false throws an exception.
             * @throws LibQGit2::Exception
             */
-            Remote *createRemote(const QString& name,  const QString& url,
+            Remote *createRemote(const QString &name,  const QString &url,
                     const Credentials &crendentials = Credentials(), QObject *parent = 0);
+
+            void deleteRemote(const QString &name);
 
             /**
              * Gets a named remote from this repository.
