@@ -41,6 +41,7 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
     _dataModel(this, page->repo()),
     _itemProvider(this),
     _branchList(ListView::create()
+        .scrollRole(ScrollRole::Main)
         .dataModel(&_dataModel)
         .listItemProvider(&_itemProvider)),
     _progressIndicator(new AutoHideProgressIndicator),
