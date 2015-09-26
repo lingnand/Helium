@@ -523,7 +523,6 @@ const git_repository* Repository::constData() const
 
 void Repository::clone(const QString& url, const QString& path, const Credentials &credentials, const Signature &signature)
 {
-    const QString remoteName("origin");
     internal::RemoteCallbacks remoteCallbacks(d_ptr.data(), credentials);
 
     git_repository *repo = 0;

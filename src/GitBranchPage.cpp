@@ -44,7 +44,6 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
         .dataModel(&_dataModel)
         .listItemProvider(&_itemProvider)),
     _progressIndicator(new AutoHideProgressIndicator),
-    _remoteInfoPage(NULL),
     _tempRemote(NULL)
 {
     conn(_branchList, SIGNAL(triggered(QVariantList)),
@@ -139,7 +138,7 @@ void GitBranchPage::showRemoteInfo(const QVariantList &ip)
         qWarning() << "What? no remote for ip" << ip;
         return;
     }
-    pushRemoteInfoPage(remote);
+    _repoPage->pushRemoteInfoPage(GitRemoteInfoPage::DisplayRemote, remote);
 }
 
 void GitBranchPage::refreshRemoteSelection()
@@ -263,19 +262,7 @@ void GitBranchPage::onAddBranchPromptFinished(bb::system::SystemUiResult::Type t
 
 void GitBranchPage::addRemote()
 {
-    pushRemoteInfoPage(NULL, GitRemoteInfoPage::SaveRemote);
-}
-
-void GitBranchPage::pushRemoteInfoPage(LibQGit2::Remote *remote, GitRemoteInfoPage::Actions actions)
-{
-    if (!_remoteInfoPage) {
-        _remoteInfoPage = new GitRemoteInfoPage(this);
-        conn(this, SIGNAL(translatorChanged()),
-            _remoteInfoPage, SLOT(onTranslatorChanged()));
-    }
-    _remoteInfoPage->setRemote(remote);
-    _remoteInfoPage->setActions(actions);
-    parent()->push(_remoteInfoPage);
+    _repoPage->pushRemoteInfoPage(GitRemoteInfoPage::SaveRemote);
 }
 
 void GitBranchPage::reload()
@@ -286,11 +273,6 @@ void GitBranchPage::reload()
 void GitBranchPage::reset()
 {
     _dataModel.clear();
-}
-
-void GitBranchPage::createRemote(const QString &name, const QString &url)
-{
-    _repoPage->createRemote(name, url, Helium::instance()->git()->sshCredentials());
 }
 
 void GitBranchPage::onGitRepoPageInProgressChanged(bool inProgress)

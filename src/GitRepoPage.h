@@ -19,6 +19,7 @@
 #include <GitDiffPage.h>
 #include <GitCommitInfoPage.h>
 #include <GitLogPage.h>
+#include <GitRemoteInfoPage.h>
 #include <PushablePage.h>
 
 namespace bb {
@@ -26,6 +27,7 @@ namespace bb {
         class ActionItem;
         class Label;
         class Control;
+        class Container;
         class ListView;
         class VisualNode;
     }
@@ -70,12 +72,15 @@ public:
     Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
     Q_SLOT void push(LibQGit2::Remote *, const QString &branch);
     Q_SLOT void safePush(LibQGit2::Remote *, const QString &branch);
-    Q_SLOT void createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &);
+    Q_SLOT void createRemote(const QString &name, const QString &url);
+    Q_SLOT void setRemoteUrl(LibQGit2::Remote *, const QString &url);
+    Q_SLOT void clone(const QString &url);
     Q_SLOT void pushSettingsPage();
     Q_SLOT void pushDiffPage(const LibQGit2::Patch &patch, GitDiffPage::Actions=GitDiffPage::Actions());
     Q_SLOT void pushLogPage(const LibQGit2::Reference &ref, LibQGit2::Remote *remote=NULL, GitLogPage::Actions=GitLogPage::Actions());
     Q_SLOT void pushCommitInfoPage(const LibQGit2::Commit &commit, GitCommitInfoPage::Actions=GitCommitInfoPage::Actions());
     Q_SLOT void pushCommitPage(const QString &hintMessage=QString());
+    Q_SLOT void pushRemoteInfoPage(GitRemoteInfoPage::Mode mode, LibQGit2::Remote *remote=NULL);
     Q_SLOT void onPagePopped(bb::cascades::Page *);
     void onTranslatorChanged(bool reload=true);
     Q_SLOT void selectAllOnIndex();
@@ -113,8 +118,10 @@ Q_SIGNALS:
     void workerPull(LibQGit2::Remote *, const LibQGit2::Reference &branch);
     void workerPush(LibQGit2::Remote *, const QString &branch);
     void workerCreateRemote(const QString &name, const QString &url, const LibQGit2::Credentials &);
+    void workerClone(const QString &url, const QString &path, const LibQGit2::Credentials &);
 private:
     Project *_project;
+    bb::cascades::Container *_contentHolder;
     // UIs that apply when there is no repo
     bb::cascades::ActionItem *_initAction, *_cloneAction, *_reloadAction, *_settingsAction;
     bb::cascades::Label *_noRepoLabel;
@@ -147,6 +154,7 @@ private:
         GitRepoPage *_gitRepoPage;
     } _statusItemProvider;
     bb::cascades::ListView *_statusListView;
+    bb::cascades::Control *_repoContent;
     AutoHideProgressIndicator *_progressIndicator;
     bb::cascades::ActionItem *_multiAddAction, *_multiResetAction;
     bb::cascades::ActionItem *_rebaseNextAction, *_rebaseAbortAction;
@@ -157,17 +165,16 @@ private:
     GitCommitPage *_commitPage;
     GitCommitInfoPage *_commitInfoPage;
     GitBranchPage *_branchPage;
+    GitRemoteInfoPage *_remoteInfoPage;
     GitSettingsPage *_settingsPage;
     LibQGit2::Reference _tempTarget;
     LibQGit2::Remote *_tempRemote;
     QString _tempBranch;
 
-    bb::cascades::Control *_repoContent;
-
     Q_SLOT void init();
-    Q_SLOT void clone();
-    Q_SLOT void branches();
-    Q_SLOT void log();
+    Q_SLOT void pushBranchPage();
+    Q_SLOT void pushLogPage();
+    Q_SLOT void safePushRemoteInfoPageForClone();
     Q_SLOT void showDiffSelection();
     Q_SLOT void showDiffIndexPath(const QVariantList &);
     Q_SLOT void addSelections();
@@ -186,6 +193,7 @@ private:
     Q_SLOT void onSelectAllOnIndexTriggered();
     Q_SLOT void onSelectAllOnWorkdirTriggered();
 
+    Q_SLOT void onCloneDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onResetHardDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onDeleteBranchDialogFinished(bb::system::SystemUiResult::Type);
     Q_SLOT void onPushDialogFinished(bb::system::SystemUiResult::Type);

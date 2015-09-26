@@ -46,6 +46,7 @@ public:
     Q_SLOT void pull(LibQGit2::Remote *, const LibQGit2::Reference &branch, Progress=Progress());
     Q_SLOT void push(LibQGit2::Remote *, const QString &branch, Progress=Progress());
     Q_SLOT void createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &, Progress=Progress());
+    Q_SLOT void clone(const QString &url, const QString &path, const LibQGit2::Credentials &credentials, Progress=Progress());
     Q_SLOT void setAuthorName(const QString &);
     Q_SLOT void setAuthorEmail(const QString &);
 Q_SIGNALS:

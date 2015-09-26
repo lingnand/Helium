@@ -15,7 +15,6 @@
 #include <bb/system/SystemUiResult>
 #include <libqgit2/qgitref.h>
 #include <PushablePage.h>
-#include <GitRemoteInfoPage.h>
 
 namespace bb {
     namespace cascades {
@@ -39,7 +38,6 @@ public:
     GitBranchPage(GitRepoPage *);
     Q_SLOT void reload();
     Q_SLOT void reset();
-    Q_SLOT void createRemote(const QString &name, const QString &url);
     void connectToRepoPage();
     void disconnectFromRepoPage();
     void onTranslatorChanged(bool reload=true);
@@ -80,10 +78,8 @@ private:
     } _itemProvider;
     bb::cascades::ListView *_branchList;
     AutoHideProgressIndicator *_progressIndicator;
-    GitRemoteInfoPage *_remoteInfoPage;
     LibQGit2::Remote *_tempRemote;
 
-    Q_SLOT void pushRemoteInfoPage(LibQGit2::Remote *remote=NULL, GitRemoteInfoPage::Actions=GitRemoteInfoPage::Actions());
     Q_SLOT void onBranchListTriggered(const QVariantList &);
     Q_SLOT void showBranchLogSelection();
     Q_SLOT void onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type);

@@ -20,6 +20,8 @@ GitWorker::GitWorker(LibQGit2::Repository *repo):
     _repo(repo), _inProgress(false),
     _currentProgress(NULL), _progressStart(0), _progressInc(0)
 {
+    conn(repo, SIGNAL(cloneProgress(int)),
+            this, SLOT(onRemoteTransferProgress(int)));
 }
 
 bool GitWorker::inProgress()
@@ -495,6 +497,27 @@ void GitWorker::createRemote(const QString &name, const QString &url, const LibQ
         emit progressChanged(progress.current, ProgressIndicatorState::Error);
         Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
     }
+    setInProgress(false);
+}
+
+void GitWorker::clone(const QString &url, const QString &path, const LibQGit2::Credentials &credentials, Progress progress)
+{
+    setInProgress(true);
+    emit progressChanged(progress.current+=(progress.cap-progress.current)/10);
+    _currentProgress = &progress.current;
+    _progressStart = progress.current;
+    _progressInc = (progress.cap-progress.current)/150;
+    try {
+        _repo->clone(url, path, credentials, LibQGit2::Signature(_name, _email));
+        Utility::toast(tr("Clone complete"));
+        _fetchStatusList(progress);
+    } catch (const LibQGit2::Exception &e) {
+        qDebug() << "::::LIBQGIT2 ERROR when cloning::::" << e.what();
+        emit progressChanged(progress.current, ProgressIndicatorState::Error);
+        Utility::toast(e.what(), tr("OK"), this, SIGNAL(progressDismissed()));
+    }
+    _currentProgress = NULL;
+    _progressStart = _progressInc = 0;
     setInProgress(false);
 }
 

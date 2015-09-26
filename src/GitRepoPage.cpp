@@ -20,6 +20,7 @@
 #include <libqgit2/qgitexception.h>
 #include <libqgit2/qgitdifffile.h>
 #include <libqgit2/qgitdiff.h>
+#include <libqgit2/qgitremote.h>
 #include <Defaults.h>
 #include <GitRepoPage.h>
 #include <GitCommitPage.h>
@@ -31,6 +32,7 @@
 #include <AutoHideProgressIndicator.h>
 #include <LocaleAwareActionItem.h>
 #include <Helium.h>
+#include <GitSettings.h>
 #include <Utility.h>
 
 using namespace bb::cascades;
@@ -47,12 +49,13 @@ bool validDiffDelta(const LibQGit2::DiffDelta &delta)
 
 GitRepoPage::GitRepoPage():
     _project(NULL),
+    _contentHolder(Container::create()),
     _initAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("i"))
         .onTriggered(this, SLOT(init()))),
     _cloneAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("c"))
-        .onTriggered(this, SLOT(clone()))),
+        .onTriggered(this, SLOT(safePushRemoteInfoPageForClone()))),
     _reloadAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_reload.png"))
         .addShortcut(Shortcut::create().key("l"))
@@ -66,17 +69,19 @@ GitRepoPage::GitRepoPage():
         .contentFlags(TextContentFlag::ActiveTextOff)
         .textStyle(Defaults::centeredBodyText())),
     _noRepoContent(ScrollView::create(
-        Segment::create().section().subsection()
-            .add(_noRepoLabel))),
+            Segment::create().section().subsection()
+                .add(_noRepoLabel))
+        .scrollMode(ScrollMode::Vertical)
+        .scrollRole(ScrollRole::Main)),
     _commitAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("c"))
         .onTriggered(this, SLOT(pushCommitPage()))),
     _branchesAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("h"))
-        .onTriggered(this, SLOT(branches()))),
+        .onTriggered(this, SLOT(pushBranchPage()))),
     _logAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("g"))
-        .onTriggered(this, SLOT(log()))),
+        .onTriggered(this, SLOT(pushLogPage()))),
     _addAllAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(addAll()))),
@@ -91,6 +96,7 @@ GitRepoPage::GitRepoPage():
         .scrollRole(ScrollRole::Main)
         .dataModel(&_statusDataModel)
         .listItemProvider(&_statusItemProvider)),
+    _repoContent(_statusListView),
     _progressIndicator(new AutoHideProgressIndicator),
     _multiAddAction(ActionItem::create()
         .addShortcut(Shortcut::create().key("a"))
@@ -112,6 +118,7 @@ GitRepoPage::GitRepoPage():
     _commitPage(NULL),
     _commitInfoPage(NULL),
     _branchPage(NULL),
+    _remoteInfoPage(NULL),
     _settingsPage(NULL),
     _tempRemote(NULL)
 {
@@ -119,14 +126,14 @@ GitRepoPage::GitRepoPage():
     _statusListView->multiSelectHandler()->addAction(_multiAddAction);
     _statusListView->multiSelectHandler()->addAction(_multiResetAction);
     _statusListView->setEnabled(false);
-    _repoContent = Container::create()
-        .add(_statusListView)
-        .add(_progressIndicator);
     conn(_statusListView, SIGNAL(triggered(QVariantList)),
         this, SLOT(showDiffIndexPath(const QVariantList &)));
     conn(_statusListView, SIGNAL(selectionChangeStarted()),
         this, SLOT(reloadMultiSelectActionsEnabled()));
     setTitleBar(TitleBar::create());
+    setContent(Container::create()
+        .add(_contentHolder)
+        .add(_progressIndicator));
 
     onTranslatorChanged(false);
 }
@@ -184,6 +191,8 @@ void GitRepoPage::setProject(Project *project)
                 _project->gitWorker(), SLOT(push(LibQGit2::Remote*, const QString&)));
             conn(this, SIGNAL(workerCreateRemote(const QString&, const QString&, const LibQGit2::Credentials&)),
                 _project->gitWorker(), SLOT(createRemote(const QString&, const QString&, const LibQGit2::Credentials&)));
+            conn(this, SIGNAL(workerClone(const QString&, const QString&, const LibQGit2::Credentials&)),
+                _project->gitWorker(), SLOT(clone(const QString&, const QString&, const LibQGit2::Credentials&)));
 
             onGitWorkerInProgressChanged(_project->gitWorker()->inProgress());
             conn(_project->gitWorker(), SIGNAL(inProgressChanged(bool)),
@@ -288,7 +297,8 @@ void GitRepoPage::reloadContent()
         // content
         _noRepoLabel->setText(tr("<br/>No repository found.<br/><br/>Use <b>Init</b> or <b>Clone</b> to create a git repository in<br/><em>%1</em>")
                 .arg(_project->path()));
-        setContent(_noRepoContent);
+        _contentHolder->remove(_repoContent);
+        _contentHolder->add(_noRepoContent);
         return;
     }
     // title
@@ -360,7 +370,8 @@ void GitRepoPage::reloadContent()
     titleBar()->setTitle(title);
     // content
     _statusListView->setEnabled(true);
-    setContent(_repoContent);
+    _contentHolder->remove(_noRepoContent);
+    _contentHolder->add(_repoContent);
 }
 
 void GitRepoPage::init()
@@ -369,9 +380,23 @@ void GitRepoPage::init()
     emit workerFetchStatusList();
 }
 
-void GitRepoPage::clone()
+void GitRepoPage::safePushRemoteInfoPageForClone()
 {
+    // check if there are any files in the existing directory
+    // if yes, prompt the user if they want to force clone
+    if (!QDir(_project->path()).entryList(QDir::NoDotAndDotDot|QDir::AllEntries).empty())
+        Utility::dialog(tr("Continue"), tr("Cancel"), tr("Confirm Clone"),
+            tr("Project directory \"%1\" is not empty. Are you sure you want to clone into this directory?")
+                .arg(Utility::shortenPath(_project->path())),
+            this, SLOT(onCloneDialogFinished(bb::system::SystemUiResult::Type)));
+    else
+        pushRemoteInfoPage(GitRemoteInfoPage::Clone);
+}
 
+void GitRepoPage::onCloneDialogFinished(bb::system::SystemUiResult::Type type)
+{
+    if (type == bb::system::SystemUiResult::ConfirmButtonSelection)
+        pushRemoteInfoPage(GitRemoteInfoPage::Clone);
 }
 
 void GitRepoPage::commit(const QString &message)
@@ -474,9 +499,33 @@ void GitRepoPage::onPushDialogFinished(bb::system::SystemUiResult::Type type)
     _tempBranch.clear();
 }
 
-void GitRepoPage::createRemote(const QString &name, const QString &url, const LibQGit2::Credentials &cred)
+void GitRepoPage::createRemote(const QString &name, const QString &url)
 {
-    emit workerCreateRemote(name, url, cred);
+    emit workerCreateRemote(name, url, Helium::instance()->git()->sshCredentials());
+}
+
+void GitRepoPage::setRemoteUrl(LibQGit2::Remote *remote, const QString &url)
+{
+    remote->setUrl(url);
+    remote->save();
+    if (_branchPage)
+        _branchPage->reload();
+}
+
+void GitRepoPage::clone(const QString &url)
+{
+    emit workerClone(url, _project->path(), Helium::instance()->git()->sshCredentials());
+}
+
+void GitRepoPage::pushRemoteInfoPage(GitRemoteInfoPage::Mode mode, LibQGit2::Remote *remote)
+{
+    if (!_remoteInfoPage) {
+        _remoteInfoPage = new GitRemoteInfoPage(this);
+        conn(this, SIGNAL(translatorChanged()),
+            _remoteInfoPage, SLOT(onTranslatorChanged()));
+    }
+    _remoteInfoPage->setMode(mode, remote);
+    parent()->push(_remoteInfoPage);
 }
 
 void GitRepoPage::pushCommitPage(const QString &hintMessage)
@@ -492,7 +541,7 @@ void GitRepoPage::pushCommitPage(const QString &hintMessage)
     _commitPage->focus();
 }
 
-void GitRepoPage::branches()
+void GitRepoPage::pushBranchPage()
 {
     if (!_branchPage) {
         _branchPage = new GitBranchPage(this);
@@ -516,7 +565,7 @@ void GitRepoPage::pushLogPage(const LibQGit2::Reference &ref, LibQGit2::Remote *
     parent()->push(_logPage);
 }
 
-void GitRepoPage::log()
+void GitRepoPage::pushLogPage()
 {
     pushLogPage(_project->gitRepo()->head());
 }
@@ -914,6 +963,8 @@ void GitRepoPage::onPagePopped(Page *page)
         _diffPage->resetPatch();
     else if (page == _commitInfoPage)
         _commitInfoPage->resetCommit();
+    else if (page == _remoteInfoPage)
+        _remoteInfoPage->resetRemote();
     else if (page == _branchPage) {
         _branchPage->reset();
         _branchPage->disconnectFromRepoPage();
