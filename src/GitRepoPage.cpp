@@ -956,6 +956,8 @@ void GitRepoPage::StatusItemProvider::updateItem(ListView *, VisualNode *listIte
 
 void GitRepoPage::onPagePopped(Page *page)
 {
+    if (!page)
+        return;
     if (page == this) {
         _statusDataModel.resetStatusList();
         resetProject();
