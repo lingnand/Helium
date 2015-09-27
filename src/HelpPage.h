@@ -51,6 +51,8 @@ private:
     bb::cascades::Label *_filetypeDesc;
     bb::cascades::Header *_runProfile;
     bb::cascades::Label *_runProfileDesc;
+    bb::cascades::Header *_git;
+    bb::cascades::Label *_gitDesc;
     Segment *_referenceSegment;
     bb::cascades::Label *_changeList;
     Segment *_changeListSegment;

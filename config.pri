@@ -248,6 +248,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_folder_unselected.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_fullscreen.png) \
+        $$quote($$BASEDIR/assets/images/ic_git.png) \
         $$quote($$BASEDIR/assets/images/ic_git_branch.png) \
         $$quote($$BASEDIR/assets/images/ic_git_branch_add.png) \
         $$quote($$BASEDIR/assets/images/ic_git_checkout.png) \

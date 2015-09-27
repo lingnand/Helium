@@ -90,7 +90,7 @@ NormalMode::NormalMode(View *view):
         .addShortcut(Shortcut::create().key("l"))
         .onTriggered(view, SLOT(reload()))),
     _gitAction(ActionItem::create()
-//        .imageSource(QUrl("asset:///images/ic_reload.png"))
+        .imageSource(QUrl("asset:///images/ic_git.png"))
         .addShortcut(Shortcut::create().key("g"))
         .onTriggered(this, SLOT(showGitRepo()))),
     _closeAction(ActionItem::create()

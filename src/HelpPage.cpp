@@ -53,6 +53,9 @@ HelpPage::HelpPage():
     _runProfile(Header::create().mode(HeaderMode::Interactive)),
     _runProfileDesc(Label::create().multiline(true).format(TextFormat::Html)
         .textStyle(SystemDefaults::TextStyles::bodyText())),
+    _git(Header::create().mode(HeaderMode::Interactive)),
+    _gitDesc(Label::create().multiline(true).format(TextFormat::Html)
+        .textStyle(SystemDefaults::TextStyles::bodyText())),
     _referenceSegment(Segment::create().section()
         .add(_tabsAndBuffers)
         .add(Segment::create().subsection().add(_tabsAndBuffersDesc))
@@ -69,7 +72,9 @@ HelpPage::HelpPage():
         .add(_filetype)
         .add(Segment::create().subsection().add(_filetypeDesc))
         .add(_runProfile)
-        .add(Segment::create().subsection().add(_runProfileDesc))),
+        .add(Segment::create().subsection().add(_runProfileDesc))
+        .add(_git)
+        .add(Segment::create().subsection().add(_gitDesc))),
     _changeList(Label::create().multiline(true).format(TextFormat::Html)
         .textStyle(SystemDefaults::TextStyles::bodyText())),
     _changeListSegment(Segment::create().section().subsection()
@@ -202,7 +207,16 @@ void HelpPage::onTranslatorChanged()
         "  %1 <em>python, shell, html, javascript</em><br/>"
         "Note that the command run profile supports running <em>any</em> shell command. For example, you can compile gcc using <a href='https://github.com/mordak/playbook-dev-tools'>playbook-dev-tools</a> and define a command to compile and run your cpp files directly."
         ).arg(BULLET_SYMBOL));
+    _git->setTitle(tr("Git"));
+    _gitDesc->setText(tr("<p><em>Git functionalities</em> can be accessed from the <strong>Git</strong> action inside any view. There are a few important pages:</p>"
+        "  %1 <strong>Status Page</strong>: this is the default view when you trigger the <em>Git</em> action. Tap on any item to see the diff (if available), add items to index/remove items from index by long-pressing on the item; you can also select multiple items and perform the same action at once<br/>"
+        "  %1 <strong>Branch Page</strong>: accessed from <strong>Branches</strong> action. Tap on any branch to see the history (git log); long-press to view the available actions e.g., checkout, fetch, push, pull. <strong>Note: remotes can be configured by tapping on their headers; long press on them to perform remote-specific actions including <em>Refresh</em> and <em>Push to Branch...</em></strong><br/>"
+        "  %1 <strong>Log Page</strong>: accessible via <em>Status Page</em> or <em>Branch Page</em>. Tap on any commit to show its details; long-press to bring up commit-specific actions e.g., <em>Checkout</em><br/>"
+        "  %1 <strong>Commit Info Page</strong>: you can see the changes made by the commit for each file by tapping on the file inside the <em>Diff</em> list section").arg(BULLET_SYMBOL));
     _changeList->setText(tr(
+        "<strong><u>Version 1.1.0.x</u></strong><br/><br/>"
+        "  %1 NEW: full GIT integration: init, clone, diff, checkout, branch, reset, merge, rebase, pull, push, etc.<br/>"
+        "  %1 NEW: new language support: cucumber, go, groovy, json, R, S, zsh<br/><br/>"
         "<strong><u>Version 1.0.4.x</u></strong><br/><br/>"
         "  %1 NEW: Full-screen mode and ability to hide title bar<br/>"
         "  %1 NEW: added <strong>Rename</strong> and <strong>Reload</strong> actions<br/>"

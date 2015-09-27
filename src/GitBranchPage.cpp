@@ -456,6 +456,7 @@ VisualNode *GitBranchPage::BranchItemProvider::createItem(ListView *, const QStr
                     .onTriggered(_page, SLOT(refreshRemoteSelection())))
                 .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Push to Branch..."))
                     .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                    .imageSource(QUrl("asset:///images/ic_git_push.png"))
                     .onTriggered(_page, SLOT(pushToBranchRemoteSelection()))))
             .contextMenuHandler(ContextMenuHandler::create()
                 .onVisualStateChanged(_page, SLOT(onRemoteHeaderContextMenuVisualStateChanged(bb::cascades::ContextMenuVisualState::Type))));
