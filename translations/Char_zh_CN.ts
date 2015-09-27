@@ -61,11 +61,11 @@
     </message>
     <message>
         <source>These settings affect the UI inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
-        <translation>这些设定将影响全屏模式时的界面。全屏模式选项可以从屏幕顶端往下滑动手指触发的菜单中找到。</translation>
+        <translation>这些设置将影响全屏模式时的界面。全屏模式选项可以从屏幕顶端往下滑动手指触发的菜单中找到。</translation>
     </message>
     <message>
         <source>Appearance Settings</source>
-        <translation>外观设定</translation>
+        <translation>外观设置</translation>
     </message>
 </context>
 <context>
@@ -192,7 +192,7 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>The filetype for the current buffer. Each filetype uses a different set of highlight rules and comes with separate settings.</source>
-        <translation>当前编辑文件的类型。每个文件类型使用不同的语法高亮规则，并且拥有独立的设定。</translation>
+        <translation>当前编辑文件的类型。每个文件类型使用不同的语法高亮规则，并且拥有独立的设置。</translation>
     </message>
     <message>
         <source>Filetype</source>
@@ -222,7 +222,7 @@ These format specifiers will be replaced:
     <name>FiletypeSettingsUI</name>
     <message>
         <source>%1 Settings</source>
-        <translation>%1设定</translation>
+        <translation>%1设置</translation>
     </message>
     <message>
         <source>Highlight is automatically updated for a range of lines around the cursor</source>
@@ -432,7 +432,7 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>General Settings</source>
-        <translation>通用设定</translation>
+        <translation>通用设置</translation>
     </message>
 </context>
 <context>
@@ -738,7 +738,7 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Hard reset will wipe the changes in your working directory.</source>
-        <translation>Hard reset会抹去您在工作路径里的所有更改。</translation>
+        <translation>Hard reset会抹去您在工作路径里的所有更改</translation>
     </message>
     <message>
         <source>Reset (Hard)</source>
@@ -806,7 +806,7 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Upstream branch does not have the same name as the current branch.</source>
-        <translation>云端Branch和当前Branch名不相符。</translation>
+        <translation>云端Branch和当前Branch名不相符</translation>
     </message>
     <message>
         <source>Confirm Clone</source>
@@ -1086,15 +1086,15 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>&lt;p&gt;The distinction between &lt;em&gt;tabs&lt;/em&gt; and &lt;em&gt;buffers&lt;/em&gt; is necessary because Helium supports multiple tabs viewing the same buffer. This can be achieved in two ways:&lt;/p&gt;&lt;br/&gt;  %1 use the &lt;strong&gt;Clone&lt;/strong&gt; action inside any tab - this spawns a new tab that shares the same buffer with the previous tab&lt;br/&gt;  %1 opening a file in a new tab which is already edited in another tab causes the new tab to share that existing buffer&lt;br/&gt;&lt;br/&gt;&lt;p&gt;Changes in a buffer are synced across all tabs linked to it. Additionally, settings accessed and changed via any tab&apos;s &lt;strong&gt;Properties&lt;/strong&gt; action apply to the same buffer. This means that you can for example:&lt;/p&gt;&lt;br/&gt;  %1 edit a long document in one tab and refer back to its early parts in another tab&lt;br/&gt;  %1 edit a script in one tab and run &amp;amp; view its output in another&lt;br/&gt;&lt;br/&gt;&lt;p&gt;&lt;em&gt;Tips: a cloned tab shares the same working directory as the old one; so to open some other file in the same directory, you can clone the current tab and the Open action will navigate to that directory by default&lt;/em&gt;&lt;/p&gt;</source>
-        <translation>&lt;p&gt;标签页面和缓冲区的区分是必要的因为在Helium里每个缓冲区都支持多个标签页面。要为同一个缓冲区创建多个标签页面您可以：&lt;/p&gt;&lt;br/&gt;  %1 在标签页内使用&lt;strong&gt;克隆&lt;/strong&gt;命令；这会新创建一个使用相同缓冲区的标签页&lt;br/&gt;  %1 打开一个已经在另一个标签内打开的文件会自动令新标签页使用已有的缓冲区&lt;br/&gt;&lt;br/&gt;&lt;p&gt;相同缓冲区内的变化会同步至所有与它相连的标签页。另外，通过其中任一标签页的&lt;strong&gt;属性&lt;/strong&gt;窗口更改的设定会应用至相同的缓冲区。这意味着您可以：&lt;/p&gt;&lt;br/&gt;  %1 在一个标签页内编辑一个长文件，同时在另一个标签页内阅读该文件的另一个部分&lt;br/&gt;  %1 在一个标签页内编辑一个脚本，在另一个标签页内运行&lt;br/&gt;&lt;br/&gt;&lt;p&gt;&lt;em&gt;技巧：克隆的标签页和原标签页使用相同的文本打开目录（当前编辑文件所在的目录），所以如果您需要快速地在一个新标签页内打开当前所编辑文件所在目录内的其他文件，您可以克隆当前标签页；在次情况下“打开”命令会默认前进至该目录&lt;/em&gt;&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;标签页面和缓冲区的区分是必要的因为在Helium里每个缓冲区都支持多个标签页面。要为同一个缓冲区创建多个标签页面您可以：&lt;/p&gt;&lt;br/&gt;  %1 在标签页内使用&lt;strong&gt;克隆&lt;/strong&gt;命令；这会新创建一个使用相同缓冲区的标签页&lt;br/&gt;  %1 打开一个已经在另一个标签内打开的文件会自动令新标签页使用已有的缓冲区&lt;br/&gt;&lt;br/&gt;&lt;p&gt;相同缓冲区内的变化会同步至所有与它相连的标签页。另外，通过其中任一标签页的&lt;strong&gt;属性&lt;/strong&gt;窗口更改的设置会应用至相同的缓冲区。这意味着您可以：&lt;/p&gt;&lt;br/&gt;  %1 在一个标签页内编辑一个长文件，同时在另一个标签页内阅读该文件的另一个部分&lt;br/&gt;  %1 在一个标签页内编辑一个脚本，在另一个标签页内运行&lt;br/&gt;&lt;br/&gt;&lt;p&gt;&lt;em&gt;技巧：克隆的标签页和原标签页使用相同的文本打开目录（当前编辑文件所在的目录），所以如果您需要快速地在一个新标签页内打开当前所编辑文件所在目录内的其他文件，您可以克隆当前标签页；在次情况下“打开”命令会默认前进至该目录&lt;/em&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Helium uses efficient algorithms to highlight documents in real-time. However, due to limitations on the amount of highlighted text that can be put into a text area, Helium uses &lt;em&gt;partial highlight&lt;/em&gt; instead to keep highlight to the necessary minimum (the range of text around the cursor). If you still encounter performance problems, you can&lt;/p&gt;  %1 turn off &lt;strong&gt;Enable Highlight&lt;/strong&gt; for the given filetype, OR&lt;br/&gt;  %1 decrease the range of partial highlight in &lt;strong&gt;General Settings&lt;/strong&gt;</source>
-        <translation>&lt;p&gt;Helium使用高效的算法进行实时语法高亮。但是，由于系统对文本框所能接受的高亮字符的数量限制，Helium采用了&lt;em&gt;局部高亮&lt;/em&gt;的方法把高亮区域限制在光标两侧。如果您依然遇到性能问题，您可以&lt;/p&gt;  %1 在对应文件类型的设定里关闭&lt;strong&gt;启用语法高亮&lt;/strong&gt;的功能, 或者&lt;br/&gt;  %1 在&lt;strong&gt;通用设定&lt;/strong&gt;里降低局部高亮的范围</translation>
+        <translation>&lt;p&gt;Helium使用高效的算法进行实时语法高亮。但是，由于系统对文本框所能接受的高亮字符的数量限制，Helium采用了&lt;em&gt;局部高亮&lt;/em&gt;的方法把高亮区域限制在光标两侧。如果您依然遇到性能问题，您可以&lt;/p&gt;  %1 在对应文件类型的设置里关闭&lt;strong&gt;启用语法高亮&lt;/strong&gt;的功能, 或者&lt;br/&gt;  %1 在&lt;strong&gt;通用设置&lt;/strong&gt;里降低局部高亮的范围</translation>
     </message>
     <message>
         <source>Each filetype defines its own set of highlight rules, as well as having its own settings for highlight and &lt;em&gt;run profiles&lt;/em&gt;. These settings can be accessed via &lt;strong&gt;Properties&lt;/strong&gt; inside any tab (which shows settings of the filetype currently associated with the given buffer); they can also be accessed inside &lt;strong&gt;Settings-Filetypes&lt;/strong&gt;.</source>
-        <translation>每个文件类型都拥有特定的高亮规则，以及独立的高亮和&lt;em&gt;运行参数&lt;/em&gt;的设定。每个标签页的&lt;strong&gt;属性&lt;/strong&gt;里都包含所相关的文件类型的设定；这些设定也可以在&lt;strong&gt;设定——文件类型&lt;/strong&gt;里找到。</translation>
+        <translation>每个文件类型都拥有特定的高亮规则，以及独立的高亮和&lt;em&gt;运行参数&lt;/em&gt;的设置。每个标签页的&lt;strong&gt;属性&lt;/strong&gt;里都包含所相关的文件类型的设置；这些设置也可以在&lt;strong&gt;设置——文件类型&lt;/strong&gt;里找到。</translation>
     </message>
     <message>
         <source>Keyboard Shortcuts</source>
@@ -1134,7 +1134,7 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>&lt;p&gt;&lt;em&gt;Run profiles&lt;/em&gt; can be configured for each filetype inside &lt;strong&gt;Properties&lt;/strong&gt; or &lt;strong&gt;Settings-Filetypes&lt;/strong&gt;. When editing a file of a filetype with an available run profile, you can use the &lt;strong&gt;Run&lt;/strong&gt; action to run the current content. By default,  the following filetypes already have their run profiles defined:&lt;/p&gt;  %1 &lt;em&gt;python, shell, html, javascript&lt;/em&gt;&lt;br/&gt;Note that the command run profile supports running &lt;em&gt;any&lt;/em&gt; shell command. For example, you can compile gcc using &lt;a href=&apos;https://github.com/mordak/playbook-dev-tools&apos;&gt;playbook-dev-tools&lt;/a&gt; and define a command to compile and run your cpp files directly.</source>
-        <translation>每个文件类型都可以通过&lt;strong&gt;属性&lt;/strong&gt;或&lt;strong&gt;设定——文件类型&lt;/strong&gt;来设置独立的&lt;p&gt;&lt;em&gt;运行参数&lt;/em&gt;。当编辑的文件所属的文件类型拥有一个有效的运行参数时，您可以使用&lt;strong&gt;运行&lt;/strong&gt;命令来运行当前文件的内容。以下文件类型拥有默认的运行参数：&lt;/p&gt;  %1 &lt;em&gt;python, shell, html, javascript&lt;/em&gt;&lt;br/&gt;注意：命令行运行参数支持使用&lt;em&gt;任何&lt;/em&gt;shell命令。比如，您可以使用&lt;a href=&apos;https://github.com/mordak/playbook-dev-tools&apos;&gt;playbook-dev-tools&lt;/a&gt;来编译gcc，然后设置一个命令行参数以自动编译和运行您的cpp文件。</translation>
+        <translation>每个文件类型都可以通过&lt;strong&gt;属性&lt;/strong&gt;或&lt;strong&gt;设置——文件类型&lt;/strong&gt;来设置独立的&lt;p&gt;&lt;em&gt;运行参数&lt;/em&gt;。当编辑的文件所属的文件类型拥有一个有效的运行参数时，您可以使用&lt;strong&gt;运行&lt;/strong&gt;命令来运行当前文件的内容。以下文件类型拥有默认的运行参数：&lt;/p&gt;  %1 &lt;em&gt;python, shell, html, javascript&lt;/em&gt;&lt;br/&gt;注意：命令行运行参数支持使用&lt;em&gt;任何&lt;/em&gt;shell命令。比如，您可以使用&lt;a href=&apos;https://github.com/mordak/playbook-dev-tools&apos;&gt;playbook-dev-tools&lt;/a&gt;来编译gcc，然后设置一个命令行参数以自动编译和运行您的cpp文件。</translation>
     </message>
     <message>
         <source>Rate Helium</source>
@@ -1424,6 +1424,18 @@ Do you want to continue?</source>
     <message>
         <source>Git</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Setttings</source>
+        <translation>显示设置</translation>
+    </message>
+    <message>
+        <source>Incomplete Settings</source>
+        <translation>设置未完成</translation>
+    </message>
+    <message>
+        <source>Your Git signature setting is not complete.</source>
+        <translation>您的Git签名信息不全</translation>
     </message>
 </context>
 <context>

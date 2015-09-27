@@ -29,6 +29,7 @@
 #include <MultiViewPane.h>
 #include <Project.h>
 #include <Helium.h>
+#include <GitSettings.h>
 #include <AppearanceSettings.h>
 #include <ShortcutHelp.h>
 #include <GitRepoPage.h>
@@ -209,6 +210,11 @@ void NormalMode::showGitRepo()
     }
     _gitRepoPage->setProject(view()->project());
     view()->content()->push(_gitRepoPage);
+    GitSettings *git = Helium::instance()->git();
+    if (git->name().isEmpty() || git->email().isEmpty())
+        Utility::dialog(tr("Show Setttings"),
+                tr("Incomplete Settings"), tr("Your Git signature setting is not complete."),
+                _gitRepoPage, SLOT(pushSettingsPage()));
 }
 
 void NormalMode::resetTitleBar()

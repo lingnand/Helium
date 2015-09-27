@@ -1415,6 +1415,18 @@ Do you want to continue?</source>
         <source>Git</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Show Setttings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incomplete Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your Git signature setting is not complete.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PushablePage</name>
