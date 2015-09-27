@@ -248,6 +248,22 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_folder_unselected.png) \
         $$quote($$BASEDIR/assets/images/ic_forward.png) \
         $$quote($$BASEDIR/assets/images/ic_fullscreen.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_branch.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_branch_add.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_checkout.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_clone.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_commit.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_diff.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_fetch.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_init.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_log.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_merge.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_pull.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_push.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_rebase.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_remote_add.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_reset_hard.png) \
+        $$quote($$BASEDIR/assets/images/ic_git_reset_mixed.png) \
         $$quote($$BASEDIR/assets/images/ic_helium.png) \
         $$quote($$BASEDIR/assets/images/ic_ignore_case.png) \
         $$quote($$BASEDIR/assets/images/ic_next.png) \
@@ -258,6 +274,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_redo.png) \
         $$quote($$BASEDIR/assets/images/ic_regex.png) \
         $$quote($$BASEDIR/assets/images/ic_reload.png) \
+        $$quote($$BASEDIR/assets/images/ic_remove.png) \
         $$quote($$BASEDIR/assets/images/ic_rename.png) \
         $$quote($$BASEDIR/assets/images/ic_replace.png) \
         $$quote($$BASEDIR/assets/images/ic_replace_all.png) \
@@ -268,6 +285,7 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/images/ic_settings.png) \
         $$quote($$BASEDIR/assets/images/ic_share.png) \
         $$quote($$BASEDIR/assets/images/ic_undo.png) \
+        $$quote($$BASEDIR/assets/images/ic_view_details.png) \
         $$quote($$BASEDIR/assets/mathjax/MathJax.js) \
         $$quote($$BASEDIR/assets/mathjax/extensions/CHTML-preview.js) \
         $$quote($$BASEDIR/assets/mathjax/extensions/FontWarnings.js) \
@@ -997,9 +1015,6 @@ lupdate_inclusion {
         $$quote($$BASEDIR/../src/srchilite/*.cc) \
         $$quote($$BASEDIR/../src/srchilite/*.cpp) \
         $$quote($$BASEDIR/../src/srchilite/*.cxx) \
-        $$quote($$BASEDIR/..//*.qml) \
-        $$quote($$BASEDIR/..//*.js) \
-        $$quote($$BASEDIR/..//*.qs) \
         $$quote($$BASEDIR/../assets/*.qml) \
         $$quote($$BASEDIR/../assets/*.js) \
         $$quote($$BASEDIR/../assets/*.qs) \

@@ -51,9 +51,11 @@ GitRepoPage::GitRepoPage():
     _project(NULL),
     _contentHolder(Container::create()),
     _initAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_init.png"))
         .addShortcut(Shortcut::create().key("i"))
         .onTriggered(this, SLOT(init()))),
     _cloneAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_clone.png"))
         .addShortcut(Shortcut::create().key("c"))
         .onTriggered(this, SLOT(safePushRemoteInfoPageForClone()))),
     _reloadAction(ActionItem::create()
@@ -74,21 +76,27 @@ GitRepoPage::GitRepoPage():
         .scrollMode(ScrollMode::Vertical)
         .scrollRole(ScrollRole::Main)),
     _commitAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_commit.png"))
         .addShortcut(Shortcut::create().key("c"))
         .onTriggered(this, SLOT(pushCommitPage()))),
     _branchesAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_branch.png"))
         .addShortcut(Shortcut::create().key("h"))
         .onTriggered(this, SLOT(pushBranchPage()))),
     _logAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_log.png"))
         .addShortcut(Shortcut::create().key("g"))
         .onTriggered(this, SLOT(pushLogPage()))),
     _addAllAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_add.png"))
         .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(addAll()))),
     _resetMixedAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_reset_mixed.png"))
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(resetMixed()))),
     _resetHardAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_git_reset_hard.png"))
         .addShortcut(Shortcut::create().key("e"))
         .onTriggered(this, SLOT(safeResetHard()))),
     _statusItemProvider(this),
@@ -99,18 +107,23 @@ GitRepoPage::GitRepoPage():
     _repoContent(_statusListView),
     _progressIndicator(new AutoHideProgressIndicator),
     _multiAddAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_add.png"))
         .addShortcut(Shortcut::create().key("a"))
         .onTriggered(this, SLOT(addSelections()))),
     _multiResetAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_remove.png"))
         .addShortcut(Shortcut::create().key("r"))
         .onTriggered(this, SLOT(resetSelections()))),
     _rebaseNextAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_forward.png"))
         .addShortcut(Shortcut::create().key("n"))
         .onTriggered(this, SLOT(rebaseNext()))),
     _rebaseAbortAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(this, SLOT(rebaseAbort()))),
     _mergeAbortAction(ActionItem::create()
+        .imageSource(QUrl("asset:///images/ic_cancel.png"))
         .addShortcut(Shortcut::create().key("x"))
         .onTriggered(this, SLOT(mergeAbort()))),
     _diffPage(NULL),
@@ -879,24 +892,30 @@ VisualNode *GitRepoPage::StatusItemProvider::createItem(ListView *, const QStrin
             .actionSet(ActionSet::create()
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Diff"))
                         .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_git_diff.png"))
                         .onTriggered(_gitRepoPage, SLOT(showDiffSelection())))
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Reset"))
                         .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_remove.png"))
                         .onTriggered(_gitRepoPage, SLOT(resetSelections())))
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Select All"))
                         .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_select_all.png"))
                         .onTriggered(_gitRepoPage, SLOT(onSelectAllOnIndexTriggered()))));
     if (type == "indexToWorkdirItem")
         return StandardListItem::create()
             .actionSet(ActionSet::create()
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Diff"))
                         .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_git_diff.png"))
                         .onTriggered(_gitRepoPage, SLOT(showDiffSelection())))
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Add"))
                         .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_add.png"))
                         .onTriggered(_gitRepoPage, SLOT(addSelections())))
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Select All"))
                         .reloadTitleOn(_gitRepoPage, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_select_all.png"))
                         .onTriggered(_gitRepoPage, SLOT(onSelectAllOnWorkdirTriggered()))));
     return NULL;
 }

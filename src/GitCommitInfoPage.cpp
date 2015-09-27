@@ -102,6 +102,7 @@ void GitCommitInfoPage::setActions(Actions actions)
         if (!_checkoutAction)
             _checkoutAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_checkout.png"))
                 .addShortcut(Shortcut::create().key("c"))
                 .onTriggered(this, SLOT(checkout()));
         addAction(_checkoutAction, ActionBarPlacement::Signature);
@@ -226,6 +227,7 @@ VisualNode *GitCommitInfoPage::DiffItemProvider::createItem(ListView *, const QS
                 .actionSet(ActionSet::create()
                     .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Diff"))
                         .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_git_diff.png"))
                         .onTriggered(_page, SLOT(showDiffSelection()))));
     return NULL;
 }

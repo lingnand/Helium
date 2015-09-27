@@ -92,6 +92,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_pullBranchAction)
             _pullBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Pull Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_pull.png"))
                 .addShortcut(Shortcut::create().key("u"))
                 .onTriggered(this, SLOT(pullBranch()));
         list.append(_pullBranchAction);
@@ -100,6 +101,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_fetchBranchAction)
             _fetchBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Fetch Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_fetch.png"))
                 .addShortcut(Shortcut::create().key("f"))
                 .onTriggered(this, SLOT(fetchBranch()));
         list.append(_fetchBranchAction);
@@ -108,6 +110,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_pushBranchAction)
             _pushBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Push to Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_push.png"))
                 .addShortcut(Shortcut::create().key("p"))
                 .onTriggered(this, SLOT(pushBranch()));
         list.append(_pushBranchAction);
@@ -116,6 +119,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_checkoutBranchAction)
             _checkoutBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_checkout.png"))
                 .addShortcut(Shortcut::create().key("c"))
                 .onTriggered(this, SLOT(checkoutBranch()));
         list.append(_checkoutBranchAction);
@@ -124,6 +128,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_mergeBranchAction)
             _mergeBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Merge Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_merge.png"))
                 .addShortcut(Shortcut::create().key("m"))
                 .onTriggered(this, SLOT(mergeBranch()));
         list.append(_mergeBranchAction);
@@ -132,6 +137,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_rebaseBranchAction)
             _rebaseBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Rebase Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_rebase.png"))
                 .addShortcut(Shortcut::create().key("r"))
                 .onTriggered(this, SLOT(rebaseBranch()));
         list.append(_rebaseBranchAction);
@@ -140,6 +146,7 @@ void GitLogPage::setActions(Actions actions)
         if (!_deleteBranchAction)
             _deleteBranchAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Delete Branch"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_delete.png"))
                 .addShortcut(Shortcut::create().key("Backspace"))
                 .onTriggered(this, SLOT(deleteBranch()));
         list.append(_deleteBranchAction);
@@ -292,9 +299,11 @@ VisualNode *GitLogPage::CommitItemProvider::createItem(ListView *, const QString
         .actionSet(ActionSet::create()
             .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "View Info"))
                 .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_view_details.png"))
                 .onTriggered(_page, SLOT(showCommitInfoSelection())))
             .add(LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Checkout"))
                 .reloadTitleOn(_page, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_git_checkout.png"))
                 .onTriggered(_page, SLOT(checkoutSelection()))));
 }
 

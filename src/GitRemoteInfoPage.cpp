@@ -70,6 +70,7 @@ void GitRemoteInfoPage::setMode(Mode mode, LibQGit2::Remote *remote)
                 if (!_saveRemoteAction)
                     _saveRemoteAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Save Remote"))
                         .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_save.png"))
                         .addShortcut(Shortcut::create().key("s"))
                         .onTriggered(this, SLOT(saveRemote()));
                 addAction(_saveRemoteAction, ActionBarPlacement::Signature);
@@ -82,6 +83,7 @@ void GitRemoteInfoPage::setMode(Mode mode, LibQGit2::Remote *remote)
                 if (!_cloneAction)
                     _cloneAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Clone"))
                         .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                        .imageSource(QUrl("asset:///images/ic_git_clone.png"))
                         .addShortcut(Shortcut::create().key("c"))
                         .onTriggered(this, SLOT(clone()));
                 addAction(_cloneAction, ActionBarPlacement::Signature);
