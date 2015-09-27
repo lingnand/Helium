@@ -21,7 +21,7 @@ class FiletypeMapSettingsPage : public PushablePage
     Q_OBJECT
 public:
     FiletypeMapSettingsPage(FiletypeMap *);
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 private:
     QList<Filetype *> _filetypes;
     FiletypeSettingsUI *_filetypeSettingsUI;

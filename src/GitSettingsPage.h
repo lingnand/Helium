@@ -30,7 +30,7 @@ class GitSettingsPage : public PushablePage
     Q_OBJECT
 public:
     GitSettingsPage(GitSettings *);
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 private:
     GitSettings *_settings;
     bb::cascades::Header *_authorHeader;

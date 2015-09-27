@@ -37,7 +37,7 @@ public:
     void setActions(Actions=Actions());
     Q_SLOT void addFile();
     Q_SLOT void resetFile();
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
 private:

@@ -29,7 +29,7 @@ class AppearanceSettingsPage : public PushablePage
     Q_OBJECT
 public:
     AppearanceSettingsPage(AppearanceSettings *);
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 private:
     AppearanceSettings *_settings;
     bb::cascades::DropDown *_themeSelect;

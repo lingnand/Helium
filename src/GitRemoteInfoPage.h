@@ -32,7 +32,7 @@ public:
     void resetRemote();
     enum Mode { DisplayRemote, SaveRemote, Clone };
     void setMode(Mode=DisplayRemote, LibQGit2::Remote *remote=NULL);
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
 private:

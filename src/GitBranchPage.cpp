@@ -80,7 +80,8 @@ void GitBranchPage::connectToRepoPage()
 void GitBranchPage::disconnectFromRepoPage()
 {
     _repoPage->disconnect(_progressIndicator);
-    _repoPage->disconnect(this);
+    disconn(_repoPage, SIGNAL(inProgressChanged(bool)),
+        this, SLOT(onGitRepoPageInProgressChanged(bool)));
 }
 
 void GitBranchPage::onBranchListTriggered(const QVariantList &ip)

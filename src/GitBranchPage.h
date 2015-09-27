@@ -40,7 +40,7 @@ public:
     Q_SLOT void reset();
     void connectToRepoPage();
     void disconnectFromRepoPage();
-    void onTranslatorChanged(bool reload=true);
+    Q_SLOT void onTranslatorChanged(bool reload=true);
 Q_SIGNALS:
     void translatorChanged();
 private:

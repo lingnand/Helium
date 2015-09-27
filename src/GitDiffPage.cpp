@@ -125,6 +125,7 @@ void GitDiffPage::setActions(Actions actions)
         if (!_addAction)
             _addAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Add"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_add.png"))
                 .addShortcut(Shortcut::create().key("a"))
                 .onTriggered(this, SLOT(addFile()));
         addAction(_addAction, ActionBarPlacement::Signature);
@@ -133,6 +134,7 @@ void GitDiffPage::setActions(Actions actions)
         if (!_resetAction)
             _resetAction = LocaleAwareActionItem::create(QT_TRANSLATE_NOOP("Man", "Reset"))
                 .reloadTitleOn(this, SIGNAL(translatorChanged()))
+                .imageSource(QUrl("asset:///images/ic_remove.png"))
                 .addShortcut(Shortcut::create().key("r"))
                 .onTriggered(this, SLOT(resetFile()));
         addAction(_resetAction, ActionBarPlacement::Signature);

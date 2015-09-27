@@ -48,7 +48,7 @@ public:
     void setActions(Actions=Actions());
     Q_SLOT void showCommitInfoSelection();
     Q_SLOT void checkoutSelection();
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
 private:

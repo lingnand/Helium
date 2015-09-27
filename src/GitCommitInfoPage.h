@@ -38,7 +38,7 @@ public:
     Q_DECLARE_FLAGS(Actions, Action)
     void setActions(Actions=Actions());
     Q_SLOT void checkout();
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 Q_SIGNALS:
     void translatorChanged();
 private:

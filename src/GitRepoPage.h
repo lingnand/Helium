@@ -82,7 +82,7 @@ public:
     Q_SLOT void pushCommitPage(const QString &hintMessage=QString());
     Q_SLOT void pushRemoteInfoPage(GitRemoteInfoPage::Mode mode, LibQGit2::Remote *remote=NULL);
     Q_SLOT void onPagePopped(bb::cascades::Page *);
-    void onTranslatorChanged(bool reload=true);
+    Q_SLOT void onTranslatorChanged(bool reload=true);
     Q_SLOT void selectAllOnIndex();
     Q_SLOT void selectAllOnWorkdir();
     enum StatusDiffType { HeadToIndex, IndexToWorkdir };

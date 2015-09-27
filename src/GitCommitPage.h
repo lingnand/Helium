@@ -29,7 +29,7 @@ public:
     Q_SLOT void setHintMessage(const QString &);
     // focus the message field
     void focus();
-    void onTranslatorChanged();
+    Q_SLOT void onTranslatorChanged();
 private:
     GitRepoPage *_repoPage;
     bb::cascades::TextArea *_textArea;
