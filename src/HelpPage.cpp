@@ -208,7 +208,7 @@ void HelpPage::onTranslatorChanged()
         "Note that the command run profile supports running <em>any</em> shell command. For example, you can compile gcc using <a href='https://github.com/mordak/playbook-dev-tools'>playbook-dev-tools</a> and define a command to compile and run your cpp files directly."
         ).arg(BULLET_SYMBOL));
     _git->setTitle(tr("Git"));
-    _gitDesc->setText(tr("<p><em>Git functionalities</em> can be accessed from the <strong>Git</strong> action inside any view. There are a few important pages:</p>"
+    _gitDesc->setText(tr("<p><em>Git functionalities</em> can be accessed from the <strong>Git</strong> action inside any view. <strong>It uses the current project directory as the repository directory.</strong> There are a few important pages:</p>"
         "  %1 <strong>Status Page</strong>: this is the default view when you trigger the <em>Git</em> action. Tap on any item to see the diff (if available), add items to index/remove items from index by long-pressing on the item; you can also select multiple items and perform the same action at once<br/>"
         "  %1 <strong>Branch Page</strong>: accessed from <strong>Branches</strong> action. Tap on any branch to see the history (git log); long-press to view the available actions e.g., checkout, fetch, push, pull. <strong>Note: remotes can be configured by tapping on their headers; long press on them to perform remote-specific actions including <em>Refresh</em> and <em>Push to Branch...</em></strong><br/>"
         "  %1 <strong>Log Page</strong>: accessible via <em>Status Page</em> or <em>Branch Page</em>. Tap on any commit to show its details; long-press to bring up commit-specific actions e.g., <em>Checkout</em><br/>"

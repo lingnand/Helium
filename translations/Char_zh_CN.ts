@@ -4,10 +4,6 @@
 <context>
     <name>AppearanceSettingsPage</name>
     <message>
-        <source>Appearance</source>
-        <translation>外观</translation>
-    </message>
-    <message>
         <source>Hide ActionBar</source>
         <translation>隐藏操作菜单</translation>
     </message>
@@ -67,6 +63,10 @@
         <source>These settings affect the UI inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
         <translation>这些设定将影响全屏模式时的界面。全屏模式选项可以从屏幕顶端往下滑动手指触发的菜单中找到。</translation>
     </message>
+    <message>
+        <source>Appearance Settings</source>
+        <translation>外观设定</translation>
+    </message>
 </context>
 <context>
     <name>Buffer</name>
@@ -121,6 +121,10 @@
         <source>Error opening file</source>
         <translation>打开文件错误</translation>
     </message>
+    <message>
+        <source>OK</source>
+        <translation>确定</translation>
+    </message>
 </context>
 <context>
     <name>CmdRunProfile</name>
@@ -170,6 +174,10 @@ These format specifiers will be replaced:
 %dir%: 当前文件所在目录
 %name%: 当前文件名
 %%: 插入%符号</translation>
+    </message>
+    <message>
+        <source>Command</source>
+        <translation>命令</translation>
     </message>
 </context>
 <context>
@@ -403,10 +411,6 @@ These format specifiers will be replaced:
 <context>
     <name>GeneralSettingsPage</name>
     <message>
-        <source>General</source>
-        <translation>通用</translation>
-    </message>
-    <message>
         <source>Highlight range controls the number of lines to be highlighted on each side of the cursor. Adjusting this value down will improve performance and vice versa.</source>
         <translation>控制光标上侧和下侧自动高亮的行数。降低行数会提高程序性能；反之亦然</translation>
     </message>
@@ -415,16 +419,528 @@ These format specifiers will be replaced:
         <translation>高亮范围</translation>
     </message>
     <message>
-        <source>&lt;Choose a directory&gt;</source>
-        <translation>「选择目录」</translation>
-    </message>
-    <message>
         <source>Default Project Directory</source>
         <translation>默认项目路径</translation>
     </message>
     <message>
         <source>The default directory for a new project</source>
         <translation>新项目所使用的默认路径</translation>
+    </message>
+    <message>
+        <source>&lt;Choose a Directory&gt;</source>
+        <translation>「选择目录」</translation>
+    </message>
+    <message>
+        <source>General Settings</source>
+        <translation>通用设定</translation>
+    </message>
+</context>
+<context>
+    <name>GitBranchPage</name>
+    <message>
+        <source>Branches</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>继续</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Add Branch</source>
+        <translation>添加Branch</translation>
+    </message>
+    <message>
+        <source>Enter the branch name to add</source>
+        <translation>输入Branch名</translation>
+    </message>
+    <message>
+        <source>Push</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push to Branch</source>
+        <translation>Push至Branch</translation>
+    </message>
+    <message>
+        <source>Enter the branch name to push to</source>
+        <translation>输入需要Push至的Branch名</translation>
+    </message>
+    <message>
+        <source>Branch name</source>
+        <translation>Branch名</translation>
+    </message>
+    <message>
+        <source>Add Remote</source>
+        <translation>添加Remote</translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation>重读</translation>
+    </message>
+    <message>
+        <source>Info &gt;</source>
+        <translation>详情 &gt;</translation>
+    </message>
+</context>
+<context>
+    <name>GitCommitInfoPage</name>
+    <message>
+        <source>Author</source>
+        <translation>作者</translation>
+    </message>
+    <message>
+        <source>Committer</source>
+        <translation>提交者</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>消息</translation>
+    </message>
+    <message>
+        <source>No hunk details available</source>
+        <translation>无Hunk信息</translation>
+    </message>
+    <message>
+        <source>Diff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Diff with Parent %1</source>
+        <translation>与%1的Diff</translation>
+    </message>
+    <message>
+        <source>Added</source>
+        <translation>新添加</translation>
+    </message>
+    <message>
+        <source>Deleted</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <source>Modified</source>
+        <translation>更改</translation>
+    </message>
+    <message>
+        <source>was %1</source>
+        <translation>曾是%1</translation>
+    </message>
+    <message>
+        <source>Renamed</source>
+        <translation>重命名</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>复制</translation>
+    </message>
+    <message>
+        <source>Ignored</source>
+        <translation>忽略</translation>
+    </message>
+    <message>
+        <source>Untracked</source>
+        <translation>未记录</translation>
+    </message>
+    <message>
+        <source>Type Changed</source>
+        <translation>类型更改</translation>
+    </message>
+</context>
+<context>
+    <name>GitCommitPage</name>
+    <message>
+        <source>Commit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation>显示快捷键</translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation>快捷键</translation>
+    </message>
+    <message>
+        <source>Lose Focus</source>
+        <translation>取消焦点</translation>
+    </message>
+    <message>
+        <source>Paste Clipboard</source>
+        <translation>粘贴</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+</context>
+<context>
+    <name>GitLogPage</name>
+    <message>
+        <source>No Log</source>
+        <translation>无Log</translation>
+    </message>
+</context>
+<context>
+    <name>GitRemoteInfoPage</name>
+    <message>
+        <source>Name</source>
+        <translation>命名</translation>
+    </message>
+    <message>
+        <source>Remote Info</source>
+        <translation>Remote信息</translation>
+    </message>
+    <message>
+        <source>URL for Fetching/Pushing</source>
+        <translation>Fetching/Pushing所用URL</translation>
+    </message>
+    <message>
+        <source>URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitRepoPage</name>
+    <message>
+        <source>No commit</source>
+        <translation>无Commit</translation>
+    </message>
+    <message>
+        <source>No Repository</source>
+        <translation>无Repository</translation>
+    </message>
+    <message>
+        <source>Init</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clone</source>
+        <translation type="unfinished">克隆</translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation>重读</translation>
+    </message>
+    <message>
+        <source>&lt;br/&gt;No repository found.&lt;br/&gt;&lt;br/&gt;Use &lt;b&gt;Init&lt;/b&gt; or &lt;b&gt;Clone&lt;/b&gt; to create a git repository in&lt;br/&gt;&lt;em&gt;%1&lt;/em&gt;</source>
+        <translation>&lt;br/&gt;未找到Repository。&lt;br/&gt;&lt;br/&gt;请使用&lt;b&gt;Init&lt;/b&gt;或&lt;b&gt;Clone&lt;/b&gt;在&lt;br/&gt;&lt;em&gt;%1&lt;/em&gt;内添加新的Repository</translation>
+    </message>
+    <message>
+        <source>Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Working Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added</source>
+        <translation>新添加</translation>
+    </message>
+    <message>
+        <source>Deleted</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <source>Modified</source>
+        <translation>更改</translation>
+    </message>
+    <message>
+        <source>was %1</source>
+        <translation>曾是%1</translation>
+    </message>
+    <message>
+        <source>Renamed</source>
+        <translation>重命名</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>复制</translation>
+    </message>
+    <message>
+        <source>Ignored</source>
+        <translation>忽略</translation>
+    </message>
+    <message>
+        <source>Untracked</source>
+        <translation>未记录</translation>
+    </message>
+    <message>
+        <source>Type Changed</source>
+        <translation>类型更改</translation>
+    </message>
+    <message>
+        <source>Commit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Branches</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add All</source>
+        <translation>Add所有</translation>
+    </message>
+    <message>
+        <source>No diff available</source>
+        <translation>无Diff信息</translation>
+    </message>
+    <message>
+        <source>No hunk details available</source>
+        <translation>无Hunk信息</translation>
+    </message>
+    <message>
+        <source>Detached at %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset (Mixed)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>继续</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Hard reset will wipe the changes in your working directory.</source>
+        <translation>Hard reset会抹去您在工作路径里的所有更改。</translation>
+    </message>
+    <message>
+        <source>Reset (Hard)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Commit message</source>
+        <translation>Commit消息</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>下一个</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source> (merge in progress)</source>
+        <translation>（Merge进行中）</translation>
+    </message>
+    <message>
+        <source> (revert in progress)</source>
+        <translation>（Revert进行中）</translation>
+    </message>
+    <message>
+        <source> (cherrypick in progress)</source>
+        <translation>（Cherrypick进行中）</translation>
+    </message>
+    <message>
+        <source> (bisect in progress)</source>
+        <translation>（Bisect进行中）</translation>
+    </message>
+    <message>
+        <source> (rebase in progress)</source>
+        <translation>（Rebase进行中）</translation>
+    </message>
+    <message>
+        <source> (interactive)</source>
+        <translation>（互动式）</translation>
+    </message>
+    <message>
+        <source> (apply mailbox)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Reset</source>
+        <translation>确认Reset</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>Confirm Deletion</source>
+        <translation>确认删除</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete branch %1?</source>
+        <translation>确定要删除%1么？</translation>
+    </message>
+    <message>
+        <source>Confirm Push</source>
+        <translation>确认Push</translation>
+    </message>
+    <message>
+        <source>Upstream branch does not have the same name as the current branch.</source>
+        <translation>云端Branch和当前Branch名不相符。</translation>
+    </message>
+    <message>
+        <source>Confirm Clone</source>
+        <translation>确认Clone</translation>
+    </message>
+    <message>
+        <source>Project directory &quot;%1&quot; is not empty. Are you sure you want to clone into this directory?</source>
+        <translation>项目路径&quot;%1&quot;不为空。确定要Clone入该路径么？</translation>
+    </message>
+</context>
+<context>
+    <name>GitSettingsPage</name>
+    <message>
+        <source>Name</source>
+        <translation>姓名</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>邮箱</translation>
+    </message>
+    <message>
+        <source>SSH Private Key</source>
+        <translation>SSH私人密匙</translation>
+    </message>
+    <message>
+        <source>&lt;Choose a Private Key File&gt;</source>
+        <translation>选择私人密匙</translation>
+    </message>
+    <message>
+        <source>SSH Public Key</source>
+        <translation>SSH公开密匙</translation>
+    </message>
+    <message>
+        <source>&lt;Choose a Public Key File&gt;</source>
+        <translation>选择公开密匙</translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation>用户名</translation>
+    </message>
+    <message>
+        <source>Passphrase</source>
+        <translation>密令</translation>
+    </message>
+    <message>
+        <source>Author</source>
+        <translation>作者</translation>
+    </message>
+    <message>
+        <source>Name and email used in commit and reflog</source>
+        <translation>Commit和Reflog中将使用的姓名和邮箱信息</translation>
+    </message>
+    <message>
+        <source>SSH Authentication</source>
+        <translation>SSH验证</translation>
+    </message>
+    <message>
+        <source>Path to private/public key file for SSH authentication</source>
+        <translation>SSH私人/公开密钥路径</translation>
+    </message>
+    <message>
+        <source>SSH username, used when the remote URL doesn&apos;t have one</source>
+        <translation>SSH用户名，当Remote的URL不包含用户名时使用</translation>
+    </message>
+    <message>
+        <source>SSH passphrase</source>
+        <translation>SSH密令</translation>
+    </message>
+    <message>
+        <source>Git Settings</source>
+        <translation>Git设置</translation>
+    </message>
+</context>
+<context>
+    <name>GitWorker</name>
+    <message>
+        <source>Commited %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD detached at %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD now on branch %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>确定</translation>
+    </message>
+    <message>
+        <source>Conflicts detected: fix them and run &quot;Commit&quot;</source>
+        <translation>发现Conflicts：修复它们然后&quot;Commit&quot;</translation>
+    </message>
+    <message>
+        <source>Commit message for merging %1</source>
+        <translation>Merge %1的Commit信息</translation>
+    </message>
+    <message>
+        <source>Fast-forwarded to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge input is reachable from HEAD: no merge required!</source>
+        <translation>Merge input is reachable from HEAD：不需要Merge！</translation>
+    </message>
+    <message>
+        <source>HEAD is unborn and doesn&apos;t point to a valid commit: no merge can be performed!</source>
+        <translation>HEAD is unborn and doesn&apos;t point to a valid commit：无法Merge！</translation>
+    </message>
+    <message>
+        <source>No merge is possible!</source>
+        <translation>无法Merge！</translation>
+    </message>
+    <message>
+        <source>Already up-to-date</source>
+        <translation>已最新</translation>
+    </message>
+    <message>
+        <source>Fetched till %1</source>
+        <translation>Fetch至%1</translation>
+    </message>
+    <message>
+        <source>Pushed to %1</source>
+        <translation>Push至%1</translation>
+    </message>
+    <message>
+        <source>Fetch-and-pruned for remote %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clone complete</source>
+        <translation>Clone完成</translation>
     </message>
 </context>
 <context>
@@ -625,8 +1141,123 @@ These format specifiers will be replaced:
         <translation>评价Helium</translation>
     </message>
     <message>
-        <source>&lt;strong&gt;&lt;u&gt;Version 1.0.4.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Full-screen mode and ability to hide title bar&lt;br/&gt;  %1 NEW: added &lt;strong&gt;Rename&lt;/strong&gt; and &lt;strong&gt;Reload&lt;/strong&gt; actions&lt;br/&gt;  %1 NEW: added auto-detection of external changes on files being edited&lt;br/&gt;  %1 NEW: instruction on how to compile and run c/c++ files within Helium (&lt;strong&gt;Reference-Run Profile&lt;/strong&gt;)&lt;br/&gt;  %1 IMPROVE: make use of font settings for command output&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.3.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: project management - manage tabs with &lt;em&gt;projects&lt;/em&gt; and open files within the project directory easily&lt;br/&gt;  %1 NEW: persistence for opened projects&lt;br/&gt;  %1 &lt;strong&gt;CHANGE&lt;/strong&gt;: %3 (when text field/area is not focused) is now mapped to &lt;em&gt;Close Project&lt;/em&gt;; &lt;strong&gt;keyboard shortcut help is now triggered by&lt;/strong&gt; %2 %3 &lt;strong&gt;regardless of whether a text field/area is focused or not&lt;/strong&gt;&lt;br/&gt;  %1 IMPROVE: opening files now doesn&apos;t ask for &lt;em&gt;Unsaved change&lt;/em&gt; confirmation anymore: it creates new tabs after the current one&lt;br/&gt;  %1 IMPROVE: new tab is now inserted after the current one instead of always appending to the end&lt;br/&gt;  %1 IMPROVE: keyboard shortcut help is now displayed via prompt instead of toast: too much information for a toast&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.2.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: space-tab conversion for each filetype&lt;br/&gt;  %1 IMPROVE: saving progress is displayed more clearly&lt;br/&gt;  %1 IMPROVE: web run profile now allows previewing files with relative path to other files e.g., images, style files&lt;br/&gt;  %1 IMPROVE: added SIGTERM control to command run profile - now programs can handle termination gracefully&lt;br/&gt;  %1 IMPROVE: changed python run command to output without buffering&lt;br/&gt;  %1 FIX: syntax highlight problem with files containing special control characters&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.1.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Markdown syntax highlight support and previewing support&lt;br/&gt;  %1 NEW: Markdown previewing support for Math symbols&lt;br/&gt;  %1 FIX: Alt+Enter problem on some devices&lt;br/&gt;  %1 FIX: some pages are not scrollable&lt;br/&gt;</source>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <source>Help</source>
+        <translation>帮助</translation>
+    </message>
+    <message>
+        <source>Git</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;strong&gt;&lt;u&gt;Version 1.1.0.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: full GIT integration: init, clone, diff, checkout, branch, reset, merge, rebase, pull, push, etc.&lt;br/&gt;  %1 NEW: new language support: cucumber, go, groovy, json, R, S, zsh&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.4.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Full-screen mode and ability to hide title bar&lt;br/&gt;  %1 NEW: added &lt;strong&gt;Rename&lt;/strong&gt; and &lt;strong&gt;Reload&lt;/strong&gt; actions&lt;br/&gt;  %1 NEW: added auto-detection of external changes on files being edited&lt;br/&gt;  %1 NEW: instruction on how to compile and run c/c++ files within Helium (&lt;strong&gt;Reference-Run Profile&lt;/strong&gt;)&lt;br/&gt;  %1 IMPROVE: make use of font settings for command output&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.3.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: project management - manage tabs with &lt;em&gt;projects&lt;/em&gt; and open files within the project directory easily&lt;br/&gt;  %1 NEW: persistence for opened projects&lt;br/&gt;  %1 &lt;strong&gt;CHANGE&lt;/strong&gt;: %3 (when text field/area is not focused) is now mapped to &lt;em&gt;Close Project&lt;/em&gt;; &lt;strong&gt;keyboard shortcut help is now triggered by&lt;/strong&gt; %2 %3 &lt;strong&gt;regardless of whether a text field/area is focused or not&lt;/strong&gt;&lt;br/&gt;  %1 IMPROVE: opening files now doesn&apos;t ask for &lt;em&gt;Unsaved change&lt;/em&gt; confirmation anymore: it creates new tabs after the current one&lt;br/&gt;  %1 IMPROVE: new tab is now inserted after the current one instead of always appending to the end&lt;br/&gt;  %1 IMPROVE: keyboard shortcut help is now displayed via prompt instead of toast: too much information for a toast&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.2.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: space-tab conversion for each filetype&lt;br/&gt;  %1 IMPROVE: saving progress is displayed more clearly&lt;br/&gt;  %1 IMPROVE: web run profile now allows previewing files with relative path to other files e.g., images, style files&lt;br/&gt;  %1 IMPROVE: added SIGTERM control to command run profile - now programs can handle termination gracefully&lt;br/&gt;  %1 IMPROVE: changed python run command to output without buffering&lt;br/&gt;  %1 FIX: syntax highlight problem with files containing special control characters&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.1.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Markdown syntax highlight support and previewing support&lt;br/&gt;  %1 NEW: Markdown previewing support for Math symbols&lt;br/&gt;  %1 FIX: Alt+Enter problem on some devices&lt;br/&gt;  %1 FIX: some pages are not scrollable&lt;br/&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;&lt;em&gt;Git functionalities&lt;/em&gt; can be accessed from the &lt;strong&gt;Git&lt;/strong&gt; action inside any view. &lt;strong&gt;It uses the current project directory as the repository directory.&lt;/strong&gt; There are a few important pages:&lt;/p&gt;  %1 &lt;strong&gt;Status Page&lt;/strong&gt;: this is the default view when you trigger the &lt;em&gt;Git&lt;/em&gt; action. Tap on any item to see the diff (if available), add items to index/remove items from index by long-pressing on the item; you can also select multiple items and perform the same action at once&lt;br/&gt;  %1 &lt;strong&gt;Branch Page&lt;/strong&gt;: accessed from &lt;strong&gt;Branches&lt;/strong&gt; action. Tap on any branch to see the history (git log); long-press to view the available actions e.g., checkout, fetch, push, pull. &lt;strong&gt;Note: remotes can be configured by tapping on their headers; long press on them to perform remote-specific actions including &lt;em&gt;Refresh&lt;/em&gt; and &lt;em&gt;Push to Branch...&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;  %1 &lt;strong&gt;Log Page&lt;/strong&gt;: accessible via &lt;em&gt;Status Page&lt;/em&gt; or &lt;em&gt;Branch Page&lt;/em&gt;. Tap on any commit to show its details; long-press to bring up commit-specific actions e.g., &lt;em&gt;Checkout&lt;/em&gt;&lt;br/&gt;  %1 &lt;strong&gt;Commit Info Page&lt;/strong&gt;: you can see the changes made by the commit for each file by tapping on the file inside the &lt;em&gt;Diff&lt;/em&gt; list section</source>
+        <translation>&lt;p&gt;&lt;em&gt;Git功能&lt;/em&gt;可通过任何页面内的&lt;strong&gt;Git&lt;/strong&gt;命令查访。&lt;strong&gt;Repository路径为当前项目路径。&lt;/strong&gt;Git功能可被归类为以下页面：&lt;/p&gt;  %1 &lt;strong&gt;Status页面&lt;/strong&gt;：这是&lt;em&gt;Git&lt;/em&gt;命令打开的默认页面。触按任何条目可查看其Diff；长按条目可Add或Reset（至Index）；您也可同时选中多个条目进行操作。&lt;br/&gt;  %1 &lt;strong&gt;Branch页面&lt;/strong&gt;：由&lt;strong&gt;Branches&lt;/strong&gt;命令查访。触按任何Branch以查阅其历史（Log）；长按可使用更多命令，如Checkout，Fetch，Push，Pull。&lt;strong&gt;注意：Remote可通过触按其所对应Header编辑；长按还可使用特别命令如&lt;em&gt;刷新&lt;/em&gt;和&lt;em&gt;Push至Branch……&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;  %1 &lt;strong&gt;Log页面&lt;/strong&gt;：可通过&lt;em&gt;Status页面&lt;/em&gt;或&lt;em&gt;Branch页面&lt;/em&gt;访问。触按任何Commit显示其详细信息；长按显示其相关命令，如&lt;em&gt;Checkout&lt;/em&gt;&lt;br/&gt;  %1 &lt;strong&gt;Commit信息页面&lt;/strong&gt;：您可触按&lt;em&gt;Diff&lt;/em&gt;块面下的文件查看该文件内详细Diff</translation>
+    </message>
+</context>
+<context>
+    <name>Man</name>
+    <message>
+        <source>View Diff</source>
+        <translation>查看Diff</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>全选</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Info</source>
+        <translation>查看详情</translation>
+    </message>
+    <message>
+        <source>Checkout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Log</source>
+        <translation>查看Log</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <source>Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rebase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pull</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push to Branch</source>
+        <translation>Push至Branch</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Push to Branch...</source>
+        <translation>Push至Branch……</translation>
+    </message>
+    <message>
+        <source>Pull Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checkout Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rebase Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete Branch</source>
+        <translation>删除Branch</translation>
+    </message>
+    <message>
+        <source>Save Remote</source>
+        <translation>保存Remote</translation>
+    </message>
+    <message>
+        <source>Clone</source>
+        <translation type="unfinished">克隆</translation>
     </message>
 </context>
 <context>
@@ -790,6 +1421,17 @@ Do you want to continue?</source>
         <source>Reload</source>
         <translation>重读</translation>
     </message>
+    <message>
+        <source>Git</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PushablePage</name>
+    <message>
+        <source>Back</source>
+        <translation>返回</translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -809,6 +1451,14 @@ Do you want to continue?</source>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
+    <message>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <source>Git</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>View</name>
@@ -819,10 +1469,6 @@ Do you want to continue?</source>
     <message>
         <source>No</source>
         <translation>否</translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation>确定</translation>
     </message>
     <message>
         <source>No Name</source>

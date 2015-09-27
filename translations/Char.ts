@@ -4,10 +4,6 @@
 <context>
     <name>AppearanceSettingsPage</name>
     <message>
-        <source>Appearance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Hide ActionBar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -67,6 +63,10 @@
         <source>These settings affect the UI inside Full-screen mode. Full-screen mode can be toggled by sliding down from the top of the screen and selecting Enter/Exit Full-screen.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Appearance Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Buffer</name>
@@ -121,6 +121,10 @@
         <source>Error opening file</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CmdRunProfile</name>
@@ -163,6 +167,10 @@ These format specifiers will be replaced:
 %dir%: the directory of the file
 %name%: the name of the file
 %%: a literal %</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Command</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -397,10 +405,6 @@ These format specifiers will be replaced:
 <context>
     <name>GeneralSettingsPage</name>
     <message>
-        <source>General</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Highlight range controls the number of lines to be highlighted on each side of the cursor. Adjusting this value down will improve performance and vice versa.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -409,15 +413,527 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;Choose a directory&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Default Project Directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>The default directory for a new project</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;Choose a Directory&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>General Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitBranchPage</name>
+    <message>
+        <source>Branches</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the branch name to add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push to Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the branch name to push to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Branch name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add Remote</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Info &gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitCommitInfoPage</name>
+    <message>
+        <source>Author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Committer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No hunk details available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Diff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Diff with Parent %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>was %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Renamed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ignored</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Untracked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type Changed</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitCommitPage</name>
+    <message>
+        <source>Commit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lose Focus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Paste Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitLogPage</name>
+    <message>
+        <source>No Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitRemoteInfoPage</name>
+    <message>
+        <source>Remote Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URL for Fetching/Pushing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitRepoPage</name>
+    <message>
+        <source>No commit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No Repository</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Init</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;br/&gt;No repository found.&lt;br/&gt;&lt;br/&gt;Use &lt;b&gt;Init&lt;/b&gt; or &lt;b&gt;Clone&lt;/b&gt; to create a git repository in&lt;br/&gt;&lt;em&gt;%1&lt;/em&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Working Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>was %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Renamed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ignored</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Untracked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type Changed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Commit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Branches</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No diff available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No hunk details available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Detached at %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset (Mixed)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hard reset will wipe the changes in your working directory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset (Hard)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Commit message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (merge in progress)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (revert in progress)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (cherrypick in progress)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (bisect in progress)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (rebase in progress)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (interactive)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (apply mailbox)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Deletion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete branch %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Push</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Upstream branch does not have the same name as the current branch.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Clone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Project directory &quot;%1&quot; is not empty. Are you sure you want to clone into this directory?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitSettingsPage</name>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSH Private Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;Choose a Private Key File&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSH Public Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;Choose a Public Key File&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Passphrase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name and email used in commit and reflog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSH Authentication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Path to private/public key file for SSH authentication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSH username, used when the remote URL doesn&apos;t have one</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSH passphrase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Git Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GitWorker</name>
+    <message>
+        <source>Commited %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD detached at %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD now on branch %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Conflicts detected: fix them and run &quot;Commit&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Commit message for merging %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fast-forwarded to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge input is reachable from HEAD: no merge required!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HEAD is unborn and doesn&apos;t point to a valid commit: no merge can be performed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No merge is possible!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Already up-to-date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetched till %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pushed to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch-and-pruned for remote %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clone complete</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -619,7 +1135,122 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;strong&gt;&lt;u&gt;Version 1.0.4.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Full-screen mode and ability to hide title bar&lt;br/&gt;  %1 NEW: added &lt;strong&gt;Rename&lt;/strong&gt; and &lt;strong&gt;Reload&lt;/strong&gt; actions&lt;br/&gt;  %1 NEW: added auto-detection of external changes on files being edited&lt;br/&gt;  %1 NEW: instruction on how to compile and run c/c++ files within Helium (&lt;strong&gt;Reference-Run Profile&lt;/strong&gt;)&lt;br/&gt;  %1 IMPROVE: make use of font settings for command output&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.3.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: project management - manage tabs with &lt;em&gt;projects&lt;/em&gt; and open files within the project directory easily&lt;br/&gt;  %1 NEW: persistence for opened projects&lt;br/&gt;  %1 &lt;strong&gt;CHANGE&lt;/strong&gt;: %3 (when text field/area is not focused) is now mapped to &lt;em&gt;Close Project&lt;/em&gt;; &lt;strong&gt;keyboard shortcut help is now triggered by&lt;/strong&gt; %2 %3 &lt;strong&gt;regardless of whether a text field/area is focused or not&lt;/strong&gt;&lt;br/&gt;  %1 IMPROVE: opening files now doesn&apos;t ask for &lt;em&gt;Unsaved change&lt;/em&gt; confirmation anymore: it creates new tabs after the current one&lt;br/&gt;  %1 IMPROVE: new tab is now inserted after the current one instead of always appending to the end&lt;br/&gt;  %1 IMPROVE: keyboard shortcut help is now displayed via prompt instead of toast: too much information for a toast&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.2.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: space-tab conversion for each filetype&lt;br/&gt;  %1 IMPROVE: saving progress is displayed more clearly&lt;br/&gt;  %1 IMPROVE: web run profile now allows previewing files with relative path to other files e.g., images, style files&lt;br/&gt;  %1 IMPROVE: added SIGTERM control to command run profile - now programs can handle termination gracefully&lt;br/&gt;  %1 IMPROVE: changed python run command to output without buffering&lt;br/&gt;  %1 FIX: syntax highlight problem with files containing special control characters&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.1.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Markdown syntax highlight support and previewing support&lt;br/&gt;  %1 NEW: Markdown previewing support for Math symbols&lt;br/&gt;  %1 FIX: Alt+Enter problem on some devices&lt;br/&gt;  %1 FIX: some pages are not scrollable&lt;br/&gt;</source>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Git</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;strong&gt;&lt;u&gt;Version 1.1.0.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: full GIT integration: init, clone, diff, checkout, branch, reset, merge, rebase, pull, push, etc.&lt;br/&gt;  %1 NEW: new language support: cucumber, go, groovy, json, R, S, zsh&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.4.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Full-screen mode and ability to hide title bar&lt;br/&gt;  %1 NEW: added &lt;strong&gt;Rename&lt;/strong&gt; and &lt;strong&gt;Reload&lt;/strong&gt; actions&lt;br/&gt;  %1 NEW: added auto-detection of external changes on files being edited&lt;br/&gt;  %1 NEW: instruction on how to compile and run c/c++ files within Helium (&lt;strong&gt;Reference-Run Profile&lt;/strong&gt;)&lt;br/&gt;  %1 IMPROVE: make use of font settings for command output&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.3.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: project management - manage tabs with &lt;em&gt;projects&lt;/em&gt; and open files within the project directory easily&lt;br/&gt;  %1 NEW: persistence for opened projects&lt;br/&gt;  %1 &lt;strong&gt;CHANGE&lt;/strong&gt;: %3 (when text field/area is not focused) is now mapped to &lt;em&gt;Close Project&lt;/em&gt;; &lt;strong&gt;keyboard shortcut help is now triggered by&lt;/strong&gt; %2 %3 &lt;strong&gt;regardless of whether a text field/area is focused or not&lt;/strong&gt;&lt;br/&gt;  %1 IMPROVE: opening files now doesn&apos;t ask for &lt;em&gt;Unsaved change&lt;/em&gt; confirmation anymore: it creates new tabs after the current one&lt;br/&gt;  %1 IMPROVE: new tab is now inserted after the current one instead of always appending to the end&lt;br/&gt;  %1 IMPROVE: keyboard shortcut help is now displayed via prompt instead of toast: too much information for a toast&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.2.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: space-tab conversion for each filetype&lt;br/&gt;  %1 IMPROVE: saving progress is displayed more clearly&lt;br/&gt;  %1 IMPROVE: web run profile now allows previewing files with relative path to other files e.g., images, style files&lt;br/&gt;  %1 IMPROVE: added SIGTERM control to command run profile - now programs can handle termination gracefully&lt;br/&gt;  %1 IMPROVE: changed python run command to output without buffering&lt;br/&gt;  %1 FIX: syntax highlight problem with files containing special control characters&lt;br/&gt;&lt;br/&gt;&lt;strong&gt;&lt;u&gt;Version 1.0.1.x&lt;/u&gt;&lt;/strong&gt;&lt;br/&gt;&lt;br/&gt;  %1 NEW: Markdown syntax highlight support and previewing support&lt;br/&gt;  %1 NEW: Markdown previewing support for Math symbols&lt;br/&gt;  %1 FIX: Alt+Enter problem on some devices&lt;br/&gt;  %1 FIX: some pages are not scrollable&lt;br/&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;&lt;em&gt;Git functionalities&lt;/em&gt; can be accessed from the &lt;strong&gt;Git&lt;/strong&gt; action inside any view. &lt;strong&gt;It uses the current project directory as the repository directory.&lt;/strong&gt; There are a few important pages:&lt;/p&gt;  %1 &lt;strong&gt;Status Page&lt;/strong&gt;: this is the default view when you trigger the &lt;em&gt;Git&lt;/em&gt; action. Tap on any item to see the diff (if available), add items to index/remove items from index by long-pressing on the item; you can also select multiple items and perform the same action at once&lt;br/&gt;  %1 &lt;strong&gt;Branch Page&lt;/strong&gt;: accessed from &lt;strong&gt;Branches&lt;/strong&gt; action. Tap on any branch to see the history (git log); long-press to view the available actions e.g., checkout, fetch, push, pull. &lt;strong&gt;Note: remotes can be configured by tapping on their headers; long press on them to perform remote-specific actions including &lt;em&gt;Refresh&lt;/em&gt; and &lt;em&gt;Push to Branch...&lt;/em&gt;&lt;/strong&gt;&lt;br/&gt;  %1 &lt;strong&gt;Log Page&lt;/strong&gt;: accessible via &lt;em&gt;Status Page&lt;/em&gt; or &lt;em&gt;Branch Page&lt;/em&gt;. Tap on any commit to show its details; long-press to bring up commit-specific actions e.g., &lt;em&gt;Checkout&lt;/em&gt;&lt;br/&gt;  %1 &lt;strong&gt;Commit Info Page&lt;/strong&gt;: you can see the changes made by the commit for each file by tapping on the file inside the &lt;em&gt;Diff&lt;/em&gt; list section</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Man</name>
+    <message>
+        <source>View Diff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checkout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rebase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pull</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push to Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Push to Branch...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pull Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checkout Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rebase Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete Branch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save Remote</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clone</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -780,6 +1411,17 @@ Do you want to continue?</source>
         <source>Reload</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Git</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PushablePage</name>
+    <message>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -799,6 +1441,14 @@ Do you want to continue?</source>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Git</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>View</name>
@@ -808,10 +1458,6 @@ Do you want to continue?</source>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
