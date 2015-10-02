@@ -1,6 +1,7 @@
 * BUG: crash on backing from a GitBranchPage which is doing Pushing
 * BUG: fix git not handling removed files (use smart git update on renamed/deleted diffs)
 * BUG: some german letters not displaying (probably filtered by your unicode mapping function)
+* allow git to reset the current branch to a specific commit
 * per-filetype settings on prediction and correction
 * persistence for tabs
 * project settings (move changing of project path into this)
