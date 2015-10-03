@@ -1,8 +1,10 @@
 * BUG: crash on backing from a GitBranchPage which is doing Pushing
 * BUG: fix git not handling removed files (use smart git update on renamed/deleted diffs)
+* BUG: fix git add branch not working
 * BUG: some german letters not displaying (probably filtered by your unicode mapping function)
 * allow git to reset the current branch to a specific commit
-* inside GitRepoPage, add an action for deleting an untracked file 
+* inside GitRepoPage, add an action for deleting an untracked file
+* add Reader mode? allowing to read the entire document with syntax highlight in a label
 * per-filetype settings on prediction and correction
 * persistence for tabs
 * project settings (move changing of project path into this)
