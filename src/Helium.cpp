@@ -224,9 +224,9 @@ void Helium::onShareDialogConfirmed(bb::system::SystemUiResult::Type type)
     _general->confirmSupport();
     switch (type) {
     case bb::system::SystemUiResult::ConfirmButtonSelection:
-        inviteToDownload(); break;
-    case bb::system::SystemUiResult::CustomButtonSelection:
         postPersonalMessage(); break;
+    case bb::system::SystemUiResult::CustomButtonSelection:
+        inviteToDownload(); break;
     }
 }
 
