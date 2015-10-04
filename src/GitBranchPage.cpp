@@ -68,6 +68,8 @@ GitBranchPage::GitBranchPage(GitRepoPage *page):
 
 void GitBranchPage::connectToRepoPage()
 {
+    // XXX: assume there is no progress right now
+    _progressIndicator->hide();
     conn(_repoPage, SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
         _progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
     conn(_repoPage, SIGNAL(progressDismissed()),
@@ -272,12 +274,16 @@ void GitBranchPage::addRemote()
 
 void GitBranchPage::reload()
 {
-    _dataModel.reload();
+    if (!_repoPage->inProgress())
+        // do not reload when something is going on
+        _dataModel.reload();
 }
 
 void GitBranchPage::reset()
 {
-    _dataModel.clear();
+    if (!_repoPage->inProgress())
+        // do not clear and remove remotes when something is going on
+        _dataModel.clear();
 }
 
 void GitBranchPage::onGitRepoPageInProgressChanged(bool inProgress)

@@ -212,6 +212,8 @@ void GitRepoPage::setProject(Project *project)
                 this, SLOT(onGitWorkerInProgressChanged(bool)));
             conn(_project->gitWorker(), SIGNAL(inProgressChanged(bool)),
                 this, SIGNAL(inProgressChanged(bool)));
+            // XXX: assume there is no progress right now
+            _progressIndicator->hide();
             conn(_project->gitWorker(), SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
                 _progressIndicator, SLOT(displayProgress(float, bb::cascades::ProgressIndicatorState::Type)));
             conn(_project->gitWorker(), SIGNAL(progressChanged(float, bb::cascades::ProgressIndicatorState::Type)),
@@ -223,7 +225,7 @@ void GitRepoPage::setProject(Project *project)
             conn(_project->gitWorker(), SIGNAL(statusListFetched(const LibQGit2::StatusList&)),
                 this, SLOT(handleStatusList(const LibQGit2::StatusList&)));
             conn(_project->gitWorker(), SIGNAL(pushCommitPage(const QString&)),
-                this, SLOT(pushCommitPage(const QString&)))
+                this, SLOT(pushCommitPage(const QString&)));
 
             conn(_project, SIGNAL(pathChanged(const QString&)),
                 this, SLOT(onProjectPathChanged()));
@@ -562,7 +564,6 @@ void GitRepoPage::pushBranchPage()
             _branchPage, SLOT(onTranslatorChanged()));
     }
     _branchPage->connectToRepoPage();
-    _branchPage->reload();
     parent()->push(_branchPage);
 }
 
