@@ -78,7 +78,8 @@ Helium::Helium(int &argc, char **argv):
     _bbmContext(QUuid(BBM_UUID))
 {
     // settings
-    performUpdate(_version.current(), _version.last());
+    if (!_version.last().isNull())
+        performUpdate(_version.current(), _version.last());
 
     _filetypeMap = (new FiletypeMapStorage("filetypes", this))->read();
     _general = (new GeneralSettingsStorage("general_settings", this))->read();
@@ -124,7 +125,7 @@ Helium::Helium(int &argc, char **argv):
 
     if (_general->numberOfTimesLaunched() == 1) {
         Utility::dialog(tr("Show Help"),
-                tr("Welcome"), tr("Thanks for purchasing Helium!"),
+                tr("Welcome"), tr("Thanks for purchasing Helium! Please review Help for a quick tour of the features. Use \"Contact\" from the swipe-down menu for bug report/feature request."),
                 this, SLOT(showHelp()));
     } else if (_version.last() < _version.current()) {
         Utility::toast(tr("Helium updated to %1").arg(_version.current().string()));
@@ -139,6 +140,19 @@ void Helium::toggleFullScreen()
 
 void Helium::performUpdate(const Version &, const Version &last)
 {
+    if (last >= Version(1, 1, 0, 2))
+        return;
+    // notice for 1.1.0.2
+    Utility::dialog("Gotcha", "From Developer", "There's been report of git clone appearing 'stuck'. "
+            "This is expected behavior for big repositories due to object unpacking. "
+            "The progress indicator might look still but the background worker thread should be running nonstop. "
+            "If there is an error the progress indicator will turn red with the message displayed. "
+            "While waiting, you can go back to edit other files (the background thread will inform you when it finishes). "
+            "Or just copy your repo with .git directory from your PC to the phone.\n"
+            "\n"
+            "Please use \"Contact\" in the top swipe-down menu for any bug report/feature request (there's no way to answer queries/support problems left in BBW review).\n"
+            "\n"
+            "Many thanks and happy hacking!");
     if (last >= Version(1, 0, 3, 0))
         return;
     QSettings settings;

@@ -22,6 +22,7 @@ public:
         v2 = list.size() > 2 ? list[2].toInt() : 0;
         v3 = list.size() > 3 ? list[3].toInt() : 0;
     }
+    bool isNull() const { return v0 == 0 && v1 == 0 && v2 == 0 && v3 ==0; }
     bool operator<(const Version &v) const {
         QList<int> l, lv;
         l << v0 << v1 << v2 << v3;

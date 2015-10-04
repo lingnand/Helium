@@ -978,10 +978,6 @@ These format specifiers will be replaced:
         <translation>歡迎</translation>
     </message>
     <message>
-        <source>Thanks for purchasing Helium!</source>
-        <translation>感謝購買Helium！</translation>
-    </message>
-    <message>
         <source>Never ask again</source>
         <translation>不再顯示</translation>
     </message>
@@ -1052,6 +1048,10 @@ These format specifiers will be replaced:
     <message>
         <source>Support Helium by spreading the love!</source>
         <translation>通過分享推薦來支持Helium！</translation>
+    </message>
+    <message>
+        <source>Thanks for purchasing Helium! Please review Help for a quick tour of the features. Use &quot;Contact&quot; from the swipe-down menu for bug report/feature request.</source>
+        <translation>感謝購買Helium！請查看“幫助”來快速瞭解如何使用各類功能。如有任何問題請使用下滑菜單的“技術支持”。</translation>
     </message>
 </context>
 <context>

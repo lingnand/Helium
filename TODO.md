@@ -1,6 +1,4 @@
-* BUG: crash on backing from a GitBranchPage which is doing Pushing
 * BUG: fix git not handling removed files (use smart git update on renamed/deleted diffs)
-* BUG: fix git add branch not working
 * BUG: some german letters not displaying (probably filtered by your unicode mapping function)
 * allow git to reset the current branch to a specific commit
 * inside GitRepoPage, add an action for deleting an untracked file

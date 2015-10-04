@@ -972,10 +972,6 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Thanks for purchasing Helium!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Never ask again</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1045,6 +1041,10 @@ These format specifiers will be replaced:
     </message>
     <message>
         <source>Support Helium by spreading the love!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Thanks for purchasing Helium! Please review Help for a quick tour of the features. Use &quot;Contact&quot; from the swipe-down menu for bug report/feature request.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
