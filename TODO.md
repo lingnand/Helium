@@ -13,8 +13,11 @@
     * AutoIt syntax file
     * matlab
 * Term48 integration
-
-
+* allow shortcuts on the homescreen - run scripts by just tapping them? (need to have a headless instance then, probably)
+* reader mode - just a html page on the view
+* new types of tabs - web browser tabs; so that we can view web pages directly in Helium... (for looking up reference, of course)
+* allow saving into the same file
+* add fuzzy finder like in Sublime Text
 
 
 
