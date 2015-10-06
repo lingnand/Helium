@@ -1028,10 +1028,6 @@ These format specifiers will be replaced:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invite to download</source>
         <translation type="unfinished"></translation>
     </message>

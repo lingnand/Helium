@@ -1034,10 +1034,6 @@ These format specifiers will be replaced:
         <translation>全屏</translation>
     </message>
     <message>
-        <source>Settings</source>
-        <translation>設置</translation>
-    </message>
-    <message>
         <source>Invite to download</source>
         <translation>邀請下載</translation>
     </message>

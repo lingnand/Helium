@@ -68,7 +68,6 @@ private:
 
     bb::cascades::ActionItem *_contactAction;
     bb::cascades::ActionItem *_shareAction;
-    bb::cascades::ActionItem *_settingsAction;
     bb::cascades::ActionItem *_fullScreenAction;
     bb::platform::bbm::Context _bbmContext;
 

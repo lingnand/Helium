@@ -12,6 +12,7 @@
 #include <bb/cascades/Menu>
 #include <bb/cascades/ActionItem>
 #include <bb/cascades/HelpActionItem>
+#include <bb/cascades/SettingsActionItem>
 #include <bb/cascades/SceneCover>
 #include <bb/cascades/SystemDefaults>
 #include <bb/cascades/UIPalette>
@@ -70,9 +71,6 @@ Helium::Helium(int &argc, char **argv):
     _shareAction(ActionItem::create()
         .imageSource(QUrl("asset:///images/ic_bbm.png"))
         .onTriggered(this, SLOT(share()))),
-    _settingsAction(ActionItem::create()
-        .imageSource(QUrl("asset:///images/ic_settings.png"))
-        .onTriggered(this, SLOT(showSettings()))),
     _fullScreenAction(ActionItem::create()
         .onTriggered(this, SLOT(toggleFullScreen()))),
     _bbmContext(QUuid(BBM_UUID))
@@ -106,10 +104,11 @@ Helium::Helium(int &argc, char **argv):
     setMenu(Menu::create()
         .help(HelpActionItem::create()
             .onTriggered(this, SLOT(showHelp())))
-        .addAction(_fullScreenAction)
+        .settings(SettingsActionItem::create()
+            .onTriggered(this, SLOT(showSettings())))
         .addAction(_contactAction)
         .addAction(_shareAction)
-        .addAction(_settingsAction));
+        .addAction(_fullScreenAction));
 
     setCover(_cover);
     conn(this, SIGNAL(thumbnail()), this, SLOT(onThumbnail()));
@@ -363,7 +362,6 @@ void Helium::onTranslatorChanged()
 {
     _contactAction->setTitle(tr("Contact"));
     _shareAction->setTitle(tr("BBM Share"));
-    _settingsAction->setTitle(tr("Settings"));
     resetFullScreenAction();
     emit translatorChanged();
 }
