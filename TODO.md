@@ -1,5 +1,8 @@
 * BUG: fix git not handling removed files (use smart git update on renamed/deleted diffs)
 * BUG: some german letters not displaying (probably filtered by your unicode mapping function)
+* BUG: when shift is locked on, the Enter key mechanism doesn't seem to work anymore?
+* BUG: in the FindMode, redo/undo doesn't update the search index
+* BUG: unadjustable font size within text area?
 * allow git to reset the current branch to a specific commit
 * inside GitRepoPage, add an action for deleting an untracked file
 * add Reader mode? allowing to read the entire document with syntax highlight in a label
