@@ -1,3 +1,4 @@
+* BUG: add in checks to prevent users from cloning repos into on-device storage (Blackberry bug causes the cloned files to be read only)
 * BUG: fix git not handling removed files (use smart git update on renamed/deleted diffs)
 * BUG: some german letters not displaying (probably filtered by your unicode mapping function)
 * BUG: when shift is locked on, the Enter key mechanism doesn't seem to work anymore?
